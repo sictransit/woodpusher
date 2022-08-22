@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
+using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Tests
 {
@@ -21,6 +23,8 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(1, fen.FullmoveNumber);
 
             var board = fen.Board;
+
+            Trace.WriteLine(BoardExtensions.PrettyPrint(board));
 
             Assert.AreEqual(new Piece(PieceColour.White, PieceType.Rook), board.Get(Position.FromAlgebraicNotation("a1")));
         }

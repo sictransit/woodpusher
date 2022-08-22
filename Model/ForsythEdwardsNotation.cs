@@ -86,8 +86,9 @@ namespace SicTransit.Woodpusher.Model
                     else
                     {
                         var piece = c.ToPiece();
+                        var position = new Position(file, rank);
 
-                        board.Set(new Position(file, rank), piece);
+                        board.Set(position, piece);
                     }
                 }
 
