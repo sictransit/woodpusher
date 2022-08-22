@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32804.467
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "woodpusher", "src\woodpusher\woodpusher.csproj", "{DF33DD6E-684D-4708-855B-C36984A739A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "woodpusher", "woodpusher\woodpusher.csproj", "{B485D131-24F4-49BF-AFD0-E05A86795527}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "woodpusher.engine", "woodpusher.engine\woodpusher.engine.csproj", "{462F32D8-B2D2-458C-BCEC-92B50CE14965}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "woodpusher.model", "woodpusher.model\woodpusher.model.csproj", "{10E2F41E-F3DE-4C80-A853-B3965A815517}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DF33DD6E-684D-4708-855B-C36984A739A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF33DD6E-684D-4708-855B-C36984A739A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DF33DD6E-684D-4708-855B-C36984A739A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DF33DD6E-684D-4708-855B-C36984A739A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B485D131-24F4-49BF-AFD0-E05A86795527}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B485D131-24F4-49BF-AFD0-E05A86795527}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B485D131-24F4-49BF-AFD0-E05A86795527}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B485D131-24F4-49BF-AFD0-E05A86795527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462F32D8-B2D2-458C-BCEC-92B50CE14965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462F32D8-B2D2-458C-BCEC-92B50CE14965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462F32D8-B2D2-458C-BCEC-92B50CE14965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462F32D8-B2D2-458C-BCEC-92B50CE14965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10E2F41E-F3DE-4C80-A853-B3965A815517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10E2F41E-F3DE-4C80-A853-B3965A815517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10E2F41E-F3DE-4C80-A853-B3965A815517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10E2F41E-F3DE-4C80-A853-B3965A815517}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
