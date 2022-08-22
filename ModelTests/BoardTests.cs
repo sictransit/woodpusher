@@ -17,14 +17,14 @@ namespace SicTransit.Woodpusher.Tests
             var whiteKing = new Piece(PieceColour.White, PieceType.King);
             var blackKing = new Piece(PieceColour.Black, PieceType.King);
 
-            var e1 = new Position(4, 0);
+            var e1 = Position.FromAlgebraicNotation("e1");
 
             board.Set(e1, whiteKing);
 
             Assert.IsTrue(board.WhiteKing > 0);
             Assert.AreEqual(board.WhiteKing, board.Occupancy);
 
-            var e8 = new Position(4, 7);
+            var e8 = Position.FromAlgebraicNotation("e8");
 
             board.Set(e8, blackKing);
 

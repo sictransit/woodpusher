@@ -162,22 +162,22 @@ namespace SicTransit.Woodpusher.Model
             {
                 return PieceType.Knight;
             }
-            
+
             if ((Bishops & mask) != 0)
             {
                 return PieceType.Bishop;
             }
-            
+
             if ((Rooks & mask) != 0)
             {
                 return PieceType.Rook;
             }
-            
+
             if ((Queens & mask) != 0)
             {
                 return PieceType.Queen;
             }
-            
+
             if ((Kings & mask) != 0)
             {
                 return PieceType.King;
