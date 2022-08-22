@@ -33,6 +33,11 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(whiteKing, board.Get(e1));
             Assert.AreEqual(blackKing, board.Get(e8));
+
+            board.Unset(e1, whiteKing);
+            board.Unset(e8, blackKing);
+
+            Assert.AreEqual(0u, board.Occupancy);
         }
     }
 }
