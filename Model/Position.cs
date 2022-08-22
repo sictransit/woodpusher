@@ -25,5 +25,18 @@ namespace SicTransit.Woodpusher.Model
 
             return new Position(file, rank);
         }
+
+        public string ToAlgebraicNotation()
+        {
+            var f = (char)(File + 'a');
+            var r = (char)(Rank + '1');
+
+            return $"{f}{r}";
+        }
+
+        public override string ToString()
+        {
+            return ToAlgebraicNotation();
+        }
     }
 }

@@ -81,37 +81,25 @@ namespace SicTransit.Woodpusher.Model
                 {
                     if (char.IsDigit(c))
                     {
-                        file += c - '1';
+                        file += c - '0';
                     }
                     else
                     {
+                        var position = new Position(file++, rank);
 
-                        var piece = c.ToPiece();
-
-                        var position = new Position(file, rank);
-
-                        board.Set(position, piece);
-
-                        file++;
+                        board.Set(position, c.ToPiece());
                     }
                 }
 
                 rank--;
-
             }
 
             return board;
         }
 
-        private static int ParseFullmoveNumber(string s)
-        {
-            return int.Parse(s);
-        }
+        private static int ParseFullmoveNumber(string s) => int.Parse(s);
 
-        private static int ParseHalfmoveClock(string s)
-        {
-            return int.Parse(s);
-        }
+        private static int ParseHalfmoveClock(string s) => int.Parse(s);
 
         private static Position? ParseEnPassantTarget(string s)
         {
@@ -171,7 +159,6 @@ namespace SicTransit.Woodpusher.Model
             }
 
             return castlings;
-
         }
     }
 }

@@ -34,12 +34,15 @@ namespace SicTransit.Woodpusher.Tests
         {
             var fen = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
 
+            Trace.WriteLine(BoardExtensions.PrettyPrint(fen.Board));
+
             Assert.AreEqual(PieceColour.Black, fen.ActiveColour);
             Assert.AreEqual(Castlings.None, fen.Castlings);
             Assert.AreEqual(Position.FromAlgebraicNotation("a3"), fen.EnPassantTarget);
+            Assert.AreEqual(new Piece(PieceColour.White, PieceType.Queen), fen.Board.Get(Position.FromAlgebraicNotation("c7")));
+            Assert.AreEqual(new Piece(PieceColour.Black, PieceType.Rook), fen.Board.Get(Position.FromAlgebraicNotation("h5")));
             Assert.AreEqual(0, fen.HalfmoveClock);
             Assert.AreEqual(34, fen.FullmoveNumber);
-
         }
     }
 }
