@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
@@ -16,7 +11,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 throw new ArgumentException($"'{nameof(s)}' cannot be null or whitespace.", nameof(s));
             }
 
-            return Regex.IsMatch(s,"^[a-h]{1}[1-8]{1}$");
+            return Regex.IsMatch(s, "^[a-h]{1}[1-8]{1}$");
         }
     }
 }

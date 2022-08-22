@@ -14,5 +14,10 @@ namespace SicTransit.Woodpusher.Model
         }
 
         public static Piece Empty => new(PieceColour.None, PieceType.None);
+
+        public override string ToString()
+        {
+            return $"{Colour} {Type}";
+        }
     }
 }

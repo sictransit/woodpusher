@@ -8,9 +8,9 @@ namespace SicTransit.Woodpusher.Model
     public class ForsythEdwardsNotation
     {
         public Board Board { get; }
-        
-        public PieceColour ActiveColour { get; }        
-        
+
+        public PieceColour ActiveColour { get; }
+
         public Castlings Castlings { get; }
 
         public Position? EnPassantTarget { get; }
@@ -36,8 +36,6 @@ namespace SicTransit.Woodpusher.Model
                 throw new ArgumentNullException(nameof(fen));
             }
 
-            Board board = new Board();
-
             var parts = fen.Split(' ');
 
             if (parts.Length != 6)
@@ -45,7 +43,9 @@ namespace SicTransit.Woodpusher.Model
                 throw new FenParsingException(fen, "parts should be == 6");
             }
 
-            var colour = ParseActiveColour(parts[1]);
+            var board = ParseBoard(parts[0]);
+
+            var activeColour = ParseActiveColour(parts[1]);
 
             var castling = ParseCastling(parts[2]);
 
@@ -55,7 +55,47 @@ namespace SicTransit.Woodpusher.Model
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            return new ForsythEdwardsNotation(board, colour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            return new ForsythEdwardsNotation(board, activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+        }
+
+        private static Board ParseBoard(string s)
+        {
+            // TODO: regex for validating FEN board setup
+
+            var parts = s.Split('/');
+
+            if (parts.Length != 8)
+            {
+                throw new FenParsingException(s, "board setup should be eight parts, separated by '/'");
+            }
+
+            var board = new Board();
+
+            var rank = 7;            
+
+            for (int r = 0; r < parts.Length; r++)
+            {
+                var file = 0;
+
+                foreach (var c in parts[r])
+                {
+                    if (char.IsDigit(c))
+                    {
+                        file += c - '1';
+                    }
+                    else
+                    {
+                        var piece = c.ToPiece();
+
+                        board.Set(new Position(file, rank), piece);
+                    }
+                }
+
+                rank--;
+
+            }
+
+            return board;
         }
 
         private static int ParseFullmoveNumber(string s)
@@ -70,7 +110,7 @@ namespace SicTransit.Woodpusher.Model
 
         private static Position? ParseEnPassantTarget(string s)
         {
-            if (s.SingleOrDefault() == '-')
+            if (s.Single() == '-')
             {
                 return null;
             }
@@ -99,7 +139,7 @@ namespace SicTransit.Woodpusher.Model
 
         private static Castlings ParseCastling(string s)
         {
-            if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s,"^-$"))
+            if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s, "^-$"))
             {
                 throw new FenParsingException(s, "castling should be \"KQkq\" with omitted letters when appropriate, or \"-\" if none");
             }
@@ -123,7 +163,7 @@ namespace SicTransit.Woodpusher.Model
                         castlings |= Castlings.BlackQueenside;
                         break;
                 }
-            }            
+            }
 
             return castlings;
 
