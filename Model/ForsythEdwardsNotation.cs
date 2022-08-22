@@ -71,13 +71,13 @@ namespace SicTransit.Woodpusher.Model
 
             var board = new Board();
 
-            var rank = 7;            
+            var rank = 7;
 
-            for (int r = 0; r < parts.Length; r++)
+            for (int p = 0; p < parts.Length; p++)
             {
                 var file = 0;
 
-                foreach (var c in parts[r])
+                foreach (var c in parts[p])
                 {
                     if (char.IsDigit(c))
                     {
@@ -85,10 +85,14 @@ namespace SicTransit.Woodpusher.Model
                     }
                     else
                     {
+
                         var piece = c.ToPiece();
+
                         var position = new Position(file, rank);
 
                         board.Set(position, piece);
+
+                        file++;
                     }
                 }
 
@@ -111,7 +115,7 @@ namespace SicTransit.Woodpusher.Model
 
         private static Position? ParseEnPassantTarget(string s)
         {
-            if (s.Single() == '-')
+            if (s.IsNothing())
             {
                 return null;
             }

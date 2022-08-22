@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
@@ -12,18 +8,27 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             var sb = new StringBuilder();
 
-            for (int rank = 7; rank > 0; rank--)
+            for (int rank = 7; rank >= 0; rank--)
             {
+                sb.Append($"{rank + 1} ");
                 for (int file = 0; file < 8; file++)
                 {
                     var piece = b.Get(new Position(file, rank));
+
                     var c = piece.ToAlgebraicNotation();
 
-                    sb.Append(c);
-                    
+                    sb.Append($"{c} ");
+
                 }
 
                 sb.AppendLine();
+            }
+
+            sb.Append("  ");
+
+            for (int i = 0; i < 8; i++)
+            {
+                sb.Append($"{(char)('A' + i)} ");
             }
 
             return sb.ToString();

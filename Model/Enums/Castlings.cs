@@ -3,9 +3,10 @@
     [Flags]
     public enum Castlings
     {
-        WhiteKingside,
-        WhiteQueenside,
-        BlackKingside,
-        BlackQueenside,
+        None = 0,
+        WhiteKingside = 1,
+        WhiteQueenside = 2,
+        BlackKingside = 4,
+        BlackQueenside = 8,
     }
 }

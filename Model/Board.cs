@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Model
         public ulong Rooks => WhiteRook | BlackRook;
         public ulong Knights => WhiteKnight | BlackKnight;
         public ulong Bishops => WhiteBishop | BlackBishop;
-        public ulong Queens => WhitePawn | BlackQueen;
+        public ulong Queens => WhiteQueen | BlackQueen;
         public ulong Kings => WhiteKing | BlackKing;
 
 
@@ -201,6 +201,14 @@ namespace SicTransit.Woodpusher.Model
             return PieceColour.None;
         }
 
-        private static ulong GetMask(Position position) => 1u << position.File << 8 * position.Rank;
+        private static ulong GetMask(Position position)
+        {
+
+            ulong p = 1u << position.File;
+
+            int s = 8 * position.Rank;
+
+            return p << s;
+        }
     }
 }
