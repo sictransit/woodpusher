@@ -1,7 +1,8 @@
 ﻿namespace woodpusher.model.enums
 {
-    internal enum PieceType
+    public enum PieceType
     {
+        None,
         Pawn,
         Knight,
         Bishop,

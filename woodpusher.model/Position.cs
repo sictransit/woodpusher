@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace woodpusher.model
 {
-    internal struct Position
+    public struct Position
     {
         public int File;
         public int Rank;

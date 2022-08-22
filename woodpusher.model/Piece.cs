@@ -2,7 +2,7 @@
 
 namespace woodpusher.model
 {
-    internal struct Piece
+    public struct Piece
     {
         public PieceColour Colour;
         public PieceType Type;

@@ -1,7 +1,8 @@
 ﻿namespace woodpusher.model.enums
 {
-    internal enum PieceColour
+    public enum PieceColour
     {
+        None,
         White,
         Black,
     }

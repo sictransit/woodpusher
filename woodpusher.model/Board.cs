@@ -7,7 +7,7 @@ using woodpusher.model.enums;
 
 namespace woodpusher.model
 {
-    internal struct Board
+    public struct Board
     {
         // 00 .. 63
         // A1 .. H8
