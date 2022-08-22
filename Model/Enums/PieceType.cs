@@ -1,4 +1,4 @@
-﻿namespace woodpusher.model.enums
+﻿namespace SicTransit.Woodpusher.Model.Enums
 {
     public enum PieceType
     {

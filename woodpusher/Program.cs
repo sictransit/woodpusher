@@ -1,4 +1,4 @@
-﻿namespace net.sictransit.woodpusher
+﻿namespace SicTransit.Woodpusher
 {
     internal class Program
     {

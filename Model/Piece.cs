@@ -1,6 +1,6 @@
-﻿using woodpusher.model.enums;
+﻿using SicTransit.Woodpusher.Model.Enums;
 
-namespace woodpusher.model
+namespace SicTransit.Woodpusher.Model
 {
     public struct Piece
     {
@@ -12,5 +12,7 @@ namespace woodpusher.model
             Colour = colour;
             Type = type;
         }
+
+        public static Piece Empty => new(PieceColour.None, PieceType.None);
     }
 }
