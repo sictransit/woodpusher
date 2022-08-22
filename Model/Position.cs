@@ -1,4 +1,6 @@
-﻿namespace SicTransit.Woodpusher.Model
+﻿using SicTransit.Woodpusher.Model.Extensions;
+
+namespace SicTransit.Woodpusher.Model
 {
     public struct Position
     {
@@ -16,6 +18,8 @@
 
         public static Position FromAlgebraicNotation(string algebraicNotation)
         {
+            if (!StringExtensions.IsAlgebraicNotation(algebraicNotation)) throw new ArgumentOutOfRangeException(nameof(algebraicNotation));
+
             var file = algebraicNotation[0] - 'a';
             var rank = algebraicNotation[1] - '1';
 
