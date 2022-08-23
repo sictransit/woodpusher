@@ -54,7 +54,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Bitboard Remove(PieceType pieceType, Square square) => Remove(pieceType, GetMask(square));
 
-        public PieceType? Peek(ulong mask) 
+        public PieceType? Peek(ulong mask)
         {
             if ((Aggregate & mask) == 0)
             {
@@ -85,7 +85,7 @@ namespace SicTransit.Woodpusher.Model
             {
                 return PieceType.Queen;
             }
-            
+
             return PieceType.King;
         }
 

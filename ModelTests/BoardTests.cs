@@ -62,7 +62,7 @@ namespace SicTransit.Woodpusher.Tests
             var e1 = Square.FromAlgebraicNotation("e1");
             var whiteKing = new Piece(PieceColour.White, PieceType.King);
 
-            board.RemovePiece(e1, whiteKing);            
+            board.RemovePiece(e1, whiteKing);
         }
 
         [TestMethod()]

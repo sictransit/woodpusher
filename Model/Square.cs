@@ -34,6 +34,10 @@ namespace SicTransit.Woodpusher.Model
             return $"{f}{r}";
         }
 
+        public Square NewRank(int rank) => new(File, rank);
+
+        public Square NewFile(int file) => new(file, Rank);        
+
         public override string ToString()
         {
             return ToAlgebraicNotation();
