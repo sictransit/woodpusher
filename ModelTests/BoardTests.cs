@@ -39,5 +39,48 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(0u, board.Aggregate);
         }
+
+        [TestMethod()]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void OccupiedSquareTest()
+        {
+            var board = new Board();
+
+            var e1 = Square.FromAlgebraicNotation("e1");
+            var whiteKing = new Piece(PieceColour.White, PieceType.King);
+
+            board = board.AddPiece(e1, whiteKing);
+            board.AddPiece(e1, whiteKing);
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void EmptySquareTest()
+        {
+            var board = new Board();
+
+            var e1 = Square.FromAlgebraicNotation("e1");
+            var whiteKing = new Piece(PieceColour.White, PieceType.King);
+
+            board.RemovePiece(e1, whiteKing);            
+        }
+
+        [TestMethod()]
+        public void FillTest()
+        {
+            var board = new Board();
+
+            var whitePawn = new Piece(PieceColour.White, PieceType.Pawn);
+
+            for (int f = 0; f < 8; f++)
+            {
+                for (int r = 0; r < 8; r++)
+                {
+                    board = board.AddPiece(new Square(f, r), whitePawn);
+                }
+            }
+
+            Assert.AreEqual(0xffffffffffffffff, board.Aggregate);
+        }
     }
 }
