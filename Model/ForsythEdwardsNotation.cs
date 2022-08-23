@@ -87,7 +87,7 @@ namespace SicTransit.Woodpusher.Model
                     {
                         var square = new Square(file++, rank);
 
-                        board.Set(square, c.ToPiece());
+                        board = board.AddPiece(square, c.ToPiece());
                     }
                 }
 

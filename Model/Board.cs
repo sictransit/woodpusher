@@ -4,188 +4,46 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Board
     {
-        // 00 .. 63
-        // A1 .. H8
-
-        public ulong Occupancy => White.Aggregate | Black.Aggregate;
-
-        public ulong Pawns => White.Pawn | Black.Pawn;
-        public ulong Rooks => White.Rook | Black.Rook;
-        public ulong Knights => White.Knight | Black.Knight;
-        public ulong Bishops => White.Bishop | Black.Bishop;
-        public ulong Queens => White.Queen | Black.Queen;
-        public ulong Kings => White.King | Black.King;
-
-        public BitField White;
-        public BitField Black;
-
-        public void Unset(Square square, Piece piece)
+        public Board(BitField white, BitField black)
         {
-            var mask = ~GetMask(square);
-
-            if (piece.Colour == PieceColour.White)
-            {
-                switch (piece.Type)
-                {
-                    case PieceType.Pawn:
-                        White.Pawn &= mask;
-                        break;
-                    case PieceType.Knight:
-                        White.Knight &= mask;
-                        break;
-                    case PieceType.Bishop:
-                        White.Bishop &= mask;
-                        break;
-                    case PieceType.Rook:
-                        White.Rook &= mask;
-                        break;
-                    case PieceType.Queen:
-                        White.Queen &= mask;
-                        break;
-                    case PieceType.King:
-                        White.King &= mask;
-                        break;
-                }
-            }
-            else
-            {
-                switch (piece.Type)
-                {
-                    case PieceType.Pawn:
-                        Black.Pawn &= mask;
-                        break;
-                    case PieceType.Knight:
-                        Black.Knight &= mask;
-                        break;
-                    case PieceType.Bishop:
-                        Black.Bishop &= mask;
-                        break;
-                    case PieceType.Rook:
-                        Black.Rook &= mask;
-                        break;
-                    case PieceType.Queen:
-                        Black.Queen &= mask;
-                        break;
-                    case PieceType.King:
-                        Black.King &= mask;
-                        break;
-                }
-            }
+            White = white;
+            Black = black;
         }
 
-        public void Set(Square square, Piece piece)
-        {
-            var mask = GetMask(square);
+        public ulong Aggregate => White.Aggregate | Black.Aggregate;
 
-            if (piece.Colour == PieceColour.White)
-            {
-                switch (piece.Type)
-                {
-                    case PieceType.Pawn:
-                        White.Pawn |= mask;
-                        break;
-                    case PieceType.Knight:
-                        White.Knight |= mask;
-                        break;
-                    case PieceType.Bishop:
-                        White.Bishop |= mask;
-                        break;
-                    case PieceType.Rook:
-                        White.Rook |= mask;
-                        break;
-                    case PieceType.Queen:
-                        White.Queen |= mask;
-                        break;
-                    case PieceType.King:
-                        White.King |= mask;
-                        break;
-                }
-            }
-            else
-            {
-                switch (piece.Type)
-                {
-                    case PieceType.Pawn:
-                        Black.Pawn |= mask;
-                        break;
-                    case PieceType.Knight:
-                        Black.Knight |= mask;
-                        break;
-                    case PieceType.Bishop:
-                        Black.Bishop |= mask;
-                        break;
-                    case PieceType.Rook:
-                        Black.Rook |= mask;
-                        break;
-                    case PieceType.Queen:
-                        Black.Queen |= mask;
-                        break;
-                    case PieceType.King:
-                        Black.King |= mask;
-                        break;
-                }
-            }
+        public BitField White { get; init; }
+        public BitField Black { get; init; }
+
+        public Board AddPiece(Square square, Piece piece)
+        {
+            return (piece.Colour == PieceColour.White) ? new Board(White.Add(piece.Type, square), Black) : new Board(White, Black.Add(piece.Type, square));
         }
 
-        public Piece Get(Square square)
+        public Board RemovePiece(Square square, Piece piece)
         {
-            var mask = GetMask(square);
-
-            var colour = GetPieceColour(mask);
-
-            return colour == PieceColour.None ? Piece.Empty : new Piece(colour, GetPieceType(mask));
+            return (piece.Colour == PieceColour.White) ? new Board(White.Remove(piece.Type, square), Black) : new Board(White, Black.Remove(piece.Type, square));
         }
 
-        private PieceType GetPieceType(ulong mask)
+        public Piece? Get(Square square)
         {
-            if ((Pawns & mask) != 0)
+            var mask = BitField.GetMask(square);
+
+            var pieceType = White.Peek(mask);
+
+            if (pieceType != null)
             {
-                return PieceType.Pawn;
+                return new Piece(PieceColour.White, pieceType.Value);
             }
 
-            if ((Knights & mask) != 0)
+            pieceType = Black.Peek(mask);
+
+            if (pieceType != null)
             {
-                return PieceType.Knight;
+                return new Piece(PieceColour.Black, pieceType.Value);
             }
 
-            if ((Bishops & mask) != 0)
-            {
-                return PieceType.Bishop;
-            }
-
-            if ((Rooks & mask) != 0)
-            {
-                return PieceType.Rook;
-            }
-
-            if ((Queens & mask) != 0)
-            {
-                return PieceType.Queen;
-            }
-
-            if ((Kings & mask) != 0)
-            {
-                return PieceType.King;
-            }
-
-            return PieceType.None;
+            return null;
         }
-
-        private PieceColour GetPieceColour(ulong mask)
-        {
-            if ((White.Aggregate & mask) != 0)
-            {
-                return PieceColour.White;
-            }
-
-            if ((Black.Aggregate & mask) != 0)
-            {
-                return PieceColour.Black;
-            }
-
-            return PieceColour.None;
-        }
-
-        private static ulong GetMask(Square square) => 1u << ((square.Rank << 3) + square.File);
     }
 }

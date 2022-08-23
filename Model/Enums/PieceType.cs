@@ -2,7 +2,6 @@
 {
     public enum PieceType
     {
-        None,
         Pawn,
         Knight,
         Bishop,

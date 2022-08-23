@@ -31,8 +31,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 PieceType.Bishop => 'B',
                 PieceType.Rook => 'R',
                 PieceType.Queen => 'Q',
-                PieceType.King => 'K',
-                PieceType.None => '-',
+                PieceType.King => 'K',                
                 _ => throw new NotImplementedException(p.ToString()),
             };
 

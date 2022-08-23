@@ -4,8 +4,8 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Square
     {
-        public int File;
-        public int Rank;
+        public int File { get; set; }
+        public int Rank { get; set; }
 
         public Square(int file, int rank)
         {

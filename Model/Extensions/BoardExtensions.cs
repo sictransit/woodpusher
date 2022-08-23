@@ -15,10 +15,9 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 {
                     var piece = b.Get(new Square(file, rank));
 
-                    var c = piece.ToAlgebraicNotation();
+                    var c = piece.HasValue ? piece.Value.ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
-
                 }
 
                 sb.AppendLine();
