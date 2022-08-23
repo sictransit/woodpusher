@@ -4,7 +4,7 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Board
     {
-        public Board(BitField white, BitField black)
+        public Board(Bitboard white, Bitboard black)
         {
             White = white;
             Black = black;
@@ -12,8 +12,8 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong Aggregate => White.Aggregate | Black.Aggregate;
 
-        public BitField White { get; init; }
-        public BitField Black { get; init; }
+        public Bitboard White { get; init; }
+        public Bitboard Black { get; init; }
 
         public Board AddPiece(Square square, Piece piece)
         {
@@ -27,7 +27,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece? Get(Square square)
         {
-            var mask = BitField.GetMask(square);
+            var mask = Bitboard.GetMask(square);
 
             var pieceType = White.Peek(mask);
 

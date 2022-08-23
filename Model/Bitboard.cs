@@ -2,12 +2,12 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct BitField
+    public struct Bitboard
     {
         // 00 .. 63
         // A1 .. H8
 
-        public BitField(ulong pawn, ulong rook, ulong knight, ulong bishop, ulong queen, ulong king)
+        public Bitboard(ulong pawn, ulong rook, ulong knight, ulong bishop, ulong queen, ulong king)
         {
             Pawn = pawn;
             Rook = rook;
@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Model
 
         public bool IsOccupied(ulong mask) => (Aggregate & mask) != 0;
 
-        public BitField Add(PieceType pieceType, ulong mask)
+        public Bitboard Add(PieceType pieceType, ulong mask)
         {
             if ((Aggregate & mask) != 0)
             {
@@ -40,9 +40,9 @@ namespace SicTransit.Woodpusher.Model
             return Toggle(pieceType, mask);
         }
 
-        public BitField Add(PieceType pieceType, Square square) => Add(pieceType, GetMask(square));
+        public Bitboard Add(PieceType pieceType, Square square) => Add(pieceType, GetMask(square));
 
-        public BitField Remove(PieceType pieceType, ulong mask)
+        public Bitboard Remove(PieceType pieceType, ulong mask)
         {
             if ((Aggregate & mask) == 0)
             {
@@ -52,7 +52,7 @@ namespace SicTransit.Woodpusher.Model
             return Toggle(pieceType, mask);
         }
 
-        public BitField Remove(PieceType pieceType, Square square) => Remove(pieceType, GetMask(square));
+        public Bitboard Remove(PieceType pieceType, Square square) => Remove(pieceType, GetMask(square));
 
         public PieceType? Peek(ulong mask) 
         {
@@ -89,7 +89,7 @@ namespace SicTransit.Woodpusher.Model
             return PieceType.King;
         }
 
-        private BitField Toggle(PieceType pieceType, ulong mask)
+        private Bitboard Toggle(PieceType pieceType, ulong mask)
         {
             var pawn = Pawn;
             var rook = Rook;
@@ -122,11 +122,9 @@ namespace SicTransit.Woodpusher.Model
                     throw new ArgumentOutOfRangeException(nameof(pieceType));
             }
 
-            return new BitField(pawn, rook, knight, bishop, queen, king);
+            return new Bitboard(pawn, rook, knight, bishop, queen, king);
         }
 
         public static ulong GetMask(Square square) => 1ul << ((square.Rank << 3) + square.File);
-
-
     }
 }
