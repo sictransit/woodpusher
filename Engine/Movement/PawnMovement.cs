@@ -50,6 +50,10 @@ namespace SicTransit.Woodpusher.Engine.Movement
                     }
                 }
             }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
