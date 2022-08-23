@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var a1 = Square.FromAlgebraicNotation("a1");
 
-            var blockAtA3 = Square.FromAlgebraicNotation("a3");            
+            var blockAtA3 = Square.FromAlgebraicNotation("a3");
 
             var moves = new List<Move>();
 

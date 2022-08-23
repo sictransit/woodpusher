@@ -18,12 +18,14 @@ namespace SicTransit.Woodpusher.Model
 
         public static bool TryCreate(int file, int rank, out Square square)
         {
-            square = new Square(file, rank);
+            square = default;
 
             if ((file is < 0 or > 7) || (rank is < 0 or > 7))
             {
                 return false;
             }
+
+            square = new Square(file, rank);
 
             return true;
         }
