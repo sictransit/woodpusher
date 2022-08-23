@@ -1,12 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SicTransit.Woodpusher.Engine.Movement;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SicTransit.Woodpusher.Engine.Movement.Tests
 {
@@ -41,8 +35,8 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
 
             Assert.AreEqual(3, moves.Count);
-            Assert.IsTrue(moves.All(m => (m.Flags & MovementFlags.Promote) != 0));
+            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(MovementFlags.Promote)));
+            Assert.IsTrue(moves.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(MovementFlags.MustTake)));
         }
-
     }
 }
