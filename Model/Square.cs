@@ -16,6 +16,18 @@ namespace SicTransit.Woodpusher.Model
             Rank = rank;
         }
 
+        public static bool TryCreate(int file, int rank, out Square square)
+        {
+            square = new Square(file, rank);
+
+            if ((file is < 0 or > 7) || (rank is < 0 or > 7))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static Square FromAlgebraicNotation(string algebraicNotation)
         {
             if (!StringExtensions.IsAlgebraicNotation(algebraicNotation)) throw new ArgumentOutOfRangeException(nameof(algebraicNotation));
@@ -37,6 +49,13 @@ namespace SicTransit.Woodpusher.Model
         public Square NewRank(int rank) => new(File, rank);
 
         public Square NewFile(int file) => new(file, Rank);        
+
+        public Square AddFileAndRank(int fileDelta, int rankDelta) => new Square(File+fileDelta, Rank+rankDelta);
+
+        //public int DistanceToEgde()
+        //{
+        //    return Math.Min(7 - Math.Max(File, Rank), Math.Min(File, Rank));
+        //}
 
         public override string ToString()
         {

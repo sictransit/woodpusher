@@ -7,45 +7,41 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     public class RookMovementTests
     {
         [TestMethod()]
-        public void GetAvailableSquaresTest()
+        public void GetTargetVectorsTest()
         {
             var a1 = Square.FromAlgebraicNotation("b2");
 
             var rookMovement = new RookMovement();
 
-            var moves = new List<Square>();
+            var moves = new List<Move>();
 
-            for (int i = 0; i <= rookMovement.Directions; i++)
+            foreach (var vector in rookMovement.GetTargetVectors(a1))
             {
-                var squares = rookMovement.GetTargetSquares(a1, i);
-
-                moves.AddRange(squares);
+                moves.AddRange(vector);
             }
 
             Assert.AreEqual(14, moves.Count);
         }
 
         [TestMethod()]
-        public void GetAvailableSquaresCornerCaseTest()
+        public void GetTargetVectorsCornerCaseTest()
         {
             var a1 = Square.FromAlgebraicNotation("a1");
 
             var rookMovement = new RookMovement();
 
-            var moves = new List<Square>();
+            var moves = new List<Move>();
 
-            for (int i = 0; i <= rookMovement.Directions; i++)
+            foreach (var vector in rookMovement.GetTargetVectors(a1))
             {
-                var squares = rookMovement.GetTargetSquares(a1, i);
-
-                moves.AddRange(squares);
+                moves.AddRange(vector);
             }
 
             Assert.AreEqual(14, moves.Count);
         }
 
         [TestMethod()]
-        public void GetAvailableSquaresButBlockedTest()
+        public void GetTargetVectorsBlockedTest()
         {
             var a1 = Square.FromAlgebraicNotation("a1");
 
@@ -53,18 +49,19 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var rookMovement = new RookMovement();
 
-            var moves = new List<Square>();
+            var moves = new List<Move>();
 
-            for (int i = 0; i <= rookMovement.Directions; i++)
+            foreach (var vector in rookMovement.GetTargetVectors(a1))
             {
-                foreach (var square in rookMovement.GetTargetSquares(a1, i))
+                foreach (var move in vector)
                 {
-                    if (square.Equals(blockAtA3))
+                    if (move.Square.Equals(blockAtA3))
                     {
                         break;
                     }
 
-                    moves.Add(square);
+                    moves.Add(move);
+
                 }
             }
 

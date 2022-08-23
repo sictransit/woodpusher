@@ -4,39 +4,29 @@ namespace SicTransit.Woodpusher.Engine.Movement
 {
     public class RookMovement : MovementBase
     {
-        public override int Directions => 3;
-
-        public override IEnumerable<Square> GetTargetSquares(Square square, int direction)
+        public override IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square)
         {
-            switch (direction)
+            if (square.Rank < 7)
             {
-                case 0:
-                    for (int r = square.Rank + 1; r <= 7; r++)
-                    {
-                        yield return square.NewRank(r);
-                    }
-                    break;
-                case 1:
-                    for (int f = square.File + 1; f <= 7; f++)
-                    {
-                        yield return square.NewFile(f);
-                    }
-                    break;
-                case 2:
-                    for (int r = square.Rank - 1; r >= 0; r--)
-                    {
-                        yield return square.NewRank(r);
-                    }
-                    break;
-                case 3:
-                    for (int f = square.File - 1; f >= 0; f--)
-                    {
-                        yield return square.NewFile(f);
-                    }
-                    break;
-                default:
-                    break;
+                yield return Enumerable.Range(square.Rank + 1, 7 - square.Rank).Select(r => new Move(square.NewRank(r)));
             }
+
+            if (square.File < 7)
+            {
+                yield return Enumerable.Range(square.File + 1, 7 - square.File).Select(f => new Move(square.NewFile(f)));
+            }
+
+            if (square.Rank > 0)
+            {
+                yield return Enumerable.Range(0, square.Rank).Reverse().Select(r => new Move(square.NewRank(r)));
+            }
+
+            if (square.File > 0)
+            {
+                yield return Enumerable.Range(0, square.File).Reverse().Select(f => new Move(square.NewFile(f)));
+            }
+
         }
     }
+
 }
