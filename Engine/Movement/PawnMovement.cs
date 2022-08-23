@@ -26,13 +26,11 @@ namespace SicTransit.Woodpusher.Engine.Movement
                     forward.Add(new Move(square.NewRank(rank + 2)));
                 }
 
-                yield return forward;
-
-                var mustTake = MovementFlags.MustTake;
+                yield return forward;                
 
                 if (Square.TryCreate(file - 1, rank + 1, out var takeLeft))
                 {
-                    yield return new[] { new Move(takeLeft, rank == 6 ? mustTake | MovementFlags.Promote : mustTake) };
+                    yield return new[] { new Move(takeLeft, rank == 6 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
 
                     if (rank > 0 && rank < 5)
                     {
@@ -42,7 +40,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
                 if (Square.TryCreate(file + 1, rank + 1, out var takeRight))
                 {
-                    yield return new[] { new Move(takeRight, rank == 6 ? mustTake | MovementFlags.Promote : mustTake) };
+                    yield return new[] { new Move(takeRight, rank == 6 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
 
                     if (rank > 0 && rank < 5)
                     {
