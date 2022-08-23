@@ -9,13 +9,11 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod()]
         public void GetTargetVectorsTest()
         {
-            var a1 = Square.FromAlgebraicNotation("b2");
-
-            var rookMovement = new RookMovement();
+            var b2 = Square.FromAlgebraicNotation("b2");
 
             var moves = new List<Move>();
 
-            foreach (var vector in rookMovement.GetTargetVectors(a1))
+            foreach (var vector in RookMovement.GetTargetVectors(b2))
             {
                 moves.AddRange(vector);
             }
@@ -28,11 +26,9 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var a1 = Square.FromAlgebraicNotation("a1");
 
-            var rookMovement = new RookMovement();
-
             var moves = new List<Move>();
 
-            foreach (var vector in rookMovement.GetTargetVectors(a1))
+            foreach (var vector in RookMovement.GetTargetVectors(a1))
             {
                 moves.AddRange(vector);
             }
@@ -45,13 +41,11 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var a1 = Square.FromAlgebraicNotation("a1");
 
-            var blockAtA3 = Square.FromAlgebraicNotation("a3");
-
-            var rookMovement = new RookMovement();
+            var blockAtA3 = Square.FromAlgebraicNotation("a3");            
 
             var moves = new List<Move>();
 
-            foreach (var vector in rookMovement.GetTargetVectors(a1))
+            foreach (var vector in RookMovement.GetTargetVectors(a1))
             {
                 foreach (var move in vector)
                 {

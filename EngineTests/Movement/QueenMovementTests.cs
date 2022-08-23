@@ -10,21 +10,21 @@ using System.Threading.Tasks;
 namespace SicTransit.Woodpusher.Engine.Movement.Tests
 {
     [TestClass()]
-    public class KnightMovementTests
+    public class QueenMovementTests
     {
         [TestMethod()]
         public void GetTargetVectorsTest()
         {
-            var d4 = Square.FromAlgebraicNotation("d4");
+            var b2 = Square.FromAlgebraicNotation("b2");
 
             var moves = new List<Move>();
 
-            foreach (var vector in KnightMovement.GetTargetVectors(d4))
+            foreach (var vector in QueenMovement.GetTargetVectors(b2))
             {
                 moves.AddRange(vector);
             }
 
-            Assert.AreEqual(8, moves.Count);
+            Assert.AreEqual(23, moves.Count);
         }
     }
 }

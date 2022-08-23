@@ -16,12 +16,10 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         public void GetTargetVectorsTest()
         {
             var g7 = Square.FromAlgebraicNotation("g7");
-
-            var bishopMovement = new BishopMovement();
-
+            
             var moves = new List<Move>();
 
-            foreach (var vector in bishopMovement.GetTargetVectors(g7))
+            foreach (var vector in BishopMovement.GetTargetVectors(g7))
             {
                 moves.AddRange(vector);
             }
@@ -32,13 +30,11 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod()]
         public void GetTargetVectorsCornerCaseTest()
         {
-            var a1 = Square.FromAlgebraicNotation("a1");
-
-            var bishopMovement = new BishopMovement();
+            var a1 = Square.FromAlgebraicNotation("a1");            
 
             var moves = new List<Move>();
 
-            foreach (var vector in bishopMovement.GetTargetVectors(a1))
+            foreach (var vector in BishopMovement.GetTargetVectors(a1))
             {
                 moves.AddRange(vector);
             }

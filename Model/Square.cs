@@ -48,9 +48,9 @@ namespace SicTransit.Woodpusher.Model
 
         public Square NewRank(int rank) => new(File, rank);
 
-        public Square NewFile(int file) => new(file, Rank);        
+        public Square NewFile(int file) => new(file, Rank);
 
-        public Square AddFileAndRank(int fileDelta, int rankDelta) => new Square(File+fileDelta, Rank+rankDelta);
+        public Square AddFileAndRank(int fileDelta, int rankDelta) => new Square(File + fileDelta, Rank + rankDelta);
 
         //public int DistanceToEgde()
         //{

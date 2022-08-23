@@ -2,9 +2,9 @@
 
 namespace SicTransit.Woodpusher.Engine.Movement
 {
-    public class KnightMovement : MovementBase
+    public static class KnightMovement 
     {
-        public override IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square)
         {
             var f = square.File;
             var r = square.Rank;

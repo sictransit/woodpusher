@@ -5,6 +5,7 @@
         None = 0,
         EnPassant,
         CastleQueen,
-        CastleKing
+        CastleKing,
+        Promote
     }
 }
