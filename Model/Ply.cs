@@ -2,7 +2,7 @@
 {
     public class Ply
     {
-        public Ply(Board board, Piece piece, Position position)
+        public Ply(Board board, Piece piece, Square square)
         {
             Board = board;
         }

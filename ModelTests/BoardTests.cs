@@ -17,19 +17,19 @@ namespace SicTransit.Woodpusher.Tests
             var whiteKing = new Piece(PieceColour.White, PieceType.King);
             var blackKing = new Piece(PieceColour.Black, PieceType.King);
 
-            var e1 = Position.FromAlgebraicNotation("e1");
+            var e1 = Square.FromAlgebraicNotation("e1");
 
             board.Set(e1, whiteKing);
 
-            Assert.IsTrue(board.WhiteKing > 0);
-            Assert.AreEqual(board.WhiteKing, board.Occupancy);
+            Assert.IsTrue(board.White.King > 0);
+            Assert.AreEqual(board.White.King, board.Occupancy);
 
-            var e8 = Position.FromAlgebraicNotation("e8");
+            var e8 = Square.FromAlgebraicNotation("e8");
 
             board.Set(e8, blackKing);
 
-            Assert.IsTrue(board.BlackKing > 0);
-            Assert.AreEqual(board.WhiteKing | board.BlackKing, board.Occupancy);
+            Assert.IsTrue(board.Black.King > 0);
+            Assert.AreEqual(board.White.King | board.Black.King, board.Occupancy);
 
             Assert.AreEqual(whiteKing, board.Get(e1));
             Assert.AreEqual(blackKing, board.Get(e8));

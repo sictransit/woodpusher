@@ -13,7 +13,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 sb.Append($"{rank + 1} ");
                 for (int file = 0; file < 8; file++)
                 {
-                    var piece = b.Get(new Position(file, rank));
+                    var piece = b.Get(new Square(file, rank));
 
                     var c = piece.ToAlgebraicNotation();
 

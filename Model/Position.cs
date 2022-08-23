@@ -2,12 +2,12 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Position
+    public struct Square
     {
         public int File;
         public int Rank;
 
-        public Position(int file, int rank)
+        public Square(int file, int rank)
         {
             if (file is < 0 or > 7) throw new ArgumentOutOfRangeException(nameof(file));
             if (rank is < 0 or > 7) throw new ArgumentOutOfRangeException(nameof(rank));
@@ -16,14 +16,14 @@ namespace SicTransit.Woodpusher.Model
             Rank = rank;
         }
 
-        public static Position FromAlgebraicNotation(string algebraicNotation)
+        public static Square FromAlgebraicNotation(string algebraicNotation)
         {
             if (!StringExtensions.IsAlgebraicNotation(algebraicNotation)) throw new ArgumentOutOfRangeException(nameof(algebraicNotation));
 
             var file = algebraicNotation[0] - 'a';
             var rank = algebraicNotation[1] - '1';
 
-            return new Position(file, rank);
+            return new Square(file, rank);
         }
 
         public string ToAlgebraicNotation()

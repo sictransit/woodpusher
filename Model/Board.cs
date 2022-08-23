@@ -7,58 +7,43 @@ namespace SicTransit.Woodpusher.Model
         // 00 .. 63
         // A1 .. H8
 
-        public ulong Occupancy => White | Black;
+        public ulong Occupancy => White.Aggregate | Black.Aggregate;
 
-        public ulong White => WhitePawn | WhiteRook | WhiteKnight | WhiteBishop | WhiteQueen | WhiteKing;
-        public ulong Black => BlackPawn | BlackRook | BlackKnight | BlackBishop | BlackQueen | BlackKing;
+        public ulong Pawns => White.Pawn | Black.Pawn;
+        public ulong Rooks => White.Rook | Black.Rook;
+        public ulong Knights => White.Knight | Black.Knight;
+        public ulong Bishops => White.Bishop | Black.Bishop;
+        public ulong Queens => White.Queen | Black.Queen;
+        public ulong Kings => White.King | Black.King;
 
-        public ulong Pawns => WhitePawn | BlackPawn;
-        public ulong Rooks => WhiteRook | BlackRook;
-        public ulong Knights => WhiteKnight | BlackKnight;
-        public ulong Bishops => WhiteBishop | BlackBishop;
-        public ulong Queens => WhiteQueen | BlackQueen;
-        public ulong Kings => WhiteKing | BlackKing;
+        public BitField White;
+        public BitField Black;
 
-
-        public ulong WhitePawn;
-        public ulong WhiteRook;
-        public ulong WhiteKnight;
-        public ulong WhiteBishop;
-        public ulong WhiteQueen;
-        public ulong WhiteKing;
-
-        public ulong BlackPawn;
-        public ulong BlackRook;
-        public ulong BlackKnight;
-        public ulong BlackBishop;
-        public ulong BlackQueen;
-        public ulong BlackKing;
-
-        public void Unset(Position position, Piece piece)
+        public void Unset(Square square, Piece piece)
         {
-            var mask = ~GetMask(position);
+            var mask = ~GetMask(square);
 
             if (piece.Colour == PieceColour.White)
             {
                 switch (piece.Type)
                 {
                     case PieceType.Pawn:
-                        WhitePawn &= mask;
+                        White.Pawn &= mask;
                         break;
                     case PieceType.Knight:
-                        WhiteKnight &= mask;
+                        White.Knight &= mask;
                         break;
                     case PieceType.Bishop:
-                        WhiteBishop &= mask;
+                        White.Bishop &= mask;
                         break;
                     case PieceType.Rook:
-                        WhiteRook &= mask;
+                        White.Rook &= mask;
                         break;
                     case PieceType.Queen:
-                        WhiteQueen &= mask;
+                        White.Queen &= mask;
                         break;
                     case PieceType.King:
-                        WhiteKing &= mask;
+                        White.King &= mask;
                         break;
                 }
             }
@@ -67,52 +52,52 @@ namespace SicTransit.Woodpusher.Model
                 switch (piece.Type)
                 {
                     case PieceType.Pawn:
-                        BlackPawn &= mask;
+                        Black.Pawn &= mask;
                         break;
                     case PieceType.Knight:
-                        BlackKnight &= mask;
+                        Black.Knight &= mask;
                         break;
                     case PieceType.Bishop:
-                        BlackBishop &= mask;
+                        Black.Bishop &= mask;
                         break;
                     case PieceType.Rook:
-                        BlackRook &= mask;
+                        Black.Rook &= mask;
                         break;
                     case PieceType.Queen:
-                        BlackQueen &= mask;
+                        Black.Queen &= mask;
                         break;
                     case PieceType.King:
-                        BlackKing &= mask;
+                        Black.King &= mask;
                         break;
                 }
             }
         }
 
-        public void Set(Position position, Piece piece)
+        public void Set(Square square, Piece piece)
         {
-            var mask = GetMask(position);
+            var mask = GetMask(square);
 
             if (piece.Colour == PieceColour.White)
             {
                 switch (piece.Type)
                 {
                     case PieceType.Pawn:
-                        WhitePawn |= mask;
+                        White.Pawn |= mask;
                         break;
                     case PieceType.Knight:
-                        WhiteKnight |= mask;
+                        White.Knight |= mask;
                         break;
                     case PieceType.Bishop:
-                        WhiteBishop |= mask;
+                        White.Bishop |= mask;
                         break;
                     case PieceType.Rook:
-                        WhiteRook |= mask;
+                        White.Rook |= mask;
                         break;
                     case PieceType.Queen:
-                        WhiteQueen |= mask;
+                        White.Queen |= mask;
                         break;
                     case PieceType.King:
-                        WhiteKing |= mask;
+                        White.King |= mask;
                         break;
                 }
             }
@@ -121,30 +106,30 @@ namespace SicTransit.Woodpusher.Model
                 switch (piece.Type)
                 {
                     case PieceType.Pawn:
-                        BlackPawn |= mask;
+                        Black.Pawn |= mask;
                         break;
                     case PieceType.Knight:
-                        BlackKnight |= mask;
+                        Black.Knight |= mask;
                         break;
                     case PieceType.Bishop:
-                        BlackBishop |= mask;
+                        Black.Bishop |= mask;
                         break;
                     case PieceType.Rook:
-                        BlackRook |= mask;
+                        Black.Rook |= mask;
                         break;
                     case PieceType.Queen:
-                        BlackQueen |= mask;
+                        Black.Queen |= mask;
                         break;
                     case PieceType.King:
-                        BlackKing |= mask;
+                        Black.King |= mask;
                         break;
                 }
             }
         }
 
-        public Piece Get(Position position)
+        public Piece Get(Square square)
         {
-            var mask = GetMask(position);
+            var mask = GetMask(square);
 
             var colour = GetPieceColour(mask);
 
@@ -188,12 +173,12 @@ namespace SicTransit.Woodpusher.Model
 
         private PieceColour GetPieceColour(ulong mask)
         {
-            if ((White & mask) != 0)
+            if ((White.Aggregate & mask) != 0)
             {
                 return PieceColour.White;
             }
 
-            if ((Black & mask) != 0)
+            if ((Black.Aggregate & mask) != 0)
             {
                 return PieceColour.Black;
             }
@@ -201,14 +186,6 @@ namespace SicTransit.Woodpusher.Model
             return PieceColour.None;
         }
 
-        private static ulong GetMask(Position position)
-        {
-
-            ulong p = 1u << position.File;
-
-            int s = 8 * position.Rank;
-
-            return p << s;
-        }
+        private static ulong GetMask(Square square) => 1u << ((square.Rank << 3) + square.File);
     }
 }

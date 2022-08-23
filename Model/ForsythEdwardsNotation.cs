@@ -13,13 +13,13 @@ namespace SicTransit.Woodpusher.Model
 
         public Castlings Castlings { get; }
 
-        public Position? EnPassantTarget { get; }
+        public Square? EnPassantTarget { get; }
 
         public int HalfmoveClock { get; }
 
         public int FullmoveNumber { get; }
 
-        private ForsythEdwardsNotation(Board board, PieceColour activeColour, Castlings castlings, Position? enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        private ForsythEdwardsNotation(Board board, PieceColour activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
             Board = board;
             ActiveColour = activeColour;
@@ -85,9 +85,9 @@ namespace SicTransit.Woodpusher.Model
                     }
                     else
                     {
-                        var position = new Position(file++, rank);
+                        var square = new Square(file++, rank);
 
-                        board.Set(position, c.ToPiece());
+                        board.Set(square, c.ToPiece());
                     }
                 }
 
@@ -101,7 +101,7 @@ namespace SicTransit.Woodpusher.Model
 
         private static int ParseHalfmoveClock(string s) => int.Parse(s);
 
-        private static Position? ParseEnPassantTarget(string s)
+        private static Square? ParseEnPassantTarget(string s)
         {
             if (s.IsNothing())
             {
@@ -113,7 +113,7 @@ namespace SicTransit.Woodpusher.Model
                 throw new FenParsingException(s, "en passant target should be in algebraic notation or '-'");
             }
 
-            return Position.FromAlgebraicNotation(s);
+            return Square.FromAlgebraicNotation(s);
         }
 
         private static PieceColour ParseActiveColour(string s)

@@ -4,13 +4,13 @@ using SicTransit.Woodpusher.Model;
 namespace SicTransit.Woodpusher.Tests
 {
     [TestClass()]
-    public class PositionTests
+    public class SqaureTests
     {
         [TestMethod()]
         public void FromAlgebraicNotationA1Test()
         {
-            var p1 = new Position(0, 0);
-            var p2 = Position.FromAlgebraicNotation("a1");
+            var p1 = new Square(0, 0);
+            var p2 = Square.FromAlgebraicNotation("a1");
 
             Assert.AreEqual(p1, p2);
         }
@@ -18,8 +18,8 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void FromAlgebraicNotationH8Test()
         {
-            var p1 = new Position(7, 7);
-            var p2 = Position.FromAlgebraicNotation("h8");
+            var p1 = new Square(7, 7);
+            var p2 = Square.FromAlgebraicNotation("h8");
 
             Assert.AreEqual(p1, p2);
         }
