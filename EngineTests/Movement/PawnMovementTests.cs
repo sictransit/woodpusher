@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     public class PawnMovementTests
     {
         [TestMethod()]
-        public void GetTargetVectorsStartingPositionTest()
+        public void GetTargetVectorsWhiteStartingPositionTest()
         {
             var a2 = Square.FromAlgebraicNotation("a2");
 
@@ -19,11 +19,26 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
                 moves.AddRange(vector);
             }
 
-            Assert.AreEqual(4, moves.Count);
+            Assert.AreEqual(3, moves.Count);
         }
 
         [TestMethod()]
-        public void GetTargetVectorsPromotePositionTest()
+        public void GetTargetVectorsBlackStartingPositionTest()
+        {
+            var a7 = Square.FromAlgebraicNotation("a7");
+
+            var moves = new List<Move>();
+
+            foreach (var vector in PawnMovement.GetTargetVectors(a7, PieceColour.Black))
+            {
+                moves.AddRange(vector);
+            }
+
+            Assert.AreEqual(3, moves.Count);
+        }
+
+        [TestMethod()]
+        public void GetTargetVectorsWhitePromotePositionTest()
         {
             var b7 = Square.FromAlgebraicNotation("b7");
 
@@ -37,6 +52,58 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(3, moves.Count);
             Assert.IsTrue(moves.All(m => m.Flags.HasFlag(MovementFlags.Promote)));
             Assert.IsTrue(moves.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(MovementFlags.MustTake)));
+        }
+
+        [TestMethod()]
+        public void GetTargetVectorsBlackPromotePositionTest()
+        {
+            var b2 = Square.FromAlgebraicNotation("b2");
+
+            var moves = new List<Move>();
+
+            foreach (var vector in PawnMovement.GetTargetVectors(b2, PieceColour.Black))
+            {
+                moves.AddRange(vector);
+            }
+
+            Assert.AreEqual(3, moves.Count);
+            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(MovementFlags.Promote)));
+            Assert.IsTrue(moves.Where(m => m.Square.File != b2.File).All(m => m.Flags.HasFlag(MovementFlags.MustTake)));
+        }
+
+
+        [TestMethod()]
+        public void GetTargetVectorsWhiteEnPassantTest()
+        {
+            var c5 = Square.FromAlgebraicNotation("c5");
+
+            var moves = new List<Move>();
+
+            foreach (var vector in PawnMovement.GetTargetVectors(c5, PieceColour.White))
+            {
+                moves.AddRange(vector);
+            }
+
+            Assert.AreEqual(5, moves.Count);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.EnPassant)) == 2);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.MustTake)) == 2);            
+        }
+
+        [TestMethod()]
+        public void GetTargetVectorsBlackEnPassantTest()
+        {
+            var d4 = Square.FromAlgebraicNotation("d4");
+
+            var moves = new List<Move>();
+
+            foreach (var vector in PawnMovement.GetTargetVectors(d4, PieceColour.Black))
+            {
+                moves.AddRange(vector);
+            }
+
+            Assert.AreEqual(5, moves.Count);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.EnPassant)) == 2);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.MustTake)) == 2);
         }
     }
 }

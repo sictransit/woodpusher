@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
                 {
                     yield return new[] { new Move(takeLeft, rank == 6 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
 
-                    if (rank > 0 && rank < 5)
+                    if (rank == 4)
                     {
                         yield return new[] { new Move(takeLeft, MovementFlags.EnPassant) };
                     }
@@ -42,7 +42,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
                 {
                     yield return new[] { new Move(takeRight, rank == 6 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
 
-                    if (rank > 0 && rank < 5)
+                    if (rank == 4)
                     {
                         yield return new[] { new Move(takeRight, MovementFlags.EnPassant) };
                     }
@@ -50,7 +50,34 @@ namespace SicTransit.Woodpusher.Engine.Movement
             }
             else
             {
-                throw new NotImplementedException();
+                var forward = new List<Move>() { new Move(square.NewRank(rank - 1), rank == 1 ? MovementFlags.Promote : MovementFlags.None) };
+
+                if (rank == 6)
+                {
+                    forward.Add(new Move(square.NewRank(rank - 2)));
+                }
+
+                yield return forward;
+
+                if (Square.TryCreate(file - 1, rank - 1, out var takeLeft))
+                {
+                    yield return new[] { new Move(takeLeft, rank == 1 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
+
+                    if (rank == 3)
+                    {
+                        yield return new[] { new Move(takeLeft, MovementFlags.EnPassant) };
+                    }
+                }
+
+                if (Square.TryCreate(file + 1, rank - 1, out var takeRight))
+                {
+                    yield return new[] { new Move(takeRight, rank == 1 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
+
+                    if (rank == 3)
+                    {
+                        yield return new[] { new Move(takeRight, MovementFlags.EnPassant) };
+                    }
+                }
             }
         }
     }
