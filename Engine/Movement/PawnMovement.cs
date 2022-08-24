@@ -26,7 +26,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
                     forward.Add(new Move(square.NewRank(rank + 2)));
                 }
 
-                yield return forward;                
+                yield return forward;
 
                 if (Square.TryCreate(file - 1, rank + 1, out var takeLeft))
                 {
