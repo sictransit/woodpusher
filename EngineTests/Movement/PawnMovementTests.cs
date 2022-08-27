@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in PawnMovement.GetTargetVectors(a2, PieceColour.White))
+            foreach (var vector in PawnMovement.GetTargetVectors(a2, Piece.White))
             {
                 moves.AddRange(vector);
             }
@@ -29,7 +29,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in PawnMovement.GetTargetVectors(a7, PieceColour.Black))
+            foreach (var vector in PawnMovement.GetTargetVectors(a7, Piece.Black))
             {
                 moves.AddRange(vector);
             }
@@ -44,7 +44,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in PawnMovement.GetTargetVectors(b7, PieceColour.White))
+            foreach (var vector in PawnMovement.GetTargetVectors(b7, Piece.White))
             {
                 moves.AddRange(vector);
             }
@@ -61,7 +61,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in PawnMovement.GetTargetVectors(b2, PieceColour.Black))
+            foreach (var vector in PawnMovement.GetTargetVectors(b2, Piece.Black))
             {
                 moves.AddRange(vector);
             }
@@ -79,7 +79,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in PawnMovement.GetTargetVectors(c5, PieceColour.White))
+            foreach (var vector in PawnMovement.GetTargetVectors(c5, Piece.White))
             {
                 moves.AddRange(vector);
             }
@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in PawnMovement.GetTargetVectors(d4, PieceColour.Black))
+            foreach (var vector in PawnMovement.GetTargetVectors(d4, Piece.Black))
             {
                 moves.AddRange(vector);
             }

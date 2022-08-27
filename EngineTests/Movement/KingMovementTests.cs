@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in KingMovement.GetTargetVectors(e2, Model.Enums.PieceColour.White))
+            foreach (var vector in KingMovement.GetTargetVectors(e2, Piece.White))
             {
                 moves.AddRange(vector);
             }
@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
                 var moves = new List<Move>();
 
-                foreach (var vector in KingMovement.GetTargetVectors(cornerSquare, Model.Enums.PieceColour.White))
+                foreach (var vector in KingMovement.GetTargetVectors(cornerSquare, Piece.White))
                 {
                     moves.AddRange(vector);
                 }
@@ -47,7 +47,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in KingMovement.GetTargetVectors(e1, Model.Enums.PieceColour.White))
+            foreach (var vector in KingMovement.GetTargetVectors(e1, Piece.White))
             {
                 moves.AddRange(vector);
             }
@@ -62,7 +62,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var moves = new List<Move>();
 
-            foreach (var vector in KingMovement.GetTargetVectors(e8, PieceColour.Black))
+            foreach (var vector in KingMovement.GetTargetVectors(e8, Piece.Black))
             {
                 moves.AddRange(vector);
             }

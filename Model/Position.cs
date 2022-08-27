@@ -1,4 +1,6 @@
-﻿namespace SicTransit.Woodpusher.Model
+﻿using SicTransit.Woodpusher.Model.Enums;
+
+namespace SicTransit.Woodpusher.Model
 {
     public struct Position
     {
@@ -10,7 +12,7 @@
         }
 
         public Piece Piece { get; }
-        public Square Square { get; }
 
+        public Square Square { get; }
     }
 }

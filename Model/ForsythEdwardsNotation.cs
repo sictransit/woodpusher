@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Model
     {
         public Board Board { get; }
 
-        public PieceColour ActiveColour { get; }
+        public Piece ActiveColour { get; }
 
         public Castlings Castlings { get; }
 
@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Model
 
         public int FullmoveNumber { get; }
 
-        private ForsythEdwardsNotation(Board board, PieceColour activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        private ForsythEdwardsNotation(Board board, Piece activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
             Board = board;
             ActiveColour = activeColour;
@@ -116,7 +116,7 @@ namespace SicTransit.Woodpusher.Model
             return Square.FromAlgebraicNotation(s);
         }
 
-        private static PieceColour ParseActiveColour(string s)
+        private static Piece ParseActiveColour(string s)
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
@@ -125,8 +125,8 @@ namespace SicTransit.Woodpusher.Model
 
             return s.Single() switch
             {
-                'w' => PieceColour.White,
-                _ => PieceColour.Black,
+                'w' => Piece.White,
+                _ => Piece.Black,
             };
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using SicTransit.Woodpusher.Model.Enums;
+using System.Text;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
@@ -15,7 +16,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 {
                     var piece = b.Get(new Square(file, rank));
 
-                    var c = piece.HasValue ? piece.Value.ToAlgebraicNotation() : ' ';
+                    var c = piece != Piece.None ? piece.ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
                 }

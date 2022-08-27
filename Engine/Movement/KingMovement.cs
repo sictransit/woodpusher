@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
         private static Square WhiteStartPosition = Square.FromAlgebraicNotation("e1");
         private static Square BlackStartPosition = Square.FromAlgebraicNotation("e8");
 
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square, PieceColour pieceColour)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square, Piece pieceColour)
         {
             var r = square.Rank;
             var f = square.File;
@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
                 }
             }
 
-            if (pieceColour == PieceColour.White)
+            if (pieceColour == Piece.White)
             {
                 if (square.Equals(WhiteStartPosition))
                 {

@@ -14,22 +14,16 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(0u, board.Aggregate);
 
-            var whiteKing = new Piece(PieceColour.White, PieceType.King);
-            var blackKing = new Piece(PieceColour.Black, PieceType.King);
+            var whiteKing = Piece.White | Piece.King;
+            var blackKing = Piece.Black | Piece.King;
 
             var e1 = Square.FromAlgebraicNotation("e1");
 
             board = board.AddPiece(e1, whiteKing);
 
-            Assert.IsTrue(board.White.King > 0);
-            Assert.AreEqual(board.White.King, board.Aggregate);
-
             var e8 = Square.FromAlgebraicNotation("e8");
 
             board = board.AddPiece(e8, blackKing);
-
-            Assert.IsTrue(board.Black.King > 0);
-            Assert.AreEqual(board.White.King | board.Black.King, board.Aggregate);
 
             Assert.AreEqual(whiteKing, board.Get(e1));
             Assert.AreEqual(blackKing, board.Get(e8));
@@ -47,7 +41,7 @@ namespace SicTransit.Woodpusher.Tests
             var board = new Board();
 
             var e1 = Square.FromAlgebraicNotation("e1");
-            var whiteKing = new Piece(PieceColour.White, PieceType.King);
+            var whiteKing = Piece.White | Piece.King;
 
             board = board.AddPiece(e1, whiteKing);
             board.AddPiece(e1, whiteKing);
@@ -60,7 +54,7 @@ namespace SicTransit.Woodpusher.Tests
             var board = new Board();
 
             var e1 = Square.FromAlgebraicNotation("e1");
-            var whiteKing = new Piece(PieceColour.White, PieceType.King);
+            var whiteKing = Piece.White | Piece.King;
 
             board.RemovePiece(e1, whiteKing);
         }
@@ -70,7 +64,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whitePawn = new Piece(PieceColour.White, PieceType.Pawn);
+            var whitePawn = Piece.White | Piece.Pawn;
 
             for (int f = 0; f < 8; f++)
             {

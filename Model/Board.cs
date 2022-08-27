@@ -4,46 +4,51 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Board
     {
-        public Board(Bitboard white, Bitboard black)
-        {
-            White = white;
-            Black = black;
+        private Bitboard white;
+        private Bitboard black;
+
+        public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.Black))
+        { 
+
         }
 
-        public ulong Aggregate => White.Aggregate | Black.Aggregate;
+        internal Board(Bitboard white, Bitboard black)
+        {
+            this.white = white;
+            this.black = black;
+        }
 
-        public Bitboard White { get; init; }
-        public Bitboard Black { get; init; }
+        public ulong Aggregate => white.Aggregate | black.Aggregate;
 
         public Board AddPiece(Square square, Piece piece)
         {
-            return (piece.Colour == PieceColour.White) ? new Board(White.Add(piece.Type, square), Black) : new Board(White, Black.Add(piece.Type, square));
+            return piece.HasFlag(Piece.White) ? new Board(white.Add(piece, square), black) : new Board(white, black.Add(piece, square));
         }
 
         public Board RemovePiece(Square square, Piece piece)
         {
-            return (piece.Colour == PieceColour.White) ? new Board(White.Remove(piece.Type, square), Black) : new Board(White, Black.Remove(piece.Type, square));
+            return piece.HasFlag(Piece.White) ? new Board(white.Remove(piece, square), black) : new Board(white, black.Remove(piece, square));
         }
 
-        public Piece? Get(Square square)
+        public Piece Get(Square square)
         {
             var mask = Bitboard.GetMask(square);
 
-            var pieceType = White.Peek(mask);
+            var piece = white.Peek(mask);
 
-            if (pieceType != null)
+            if (piece != Piece.None)
             {
-                return new Piece(PieceColour.White, pieceType.Value);
+                return piece;
             }
 
-            pieceType = Black.Peek(mask);
+            piece = black.Peek(mask);
 
-            if (pieceType != null)
+            if (piece != Piece.None)
             {
-                return new Piece(PieceColour.Black, pieceType.Value);
+                return piece;
             }
 
-            return null;
+            return Piece.None;
         }
     }
 }

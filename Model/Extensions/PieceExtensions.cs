@@ -6,36 +6,37 @@ namespace SicTransit.Woodpusher.Model.Extensions
     {
         public static Piece ToPiece(this char c)
         {
-            var type = char.ToUpperInvariant(c) switch
+            var piece = char.ToUpperInvariant(c) switch
             {
-                'P' => PieceType.Pawn,
-                'R' => PieceType.Rook,
-                'N' => PieceType.Knight,
-                'B' => PieceType.Bishop,
-                'Q' => PieceType.Queen,
-                'K' => PieceType.King,
+                'P' => Piece.Pawn,
+                'R' => Piece.Rook,
+                'N' => Piece.Knight,
+                'B' => Piece.Bishop,
+                'Q' => Piece.Queen,
+                'K' => Piece.King,
                 _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
             };
 
-            var piece = new Piece(char.IsUpper(c) ? PieceColour.White : PieceColour.Black, type);
+            piece |= char.IsUpper(c) ? Piece.White : Piece.Black;
 
             return piece;
         }
 
-        public static char ToAlgebraicNotation(this Piece p)
+        public static char ToAlgebraicNotation(this Piece p) => p switch
         {
-            var c = p.Type switch
-            {
-                PieceType.Pawn => 'P',
-                PieceType.Knight => 'N',
-                PieceType.Bishop => 'B',
-                PieceType.Rook => 'R',
-                PieceType.Queen => 'Q',
-                PieceType.King => 'K',
-                _ => throw new NotImplementedException(p.ToString()),
-            };
-
-            return p.Colour == PieceColour.White ? c : char.ToLowerInvariant(c);
-        }
+            Piece.Pawn | Piece.White => 'P',
+            Piece.Knight | Piece.White => 'N',
+            Piece.Bishop | Piece.White => 'B',
+            Piece.Rook | Piece.White => 'R',
+            Piece.Queen | Piece.White => 'Q',
+            Piece.King | Piece.White => 'K',
+            Piece.Pawn | Piece.Black => 'p',
+            Piece.Knight | Piece.Black => 'n',
+            Piece.Bishop | Piece.Black => 'b',
+            Piece.Rook | Piece.Black => 'r',
+            Piece.Queen | Piece.Black => 'q',
+            Piece.King | Piece.Black => 'k',
+            _ => throw new NotImplementedException(p.ToString()),
+        };
     }
 }
