@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -8,7 +9,7 @@ namespace SicTransit.Woodpusher.Model
         // A1 .. H8
 
         public Bitboard(Piece colour) : this(colour, 0, 0, 0, 0, 0, 0)
-        { 
+        {
         }
 
         public Bitboard(Piece colour, ulong pawn, ulong rook, ulong knight, ulong bishop, ulong queen, ulong king)
@@ -32,11 +33,11 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; init; }
         public ulong King { get; init; }
 
-        public bool IsOccupied(Square square) => IsOccupied(GetMask(square));
+        public bool IsOccupied(Square square) => IsOccupied(square.ToMask());
 
-        public bool IsOccupied(ulong mask) => (Aggregate & mask) != 0;
+        private bool IsOccupied(ulong mask) => (Aggregate & mask) != 0;
 
-        public Bitboard Add(Piece piece, ulong mask)
+        private Bitboard Add(Piece piece, ulong mask)
         {
             if ((Aggregate & mask) != 0)
             {
@@ -46,9 +47,9 @@ namespace SicTransit.Woodpusher.Model
             return Toggle(piece, mask);
         }
 
-        public Bitboard Add(Piece piece, Square square) => Add(piece, GetMask(square));
+        public Bitboard Add(Piece piece, Square square) => Add(piece, square.ToMask());
 
-        public Bitboard Remove(Piece piece, ulong mask)
+        private Bitboard Remove(Piece piece, ulong mask)
         {
             if ((Aggregate & mask) == 0)
             {
@@ -58,9 +59,11 @@ namespace SicTransit.Woodpusher.Model
             return Toggle(piece, mask);
         }
 
-        public Bitboard Remove(Piece piece, Square square) => Remove(piece, GetMask(square));
+        public Bitboard Remove(Piece piece, Square square) => Remove(piece, square.ToMask());
 
-        public Piece Peek(ulong mask)
+        public Piece Peek(Square square) => Peek(square.ToMask());
+
+        private Piece Peek(ulong mask)
         {
             if ((Pawn & mask) != 0)
             {
@@ -74,17 +77,17 @@ namespace SicTransit.Woodpusher.Model
 
             if ((Knight & mask) != 0)
             {
-                return Colour | Piece.Knight;                
+                return Colour | Piece.Knight;
             }
 
             if ((Bishop & mask) != 0)
             {
-                return Colour | Piece.Bishop;                
+                return Colour | Piece.Bishop;
             }
 
             if ((Queen & mask) != 0)
             {
-                return Colour | Piece.Queen;                
+                return Colour | Piece.Queen;
             }
 
             if ((King & mask) != 0)
@@ -103,7 +106,7 @@ namespace SicTransit.Woodpusher.Model
             }
             else if (piece.HasFlag(Piece.Rook))
             {
-                return new Bitboard(Colour, Pawn, Rook ^mask, Knight, Bishop, Queen, King);
+                return new Bitboard(Colour, Pawn, Rook ^ mask, Knight, Bishop, Queen, King);
             }
             else if (piece.HasFlag(Piece.Knight))
             {
@@ -111,20 +114,18 @@ namespace SicTransit.Woodpusher.Model
             }
             else if (piece.HasFlag(Piece.Bishop))
             {
-                return new Bitboard(Colour, Pawn, Rook, Knight, Bishop ^mask, Queen, King);
+                return new Bitboard(Colour, Pawn, Rook, Knight, Bishop ^ mask, Queen, King);
             }
             else if (piece.HasFlag(Piece.Queen))
             {
-                return new Bitboard(Colour, Pawn, Rook , Knight, Bishop, Queen ^mask, King);
+                return new Bitboard(Colour, Pawn, Rook, Knight, Bishop, Queen ^ mask, King);
             }
             else if (piece.HasFlag(Piece.King))
             {
-                return new Bitboard(Colour, Pawn, Rook, Knight, Bishop, Queen , King ^mask);
+                return new Bitboard(Colour, Pawn, Rook, Knight, Bishop, Queen, King ^ mask);
             }
 
             throw new ArgumentOutOfRangeException(nameof(piece));
         }
-
-        public static ulong GetMask(Square square) => 1ul << ((square.Rank << 3) + square.File);
     }
 }

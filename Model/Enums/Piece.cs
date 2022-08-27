@@ -2,7 +2,7 @@
 {
     [Flags]
     public enum Piece
-    { 
+    {
         None = 0,
         Pawn = Constants.PAWN,
         Knight = Constants.KNIGHT,

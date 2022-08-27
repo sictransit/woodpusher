@@ -4,11 +4,11 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Board
     {
-        private Bitboard white;
-        private Bitboard black;
+        private readonly Bitboard white;
+        private readonly Bitboard black;
 
         public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.Black))
-        { 
+        {
 
         }
 
@@ -32,16 +32,14 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Get(Square square)
         {
-            var mask = Bitboard.GetMask(square);
-
-            var piece = white.Peek(mask);
+            var piece = white.Peek(square);
 
             if (piece != Piece.None)
             {
                 return piece;
             }
 
-            piece = black.Peek(mask);
+            piece = black.Peek(square);
 
             if (piece != Piece.None)
             {
