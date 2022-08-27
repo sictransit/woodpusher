@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var e1 = Square.FromAlgebraicNotation("e1");            
+            var e1 = Square.FromAlgebraicNotation("e1");
 
             board.RemovePiece(e1, Piece.White | Piece.King);
         }
