@@ -63,6 +63,21 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Peek(Square square) => Peek(square.ToMask());
 
+        public IEnumerable<Position> GetPieces()
+        {
+            for (int shift = 0; shift < 64; shift++)
+            {
+                var mask = Aggregate >> shift;
+
+                var piece = Peek(Aggregate >> shift);
+
+                if (piece != Piece.None)
+                {
+                    yield return new Position(piece, mask.ToSquare());
+                }
+            }
+        }
+
         private Piece Peek(ulong mask)
         {
             if ((Pawn & mask) != 0)

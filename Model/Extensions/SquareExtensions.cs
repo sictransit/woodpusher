@@ -1,4 +1,6 @@
-﻿namespace SicTransit.Woodpusher.Model.Extensions
+﻿using System.Numerics;
+
+namespace SicTransit.Woodpusher.Model.Extensions
 {
     public static class SquareExtensions
     {
@@ -11,29 +13,9 @@
                 throw new ArgumentOutOfRangeException(nameof(mask));
             }
 
-            int rank = 0;
-            int file = 0;
+            var trailingZeroes = BitOperations.TrailingZeroCount(mask);
 
-            for (int shift = 0; shift < 64; shift++)
-            {
-                if (mask == 1)
-                {
-                    return new Square(file, rank);
-                }
-
-                mask >>= 1;
-
-                file++;
-
-                if (file == 8)
-                {
-                    rank++;
-                    file = 0;
-                }
-            }
-
-            throw new NotImplementedException("Wow! Bit manipulation is broken in C#. We should never get here!");
+            return new Square(trailingZeroes % 8, trailingZeroes / 8);
         }
-
     }
 }

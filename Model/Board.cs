@@ -30,6 +30,18 @@ namespace SicTransit.Woodpusher.Model
             return piece.HasFlag(Piece.White) ? new Board(white.Remove(piece, square), black) : new Board(white, black.Remove(piece, square));
         }
 
+        public IEnumerable<Position> GetPositions(Piece colour)
+        {
+            if (colour == Piece.White)
+            {
+                return white.GetPieces();
+            }
+            else
+            {
+                return black.GetPieces();
+            }
+        }
+
         public Piece Get(Square square)
         {
             var piece = white.Peek(square);

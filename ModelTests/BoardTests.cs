@@ -53,10 +53,9 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var e1 = Square.FromAlgebraicNotation("e1");
-            var whiteKing = Piece.White | Piece.King;
+            var e1 = Square.FromAlgebraicNotation("e1");            
 
-            board.RemovePiece(e1, whiteKing);
+            board.RemovePiece(e1, Piece.White | Piece.King);
         }
 
         [TestMethod()]
@@ -75,6 +74,31 @@ namespace SicTransit.Woodpusher.Tests
             }
 
             Assert.AreEqual(0xffffffffffffffff, board.Aggregate);
+        }
+
+        [TestMethod]
+        public void GetPositionsTest()
+        {
+            var board = new Board();
+
+            var whiteKing = Piece.White | Piece.King;
+            var e1 = Square.FromAlgebraicNotation("e1");
+
+            var blackKing = Piece.Black | Piece.King;
+            var e8 = Square.FromAlgebraicNotation("e8");
+
+            board = board.AddPiece(e1, whiteKing);
+            board = board.AddPiece(e8, blackKing);
+
+            var whitePositions = board.GetPositions(Piece.White);
+
+            Assert.AreEqual(whiteKing, whitePositions.Single().Piece);
+            Assert.AreEqual(e1, whitePositions.Single().Square);
+
+            var blackPositions = board.GetPositions(Piece.Black);
+
+            Assert.AreEqual(blackKing, blackPositions.Single().Piece);
+            Assert.AreEqual(e8, blackPositions.Single().Square);
         }
     }
 }
