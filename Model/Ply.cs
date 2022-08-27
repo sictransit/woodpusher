@@ -1,12 +1,14 @@
 ﻿namespace SicTransit.Woodpusher.Model
 {
-    public class Ply
+    public struct Ply
     {
-        public Ply(Board board, Piece piece, Square square)
+        public Ply(Position position, Move move)
         {
-            Board = board;
+            Position = position;
+            Move = move;
         }
 
-        public Board Board;
+        public Position Position { get; }
+        public Move Move { get; }
     }
 }

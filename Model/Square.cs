@@ -52,12 +52,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Square NewFile(int file) => new(file, Rank);
 
-        public Square AddFileAndRank(int fileDelta, int rankDelta) => new Square(File + fileDelta, Rank + rankDelta);
-
-        //public int DistanceToEgde()
-        //{
-        //    return Math.Min(7 - Math.Max(File, Rank), Math.Min(File, Rank));
-        //}
+        public Square AddFileAndRank(int fileDelta, int rankDelta) => new(File + fileDelta, Rank + rankDelta);
 
         public override string ToString()
         {
