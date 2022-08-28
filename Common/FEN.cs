@@ -1,9 +1,10 @@
-﻿using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Exceptions;
+﻿using SicTransit.Woodpusher.Common.Exceptions;
+using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
-namespace SicTransit.Woodpusher.Model
+namespace SicTransit.Woodpusher.Common
 {
     public class FEN
     {

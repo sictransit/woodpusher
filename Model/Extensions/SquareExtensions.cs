@@ -1,10 +1,11 @@
-﻿using System.Numerics;
+﻿using SicTransit.Woodpusher.Model;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
     public static class SquareExtensions
     {
-        public static ulong ToMask(this Square square) => 1ul << ((square.Rank << 3) + square.File);
+        public static ulong ToMask(this Square square) => 1ul << (square.Rank << 3) + square.File;
 
         public static Square ToSquare(this ulong mask)
         {

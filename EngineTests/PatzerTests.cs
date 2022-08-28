@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
-using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using System;
 using System.Collections.Generic;

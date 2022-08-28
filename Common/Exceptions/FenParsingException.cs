@@ -1,4 +1,4 @@
-﻿namespace SicTransit.Woodpusher.Model.Exceptions
+﻿namespace SicTransit.Woodpusher.Common.Exceptions
 {
     public sealed class FenParsingException : Exception
     {

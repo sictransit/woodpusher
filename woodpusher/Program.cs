@@ -1,5 +1,5 @@
-﻿using SicTransit.Woodpusher.Engine;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Engine;
 
 namespace SicTransit.Woodpusher
 {

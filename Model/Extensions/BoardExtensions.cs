@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Model.Enums;
+﻿using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using System.Text;
 
 namespace SicTransit.Woodpusher.Model.Extensions

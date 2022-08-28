@@ -1,11 +1,18 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Tests
+namespace SicTransit.Woodpusher.Common.Tests
 {
+
     [TestClass()]
     public class FENTests
     {
