@@ -79,7 +79,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool PawnCannotTakeForward(Position position, Move move) => position.Piece.HasFlag(Piece.Pawn) && Board.IsOccupied(move.Square) && !move.Flags.HasFlag(MovementFlags.MustTake);
 
-        private bool TookPiece (Move move) => Board.IsOccupied(move.Square) && !Board.Get(move.Square).HasFlag(ActiveColour);
+        private bool TookPiece(Move move) => Board.IsOccupied(move.Square) && !Board.Get(move.Square).HasFlag(ActiveColour);
 
         private static IEnumerable<IEnumerable<Move>> GetVectors(Position position)
         {

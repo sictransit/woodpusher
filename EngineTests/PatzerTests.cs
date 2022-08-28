@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var ply = patzer.GetValidPly().ToArray();
 
-            Assert.AreEqual(20, ply.Count());
+            Assert.AreEqual(20, ply.Length);
             Assert.AreEqual(16, ply.Where(p => p.Position.Piece.HasFlag(Piece.Pawn)).Count());
             Assert.AreEqual(4, ply.Where(p => p.Position.Piece.HasFlag(Piece.Knight)).Count());
         }
