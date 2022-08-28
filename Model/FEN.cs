@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public class ForsythEdwardsNotation
+    public class FEN
     {
         public Board Board { get; }
 
@@ -19,7 +19,9 @@ namespace SicTransit.Woodpusher.Model
 
         public int FullmoveNumber { get; }
 
-        private ForsythEdwardsNotation(Board board, Piece activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+        private FEN(Board board, Piece activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
             Board = board;
             ActiveColour = activeColour;
@@ -29,7 +31,7 @@ namespace SicTransit.Woodpusher.Model
             FullmoveNumber = fullmoveNumber;
         }
 
-        public static ForsythEdwardsNotation Parse(string fen)
+        public static FEN Parse(string fen)
         {
             if (fen is null)
             {
@@ -55,7 +57,7 @@ namespace SicTransit.Woodpusher.Model
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            return new ForsythEdwardsNotation(board, activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            return new FEN(board, activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
         }
 
         private static Board ParseBoard(string s)

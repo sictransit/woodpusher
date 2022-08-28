@@ -7,14 +7,12 @@ using System.Diagnostics;
 namespace SicTransit.Woodpusher.Tests
 {
     [TestClass()]
-    public class ForsythEdwardsNotationTests
+    public class FENTests
     {
         [TestMethod()]
         public void ParseSetupTest()
         {
-            var startingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-            var fen = ForsythEdwardsNotation.Parse(startingPosition);
+            var fen = FEN.Parse(FEN.StartingPosition);
 
             Assert.AreEqual(Piece.White, fen.ActiveColour);
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, fen.Castlings);
@@ -32,7 +30,7 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void ParseMagnusCarlsenTest()
         {
-            var fen = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
+            var fen = FEN.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
 
             Trace.WriteLine(BoardExtensions.PrettyPrint(fen.Board));
 
