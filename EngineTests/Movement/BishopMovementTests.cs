@@ -22,6 +22,21 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         }
 
         [TestMethod()]
+        public void GetVectorsFromF1Test()
+        {
+            var f1 = Square.FromAlgebraicNotation("f1");
+
+            var moves = new List<Move>();
+
+            foreach (var vector in BishopMovement.GetTargetVectors(f1))
+            {
+                moves.AddRange(vector);
+            }
+
+            Assert.AreEqual(7, moves.Count);
+        }
+
+        [TestMethod()]
         public void GetTargetVectorsCornerCaseTest()
         {
             var a1 = Square.FromAlgebraicNotation("a1");

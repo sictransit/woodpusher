@@ -28,7 +28,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
                 yield return Enumerable.Range(1, bottomLeft).Select(d => new Move(square.AddFileAndRank(-d, -d)));
             }
 
-            var topLeft = Math.Min(7 - square.File, square.Rank);
+            var topLeft = Math.Min(square.File, 7 - square.Rank);
 
             if (topLeft > 0)
             {
