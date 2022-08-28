@@ -10,5 +10,10 @@
 
         public Position Position { get; }
         public Move Move { get; }
+
+        public override string ToString()
+        {
+            return $"{Position}{Move}";
+        }
     }
 }

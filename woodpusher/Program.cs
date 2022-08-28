@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Common;
+﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
 
 namespace SicTransit.Woodpusher
@@ -7,11 +8,18 @@ namespace SicTransit.Woodpusher
     {
         static void Main(string[] args)
         {
+            Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
+
             var patzer = new Patzer();
 
             patzer.Initialize(FEN.StartingPosition);
 
-            patzer.GetValidMoves();
+            foreach (var ply in patzer.GetValidPly())
+            {
+                Log.Debug(ply.ToString());
+            }
+
+            
         }
     }
 }
