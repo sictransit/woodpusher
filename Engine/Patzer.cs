@@ -33,20 +33,12 @@ namespace SicTransit.Woodpusher.Engine
             {
                 foreach (IEnumerable<Move> vector in GetVectors(position))
                 {
-                    var tookPiece = false;
-
                     foreach (var move in vector)
                     {
-                        if (tookPiece)
-                        {
-                            break;
-                        }
-
                         if (TakingOwnPiece(move))
                         {
                             break;
                         }
-
 
                         if (MustTakeButCannot(move))
                         {
@@ -58,9 +50,9 @@ namespace SicTransit.Woodpusher.Engine
                             break;
                         }
 
-                        if (TookPiece(move))
+                        if (CastleButMayNot(move))
                         {
-                            tookPiece = true;
+                            break;
                         }
 
                         var ply = new Ply(position, move);
@@ -68,10 +60,18 @@ namespace SicTransit.Woodpusher.Engine
                         Log.Debug($"valid: {ply}");
 
                         yield return ply;
+
+                        if (TookPiece(move))
+                        {
+                            break;
+                        }
                     }
                 }
             }
         }
+
+        // TODO: Something clever with the flags, making it easy to evaluate regardless of active colour.
+        private bool CastleButMayNot(Move move) => false;
 
         private bool TakingOwnPiece(Move move) => Board.IsOccupied(move.Square) && Board.Get(move.Square).HasFlag(ActiveColour);
 

@@ -70,5 +70,19 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.AreEqual(3, ply.Where(p => p.Position.Piece.HasFlag(Piece.King)).Count());
             Assert.AreEqual(1, ply.Where(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(MovementFlags.CastleKing)).Count());
         }
+
+        [TestMethod]
+        public void BlackCannotCastleTest()
+        {
+            var fen = @"r1bqk2r/pppp1Npp/2n2n2/2b4Q/2B1P3/8/PPPP1PPP/RNB2RK1 b - - 0 7";
+
+            patzer!.Initialize(fen);
+
+            var ply = patzer.GetValidPly().ToArray();
+
+            Assert.AreEqual(Piece.Black, patzer.ActiveColour);
+
+            Assert.IsTrue(!ply.Any(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(MovementFlags.CastleKing)));
+        }
     }
 }
