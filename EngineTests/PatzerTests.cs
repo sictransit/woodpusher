@@ -52,5 +52,23 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.AreEqual(5, ply.Where(p => p.Position.Piece.HasFlag(Piece.Bishop)).Count());
             Assert.AreEqual(4, ply.Where(p => p.Position.Piece.HasFlag(Piece.Queen)).Count());
         }
+
+        [TestMethod]
+        public void WhiteCastlingKingsideTest()
+        {
+            var fen = @"r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
+
+            patzer!.Initialize(fen);
+
+            var ply = patzer.GetValidPly().ToArray();
+
+            Assert.AreEqual(11, ply.Where(p => p.Position.Piece.HasFlag(Piece.Pawn)).Count());
+            Assert.AreEqual(1, ply.Where(p => p.Position.Piece.HasFlag(Piece.Queen)).Count());
+            Assert.AreEqual(7, ply.Where(p => p.Position.Piece.HasFlag(Piece.Knight)).Count());
+            Assert.AreEqual(9, ply.Where(p => p.Position.Piece.HasFlag(Piece.Bishop)).Count());
+            Assert.AreEqual(2, ply.Where(p => p.Position.Piece.HasFlag(Piece.Rook)).Count());
+            Assert.AreEqual(3, ply.Where(p => p.Position.Piece.HasFlag(Piece.King)).Count());
+            Assert.AreEqual(1, ply.Where(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(MovementFlags.CastleKing)).Count());
+        }
     }
 }

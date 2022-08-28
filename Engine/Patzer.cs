@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Common;
+﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine.Movement;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -32,19 +33,41 @@ namespace SicTransit.Woodpusher.Engine
             {
                 foreach (IEnumerable<Move> vector in GetVectors(position))
                 {
+                    var tookPiece = false;
+
                     foreach (var move in vector)
                     {
+                        if (tookPiece)
+                        {
+                            break;
+                        }
+
                         if (TakingOwnPiece(move))
                         {
                             break;
                         }
+
 
                         if (MustTakeButCannot(move))
                         {
                             break;
                         }
 
-                        yield return new Ply(position, move);
+                        if (PawnCannotTakeForward(position, move))
+                        {
+                            break;
+                        }
+
+                        if (TookPiece(move))
+                        {
+                            tookPiece = true;
+                        }
+
+                        var ply = new Ply(position, move);
+
+                        Log.Debug($"valid: {ply}");
+
+                        yield return ply;
                     }
                 }
             }
@@ -53,6 +76,10 @@ namespace SicTransit.Woodpusher.Engine
         private bool TakingOwnPiece(Move move) => Board.IsOccupied(move.Square) && Board.Get(move.Square).HasFlag(ActiveColour);
 
         private bool MustTakeButCannot(Move move) => move.Flags.HasFlag(MovementFlags.MustTake) && (!Board.IsOccupied(move.Square) || Board.Get(move.Square).HasFlag(ActiveColour));
+
+        private bool PawnCannotTakeForward(Position position, Move move) => position.Piece.HasFlag(Piece.Pawn) && Board.IsOccupied(move.Square) && !move.Flags.HasFlag(MovementFlags.MustTake);
+
+        private bool TookPiece (Move move) => Board.IsOccupied(move.Square) && !Board.Get(move.Square).HasFlag(ActiveColour);
 
         private static IEnumerable<IEnumerable<Move>> GetVectors(Position position)
         {
