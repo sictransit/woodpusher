@@ -21,11 +21,14 @@ namespace SicTransit.Woodpusher.Model
             Bishop = bishop;
             Queen = queen;
             King = king;
+
+            All = Pawn | Rook | Knight | Bishop | Queen | King;
         }
 
-        public ulong Aggregate => Pawn | Rook | Knight | Bishop | Queen | King;
-
         public Piece Colour { get; }
+
+        public ulong All { get; private set; }
+        
         public ulong Pawn { get; init; }
         public ulong Rook { get; init; }
         public ulong Knight { get; init; }
@@ -35,11 +38,11 @@ namespace SicTransit.Woodpusher.Model
 
         public bool IsOccupied(Square square) => IsOccupied(square.ToMask());
 
-        private bool IsOccupied(ulong mask) => (Aggregate & mask) != 0;
+        private bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         private Bitboard Add(Piece piece, ulong mask)
         {
-            if ((Aggregate & mask) != 0)
+            if ((All & mask) != 0)
             {
                 throw new InvalidOperationException("That square is already occupied.");
             }
@@ -51,7 +54,7 @@ namespace SicTransit.Woodpusher.Model
 
         private Bitboard Remove(Piece piece, ulong mask)
         {
-            if ((Aggregate & mask) == 0)
+            if ((All & mask) == 0)
             {
                 throw new InvalidOperationException("There is no piece on that square.");
             }
@@ -67,13 +70,11 @@ namespace SicTransit.Woodpusher.Model
         {
             for (int shift = 0; shift < 64; shift++)
             {
-                var mask = Aggregate >> shift;
+                var mask = 1ul << shift;
 
-                var piece = Peek(Aggregate >> shift);
-
-                if (piece != Piece.None)
+                if (IsOccupied(mask))
                 {
-                    yield return new Position(piece, mask.ToSquare());
+                    yield return new Position(Peek(mask), mask.ToSquare());
                 }
             }
         }
@@ -110,7 +111,7 @@ namespace SicTransit.Woodpusher.Model
                 return Colour | Piece.King;
             }
 
-            return Piece.None;
+            throw new ArgumentOutOfRangeException(nameof(mask));
         }
 
         private Bitboard Toggle(Piece piece, ulong mask)

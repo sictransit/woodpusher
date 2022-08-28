@@ -22,21 +22,25 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return piece;
         }
 
-        public static char ToAlgebraicNotation(this Piece p) => p switch
+        public static char ToChar(this Piece p) 
         {
-            Piece.Pawn | Piece.White => 'P',
-            Piece.Knight | Piece.White => 'N',
-            Piece.Bishop | Piece.White => 'B',
-            Piece.Rook | Piece.White => 'R',
-            Piece.Queen | Piece.White => 'Q',
-            Piece.King | Piece.White => 'K',
-            Piece.Pawn | Piece.Black => 'p',
-            Piece.Knight | Piece.Black => 'n',
-            Piece.Bishop | Piece.Black => 'b',
-            Piece.Rook | Piece.Black => 'r',
-            Piece.Queen | Piece.Black => 'q',
-            Piece.King | Piece.Black => 'k',
-            _ => throw new NotImplementedException(p.ToString()),
-        };
+            return ((int)p & Constants.PIECETYPE) switch
+            {
+                Constants.PAWN => 'P',
+                Constants.ROOK => 'R',
+                Constants.KNIGHT => 'N',
+                Constants.BISHOP => 'B',
+                Constants.QUEEN => 'Q',
+                Constants.KING => 'K',
+                _ => throw new NotImplementedException(p.ToString()),
+            };
+        }
+
+        public static char ToAlgebraicNotation(this Piece p)
+        {
+            var c = p.ToChar();
+
+            return p.HasFlag(Piece.White) ? c : char.ToLowerInvariant(c);
+        }
     }
 }

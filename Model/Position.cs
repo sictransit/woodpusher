@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -14,5 +15,10 @@ namespace SicTransit.Woodpusher.Model
         public Piece Piece { get; }
 
         public Square Square { get; }
+
+        public override string ToString()
+        {
+            return $"{Piece.ToChar()}{Square}";
+        }
     }
 }

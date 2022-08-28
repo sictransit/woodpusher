@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Model
             this.black = black;
         }
 
-        public ulong Aggregate => white.Aggregate | black.Aggregate;
+        public ulong Aggregate => white.All | black.All;
 
         public Board AddPiece(Square square, Piece piece)
         {
@@ -28,6 +28,11 @@ namespace SicTransit.Woodpusher.Model
         public Board RemovePiece(Square square, Piece piece)
         {
             return piece.HasFlag(Piece.White) ? new Board(white.Remove(piece, square), black) : new Board(white, black.Remove(piece, square));
+        }
+
+        public bool IsOccupied(Square square)
+        { 
+            return white.IsOccupied(square) || black.IsOccupied(square);
         }
 
         public IEnumerable<Position> GetPositions(Piece colour)
@@ -44,21 +49,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Get(Square square)
         {
-            var piece = white.Peek(square);
-
-            if (piece != Piece.None)
-            {
-                return piece;
-            }
-
-            piece = black.Peek(square);
-
-            if (piece != Piece.None)
-            {
-                return piece;
-            }
-
-            return Piece.None;
+            return white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
         }
     }
 }

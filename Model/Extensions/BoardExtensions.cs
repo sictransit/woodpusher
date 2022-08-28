@@ -15,9 +15,9 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 sb.Append($"{rank + 1} ");
                 for (int file = 0; file < 8; file++)
                 {
-                    var piece = b.Get(new Square(file, rank));
-
-                    var c = piece != Piece.None ? piece.ToAlgebraicNotation() : ' ';
+                    var square = new Square(file, rank);
+                    
+                    var c = b.IsOccupied(square) ? b.Get(square).ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
                 }
