@@ -1,6 +1,4 @@
-﻿using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Enums;
-using System.Text;
+﻿using System.Text;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
@@ -16,7 +14,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 for (int file = 0; file < 8; file++)
                 {
                     var square = new Square(file, rank);
-                    
+
                     var c = b.IsOccupied(square) ? b.Get(square).ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");

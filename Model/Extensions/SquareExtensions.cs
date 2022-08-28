@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Model;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {

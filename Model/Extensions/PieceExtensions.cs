@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return piece;
         }
 
-        public static char ToChar(this Piece p) 
+        public static char ToChar(this Piece p)
         {
             return ((int)p & Constants.PIECETYPE) switch
             {

@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher
                 Log.Debug(ply.ToString());
             }
 
-            
+
         }
     }
 }

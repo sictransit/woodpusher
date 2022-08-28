@@ -28,7 +28,7 @@ namespace SicTransit.Woodpusher.Model
         public Piece Colour { get; }
 
         public ulong All { get; private set; }
-        
+
         public ulong Pawn { get; init; }
         public ulong Rook { get; init; }
         public ulong Knight { get; init; }

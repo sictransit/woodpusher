@@ -1,5 +1,4 @@
-﻿using Serilog;
-using SicTransit.Woodpusher.Common;
+﻿using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine.Movement;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -75,7 +74,7 @@ namespace SicTransit.Woodpusher.Engine
                     return KingMovement.GetTargetVectors(position.Square, colour);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(position));
-            }            
+            }
         }
     }
 }

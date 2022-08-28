@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public Piece Piece { get; }        
+        public Piece Piece { get; }
 
         public Square Square { get; }
 

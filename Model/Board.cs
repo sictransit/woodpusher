@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Model
         }
 
         public bool IsOccupied(Square square)
-        { 
+        {
             return white.IsOccupied(square) || black.IsOccupied(square);
         }
 
