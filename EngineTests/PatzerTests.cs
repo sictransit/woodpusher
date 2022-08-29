@@ -72,6 +72,18 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        public void EnPassantWithoutTargetTest()
+        {
+            var fen = @"r1bqkb1r/ppp1p1pp/2np3n/3PPp2/8/8/PPP2PPP/RNBQKBNR w KQkq f6 0 5";
+
+            patzer!.Initialize(fen);
+
+            var ply = patzer.GetValidPly().ToArray();
+
+            Assert.IsTrue(ply.Count(p => p.Move.Flags.HasFlag(SpecialMove.EnPassant)) == 1);
+        }
+
+        [TestMethod]
         public void BlackCannotCastleTest()
         {
             var fen = @"r1bqk2r/pppp1Npp/2n2n2/2b4Q/2B1P3/8/PPPP1PPP/RNB2RK1 b - - 0 7";
