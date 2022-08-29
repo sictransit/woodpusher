@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -80,7 +81,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var ply = patzer.GetValidPly().ToArray();
 
-            Assert.IsTrue(ply.Count(p => p.Move.Flags.HasFlag(SpecialMove.EnPassant)) == 1);
+            var enPassantMove = ply.SingleOrDefault(p => p.Move.Flags.HasFlag(SpecialMove.EnPassant));
+
+            Assert.IsNotNull(enPassantMove);
+
+            Assert.AreEqual(Square.FromAlgebraicNotation("f6"), enPassantMove.Move.Square);
         }
 
         [TestMethod]
