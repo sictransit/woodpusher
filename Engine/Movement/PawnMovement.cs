@@ -12,70 +12,70 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
             if (rank is 7 or 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(square), $"A pawn shouldn't be here: {square}");
+                yield break;
             }
 
             var file = square.File;
 
             if (colour == Piece.White)
             {
-                var forward = new List<Move>() { new Move(square.NewRank(rank + 1), rank == 6 ? MovementFlags.Promote : MovementFlags.None) };
+                var forward = new List<Move>() { new Move(square.NewRank(rank + 1), rank == 6 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
 
                 if (rank == 1)
                 {
-                    forward.Add(new Move(square.NewRank(rank + 2)));
+                    forward.Add(new Move(square.NewRank(rank + 2), SpecialMove.CannotTake));
                 }
 
                 yield return forward;
 
                 if (Square.TryCreate(file - 1, rank + 1, out var takeLeft))
                 {
-                    yield return new[] { new Move(takeLeft, rank == 6 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
+                    yield return new[] { new Move(takeLeft, rank == 6 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
 
                     if (rank == 4)
                     {
-                        yield return new[] { new Move(takeLeft, MovementFlags.EnPassant) };
+                        yield return new[] { new Move(takeLeft, SpecialMove.EnPassant) };
                     }
                 }
 
                 if (Square.TryCreate(file + 1, rank + 1, out var takeRight))
                 {
-                    yield return new[] { new Move(takeRight, rank == 6 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
+                    yield return new[] { new Move(takeRight, rank == 6 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
 
                     if (rank == 4)
                     {
-                        yield return new[] { new Move(takeRight, MovementFlags.EnPassant) };
+                        yield return new[] { new Move(takeRight, SpecialMove.EnPassant ) };
                     }
                 }
             }
             else
             {
-                var forward = new List<Move>() { new Move(square.NewRank(rank - 1), rank == 1 ? MovementFlags.Promote : MovementFlags.None) };
+                var forward = new List<Move>() { new Move(square.NewRank(rank - 1), rank == 1 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
 
                 if (rank == 6)
                 {
-                    forward.Add(new Move(square.NewRank(rank - 2)));
+                    forward.Add(new Move(square.NewRank(rank - 2), SpecialMove.CannotTake));
                 }
 
                 yield return forward;
 
                 if (Square.TryCreate(file - 1, rank - 1, out var takeLeft))
                 {
-                    yield return new[] { new Move(takeLeft, rank == 1 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
+                    yield return new[] { new Move(takeLeft, rank == 1 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
 
                     if (rank == 3)
                     {
-                        yield return new[] { new Move(takeLeft, MovementFlags.EnPassant) };
+                        yield return new[] { new Move(takeLeft, SpecialMove.EnPassant ) };
                     }
                 }
 
                 if (Square.TryCreate(file + 1, rank - 1, out var takeRight))
                 {
-                    yield return new[] { new Move(takeRight, rank == 1 ? MovementFlags.MustTake | MovementFlags.Promote : MovementFlags.MustTake) };
+                    yield return new[] { new Move(takeRight, rank == 1 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
 
                     if (rank == 3)
                     {
-                        yield return new[] { new Move(takeRight, MovementFlags.EnPassant) };
+                        yield return new[] { new Move(takeRight, SpecialMove.EnPassant ) };
                     }
                 }
             }

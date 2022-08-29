@@ -57,16 +57,16 @@ namespace SicTransit.Woodpusher.Engine.Movement
             {
                 if (square.Equals(WhiteStartPosition))
                 {
-                    yield return new[] { new Move(new Square(6, 0), MovementFlags.CastleKing) };
-                    yield return new[] { new Move(new Square(2, 0), MovementFlags.CastleQueen) };
+                    yield return new[] { new Move(new Square(6, 0), SpecialMove.CastleKing) };
+                    yield return new[] { new Move(new Square(2, 0), SpecialMove.CastleQueen) };
                 }
             }
             else
             {
                 if (square.Equals(BlackStartPosition))
                 {
-                    yield return new[] { new Move(new Square(6, 7), MovementFlags.CastleKing) };
-                    yield return new[] { new Move(new Square(2, 7), MovementFlags.CastleQueen) };
+                    yield return new[] { new Move(new Square(6, 7), SpecialMove.CastleKing) };
+                    yield return new[] { new Move(new Square(2, 7), SpecialMove.CastleQueen) };
                 }
             }
         }

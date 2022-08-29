@@ -4,12 +4,12 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Move
     {
-        public Move(Square square) : this(square, MovementFlags.None)
+        public Move(Square square) : this(square, SpecialMove.None)
         {
 
         }
 
-        public Move(Square square, MovementFlags flags)
+        public Move(Square square, SpecialMove flags)
         {
             Square = square;
             Flags = flags;
@@ -17,11 +17,11 @@ namespace SicTransit.Woodpusher.Model
 
         public Square Square { get; init; }
 
-        public MovementFlags Flags { get; init; }
+        public SpecialMove Flags { get; init; }
 
         public override string ToString()
         {
-            return $"{Square}" + (Flags == MovementFlags.None ? string.Empty : $" ({Flags})");
+            return $"{Square}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})");
         }
 
     }

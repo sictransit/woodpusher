@@ -4,13 +4,13 @@
     public enum Piece
     {
         None = 0,
-        Pawn = Constants.PAWN,
-        Knight = Constants.KNIGHT,
-        Bishop = Constants.BISHOP,
-        Rook = Constants.ROOK,
-        Queen = Constants.QUEEN,
-        King = Constants.KING,
-        White = Constants.WHITE,
-        Black = Constants.BLACK,
+        Pawn = Constants.Pawn,
+        Knight = Constants.Knight,
+        Bishop = Constants.Bishop,
+        Rook = Constants.Rook,
+        Queen = Constants.Queen,
+        King = Constants.King,
+        White = Constants.White,
+        Black = Constants.Black,
     }
 }

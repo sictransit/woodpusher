@@ -20,6 +20,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
 
             Assert.AreEqual(3, moves.Count);
+            Assert.IsTrue(moves.Where(m => m.Square.File == a2.File).All(m => m.Flags.HasFlag(SpecialMove.CannotTake)));
         }
 
         [TestMethod()]
@@ -50,8 +51,8 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
 
             Assert.AreEqual(3, moves.Count);
-            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(MovementFlags.Promote)));
-            Assert.IsTrue(moves.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(MovementFlags.MustTake)));
+            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
+            Assert.IsTrue(moves.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
 
         [TestMethod()]
@@ -67,8 +68,8 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
 
             Assert.AreEqual(3, moves.Count);
-            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(MovementFlags.Promote)));
-            Assert.IsTrue(moves.Where(m => m.Square.File != b2.File).All(m => m.Flags.HasFlag(MovementFlags.MustTake)));
+            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
+            Assert.IsTrue(moves.Where(m => m.Square.File != b2.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
 
 
@@ -85,8 +86,8 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
 
             Assert.AreEqual(5, moves.Count);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.EnPassant)) == 2);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.MustTake)) == 2);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.EnPassant)) == 2);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
         }
 
         [TestMethod()]
@@ -102,8 +103,8 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
 
             Assert.AreEqual(5, moves.Count);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.EnPassant)) == 2);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(MovementFlags.MustTake)) == 2);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.EnPassant)) == 2);
+            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
         }
     }
 }

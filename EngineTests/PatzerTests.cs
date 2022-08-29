@@ -33,8 +33,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var ply = patzer.GetValidPly().ToArray();
 
             Assert.AreEqual(20, ply.Length);
-            Assert.AreEqual(16, ply.Where(p => p.Position.Piece.HasFlag(Piece.Pawn)).Count());
-            Assert.AreEqual(4, ply.Where(p => p.Position.Piece.HasFlag(Piece.Knight)).Count());
+            Assert.AreEqual(16, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
+            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.HasFlag(Piece.Knight)));
         }
 
         [TestMethod()]
@@ -46,11 +46,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var ply = patzer.GetValidPly().ToArray();
 
-            Assert.AreEqual(15, ply.Where(p => p.Position.Piece.HasFlag(Piece.Pawn)).Count());
-            Assert.AreEqual(1, ply.Where(p => p.Position.Piece.HasFlag(Piece.King)).Count());
-            Assert.AreEqual(5, ply.Where(p => p.Position.Piece.HasFlag(Piece.Knight)).Count());
-            Assert.AreEqual(5, ply.Where(p => p.Position.Piece.HasFlag(Piece.Bishop)).Count());
-            Assert.AreEqual(4, ply.Where(p => p.Position.Piece.HasFlag(Piece.Queen)).Count());
+            Assert.AreEqual(15, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.King)));
+            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.HasFlag(Piece.Knight)));
+            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.HasFlag(Piece.Bishop)));
+            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.HasFlag(Piece.Queen)));
         }
 
         [TestMethod]
@@ -62,13 +62,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var ply = patzer.GetValidPly().ToArray();
 
-            Assert.AreEqual(11, ply.Where(p => p.Position.Piece.HasFlag(Piece.Pawn)).Count());
-            Assert.AreEqual(1, ply.Where(p => p.Position.Piece.HasFlag(Piece.Queen)).Count());
-            Assert.AreEqual(7, ply.Where(p => p.Position.Piece.HasFlag(Piece.Knight)).Count());
-            Assert.AreEqual(9, ply.Where(p => p.Position.Piece.HasFlag(Piece.Bishop)).Count());
-            Assert.AreEqual(2, ply.Where(p => p.Position.Piece.HasFlag(Piece.Rook)).Count());
-            Assert.AreEqual(3, ply.Where(p => p.Position.Piece.HasFlag(Piece.King)).Count());
-            Assert.AreEqual(1, ply.Where(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(MovementFlags.CastleKing)).Count());
+            Assert.AreEqual(11, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.Queen)));
+            Assert.AreEqual(7, ply.Count(p => p.Position.Piece.HasFlag(Piece.Knight)));
+            Assert.AreEqual(9, ply.Count(p => p.Position.Piece.HasFlag(Piece.Bishop)));
+            Assert.AreEqual(2, ply.Count(p => p.Position.Piece.HasFlag(Piece.Rook)));
+            Assert.AreEqual(3, ply.Count(p => p.Position.Piece.HasFlag(Piece.King)));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.AreEqual(Piece.Black, patzer.ActiveColour);
 
-            Assert.IsTrue(!ply.Any(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(MovementFlags.CastleKing)));
+            Assert.IsTrue(!ply.Any(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
     }
 }

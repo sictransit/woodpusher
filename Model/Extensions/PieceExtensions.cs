@@ -24,14 +24,14 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
         public static char ToChar(this Piece p)
         {
-            return ((int)p & Constants.PIECETYPE) switch
+            return ((int)p & Constants.PieceTypeMask) switch
             {
-                Constants.PAWN => 'P',
-                Constants.ROOK => 'R',
-                Constants.KNIGHT => 'N',
-                Constants.BISHOP => 'B',
-                Constants.QUEEN => 'Q',
-                Constants.KING => 'K',
+                Constants.Pawn => 'P',
+                Constants.Rook => 'R',
+                Constants.Knight => 'N',
+                Constants.Bishop => 'B',
+                Constants.Queen => 'Q',
+                Constants.King => 'K',
                 _ => throw new NotImplementedException(p.ToString()),
             };
         }
