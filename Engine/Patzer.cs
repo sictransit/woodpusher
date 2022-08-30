@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
 
-            movementCache = new MovementCache();
+            movementCache = new MovementCache();            
         }
 
 
@@ -71,7 +71,7 @@ namespace SicTransit.Woodpusher.Engine
 
                         var ply = new Ply(position, move);
 
-                        Log.Debug($"valid: {ply}");
+                        //Log.Debug($"valid: {ply}");
 
                         yield return ply;
 

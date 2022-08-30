@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher
     {
         static void Main(string[] args)
         {
-            Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
+            Logging.EnableLogging(Serilog.Events.LogEventLevel.Information);
 
             var patzer = new Patzer();
 
@@ -18,8 +18,6 @@ namespace SicTransit.Woodpusher
             {
                 Log.Debug(ply.ToString());
             }
-
-
         }
     }
 }
