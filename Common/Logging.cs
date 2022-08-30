@@ -17,5 +17,14 @@ namespace SicTransit.Woodpusher.Common
                 .WriteTo.File(logFilename, LogEventLevel.Information)
                 .CreateLogger();
         }
+
+        public static void EnableUnitTestLogging(LogEventLevel level = LogEventLevel.Information)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
+                .WriteTo.Trace(level)
+                .CreateLogger();
+        }
     }
 }
