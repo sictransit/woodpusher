@@ -32,6 +32,11 @@ namespace SicTransit.Woodpusher.Engine
             EnPassantTarget = fen.EnPassantTarget;
         }
 
+        public void Play(string pgn)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<Ply> GetValidPly()
         {
             foreach (var position in Board.GetPositions(ActiveColour))

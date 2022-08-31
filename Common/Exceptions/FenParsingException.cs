@@ -1,11 +1,11 @@
 ﻿namespace SicTransit.Woodpusher.Common.Exceptions
 {
-    public sealed class FenParsingException : Exception
+    public sealed class FENParsingException : Exception
     {
-        public FenParsingException(string fen, string message) : base($"Unable to parse [{fen}]: {message}")
+        public FENParsingException(string fen, string message) : base($"Unable to parse [{fen}]: {message}")
         { }
 
-        public FenParsingException(string message, Exception inner) : base(message, inner)
+        public FENParsingException(string message, Exception inner) : base(message, inner)
         { }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Model;
 using System;
@@ -42,12 +43,9 @@ namespace SicTransit.Woodpusher.Common
 
             var moveSection = sb.ToString().RemoveComments().RemoveVariations();
 
-            if (TryParseMoves(moveSection, out var moves))
+            foreach (var move in ParseMoves(moveSection))
             {
-                foreach (var move in moves)
-                {
-                    Log.Debug($"move: {move}");
-                }
+                Log.Debug($"move: {move}");
             }
 
             return pgn;
@@ -73,20 +71,30 @@ namespace SicTransit.Woodpusher.Common
             return true;
         }
 
-        private static bool TryParseMoves(string s, out IEnumerable<PgnMove> moves)
+        private static IEnumerable<string> ParseMoves(string s)
         {
-            moves = Enumerable.Empty<PgnMove>();
-            
-            Log.Debug($"parsing moves: {s}");
+            var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            return false;
+            var indexRegex = new Regex(@"(\d+)\.");
+            var moveRegex = new Regex(@"[abcdefgh12345678RNBQKPO\-x]+");
+            var resultRegex = new Regex(@"0\-0|1-1|1\/2-1\/2");
+
+            foreach (var part in parts)
+            {
+                var indexMatch = indexRegex.Match(part);                
+
+                if (indexMatch.Success)
+                {
+                    continue;
+                }
+
+                var moveMatch = moveRegex.Match(part);
+
+                if (moveMatch.Success && !resultRegex.IsMatch(part))
+                {
+                    yield return moveMatch.Groups[0].Value;                 
+                }
+            }            
         }
-
-
-        private struct PgnMove
-        { 
-
-        }
-
     }
 }
