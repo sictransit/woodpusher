@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Model;
 using System;
 using System.Collections.Generic;
@@ -20,23 +21,32 @@ namespace SicTransit.Woodpusher.Common
         {
             var pgn = new PGN();
 
+            var sb = new StringBuilder();
+
             using (var reader = new StringReader(s))
             {
                 string line;
-                var moveIndex = 1;
+
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (TryParseTag(line, out var tag))
                     {
                         pgn.tags.Add(tag.Key, tag.Value);
                     }
-                    else if (TryParseMoves(line, moveIndex, out var moves))
-                    {
-                    }
                     else
                     {
-                        Log.Debug($"ignored line: {line}");
+                        sb.Append(line + ' ');
                     }
+                }
+            }
+
+            var moveSection = sb.ToString().RemoveComments().RemoveVariations();
+
+            if (TryParseMoves(moveSection, out var moves))
+            {
+                foreach (var move in moves)
+                {
+                    Log.Debug($"move: {move}");
                 }
             }
 
@@ -63,30 +73,15 @@ namespace SicTransit.Woodpusher.Common
             return true;
         }
 
-        private static bool TryParseMoves(string s, int index, out IEnumerable<PgnMove> moves)
+        private static bool TryParseMoves(string s, out IEnumerable<PgnMove> moves)
         {
-
-
             moves = Enumerable.Empty<PgnMove>();
-
-            s = RemoveComments(s);
-            s = RemoveVariations(s);
             
             Log.Debug($"parsing moves: {s}");
+
             return false;
         }
 
-        private static string RemoveComments(string s)
-        {
-            var r = new Regex(@"\{[^\{]+?\}");
-            return r.Replace(s, string.Empty, int.MaxValue);
-        }
-
-        private static string RemoveVariations(string s)
-        {
-            var r = new Regex(@"\([^\(]+?\)");
-            return r.Replace(s, string.Empty, int.MaxValue);
-        }
 
         private struct PgnMove
         { 
