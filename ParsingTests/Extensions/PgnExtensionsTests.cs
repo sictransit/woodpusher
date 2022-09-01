@@ -1,12 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Parsing.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Parsing.Extensions.Tests
+namespace SicTransit.Woodpusher.Tests.Extensions
 {
     [TestClass()]
     public class PgnExtensionsTests

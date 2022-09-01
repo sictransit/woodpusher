@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Parsing;
 
-namespace SicTransit.Woodpusher.Engine.Tests
+namespace SicTransit.Woodpusher.Tests
 {
     [TestClass()]
     public class PatzerTests

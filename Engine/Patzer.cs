@@ -1,5 +1,4 @@
-﻿using Serilog;
-using SicTransit.Woodpusher.Common;
+﻿using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Parsing;
@@ -19,7 +18,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
 
-            movementCache = new MovementCache();            
+            movementCache = new MovementCache();
         }
 
 

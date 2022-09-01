@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Extensions;
 
-namespace SicTransit.Woodpusher.Model.Extensions.Tests
+namespace SicTransit.Woodpusher.Tests.Extensions
 {
     [TestClass()]
     public class SquareExtensionsTests

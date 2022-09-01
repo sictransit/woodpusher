@@ -1,13 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Parsing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Parsing.Tests
+namespace SicTransit.Woodpusher.Tests
 {
     [TestClass()]
     public class PortableGameNotationTests

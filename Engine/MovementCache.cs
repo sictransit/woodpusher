@@ -37,13 +37,13 @@ namespace SicTransit.Woodpusher.Engine
 
         private void InitializeChecks()
         {
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();            
+            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
             squares.ForEach(square =>
             {
                 ulong mask = 0;
 
-                var moves = GetVectors(new Position(Piece.Queen|Piece.White, square)).Concat(GetVectors(new Position(Piece.Knight|Piece.White, square))).SelectMany(v => v);
+                var moves = GetVectors(new Position(Piece.Queen | Piece.White, square)).Concat(GetVectors(new Position(Piece.Knight | Piece.White, square))).SelectMany(v => v);
 
                 foreach (var move in moves)
                 {

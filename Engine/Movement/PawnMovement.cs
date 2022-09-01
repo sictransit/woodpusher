@@ -44,7 +44,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
                     if (rank == 4)
                     {
-                        yield return new[] { new Move(takeRight, SpecialMove.EnPassant ) };
+                        yield return new[] { new Move(takeRight, SpecialMove.EnPassant) };
                     }
                 }
             }
@@ -65,7 +65,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
                     if (rank == 3)
                     {
-                        yield return new[] { new Move(takeLeft, SpecialMove.EnPassant ) };
+                        yield return new[] { new Move(takeLeft, SpecialMove.EnPassant) };
                     }
                 }
 
@@ -75,7 +75,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
                     if (rank == 3)
                     {
-                        yield return new[] { new Move(takeRight, SpecialMove.EnPassant ) };
+                        yield return new[] { new Move(takeRight, SpecialMove.EnPassant) };
                     }
                 }
             }
