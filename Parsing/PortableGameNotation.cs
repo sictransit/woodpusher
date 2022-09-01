@@ -15,6 +15,8 @@ namespace SicTransit.Woodpusher.Parsing
 
         public static PortableGameNotation Parse(string s)
         {
+            Log.Debug($"Parsing PGN:\n{s}");
+
             var pgn = new PortableGameNotation();
 
             var sb = new StringBuilder();

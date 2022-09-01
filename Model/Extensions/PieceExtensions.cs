@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
         public static Piece ToPiece(this char c)
         {
-            var piece = ToPieceType(c);
+            var piece = ToPieceType(char.ToUpperInvariant(c));
 
             piece |= char.IsUpper(c) ? Piece.White : Piece.Black;
 
