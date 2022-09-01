@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace SicTransit.Woodpusher.Parsing.Moves
 {
-    public abstract class PGNMove
+    public abstract class PGNMoveq
     {
-        public abstract bool TryParse(string s, out PGNMove move);
+        public abstract bool TryParse(string s, out PGNMoveq move);
     }
 }

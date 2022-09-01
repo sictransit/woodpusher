@@ -43,7 +43,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             if (parts.Length != 6)
             {
-                throw new FENParsingExceptionQ(fen, "parts should be == 6");
+                throw new FenParsingException(fen, "parts should be == 6");
             }
 
             var board = ParseBoard(parts[0]);
@@ -69,7 +69,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             if (parts.Length != 8)
             {
-                throw new FENParsingExceptionQ(s, "board setup should be eight parts, separated by '/'");
+                throw new FenParsingException(s, "board setup should be eight parts, separated by '/'");
             }
 
             var board = new Board();
@@ -113,7 +113,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             if (!StringExtensions.IsAlgebraicNotation(s))
             {
-                throw new FENParsingExceptionQ(s, "en passant target should be in algebraic notation or '-'");
+                throw new FenParsingException(s, "en passant target should be in algebraic notation or '-'");
             }
 
             return Square.FromAlgebraicNotation(s);
@@ -123,7 +123,7 @@ namespace SicTransit.Woodpusher.Parsing
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
-                throw new FENParsingExceptionQ(s, "active colour should be 'w' or 'b'");
+                throw new FenParsingException(s, "active colour should be 'w' or 'b'");
             }
 
             return s.Single() switch
@@ -137,7 +137,7 @@ namespace SicTransit.Woodpusher.Parsing
         {
             if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s, "^-$"))
             {
-                throw new FENParsingExceptionQ(s, "castling should be \"KQkq\" with omitted letters when appropriate, or \"-\" if none");
+                throw new FenParsingException(s, "castling should be \"KQkq\" with omitted letters when appropriate, or \"-\" if none");
             }
 
             Castlings castlings = 0;
