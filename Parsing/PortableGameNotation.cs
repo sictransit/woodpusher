@@ -1,26 +1,20 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common.Exceptions;
-using SicTransit.Woodpusher.Common.Extensions;
-using SicTransit.Woodpusher.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using SicTransit.Woodpusher.Parsing.Extensions;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Common
+namespace SicTransit.Woodpusher.Parsing
 {
-    public class PGN
+    public class PortableGameNotation
     {
-        private readonly Dictionary<string, string> tags = new();        
+        private readonly Dictionary<string, string> tags = new();
 
-        private PGN()
+        private PortableGameNotation()
         { }
 
-        public static PGN Parse(string s)
+        public static PortableGameNotation Parse(string s)
         {
-            var pgn = new PGN();
+            var pgn = new PortableGameNotation();
 
             var sb = new StringBuilder();
 
@@ -81,7 +75,7 @@ namespace SicTransit.Woodpusher.Common
 
             foreach (var part in parts)
             {
-                var indexMatch = indexRegex.Match(part);                
+                var indexMatch = indexRegex.Match(part);
 
                 if (indexMatch.Success)
                 {
@@ -92,9 +86,9 @@ namespace SicTransit.Woodpusher.Common
 
                 if (moveMatch.Success && !resultRegex.IsMatch(part))
                 {
-                    yield return moveMatch.Groups[0].Value;                 
+                    yield return moveMatch.Groups[0].Value;
                 }
-            }            
+            }
         }
     }
 }

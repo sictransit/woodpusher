@@ -1,17 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Common.Tests
+namespace SicTransit.Woodpusher.Parsing.Tests
 {
     [TestClass()]
-    public class PGNTests
+    public class PortableGameNotationTests
     {
         private static string pgnFischerSpassky = @"
 [Event ""F/S Return Match""]
@@ -41,7 +40,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         [TestMethod()]
         public void ParseTest()
         {
-            var pgn = PGN.Parse(pgnFischerSpassky);
+            var pgn = PortableGameNotation.Parse(pgnFischerSpassky);
 
             Assert.IsNotNull(pgn);
         }

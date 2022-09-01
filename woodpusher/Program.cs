@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
+using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher
 {
@@ -12,7 +13,7 @@ namespace SicTransit.Woodpusher
 
             var patzer = new Patzer();
 
-            patzer.Initialize(FEN.StartingPosition);
+            patzer.Initialize(ForsythEdwardsNotation.StartingPosition);
 
             foreach (var ply in patzer.GetValidPly())
             {

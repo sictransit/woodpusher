@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -24,7 +25,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Initialize(string position)
         {
-            var fen = FEN.Parse(position);
+            var fen = ForsythEdwardsNotation.Parse(position);
 
             Board = fen.Board;
             ActiveColour = fen.ActiveColour;

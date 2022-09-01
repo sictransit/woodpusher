@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Common.Extensions
+namespace SicTransit.Woodpusher.Parsing.Extensions
 {
     public static class PgnExtensions
     {

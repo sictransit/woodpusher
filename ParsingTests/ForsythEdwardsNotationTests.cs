@@ -1,19 +1,24 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Parsing;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SicTransit.Woodpusher.Common.Tests
+namespace SicTransit.Woodpusher.Parsing.Tests
 {
-
     [TestClass()]
-    public class FENTests
+    public class ForsythEdwardsNotationTests
     {
         [TestMethod()]
         public void ParseSetupTest()
         {
-            var fen = FEN.Parse(FEN.StartingPosition);
+            var fen = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
             Assert.AreEqual(Piece.White, fen.ActiveColour);
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, fen.Castlings);
@@ -31,7 +36,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod()]
         public void ParseMagnusCarlsenTest()
         {
-            var fen = FEN.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
+            var fen = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
 
             Trace.WriteLine(BoardExtensions.PrettyPrint(fen.Board));
 

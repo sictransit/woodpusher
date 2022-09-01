@@ -1,12 +1,12 @@
-﻿using SicTransit.Woodpusher.Common.Exceptions;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Parsing.Exceptions;
 using System.Text.RegularExpressions;
 
-namespace SicTransit.Woodpusher.Common
+namespace SicTransit.Woodpusher.Parsing
 {
-    public class FEN
+    public class ForsythEdwardsNotation
     {
         public Board Board { get; }
 
@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Common
 
         public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        private FEN(Board board, Piece activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        private ForsythEdwardsNotation(Board board, Piece activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
             Board = board;
             ActiveColour = activeColour;
@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher.Common
             FullmoveNumber = fullmoveNumber;
         }
 
-        public static FEN Parse(string fen)
+        public static ForsythEdwardsNotation Parse(string fen)
         {
             if (fen is null)
             {
@@ -43,7 +43,7 @@ namespace SicTransit.Woodpusher.Common
 
             if (parts.Length != 6)
             {
-                throw new FENParsingException(fen, "parts should be == 6");
+                throw new FENParsingExceptionQ(fen, "parts should be == 6");
             }
 
             var board = ParseBoard(parts[0]);
@@ -58,7 +58,7 @@ namespace SicTransit.Woodpusher.Common
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            return new FEN(board, activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            return new ForsythEdwardsNotation(board, activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
         }
 
         private static Board ParseBoard(string s)
@@ -69,7 +69,7 @@ namespace SicTransit.Woodpusher.Common
 
             if (parts.Length != 8)
             {
-                throw new FENParsingException(s, "board setup should be eight parts, separated by '/'");
+                throw new FENParsingExceptionQ(s, "board setup should be eight parts, separated by '/'");
             }
 
             var board = new Board();
@@ -113,7 +113,7 @@ namespace SicTransit.Woodpusher.Common
 
             if (!StringExtensions.IsAlgebraicNotation(s))
             {
-                throw new FENParsingException(s, "en passant target should be in algebraic notation or '-'");
+                throw new FENParsingExceptionQ(s, "en passant target should be in algebraic notation or '-'");
             }
 
             return Square.FromAlgebraicNotation(s);
@@ -123,7 +123,7 @@ namespace SicTransit.Woodpusher.Common
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
-                throw new FENParsingException(s, "active colour should be 'w' or 'b'");
+                throw new FENParsingExceptionQ(s, "active colour should be 'w' or 'b'");
             }
 
             return s.Single() switch
@@ -137,7 +137,7 @@ namespace SicTransit.Woodpusher.Common
         {
             if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s, "^-$"))
             {
-                throw new FENParsingException(s, "castling should be \"KQkq\" with omitted letters when appropriate, or \"-\" if none");
+                throw new FENParsingExceptionQ(s, "castling should be \"KQkq\" with omitted letters when appropriate, or \"-\" if none");
             }
 
             Castlings castlings = 0;

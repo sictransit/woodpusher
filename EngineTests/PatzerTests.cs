@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -19,7 +20,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod()]
         public void InitializeTest()
         {
-            patzer!.Initialize(FEN.StartingPosition);
+            patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
 
             Assert.IsNotNull(patzer.Board);
             Assert.AreEqual(Piece.White, patzer.ActiveColour);
@@ -29,7 +30,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod()]
         public void PlyFromStartingPositionTest()
         {
-            patzer!.Initialize(FEN.StartingPosition);
+            patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
 
             var ply = patzer.GetValidPly().ToArray();
 
