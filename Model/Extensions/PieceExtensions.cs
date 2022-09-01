@@ -4,18 +4,21 @@ namespace SicTransit.Woodpusher.Model.Extensions
 {
     public static class PieceExtensions
     {
+        public static Piece ToPieceType(this char c) => c switch
+        {
+            'P' => Piece.Pawn,
+            'R' => Piece.Rook,
+            'N' => Piece.Knight,
+            'B' => Piece.Bishop,
+            'Q' => Piece.Queen,
+            'K' => Piece.King,
+            _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
+        };
+
+
         public static Piece ToPiece(this char c)
         {
-            var piece = char.ToUpperInvariant(c) switch
-            {
-                'P' => Piece.Pawn,
-                'R' => Piece.Rook,
-                'N' => Piece.Knight,
-                'B' => Piece.Bishop,
-                'Q' => Piece.Queen,
-                'K' => Piece.King,
-                _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
-            };
+            var piece = ToPieceType(c);
 
             piece |= char.IsUpper(c) ? Piece.White : Piece.Black;
 

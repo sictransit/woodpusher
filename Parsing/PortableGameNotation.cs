@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Parsing.Extensions;
+using SicTransit.Woodpusher.Parsing.Moves;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -65,7 +66,7 @@ namespace SicTransit.Woodpusher.Parsing
             return true;
         }
 
-        private static IEnumerable<string> ParseMoves(string s)
+        private static IEnumerable<PgnMove> ParseMoves(string s)
         {
             var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -86,7 +87,7 @@ namespace SicTransit.Woodpusher.Parsing
 
                 if (moveMatch.Success && !resultRegex.IsMatch(part))
                 {
-                    yield return moveMatch.Groups[0].Value;
+                    yield return PgnMove.Parse(part);
                 }
             }
         }

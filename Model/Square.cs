@@ -34,8 +34,8 @@ namespace SicTransit.Woodpusher.Model
         {
             if (!StringExtensions.IsAlgebraicNotation(algebraicNotation)) throw new ArgumentOutOfRangeException(nameof(algebraicNotation));
 
-            var file = algebraicNotation[0] - 'a';
-            var rank = algebraicNotation[1] - '1';
+            var file = algebraicNotation[0].ToFile();
+            var rank = algebraicNotation[1].ToRank();
 
             return new Square(file, rank);
         }
