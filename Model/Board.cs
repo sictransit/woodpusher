@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -34,6 +35,8 @@ namespace SicTransit.Woodpusher.Model
         {
             return white.IsOccupied(square) || black.IsOccupied(square);
         }
+
+        public Square FindKing(Piece colour) => colour.HasFlag(Piece.White) ? white.King.ToSquare() : black.King.ToSquare();
 
         public IEnumerable<Position> GetPositions(Piece colour)
         {

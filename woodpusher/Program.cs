@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher
 
             patzer.Initialize(ForsythEdwardsNotation.StartingPosition);
 
-            foreach (var ply in patzer.GetValidPly())
+            foreach (var ply in patzer.GetValidPly(patzer.ActiveColour))
             {
                 Log.Debug(ply.ToString());
             }

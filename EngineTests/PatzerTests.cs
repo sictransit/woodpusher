@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
 
-            var ply = patzer.GetValidPly().ToArray();
+            var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
             Assert.AreEqual(20, ply.Length);
             Assert.AreEqual(16, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
@@ -46,7 +46,7 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly().ToArray();
+            var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
             Assert.AreEqual(15, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
             Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.King)));
@@ -62,7 +62,7 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly().ToArray();
+            var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
             Assert.AreEqual(11, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
             Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.Queen)));
@@ -80,7 +80,7 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly().ToArray();
+            var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
             var enPassantMove = ply.SingleOrDefault(p => p.Move.Flags.HasFlag(SpecialMove.EnPassant));
 
@@ -96,11 +96,31 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly().ToArray();
+            var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
             Assert.AreEqual(Piece.Black, patzer.ActiveColour);
 
             Assert.IsTrue(!ply.Any(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
+
+        [TestMethod()]
+        public void IsCheckedTest()
+        {
+            var fen = @"rnbqk2r/pppp2pp/4pp2/8/1b1PPP1P/2P2n2/PP4P1/RNBQKBNR w KQkq - 1 8";
+
+            patzer!.Initialize(fen);
+
+            Assert.IsTrue(patzer.IsChecked());
+
+        }
+
+        [TestMethod()]
+        public void IsNotCheckedTest()
+        {
+            patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
+
+            Assert.IsFalse(patzer.IsChecked());
+        }
+
     }
 }

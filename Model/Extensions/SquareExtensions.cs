@@ -17,5 +17,16 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             return new Square(trailingZeroes % 8, trailingZeroes / 8);
         }
+
+        public static IEnumerable<Square> ToSquares(this ulong mask)
+        {
+            for (int i = 0; i < 64; i++)
+            {
+                if (((1ul>>i) & mask) ==1 )
+                {
+                    yield return ToSquare(mask);
+                }
+            }
+        }
     }
 }

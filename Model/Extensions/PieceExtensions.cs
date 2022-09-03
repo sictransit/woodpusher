@@ -45,5 +45,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             return p.HasFlag(Piece.White) ? c : char.ToLowerInvariant(c);
         }
+
+        public static Piece OpponentColour(this Piece p) => p.HasFlag(Piece.White) ? (p & ~Piece.White) | Piece.Black : (p & ~Piece.Black) | Piece.White;
     }
 }
