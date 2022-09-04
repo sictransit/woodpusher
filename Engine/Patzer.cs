@@ -61,7 +61,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private IEnumerable<Ply> GetValidMoves(Position position)
         {
-            foreach (IEnumerable<Move> vector in movementCache.GetVectors(position))
+            foreach (IEnumerable<Target> vector in movementCache.GetVectors(position))
             {
                 foreach (var move in vector)
                 {
@@ -108,7 +108,7 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         // TODO: Something clever with the flags, making it easy to evaluate regardless of active colour.
-        private bool CastleButMayNot(Move move) => false;
+        private bool CastleButMayNot(Target move) => false;
 
         private bool TakingOwnPiece(Ply ply) => Board.IsOccupied(ply.Move.Square, ply.Position.Piece.Colour);
 

@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     internal class MovementCache
     {
-        private readonly Dictionary<Position, List<Move[]>> vectors = new Dictionary<Position, List<Move[]>>();
+        private readonly Dictionary<Position, List<Target[]>> vectors = new Dictionary<Position, List<Target[]>>();
         private readonly Dictionary<Square, ulong> checks = new();
 
         public MovementCache()
@@ -48,11 +48,11 @@ namespace SicTransit.Woodpusher.Engine
 
                 var queenVectors = GetVectors(new Position(whiteQueen, square));
                 var knightVectors = GetVectors(new Position(whiteKnight, square));
-                var moves = queenVectors.Concat(knightVectors).SelectMany(v => v);
+                var targets = queenVectors.Concat(knightVectors).SelectMany(v => v);
 
-                foreach (var move in moves)
+                foreach (var target in targets)
                 {
-                    mask |= move.Square.ToMask();
+                    mask |= target.Square.ToMask();
                 }
 
                 checks.Add(square, mask);
@@ -60,7 +60,7 @@ namespace SicTransit.Woodpusher.Engine
         }
 
 
-        public List<Move[]> GetVectors(Position position)
+        public List<Target[]> GetVectors(Position position)
         {
             return vectors[position];
         }
@@ -70,7 +70,7 @@ namespace SicTransit.Woodpusher.Engine
             return checks[square];
         }
 
-        private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position) => position.Piece.Type switch
+        private static IEnumerable<IEnumerable<Target>> CreateVectors(Position position) => position.Piece.Type switch
         {
             PieceType.Pawn => PawnMovement.GetTargetVectors(position.Square, position.Piece.Colour),
             PieceType.Rook => RookMovement.GetTargetVectors(position.Square),

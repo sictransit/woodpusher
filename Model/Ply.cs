@@ -2,14 +2,14 @@
 {
     public struct Ply
     {
-        public Ply(Position position, Move move)
+        public Ply(Position position, Target move)
         {
             Position = position;
             Move = move;
         }
 
         public Position Position { get; }
-        public Move Move { get; }
+        public Target Move { get; }
 
         public override string ToString()
         {

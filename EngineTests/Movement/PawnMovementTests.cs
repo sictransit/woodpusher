@@ -12,15 +12,15 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var a2 = Square.FromAlgebraicNotation("a2");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in PawnMovement.GetTargetVectors(a2, PieceColour.White))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(3, moves.Count);
-            Assert.IsTrue(moves.Where(m => m.Square.File == a2.File).All(m => m.Flags.HasFlag(SpecialMove.CannotTake)));
+            Assert.AreEqual(3, targets.Count);
+            Assert.IsTrue(targets.Where(m => m.Square.File == a2.File).All(m => m.Flags.HasFlag(SpecialMove.CannotTake)));
         }
 
         [TestMethod()]
@@ -28,14 +28,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var a7 = Square.FromAlgebraicNotation("a7");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in PawnMovement.GetTargetVectors(a7, PieceColour.Black))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(3, moves.Count);
+            Assert.AreEqual(3, targets.Count);
         }
 
         [TestMethod()]
@@ -43,16 +43,16 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var b7 = Square.FromAlgebraicNotation("b7");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in PawnMovement.GetTargetVectors(b7, PieceColour.White))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(3, moves.Count);
-            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
-            Assert.IsTrue(moves.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
+            Assert.AreEqual(3, targets.Count);
+            Assert.IsTrue(targets.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
+            Assert.IsTrue(targets.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
 
         [TestMethod()]
@@ -60,16 +60,16 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var b2 = Square.FromAlgebraicNotation("b2");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in PawnMovement.GetTargetVectors(b2, PieceColour.Black))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(3, moves.Count);
-            Assert.IsTrue(moves.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
-            Assert.IsTrue(moves.Where(m => m.Square.File != b2.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
+            Assert.AreEqual(3, targets.Count);
+            Assert.IsTrue(targets.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
+            Assert.IsTrue(targets.Where(m => m.Square.File != b2.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
 
 
@@ -78,16 +78,16 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var c5 = Square.FromAlgebraicNotation("c5");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in PawnMovement.GetTargetVectors(c5, PieceColour.White))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(5, moves.Count);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.EnPassant)) == 2);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
+            Assert.AreEqual(5, targets.Count);
+            Assert.IsTrue(targets.Count(m => m.Flags.HasFlag(SpecialMove.EnPassant)) == 2);
+            Assert.IsTrue(targets.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
         }
 
         [TestMethod()]
@@ -95,16 +95,16 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var d4 = Square.FromAlgebraicNotation("d4");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in PawnMovement.GetTargetVectors(d4, PieceColour.Black))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(5, moves.Count);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.EnPassant)) == 2);
-            Assert.IsTrue(moves.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
+            Assert.AreEqual(5, targets.Count);
+            Assert.IsTrue(targets.Count(m => m.Flags.HasFlag(SpecialMove.EnPassant)) == 2);
+            Assert.IsTrue(targets.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
         }
     }
 }

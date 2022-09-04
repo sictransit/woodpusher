@@ -12,14 +12,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var e2 = Square.FromAlgebraicNotation("e2");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in KingMovement.GetTargetVectors(e2, PieceColour.White))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(8, moves.Count);
+            Assert.AreEqual(8, targets.Count);
         }
 
         [TestMethod()]
@@ -29,14 +29,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             {
                 var cornerSquare = Square.FromAlgebraicNotation(corner);
 
-                var moves = new List<Move>();
+                var targets = new List<Target>();
 
                 foreach (var vector in KingMovement.GetTargetVectors(cornerSquare, PieceColour.White))
                 {
-                    moves.AddRange(vector);
+                    targets.AddRange(vector);
                 }
 
-                Assert.AreEqual(3, moves.Count);
+                Assert.AreEqual(3, targets.Count);
             }
         }
 
@@ -45,14 +45,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var e1 = Square.FromAlgebraicNotation("e1");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in KingMovement.GetTargetVectors(e1, PieceColour.White))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(7, moves.Count);
+            Assert.AreEqual(7, targets.Count);
         }
 
         [TestMethod()]
@@ -60,14 +60,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var e8 = Square.FromAlgebraicNotation("e8");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in KingMovement.GetTargetVectors(e8, PieceColour.Black))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(7, moves.Count);
+            Assert.AreEqual(7, targets.Count);
         }
 
     }

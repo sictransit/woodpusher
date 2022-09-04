@@ -2,14 +2,14 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Move
+    public struct Target
     {
-        public Move(Square square) : this(square, SpecialMove.None)
+        public Target(Square square) : this(square, SpecialMove.None)
         {
 
         }
 
-        public Move(Square square, SpecialMove flags)
+        public Target(Square square, SpecialMove flags)
         {
             Square = square;
             Flags = flags;

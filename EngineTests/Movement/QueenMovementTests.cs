@@ -11,14 +11,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var b2 = Square.FromAlgebraicNotation("b2");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in QueenMovement.GetTargetVectors(b2))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(23, moves.Count);
+            Assert.AreEqual(23, targets.Count);
         }
     }
 }

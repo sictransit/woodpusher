@@ -11,14 +11,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var b2 = Square.FromAlgebraicNotation("b2");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in RookMovement.GetTargetVectors(b2))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(14, moves.Count);
+            Assert.AreEqual(14, targets.Count);
         }
 
         [TestMethod()]
@@ -26,14 +26,14 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             var a1 = Square.FromAlgebraicNotation("a1");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in RookMovement.GetTargetVectors(a1))
             {
-                moves.AddRange(vector);
+                targets.AddRange(vector);
             }
 
-            Assert.AreEqual(14, moves.Count);
+            Assert.AreEqual(14, targets.Count);
         }
 
         [TestMethod()]
@@ -43,23 +43,23 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
 
             var blockAtA3 = Square.FromAlgebraicNotation("a3");
 
-            var moves = new List<Move>();
+            var targets = new List<Target>();
 
             foreach (var vector in RookMovement.GetTargetVectors(a1))
             {
-                foreach (var move in vector)
+                foreach (var target in vector)
                 {
-                    if (move.Square.Equals(blockAtA3))
+                    if (target.Square.Equals(blockAtA3))
                     {
                         break;
                     }
 
-                    moves.Add(move);
+                    targets.Add(target);
 
                 }
             }
 
-            Assert.AreEqual(8, moves.Count);
+            Assert.AreEqual(8, targets.Count);
         }
     }
 }
