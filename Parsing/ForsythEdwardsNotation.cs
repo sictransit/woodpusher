@@ -6,33 +6,11 @@ using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Parsing
 {
-    public class ForsythEdwardsNotation
+    public static class ForsythEdwardsNotation
     {
-        public Board Board { get; }
-
-        public PieceColour ActiveColour { get; }
-
-        public Castlings Castlings { get; }
-
-        public Square? EnPassantTarget { get; }
-
-        public int HalfmoveClock { get; }
-
-        public int FullmoveNumber { get; }
-
         public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        private ForsythEdwardsNotation(Board board, PieceColour activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
-        {
-            Board = board;
-            ActiveColour = activeColour;
-            Castlings = castlings;
-            EnPassantTarget = enPassantTarget;
-            HalfmoveClock = halfmoveClock;
-            FullmoveNumber = fullmoveNumber;
-        }
-
-        public static ForsythEdwardsNotation Parse(string fen)
+        public static Board Parse(string fen)
         {
             if (fen is null)
             {
@@ -58,7 +36,9 @@ namespace SicTransit.Woodpusher.Parsing
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            return new ForsythEdwardsNotation(board, activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            var counters = new Counters(activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+
+            return new Board(board, counters);
         }
 
         private static Board ParseBoard(string s)

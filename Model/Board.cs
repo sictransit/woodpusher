@@ -8,30 +8,38 @@ namespace SicTransit.Woodpusher.Model
         private readonly Bitboard white;
         private readonly Bitboard black;
 
-        public Board() : this(new Bitboard(PieceColour.White), new Bitboard(PieceColour.Black))
+        public Counters Counters { get; init; }
+
+        public Board() : this(new Bitboard(PieceColour.White), new Bitboard(PieceColour.Black), Counters.Default)
         {
 
         }
 
-        internal Board(Bitboard white, Bitboard black)
+        public Board(Board board, Counters counters) : this(board.white, board.black, counters)
+        { 
+
+        }
+
+        internal Board(Bitboard white, Bitboard black, Counters counters)
         {
             this.white = white;
             this.black = black;
+            Counters = counters;
         }
 
         public ulong Aggregate => white.All | black.All;
 
         public Board AddPiece(Square square, Piece piece) => piece.Colour switch
         {
-            PieceColour.White => new Board(white.Add(piece.Type, square), black),
-            PieceColour.Black => new Board(white, black.Add(piece.Type, square)),
+            PieceColour.White => new Board(white.Add(piece.Type, square), black, Counters),
+            PieceColour.Black => new Board(white, black.Add(piece.Type, square), Counters),
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
         public Board RemovePiece(Square square, Piece piece) => piece.Colour switch
         {
-            PieceColour.White => new Board(white.Remove(piece.Type, square), black),
-            PieceColour.Black => new Board(white, black.Remove(piece.Type, square)),
+            PieceColour.White => new Board(white.Remove(piece.Type, square), black, Counters),
+            PieceColour.Black => new Board(white, black.Remove(piece.Type, square), Counters),
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 

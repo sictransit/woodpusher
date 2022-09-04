@@ -9,9 +9,6 @@ namespace SicTransit.Woodpusher.Engine
     public class Patzer
     {
         public Board Board { get; private set; }
-        public PieceColour ActiveColour { get; private set; }
-        public Castlings Castlings { get; private set; }
-        public Square? EnPassantTarget { get; private set; }
 
         private readonly MovementCache movementCache;
 
@@ -25,12 +22,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Initialize(string position)
         {
-            var fen = ForsythEdwardsNotation.Parse(position);
-
-            Board = fen.Board;
-            ActiveColour = fen.ActiveColour;
-            Castlings = fen.Castlings;
-            EnPassantTarget = fen.EnPassantTarget;
+            Board = ForsythEdwardsNotation.Parse(position);
         }
 
         public IEnumerable<Ply> GetValidPly(PieceColour colour)
@@ -46,9 +38,9 @@ namespace SicTransit.Woodpusher.Engine
 
         public bool IsChecked()
         {
-            var kingSquare = Board.FindKing(ActiveColour);
+            var kingSquare = Board.FindKing(Board.Counters.ActiveColour);
 
-            foreach (var ply in GetValidPly(ActiveColour.OpponentColour()))
+            foreach (var ply in GetValidPly(Board.Counters.ActiveColour.OpponentColour()))
             {
                 if (ply.Move.Square.Equals(kingSquare))
                 {
@@ -116,7 +108,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool PawnCannotTakeForward(Ply ply) => Board.IsOccupied(ply.Move.Square);
 
-        private bool EnPassantWithoutTarget(Ply ply) => ply.Move.Flags.HasFlag(SpecialMove.EnPassant) && !ply.Move.Square.Equals(EnPassantTarget);
+        private bool EnPassantWithoutTarget(Ply ply) => ply.Move.Flags.HasFlag(SpecialMove.EnPassant) && !ply.Move.Square.Equals(Board.Counters.EnPassantTarget);
 
         private bool TookPiece(Ply ply) => Board.IsOccupied(ply.Move.Square, ply.Position.Piece.Colour.OpponentColour());
 
