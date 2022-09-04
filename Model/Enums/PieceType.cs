@@ -6,8 +6,8 @@
         Pawn,
         Knight,
         Bishop,
-        Rook ,
+        Rook,
         Queen,
-        King ,
+        King,
     }
 }

@@ -1,9 +1,9 @@
 ﻿namespace SicTransit.Woodpusher.Model.Enums
 {
-    public enum PieceColour 
+    public enum PieceColour
     {
-        White ,
-        Black 
+        White,
+        Black
 
     }
 }

@@ -81,10 +81,10 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whiteKing = new Piece(PieceType.King, PieceColour.White) ;
+            var whiteKing = new Piece(PieceType.King, PieceColour.White);
             var e1 = Square.FromAlgebraicNotation("e1");
 
-            var blackKing = new Piece(PieceType.King, PieceColour.Black) ;
+            var blackKing = new Piece(PieceType.King, PieceColour.Black);
             var e8 = Square.FromAlgebraicNotation("e8");
 
             board = board.AddPiece(e1, whiteKing);

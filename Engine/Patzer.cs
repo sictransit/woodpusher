@@ -3,7 +3,6 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Parsing;
-using System.Drawing;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -14,7 +13,7 @@ namespace SicTransit.Woodpusher.Engine
         public Castlings Castlings { get; private set; }
         public Square? EnPassantTarget { get; private set; }
 
-        private readonly MovementCache movementCache;        
+        private readonly MovementCache movementCache;
 
         public Patzer()
         {
@@ -34,7 +33,7 @@ namespace SicTransit.Woodpusher.Engine
             EnPassantTarget = fen.EnPassantTarget;
         }
 
-        
+
 
         public IEnumerable<Ply> GetValidPly(PieceColour colour)
         {
@@ -49,7 +48,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public bool IsChecked()
         {
-            var kingSquare = Board.FindKing(ActiveColour);            
+            var kingSquare = Board.FindKing(ActiveColour);
 
             foreach (var ply in GetValidPly(ActiveColour.OpponentColour()))
             {
@@ -80,7 +79,7 @@ namespace SicTransit.Woodpusher.Engine
                         break;
                     }
 
-                    if (position.Piece. Type == PieceType.Pawn)
+                    if (position.Piece.Type == PieceType.Pawn)
                     {
                         if (EnPassantWithoutTarget(ply))
                         {
@@ -96,7 +95,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (CastleButMayNot(move))
                     {
                         break;
-                    }                    
+                    }
 
                     //Log.Debug($"valid: {ply}");
 
