@@ -33,8 +33,6 @@ namespace SicTransit.Woodpusher.Engine
             EnPassantTarget = fen.EnPassantTarget;
         }
 
-
-
         public IEnumerable<Ply> GetValidPly(PieceColour colour)
         {
             foreach (var position in Board.GetPositions(colour))

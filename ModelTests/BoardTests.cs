@@ -100,5 +100,31 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(blackKing, blackPositions.Single().Piece);
             Assert.AreEqual(e8, blackPositions.Single().Square);
         }
+
+        [TestMethod]
+        public void GetPositionsOnFileTest()
+        {
+            Board board = new Board();
+
+            var pieces = new HashSet<Piece>();
+
+            var file = 3;
+            var rank = 0;
+
+            foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
+            {
+                var piece = new Piece(pieceType, PieceColour.Black);
+                pieces.Add(piece);
+
+                board = board.AddPiece(new Square(file, rank++), piece);
+            }
+
+            foreach (var position in board.GetPositionsOnFile(PieceColour.Black, file))
+            {
+                Assert.IsTrue(pieces.Contains(position.Piece));
+            }
+
+            Assert.AreEqual(0, board.GetPositionsOnFile(PieceColour.White, file).Count());
+        }
     }
 }
