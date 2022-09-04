@@ -19,6 +19,11 @@ namespace SicTransit.Woodpusher.Engine
             movementCache = new MovementCache();
         }
 
+        public void Initialize()
+        {
+            Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+        }
+
 
         public void Initialize(string position)
         {

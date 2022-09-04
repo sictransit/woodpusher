@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void InitializeTest()
         {
-            patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
+            patzer!.Initialize();
 
             Assert.IsNotNull(patzer.Board);
             Assert.AreEqual(PieceColour.White, patzer.Board.Counters.ActiveColour);
@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void PlyFromStartingPositionTest()
         {
-            patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
+            patzer!.Initialize();
 
             var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
 
