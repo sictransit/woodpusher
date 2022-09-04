@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     internal class MovementCache
     {
-        private readonly Dictionary<Position, List<Target[]>> vectors = new Dictionary<Position, List<Target[]>>();
+        private readonly Dictionary<Position, List<Target[]>> vectors = new();
         private readonly Dictionary<Square, ulong> checks = new();
 
         public MovementCache()
