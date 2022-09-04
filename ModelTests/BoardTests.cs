@@ -12,8 +12,6 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            Assert.AreEqual(0u, board.Aggregate);
-
             var whiteKing = new Piece(PieceType.King, PieceColour.White);
             var blackKing = new Piece(PieceType.King, PieceColour.Black);
 
@@ -31,7 +29,8 @@ namespace SicTransit.Woodpusher.Tests
             board = board.RemovePiece(e1, whiteKing);
             board = board.RemovePiece(e8, blackKing);
 
-            Assert.AreEqual(0u, board.Aggregate);
+            Assert.IsFalse(board.IsOccupied(e1));
+            Assert.IsFalse(board.IsOccupied(e8));
         }
 
         [TestMethod()]
@@ -69,11 +68,13 @@ namespace SicTransit.Woodpusher.Tests
             {
                 for (int r = 0; r < 8; r++)
                 {
-                    board = board.AddPiece(new Square(f, r), whitePawn);
+                    var square = new Square(f, r);
+
+                    board = board.AddPiece(square, whitePawn);
+
+                    Assert.AreEqual(whitePawn, board.Get(square));
                 }
             }
-
-            Assert.AreEqual(0xffffffffffffffff, board.Aggregate);
         }
 
         [TestMethod]

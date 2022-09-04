@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Model
         }
 
         public Board(Board board, Counters counters) : this(board.white, board.black, counters)
-        { 
+        {
 
         }
 
@@ -26,8 +26,6 @@ namespace SicTransit.Woodpusher.Model
             this.black = black;
             Counters = counters;
         }
-
-        public ulong Aggregate => white.All | black.All;
 
         public Board AddPiece(Square square, Piece piece) => piece.Colour switch
         {

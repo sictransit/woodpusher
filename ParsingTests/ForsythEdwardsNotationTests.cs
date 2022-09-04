@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, board.Counters.Castlings);
             Assert.IsNull(board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
-            Assert.AreEqual(1, board.Counters.FullmoveNumber);            
+            Assert.AreEqual(1, board.Counters.FullmoveNumber);
 
             Trace.WriteLine(board.PrettyPrint());
 

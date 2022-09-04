@@ -81,7 +81,7 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPieces(int file)
         {
-            for (int shift = file; shift < 64; shift+=8)
+            for (int shift = file; shift < 64; shift += 8)
             {
                 var mask = 1ul << shift;
 
