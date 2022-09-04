@@ -4,48 +4,45 @@ namespace SicTransit.Woodpusher.Model.Extensions
 {
     public static class PieceExtensions
     {
-        public static Piece ToPieceType(this char c) => c switch
+        public static PieceType ToPieceType(this char c) => c switch
         {
-            'P' => Piece.Pawn,
-            'R' => Piece.Rook,
-            'N' => Piece.Knight,
-            'B' => Piece.Bishop,
-            'Q' => Piece.Queen,
-            'K' => Piece.King,
+            'P' => PieceType.Pawn,
+            'R' => PieceType.Rook,
+            'N' => PieceType.Knight,
+            'B' => PieceType.Bishop,
+            'Q' => PieceType.Queen,
+            'K' => PieceType.King,
             _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
         };
 
 
         public static Piece ToPiece(this char c)
         {
-            var piece = ToPieceType(char.ToUpperInvariant(c));
+            var pieceType = ToPieceType(char.ToUpperInvariant(c));
 
-            piece |= char.IsUpper(c) ? Piece.White : Piece.Black;
+            var pieceColour = char.IsUpper(c) ? PieceColour.White : PieceColour.Black;
 
-            return piece;
+            return new Piece(pieceType, pieceColour);
         }
 
-        public static char ToChar(this Piece p)
+        public static char ToChar(this Piece p) => p.Type switch
         {
-            return ((int)p & Constants.PieceTypeMask) switch
-            {
-                Constants.Pawn => 'P',
-                Constants.Rook => 'R',
-                Constants.Knight => 'N',
-                Constants.Bishop => 'B',
-                Constants.Queen => 'Q',
-                Constants.King => 'K',
-                _ => throw new NotImplementedException(p.ToString()),
-            };
-        }
+            PieceType.Pawn => 'P',
+            PieceType.Rook => 'R',
+            PieceType.Knight => 'N',
+            PieceType.Bishop => 'B',
+            PieceType.Queen => 'Q',
+            PieceType.King => 'K',
+            _ => throw new NotImplementedException(p.ToString()),
+        };
 
         public static char ToAlgebraicNotation(this Piece p)
         {
             var c = p.ToChar();
 
-            return p.HasFlag(Piece.White) ? c : char.ToLowerInvariant(c);
+            return p.Colour == PieceColour.White ? c : char.ToLowerInvariant(c);
         }
 
-        public static Piece OpponentColour(this Piece p) => p.HasFlag(Piece.White) ? (p & ~Piece.White) | Piece.Black : (p & ~Piece.Black) | Piece.White;
+        public static PieceColour OpponentColour(this PieceColour p) => p == PieceColour.White ? PieceColour.Black : PieceColour.White;
     }
 }

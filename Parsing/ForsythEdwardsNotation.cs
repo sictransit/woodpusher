@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Parsing
     {
         public Board Board { get; }
 
-        public Piece ActiveColour { get; }
+        public PieceColour ActiveColour { get; }
 
         public Castlings Castlings { get; }
 
@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Parsing
 
         public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        private ForsythEdwardsNotation(Board board, Piece activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        private ForsythEdwardsNotation(Board board, PieceColour activeColour, Castlings castlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
             Board = board;
             ActiveColour = activeColour;
@@ -119,7 +119,7 @@ namespace SicTransit.Woodpusher.Parsing
             return Square.FromAlgebraicNotation(s);
         }
 
-        private static Piece ParseActiveColour(string s)
+        private static PieceColour ParseActiveColour(string s)
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
@@ -128,8 +128,8 @@ namespace SicTransit.Woodpusher.Parsing
 
             return s.Single() switch
             {
-                'w' => Piece.White,
-                _ => Piece.Black,
+                'w' => PieceColour.White,
+                _ => PieceColour.Black,
             };
         }
 

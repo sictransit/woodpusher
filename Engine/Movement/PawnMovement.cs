@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 {
     public static class PawnMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square, Piece colour)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Square square, PieceColour colour)
         {
             var rank = square.Rank;
 
@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
             var file = square.File;
 
-            if (colour == Piece.White)
+            if (colour == PieceColour.White)
             {
                 var forward = new List<Move>() { new Move(square.NewRank(rank + 1), rank == 6 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
 

@@ -14,8 +14,8 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(0u, board.Aggregate);
 
-            var whiteKing = Piece.White | Piece.King;
-            var blackKing = Piece.Black | Piece.King;
+            var whiteKing = new Piece(PieceType.King, PieceColour.White);
+            var blackKing = new Piece(PieceType.King, PieceColour.Black);
 
             var e1 = Square.FromAlgebraicNotation("e1");
 
@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Tests
             var board = new Board();
 
             var e1 = Square.FromAlgebraicNotation("e1");
-            var whiteKing = Piece.White | Piece.King;
+            var whiteKing = new Piece(PieceType.King, PieceColour.White);
 
             board = board.AddPiece(e1, whiteKing);
             board.AddPiece(e1, whiteKing);
@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var e1 = Square.FromAlgebraicNotation("e1");
 
-            board.RemovePiece(e1, Piece.White | Piece.King);
+            board.RemovePiece(e1, new Piece(PieceType.King, PieceColour.White));
         }
 
         [TestMethod()]
@@ -63,7 +63,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whitePawn = Piece.White | Piece.Pawn;
+            var whitePawn = new Piece(PieceType.Pawn, PieceColour.White);
 
             for (int f = 0; f < 8; f++)
             {
@@ -81,21 +81,21 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whiteKing = Piece.White | Piece.King;
+            var whiteKing = new Piece(PieceType.King, PieceColour.White) ;
             var e1 = Square.FromAlgebraicNotation("e1");
 
-            var blackKing = Piece.Black | Piece.King;
+            var blackKing = new Piece(PieceType.King, PieceColour.Black) ;
             var e8 = Square.FromAlgebraicNotation("e8");
 
             board = board.AddPiece(e1, whiteKing);
             board = board.AddPiece(e8, blackKing);
 
-            var whitePositions = board.GetPositions(Piece.White);
+            var whitePositions = board.GetPositions(PieceColour.White);
 
             Assert.AreEqual(whiteKing, whitePositions.Single().Piece);
             Assert.AreEqual(e1, whitePositions.Single().Square);
 
-            var blackPositions = board.GetPositions(Piece.Black);
+            var blackPositions = board.GetPositions(PieceColour.Black);
 
             Assert.AreEqual(blackKing, blackPositions.Single().Piece);
             Assert.AreEqual(e8, blackPositions.Single().Square);

@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void InitializeVectors()
         {
-            var pieces = new[] { Piece.White, Piece.Black }.Select(c => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King }.Select(t => c | t)).SelectMany(x => x).ToList();
+            var pieces = new[] { PieceColour.White, PieceColour.Black }.Select(c => new[] { PieceType.Pawn, PieceType.Rook, PieceType.Knight, PieceType.Bishop, PieceType.Queen, PieceType.King }.Select(t => new Piece(t, c))).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
             pieces.ForEach(piece =>
@@ -39,11 +39,16 @@ namespace SicTransit.Woodpusher.Engine
         {
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
+            var whiteQueen = new Piece(PieceType.Queen, PieceColour.White);
+            var whiteKnight = new Piece(PieceType.Knight, PieceColour.White);
+
             squares.ForEach(square =>
             {
                 ulong mask = 0;
 
-                var moves = GetVectors(new Position(Piece.Queen | Piece.White, square)).Concat(GetVectors(new Position(Piece.Knight | Piece.White, square))).SelectMany(v => v);
+                var queenVectors = GetVectors(new Position(whiteQueen, square));
+                var knightVectors = GetVectors(new Position(whiteKnight, square));
+                var moves = queenVectors.Concat(knightVectors).SelectMany(v => v);
 
                 foreach (var move in moves)
                 {
@@ -65,27 +70,15 @@ namespace SicTransit.Woodpusher.Engine
             return checks[square];
         }
 
-        private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position)
+        private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position) => position.Piece.Type switch
         {
-            var colour = position.Piece.HasFlag(Piece.White) ? Piece.White : Piece.Black;
-
-            switch ((int)position.Piece & Constants.PieceTypeMask)
-            {
-                case Constants.Pawn:
-                    return PawnMovement.GetTargetVectors(position.Square, colour);
-                case Constants.Rook:
-                    return RookMovement.GetTargetVectors(position.Square);
-                case Constants.Knight:
-                    return KnightMovement.GetTargetVectors(position.Square);
-                case Constants.Bishop:
-                    return BishopMovement.GetTargetVectors(position.Square);
-                case Constants.Queen:
-                    return QueenMovement.GetTargetVectors(position.Square);
-                case Constants.King:
-                    return KingMovement.GetTargetVectors(position.Square, colour);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(position));
-            }
-        }
+            PieceType.Pawn => PawnMovement.GetTargetVectors(position.Square, position.Piece.Colour),
+            PieceType.Rook => RookMovement.GetTargetVectors(position.Square),
+            PieceType.Knight => KnightMovement.GetTargetVectors(position.Square),
+            PieceType.Bishop => BishopMovement.GetTargetVectors(position.Square),
+            PieceType.Queen => QueenMovement.GetTargetVectors(position.Square),
+            PieceType.King => KingMovement.GetTargetVectors(position.Square, position.Piece.Colour),
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
+        };
     }
 }

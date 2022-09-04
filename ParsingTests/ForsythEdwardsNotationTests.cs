@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var fen = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            Assert.AreEqual(Piece.White, fen.ActiveColour);
+            Assert.AreEqual(PieceColour.White, fen.ActiveColour);
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, fen.Castlings);
             Assert.IsNull(fen.EnPassantTarget);
             Assert.AreEqual(0, fen.HalfmoveClock);
@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
 
-            Assert.AreEqual(Piece.White | Piece.Rook, board.Get(Square.FromAlgebraicNotation("a1")));
+            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.White), board.Get(Square.FromAlgebraicNotation("a1")));
         }
 
         [TestMethod()]
@@ -35,11 +35,11 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(fen.Board.PrettyPrint());
 
-            Assert.AreEqual(Piece.Black, fen.ActiveColour);
+            Assert.AreEqual(PieceColour.Black, fen.ActiveColour);
             Assert.AreEqual(Castlings.None, fen.Castlings);
             Assert.AreEqual(Square.FromAlgebraicNotation("a3"), fen.EnPassantTarget);
-            Assert.AreEqual(Piece.White | Piece.Queen, fen.Board.Get(Square.FromAlgebraicNotation("c7")));
-            Assert.AreEqual(Piece.Black | Piece.Rook, fen.Board.Get(Square.FromAlgebraicNotation("h5")));
+            Assert.AreEqual(new Piece(PieceType.Queen, PieceColour.White), fen.Board.Get(Square.FromAlgebraicNotation("c7")));
+            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.Black), fen.Board.Get(Square.FromAlgebraicNotation("h5")));
             Assert.AreEqual(0, fen.HalfmoveClock);
             Assert.AreEqual(34, fen.FullmoveNumber);
         }

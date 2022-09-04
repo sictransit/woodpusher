@@ -7,12 +7,12 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public class SimplePieceMove : PgnMove
     {
-        private readonly Piece piece;
+        private readonly PieceType pieceType;
         private readonly Square square;
 
-        public SimplePieceMove(Piece piece, Square square)
+        public SimplePieceMove(PieceType pieceType, Square square)
         {
-            this.piece = piece;
+            this.pieceType = pieceType;
             this.square = square;
         }
 
@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         public override string ToString()
         {
-            return $"{piece} to {square}";
+            return $"{pieceType} to {square}";
         }
     }
 }

@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Model
         private readonly Bitboard white;
         private readonly Bitboard black;
 
-        public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.Black))
+        public Board() : this(new Bitboard(PieceColour.White), new Bitboard(PieceColour.Black))
         {
 
         }
@@ -21,38 +21,30 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong Aggregate => white.All | black.All;
 
-        public Board AddPiece(Square square, Piece piece)
+        public Board AddPiece(Square square, Piece piece) => piece.Colour switch
         {
-            return piece.HasFlag(Piece.White) ? new Board(white.Add(piece, square), black) : new Board(white, black.Add(piece, square));
-        }
+            PieceColour.White => new Board(white.Add(piece.Type, square), black),
+            PieceColour.Black => new Board(white, black.Add(piece.Type, square)),
+            _ => throw new ArgumentOutOfRangeException(nameof(piece)),
+        };
 
-        public Board RemovePiece(Square square, Piece piece)
+        public Board RemovePiece(Square square, Piece piece) => piece.Colour switch
         {
-            return piece.HasFlag(Piece.White) ? new Board(white.Remove(piece, square), black) : new Board(white, black.Remove(piece, square));
-        }
+            PieceColour.White => new Board(white.Remove(piece.Type, square), black),
+            PieceColour.Black => new Board(white, black.Remove(piece.Type, square)),
+            _ => throw new ArgumentOutOfRangeException(nameof(piece)),
+        };
 
-        public bool IsOccupied(Square square)
-        {
-            return white.IsOccupied(square) || black.IsOccupied(square);
-        }
+        public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);
 
-        public Square FindKing(Piece colour) => colour.HasFlag(Piece.White) ? white.King.ToSquare() : black.King.ToSquare();
+        public bool IsOccupied(Square square, PieceColour colour) => GetBitboard(colour).IsOccupied(square);
 
-        public IEnumerable<Position> GetPositions(Piece colour)
-        {
-            if (colour == Piece.White)
-            {
-                return white.GetPieces();
-            }
-            else
-            {
-                return black.GetPieces();
-            }
-        }
+        private Bitboard GetBitboard(PieceColour colour) => colour == PieceColour.White ? white : black;
 
-        public Piece Get(Square square)
-        {
-            return white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
-        }
+        public Square FindKing(PieceColour colour) => GetBitboard(colour).King.ToSquare();
+
+        public IEnumerable<Position> GetPositions(PieceColour colour) => GetBitboard(colour).GetPieces();
+
+        public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
     }
 }

@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Tests
             patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
 
             Assert.IsNotNull(patzer.Board);
-            Assert.AreEqual(Piece.White, patzer.ActiveColour);
+            Assert.AreEqual(PieceColour.White, patzer.ActiveColour);
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, patzer.Castlings);
         }
 
@@ -35,8 +35,8 @@ namespace SicTransit.Woodpusher.Tests
             var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
             Assert.AreEqual(20, ply.Length);
-            Assert.AreEqual(16, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
-            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.HasFlag(Piece.Knight)));
+            Assert.AreEqual(16, ply.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.Type == PieceType.Knight));
         }
 
         [TestMethod()]
@@ -48,11 +48,11 @@ namespace SicTransit.Woodpusher.Tests
 
             var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
-            Assert.AreEqual(15, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.King)));
-            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.HasFlag(Piece.Knight)));
-            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.HasFlag(Piece.Bishop)));
-            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.HasFlag(Piece.Queen)));
+            Assert.AreEqual(15, ply.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.King));
+            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.Type == PieceType.Bishop));
+            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.Type == PieceType.Queen));
         }
 
         [TestMethod]
@@ -64,13 +64,13 @@ namespace SicTransit.Woodpusher.Tests
 
             var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
-            Assert.AreEqual(11, ply.Count(p => p.Position.Piece.HasFlag(Piece.Pawn)));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.Queen)));
-            Assert.AreEqual(7, ply.Count(p => p.Position.Piece.HasFlag(Piece.Knight)));
-            Assert.AreEqual(9, ply.Count(p => p.Position.Piece.HasFlag(Piece.Bishop)));
-            Assert.AreEqual(2, ply.Count(p => p.Position.Piece.HasFlag(Piece.Rook)));
-            Assert.AreEqual(3, ply.Count(p => p.Position.Piece.HasFlag(Piece.King)));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.AreEqual(11, ply.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.Queen));
+            Assert.AreEqual(7, ply.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(9, ply.Count(p => p.Position.Piece.Type == PieceType.Bishop));
+            Assert.AreEqual(2, ply.Count(p => p.Position.Piece.Type == PieceType.Rook));
+            Assert.AreEqual(3, ply.Count(p => p.Position.Piece.Type == PieceType.King));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.King && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod]
@@ -98,9 +98,9 @@ namespace SicTransit.Woodpusher.Tests
 
             var ply = patzer.GetValidPly(patzer.ActiveColour).ToArray();
 
-            Assert.AreEqual(Piece.Black, patzer.ActiveColour);
+            Assert.AreEqual(PieceColour.Black, patzer.ActiveColour);
 
-            Assert.IsTrue(!ply.Any(p => p.Position.Piece.HasFlag(Piece.King) && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.IsTrue(!ply.Any(p => p.Position.Piece.Type == PieceType.King && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod()]
