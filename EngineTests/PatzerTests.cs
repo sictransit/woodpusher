@@ -70,7 +70,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(9, ply.Count(p => p.Position.Piece.Type == PieceType.Bishop));
             Assert.AreEqual(2, ply.Count(p => p.Position.Piece.Type == PieceType.Rook));
             Assert.AreEqual(3, ply.Count(p => p.Position.Piece.Type == PieceType.King));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.King && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod]
@@ -82,11 +82,11 @@ namespace SicTransit.Woodpusher.Tests
 
             var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
 
-            var enPassantMove = ply.SingleOrDefault(p => p.Move.Flags.HasFlag(SpecialMove.EnPassant));
+            var enPassantMove = ply.SingleOrDefault(p => p.Target.Flags.HasFlag(SpecialMove.EnPassant));
 
             Assert.IsNotNull(enPassantMove);
 
-            Assert.AreEqual(Square.FromAlgebraicNotation("f6"), enPassantMove.Move.Square);
+            Assert.AreEqual(Square.FromAlgebraicNotation("f6"), enPassantMove.Target.Square);
         }
 
         [TestMethod]
@@ -100,7 +100,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(PieceColour.Black, patzer.Board.Counters.ActiveColour);
 
-            Assert.IsTrue(!ply.Any(p => p.Position.Piece.Type == PieceType.King && p.Move.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.IsTrue(!ply.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod()]

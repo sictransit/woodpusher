@@ -2,18 +2,18 @@
 {
     public struct Ply
     {
-        public Ply(Position position, Target move)
+        public Ply(Position position, Target target)
         {
             Position = position;
-            Move = move;
+            Target = target;
         }
 
         public Position Position { get; }
-        public Target Move { get; }
+        public Target Target { get; }
 
         public override string ToString()
         {
-            return $"{Position}{Move}";
+            return $"{Position}{Target}";
         }
     }
 }

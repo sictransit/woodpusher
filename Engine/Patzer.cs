@@ -42,7 +42,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var ply in GetValidPly(Board.Counters.ActiveColour.OpponentColour()))
             {
-                if (ply.Move.Square.Equals(kingSquare))
+                if (ply.Target.Square.Equals(kingSquare))
                 {
                     return true;
                 }
@@ -102,15 +102,15 @@ namespace SicTransit.Woodpusher.Engine
         // TODO: Something clever with the flags, making it easy to evaluate regardless of active colour.
         private bool CastleButMayNot(Target move) => false;
 
-        private bool TakingOwnPiece(Ply ply) => Board.IsOccupied(ply.Move.Square, ply.Position.Piece.Colour);
+        private bool TakingOwnPiece(Ply ply) => Board.IsOccupied(ply.Target.Square, ply.Position.Piece.Colour);
 
-        private bool MustTakeButCannot(Ply ply) => ply.Move.Flags.HasFlag(SpecialMove.MustTake) && (!Board.IsOccupied(ply.Move.Square, ply.Position.Piece.Colour.OpponentColour()));
+        private bool MustTakeButCannot(Ply ply) => ply.Target.Flags.HasFlag(SpecialMove.MustTake) && (!Board.IsOccupied(ply.Target.Square, ply.Position.Piece.Colour.OpponentColour()));
 
-        private bool PawnCannotTakeForward(Ply ply) => Board.IsOccupied(ply.Move.Square);
+        private bool PawnCannotTakeForward(Ply ply) => Board.IsOccupied(ply.Target.Square);
 
-        private bool EnPassantWithoutTarget(Ply ply) => ply.Move.Flags.HasFlag(SpecialMove.EnPassant) && !ply.Move.Square.Equals(Board.Counters.EnPassantTarget);
+        private bool EnPassantWithoutTarget(Ply ply) => ply.Target.Flags.HasFlag(SpecialMove.EnPassant) && !ply.Target.Square.Equals(Board.Counters.EnPassantTarget);
 
-        private bool TookPiece(Ply ply) => Board.IsOccupied(ply.Move.Square, ply.Position.Piece.Colour.OpponentColour());
+        private bool TookPiece(Ply ply) => Board.IsOccupied(ply.Target.Square, ply.Position.Piece.Colour.OpponentColour());
 
     }
 }
