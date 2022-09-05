@@ -64,6 +64,11 @@ namespace SicTransit.Woodpusher.Model
 
         public Bitboard Remove(PieceType pieceType, Square square) => Remove(pieceType, square.ToMask());
 
+        public Bitboard Move(PieceType pieceType, Square fromSquare, Square toSquare)
+        {
+            return Toggle(pieceType, fromSquare.ToMask() | toSquare.ToMask());
+        }
+
         public Piece Peek(Square square) => Peek(square.ToMask());
 
         public IEnumerable<Position> GetPieces()
@@ -131,9 +136,9 @@ namespace SicTransit.Woodpusher.Model
         private Bitboard Toggle(PieceType pieceType, ulong mask) => pieceType switch
         {
             PieceType.Pawn => new Bitboard(SetColour, Pawn ^ mask, Rook, Knight, Bishop, Queen, King),
+            PieceType.Rook => new Bitboard(SetColour, Pawn, Rook ^ mask, Knight, Bishop, Queen, King),
             PieceType.Knight => new Bitboard(SetColour, Pawn, Rook, Knight ^ mask, Bishop, Queen, King),
             PieceType.Bishop => new Bitboard(SetColour, Pawn, Rook, Knight, Bishop ^ mask, Queen, King),
-            PieceType.Rook => new Bitboard(SetColour, Pawn, Rook ^ mask, Knight, Bishop, Queen, King),
             PieceType.Queen => new Bitboard(SetColour, Pawn, Rook, Knight, Bishop, Queen ^ mask, King),
             PieceType.King => new Bitboard(SetColour, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),

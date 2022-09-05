@@ -41,6 +41,56 @@ namespace SicTransit.Woodpusher.Model
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
+        public Board Play(Ply ply)
+        {
+            var castlings = Counters.Castlings;
+            var fullmoveCounter = Counters.FullmoveNumber + (Counters.ActiveColour == PieceColour.Black ? 1 : 0);
+
+            var opponentBitboard = GetBitboard(Counters.ActiveColour.OpponentColour());
+
+            Piece? targetPiece = null;
+
+            if (opponentBitboard.IsOccupied(ply.Target.Square))
+            {
+                targetPiece = opponentBitboard.Peek(ply.Target.Square);
+
+                opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, ply.Target.Square);
+            }
+
+            var activeBitboard = GetBitboard(Counters.ActiveColour).Move(ply.Position.Piece.Type, ply.Position.Square, ply.Target.Square);
+
+            if (ply.Position.Piece.Type == PieceType.King)
+            {
+                switch (Counters.ActiveColour)
+                {
+                    case PieceColour.White:
+                        castlings &= ~Castlings.WhiteQueenside;
+                        castlings &= ~Castlings.WhiteKingside;
+                        break;
+                    case PieceColour.Black:
+                        castlings &= ~Castlings.BlackQueenside;
+                        castlings &= ~Castlings.BlackKingside;
+                        break;
+                }
+            }
+
+            var halvmoveClock = (ply.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue) ? 0 : Counters.HalfmoveClock + 1;
+            Square? enPassantTarget = null;
+
+            if (ply.Position.Piece.Type == PieceType.Pawn)
+            {
+                enPassantTarget = ply.Target.ReferenceSquare;
+            }
+
+            var activeColour = Counters.ActiveColour.OpponentColour();
+
+            var counters = new Counters(activeColour, castlings, enPassantTarget, halvmoveClock, fullmoveCounter);
+
+            return Counters.ActiveColour == PieceColour.White
+                ? new Board(activeBitboard, opponentBitboard, counters)
+                : new Board(opponentBitboard, activeBitboard, counters);
+        }
+
         public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);
 
         public bool IsOccupied(Square square, PieceColour colour) => GetBitboard(colour).IsOccupied(square);

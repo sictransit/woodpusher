@@ -9,13 +9,19 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public Target(Square square, SpecialMove flags)
+        public Target(Square square, SpecialMove flags) : this(square, flags, null)
+        { }
+
+        public Target(Square square, SpecialMove flags, Square? referenceSquare)
         {
             Square = square;
             Flags = flags;
+            ReferenceSquare = referenceSquare;
         }
 
         public Square Square { get; init; }
+
+        public Square? ReferenceSquare { get; init; }
 
         public SpecialMove Flags { get; init; }
 

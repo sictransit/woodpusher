@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
                 if (rank == 1)
                 {
-                    forward.Add(new Target(square.NewRank(rank + 2), SpecialMove.CannotTake));
+                    forward.Add(new Target(square.NewRank(rank + 2), SpecialMove.CannotTake, square.NewRank(rank + 1)));
                 }
 
                 yield return forward;
@@ -54,7 +54,7 @@ namespace SicTransit.Woodpusher.Engine.Movement
 
                 if (rank == 6)
                 {
-                    forward.Add(new Target(square.NewRank(rank - 2), SpecialMove.CannotTake));
+                    forward.Add(new Target(square.NewRank(rank - 2), SpecialMove.CannotTake, square.NewRank(rank - 1)));
                 }
 
                 yield return forward;
