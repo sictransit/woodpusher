@@ -150,7 +150,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var d2 = Square.FromAlgebraicNotation("d2");
 
-            board = board.Play(new (new (whiteBishop, c1), new (d2)));
+            board = board.Play(new(new(whiteBishop, c1), new(d2)));
             Assert.AreEqual(PieceColour.Black, board.Counters.ActiveColour);
             Assert.AreEqual(1, board.Counters.HalfmoveClock);
             Assert.AreEqual(0, board.Counters.FullmoveNumber);

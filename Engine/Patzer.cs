@@ -40,15 +40,9 @@ namespace SicTransit.Woodpusher.Engine
         {
             var kingSquare = Board.FindKing(Board.Counters.ActiveColour);
 
-            foreach (var ply in GetValidPly(Board.Counters.ActiveColour.OpponentColour()))
-            {
-                if (ply.Target.Square.Equals(kingSquare))
-                {
-                    return true;
-                }
-            }
+            var validPly = GetValidPly(Board.Counters.ActiveColour.OpponentColour());
 
-            return false;
+            return validPly.Any(p => p.Target.Square.Equals(kingSquare));
         }
 
         private IEnumerable<Ply> GetValidMoves(Position position)
