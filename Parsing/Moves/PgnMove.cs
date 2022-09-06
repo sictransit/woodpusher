@@ -57,7 +57,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePawnMove(s, Square.FromAlgebraicNotation(match.Captures[0].Value));
+                move = new SimplePawnMove(s, new Square(match.Captures[0].Value));
             }
 
             return move != default;
@@ -73,7 +73,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePieceMove(s, match.Groups[1].Value[0].ToPieceType(), Square.FromAlgebraicNotation(match.Groups[2].Value));
+                move = new SimplePieceMove(s, match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value));
             }
 
             return move != default;
@@ -89,7 +89,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), Square.FromAlgebraicNotation(match.Groups[3].Value));
+                move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), new Square(match.Groups[3].Value));
             }
 
             return move != default;
@@ -105,7 +105,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new FileMove(s, match.Groups[1].Value[0].ToFile(), Square.FromAlgebraicNotation(match.Groups[2].Value));
+                move = new FileMove(s, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value));
             }
 
             return move != default;

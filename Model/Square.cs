@@ -16,6 +16,9 @@ namespace SicTransit.Woodpusher.Model
             Rank = rank;
         }
 
+        public Square(string algebraic) : this(algebraic[0].ToFile(), algebraic[1].ToRank())
+        { }
+
         public static bool TryCreate(int file, int rank, out Square square)
         {
             square = default;
@@ -28,16 +31,6 @@ namespace SicTransit.Woodpusher.Model
             square = new Square(file, rank);
 
             return true;
-        }
-
-        public static Square FromAlgebraicNotation(string algebraicNotation)
-        {
-            if (!StringExtensions.IsAlgebraicNotation(algebraicNotation)) throw new ArgumentOutOfRangeException(nameof(algebraicNotation));
-
-            var file = algebraicNotation[0].ToFile();
-            var rank = algebraicNotation[1].ToRank();
-
-            return new Square(file, rank);
         }
 
         public string ToAlgebraicNotation()

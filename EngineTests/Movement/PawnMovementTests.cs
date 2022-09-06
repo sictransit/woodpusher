@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsWhiteStartingPositionTest()
         {
-            var a2 = Square.FromAlgebraicNotation("a2");
+            var a2 = new Square("a2");
 
             var targets = new List<Target>();
 
@@ -26,7 +26,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsBlackStartingPositionTest()
         {
-            var a7 = Square.FromAlgebraicNotation("a7");
+            var a7 = new Square("a7");
 
             var targets = new List<Target>();
 
@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsWhitePromotePositionTest()
         {
-            var b7 = Square.FromAlgebraicNotation("b7");
+            var b7 = new Square("b7");
 
             var targets = new List<Target>();
 
@@ -58,7 +58,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsBlackPromotePositionTest()
         {
-            var b2 = Square.FromAlgebraicNotation("b2");
+            var b2 = new Square("b2");
 
             var targets = new List<Target>();
 
@@ -76,7 +76,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsWhiteEnPassantTest()
         {
-            var c5 = Square.FromAlgebraicNotation("c5");
+            var c5 = new Square("c5");
 
             var targets = new List<Target>();
 
@@ -93,7 +93,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsBlackEnPassantTest()
         {
-            var d4 = Square.FromAlgebraicNotation("d4");
+            var d4 = new Square("d4");
 
             var targets = new List<Target>();
 

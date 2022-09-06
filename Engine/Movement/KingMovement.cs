@@ -5,8 +5,8 @@ namespace SicTransit.Woodpusher.Engine.Movement
 {
     public static class KingMovement
     {
-        private static Square WhiteStartPosition = Square.FromAlgebraicNotation("e1");
-        private static Square BlackStartPosition = Square.FromAlgebraicNotation("e8");
+        private static Square WhiteStartPosition = new("e1");
+        private static Square BlackStartPosition = new("e8");
 
         public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColour pieceColour)
         {

@@ -17,11 +17,11 @@ namespace SicTransit.Woodpusher.Tests
             var whiteKing = new Piece(PieceType.King, PieceColour.White);
             var blackKing = new Piece(PieceType.King, PieceColour.Black);
 
-            var e1 = Square.FromAlgebraicNotation("e1");
+            var e1 = new Square("e1");
 
             board = board.AddPiece(e1, whiteKing);
 
-            var e8 = Square.FromAlgebraicNotation("e8");
+            var e8 = new Square("e8");
 
             board = board.AddPiece(e8, blackKing);
 
@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var e1 = Square.FromAlgebraicNotation("e1");
+            var e1 = new Square("e1");
             var whiteKing = new Piece(PieceType.King, PieceColour.White);
 
             board = board.AddPiece(e1, whiteKing);
@@ -54,7 +54,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var e1 = Square.FromAlgebraicNotation("e1");
+            var e1 = new Square("e1");
 
             board.RemovePiece(e1, new Piece(PieceType.King, PieceColour.White));
         }
@@ -85,10 +85,10 @@ namespace SicTransit.Woodpusher.Tests
             var board = new Board();
 
             var whiteKing = new Piece(PieceType.King, PieceColour.White);
-            var e1 = Square.FromAlgebraicNotation("e1");
+            var e1 = new Square("e1");
 
             var blackKing = new Piece(PieceType.King, PieceColour.Black);
-            var e8 = Square.FromAlgebraicNotation("e8");
+            var e8 = new Square("e8");
 
             board = board.AddPiece(e1, whiteKing).AddPiece(e8, blackKing);
 
@@ -109,13 +109,13 @@ namespace SicTransit.Woodpusher.Tests
             var board = new Board();
 
             var blackPawn1 = new Piece(PieceType.Pawn, PieceColour.Black);
-            var e2 = Square.FromAlgebraicNotation("e2");
+            var e2 = new Square("e2");
 
             var blackPawn2 = new Piece(PieceType.Pawn, PieceColour.Black);
-            var e3 = Square.FromAlgebraicNotation("e3");
+            var e3 = new Square("e3");
 
             var blackPawn3 = new Piece(PieceType.Pawn, PieceColour.Black);
-            var e4 = Square.FromAlgebraicNotation("e4");
+            var e4 = new Square("e4");
 
             board = board.AddPiece(e2, blackPawn1).AddPiece(e3, blackPawn2).AddPiece(e4, blackPawn3);
 
@@ -159,8 +159,8 @@ namespace SicTransit.Woodpusher.Tests
             var whiteBishop = new Piece(PieceType.Bishop, PieceColour.White);
             var blackPawn = new Piece(PieceType.Pawn, PieceColour.Black);
 
-            var c1 = Square.FromAlgebraicNotation("c1");
-            var g7 = Square.FromAlgebraicNotation("g7");
+            var c1 = new Square("c1");
+            var g7 = new Square("g7");
 
             var board = new Board().AddPiece(c1, whiteBishop).AddPiece(g7, blackPawn);
 
@@ -171,7 +171,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
 
-            var d2 = Square.FromAlgebraicNotation("d2");
+            var d2 = new Square("d2");
 
             board = board.Play(new(new(whiteBishop, c1), new(d2)));
             Assert.AreEqual(PieceColour.Black, board.Counters.ActiveColour);
@@ -180,11 +180,11 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
 
-            var g5 = Square.FromAlgebraicNotation("g5");
+            var g5 = new Square("g5");
 
-            board = board.Play(new(new(blackPawn, g7), new(g5, SpecialMove.CannotTake, Square.FromAlgebraicNotation("g6"))));
+            board = board.Play(new(new(blackPawn, g7), new(g5, SpecialMove.CannotTake, new Square("g6"))));
             Assert.AreEqual(PieceColour.White, board.Counters.ActiveColour);
-            Assert.AreEqual(Square.FromAlgebraicNotation("g6"), board.Counters.EnPassantTarget);
+            Assert.AreEqual(new Square("g6"), board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(1, board.Counters.FullmoveNumber);
 

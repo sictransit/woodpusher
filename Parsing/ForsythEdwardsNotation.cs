@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher.Parsing
                 throw new FenParsingException(s, "en passant target should be in algebraic notation or '-'");
             }
 
-            return Square.FromAlgebraicNotation(s);
+            return new Square(s);
         }
 
         private static PieceColour ParseActiveColour(string s)

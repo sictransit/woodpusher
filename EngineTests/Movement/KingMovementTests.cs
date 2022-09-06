@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            var e2 = Square.FromAlgebraicNotation("e2");
+            var e2 = new Square("e2");
 
             var targets = new List<Target>();
 
@@ -27,7 +27,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         {
             foreach (var corner in new[] { "a1", "a8", "h1", "h8" })
             {
-                var cornerSquare = Square.FromAlgebraicNotation(corner);
+                var cornerSquare = new Square(corner);
 
                 var targets = new List<Target>();
 
@@ -43,7 +43,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsWhiteCastlingTest()
         {
-            var e1 = Square.FromAlgebraicNotation("e1");
+            var e1 = new Square("e1");
 
             var targets = new List<Target>();
 
@@ -58,7 +58,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsBlackCastlingTest()
         {
-            var e8 = Square.FromAlgebraicNotation("e8");
+            var e8 = new Square("e8");
 
             var targets = new List<Target>();
 

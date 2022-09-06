@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
 
-            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.White), board.Get(Square.FromAlgebraicNotation("a1")));
+            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.White), board.Get(new Square("a1")));
         }
 
         [TestMethod]
@@ -35,9 +35,9 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(PieceColour.Black, board.Counters.ActiveColour);
             Assert.AreEqual(Castlings.None, board.Counters.Castlings);
-            Assert.AreEqual(Square.FromAlgebraicNotation("a3"), board.Counters.EnPassantTarget);
-            Assert.AreEqual(new Piece(PieceType.Queen, PieceColour.White), board.Get(Square.FromAlgebraicNotation("c7")));
-            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.Black), board.Get(Square.FromAlgebraicNotation("h5")));
+            Assert.AreEqual(new Square("a3"), board.Counters.EnPassantTarget);
+            Assert.AreEqual(new Piece(PieceType.Queen, PieceColour.White), board.Get(new Square("c7")));
+            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.Black), board.Get(new Square("h5")));
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(34, board.Counters.FullmoveNumber);
         }

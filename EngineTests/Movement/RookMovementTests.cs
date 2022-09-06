@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            var b2 = Square.FromAlgebraicNotation("b2");
+            var b2 = new Square("b2");
 
             var targets = new List<Target>();
 
@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsCornerCaseTest()
         {
-            var a1 = Square.FromAlgebraicNotation("a1");
+            var a1 = new Square("a1");
 
             var targets = new List<Target>();
 
@@ -39,9 +39,9 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsBlockedTest()
         {
-            var a1 = Square.FromAlgebraicNotation("a1");
+            var a1 = new Square("a1");
 
-            var blockAtA3 = Square.FromAlgebraicNotation("a3");
+            var blockAtA3 = new Square("a3");
 
             var targets = new List<Target>();
 

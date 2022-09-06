@@ -82,7 +82,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.IsNotNull(enPassantMove);
 
-            Assert.AreEqual(Square.FromAlgebraicNotation("f6"), enPassantMove.Target.Square);
+            Assert.AreEqual(new Square("f6"), enPassantMove.Target.Square);
         }
 
         [TestMethod]

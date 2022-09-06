@@ -10,19 +10,19 @@ namespace SicTransit.Woodpusher.Tests.Extensions
         [TestMethod]
         public void ToMaskTest()
         {
-            Assert.AreEqual(1ul, Square.FromAlgebraicNotation("a1").ToMask());
-            Assert.AreEqual(1ul << 8, Square.FromAlgebraicNotation("a2").ToMask());
-            Assert.AreEqual(1ul << 9, Square.FromAlgebraicNotation("b2").ToMask());
-            Assert.AreEqual(1ul << 63, Square.FromAlgebraicNotation("h8").ToMask());
+            Assert.AreEqual(1ul, new Square("a1").ToMask());
+            Assert.AreEqual(1ul << 8, new Square("a2").ToMask());
+            Assert.AreEqual(1ul << 9, new Square("b2").ToMask());
+            Assert.AreEqual(1ul << 63, new Square("h8").ToMask());
         }
 
         [TestMethod]
         public void ToSquareTest()
         {
-            Assert.AreEqual(Square.FromAlgebraicNotation("a1"), 1ul.ToSquare());
-            Assert.AreEqual(Square.FromAlgebraicNotation("a2"), (1ul << 8).ToSquare());
-            Assert.AreEqual(Square.FromAlgebraicNotation("b2"), (1ul << 9).ToSquare());
-            Assert.AreEqual(Square.FromAlgebraicNotation("h8"), (1ul << 63).ToSquare());
+            Assert.AreEqual(new Square("a1"), 1ul.ToSquare());
+            Assert.AreEqual(new Square("a2"), (1ul << 8).ToSquare());
+            Assert.AreEqual(new Square("b2"), (1ul << 9).ToSquare());
+            Assert.AreEqual(new Square("h8"), (1ul << 63).ToSquare());
         }
     }
 }

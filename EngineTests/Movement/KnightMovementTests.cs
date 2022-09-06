@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            var d4 = Square.FromAlgebraicNotation("d4");
+            var d4 = new Square("d4");
 
             var targets = new List<Target>();
 
