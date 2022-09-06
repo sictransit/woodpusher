@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Tests.Extensions
     [TestClass()]
     public class BoardExtensionsTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void PrettyPrintTest()
         {
             var board = new Board();

@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     [TestClass()]
     public class KingMovementTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsTest()
         {
             var e2 = Square.FromAlgebraicNotation("e2");
@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(8, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsCornerTest()
         {
             foreach (var corner in new[] { "a1", "a8", "h1", "h8" })
@@ -40,7 +40,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             }
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsWhiteCastlingTest()
         {
             var e1 = Square.FromAlgebraicNotation("e1");
@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(7, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsBlackCastlingTest()
         {
             var e8 = Square.FromAlgebraicNotation("e8");

@@ -18,7 +18,7 @@ hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33. f3 Bc8 34. Kf2 Bf5 ( fa
 Nf2 42. g4 Bd3 43. Re6 1/2-1/2
 ";
 
-        [TestMethod()]
+        [TestMethod]
         public void RemoveCommentsTest()
         {
             var cleaned = pgn.RemoveComments();
@@ -26,7 +26,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
             Assert.IsTrue(!cleaned.Contains('{') && !cleaned.Contains('}'));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void RemoveVariationsTest()
         {
             var cleaned = pgn.RemoveVariations();

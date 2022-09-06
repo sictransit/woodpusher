@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     [TestClass()]
     public class BishopMovementTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsTest()
         {
             var g7 = Square.FromAlgebraicNotation("g7");
@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(9, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetVectorsFromF1Test()
         {
             var f1 = Square.FromAlgebraicNotation("f1");
@@ -36,7 +36,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(7, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsCornerCaseTest()
         {
             var a1 = Square.FromAlgebraicNotation("a1");

@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class BoardTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void BoardTest()
         {
             var board = new Board();
@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.IsFalse(board.IsOccupied(e8));
         }
 
-        [TestMethod()]
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void OccupiedSquareTest()
         {
@@ -48,7 +48,7 @@ namespace SicTransit.Woodpusher.Tests
             board.AddPiece(e1, whiteKing);
         }
 
-        [TestMethod()]
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void EmptySquareTest()
         {
@@ -59,7 +59,7 @@ namespace SicTransit.Woodpusher.Tests
             board.RemovePiece(e1, new Piece(PieceType.King, PieceColour.White));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void FillTest()
         {
             var board = new Board();

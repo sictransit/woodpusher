@@ -8,10 +8,15 @@ namespace SicTransit.Woodpusher.Parsing
 {
     public class PortableGameNotation
     {
+        public IReadOnlyDictionary<string, string> Tags => tags;
+        public IReadOnlyList<PgnMove> PgnMoves => pgnMoves;
+
         private readonly Dictionary<string, string> tags = new();
+        private readonly List<PgnMove> pgnMoves = new();
 
         private PortableGameNotation()
-        { }
+        {
+        }
 
         public static PortableGameNotation Parse(string s)
         {
@@ -43,6 +48,8 @@ namespace SicTransit.Woodpusher.Parsing
             foreach (var move in ParseMoves(moveSection))
             {
                 Log.Debug($"move: {move}");
+
+                pgn.pgnMoves.Add(move);
             }
 
             return pgn;

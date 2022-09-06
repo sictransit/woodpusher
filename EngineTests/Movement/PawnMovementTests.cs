@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     [TestClass()]
     public class PawnMovementTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsWhiteStartingPositionTest()
         {
             var a2 = Square.FromAlgebraicNotation("a2");
@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.IsTrue(targets.Where(m => m.Square.File == a2.File).All(m => m.Flags.HasFlag(SpecialMove.CannotTake)));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsBlackStartingPositionTest()
         {
             var a7 = Square.FromAlgebraicNotation("a7");
@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(3, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsWhitePromotePositionTest()
         {
             var b7 = Square.FromAlgebraicNotation("b7");
@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.IsTrue(targets.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsBlackPromotePositionTest()
         {
             var b2 = Square.FromAlgebraicNotation("b2");
@@ -73,7 +73,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
         }
 
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsWhiteEnPassantTest()
         {
             var c5 = Square.FromAlgebraicNotation("c5");
@@ -90,7 +90,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.IsTrue(targets.Count(m => m.Flags.HasFlag(SpecialMove.MustTake)) == 2);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsBlackEnPassantTest()
         {
             var d4 = Square.FromAlgebraicNotation("d4");

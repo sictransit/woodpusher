@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     [TestClass()]
     public class KnightMovementTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsTest()
         {
             var d4 = Square.FromAlgebraicNotation("d4");

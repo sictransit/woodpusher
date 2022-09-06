@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Tests
             patzer = new Patzer();
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void InitializeTest()
         {
             Assert.IsNotNull(patzer!.Board);
@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, patzer.Board.Castlings);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MovesFromStartingPositionTest()
         {
             var moves = patzer!.GetValidMoves(patzer.Board.ActiveColour).ToArray();
@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(4, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MovesFromSicilianOpeningTest()
         {
             var fen = @"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
@@ -99,7 +99,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.IsTrue(!moves.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void IsCheckedTest()
         {
             var fen = @"rnbqk2r/pppp2pp/4pp2/8/1b1PPP1P/2P2n2/PP4P1/RNBQKBNR w KQkq - 1 8";
@@ -110,7 +110,7 @@ namespace SicTransit.Woodpusher.Tests
 
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void IsNotCheckedTest()
         {
             patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);

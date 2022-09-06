@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     [TestClass()]
     public class RookMovementTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsTest()
         {
             var b2 = Square.FromAlgebraicNotation("b2");
@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(14, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsCornerCaseTest()
         {
             var a1 = Square.FromAlgebraicNotation("a1");
@@ -36,7 +36,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
             Assert.AreEqual(14, targets.Count);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsBlockedTest()
         {
             var a1 = Square.FromAlgebraicNotation("a1");

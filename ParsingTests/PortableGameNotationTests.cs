@@ -32,12 +32,16 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ParseTest()
         {
             var pgn = PortableGameNotation.Parse(pgnFischerSpassky);
 
-            Assert.IsNotNull(pgn);
+            Assert.IsNotNull(pgn.Tags);
+            Assert.IsTrue(pgn.Tags.Any());
+
+            Assert.IsNotNull(pgn.PgnMoves);
+            Assert.IsTrue(pgn.PgnMoves.Any());
         }
     }
 }

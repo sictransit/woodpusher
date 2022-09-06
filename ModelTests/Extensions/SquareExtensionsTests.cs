@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Tests.Extensions
     [TestClass()]
     public class SquareExtensionsTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void ToMaskTest()
         {
             Assert.AreEqual(1ul, Square.FromAlgebraicNotation("a1").ToMask());
@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Tests.Extensions
             Assert.AreEqual(1ul << 63, Square.FromAlgebraicNotation("h8").ToMask());
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ToSquareTest()
         {
             Assert.AreEqual(Square.FromAlgebraicNotation("a1"), 1ul.ToSquare());

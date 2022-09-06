@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Engine.Movement.Tests
     [TestClass()]
     public class QueenMovementTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void GetTargetVectorsTest()
         {
             var b2 = Square.FromAlgebraicNotation("b2");

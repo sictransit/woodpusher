@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class ForsythEdwardsNotationTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void ParseSetupTest()
         {
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
@@ -26,7 +26,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.White), board.Get(Square.FromAlgebraicNotation("a1")));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ParseMagnusCarlsenTest()
         {
             var board = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");

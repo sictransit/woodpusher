@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class SqaureTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void FromAlgebraicNotationA1Test()
         {
             var p1 = new Square(0, 0);
@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(p1, p2);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void FromAlgebraicNotationH8Test()
         {
             var p1 = new Square(7, 7);
