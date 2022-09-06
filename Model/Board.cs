@@ -101,7 +101,9 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPositions(PieceColour colour) => GetBitboard(colour).GetPieces();
 
-        public IEnumerable<Position> GetPositionsOnFile(PieceColour colour, int file) => GetBitboard(colour).GetPieces(file);
+        public IEnumerable<Position> GetPositions(PieceColour colour, int file) => GetBitboard(colour).GetPieces(file);
+
+        public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, int file) => GetBitboard(colour).GetPieces(type, file);
 
         public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
     }

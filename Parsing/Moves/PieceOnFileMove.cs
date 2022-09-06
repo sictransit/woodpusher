@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         private readonly int file;
         private readonly Square square;
 
-        public PieceOnFileMove(PieceType pieceType, int file, Square square) 
+        public PieceOnFileMove(PieceType pieceType, int file, Square square)
         {
             this.pieceType = pieceType;
             this.file = file;

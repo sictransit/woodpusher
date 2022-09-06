@@ -90,8 +90,7 @@ namespace SicTransit.Woodpusher.Tests
             var blackKing = new Piece(PieceType.King, PieceColour.Black);
             var e8 = Square.FromAlgebraicNotation("e8");
 
-            board = board.AddPiece(e1, whiteKing);
-            board = board.AddPiece(e8, blackKing);
+            board = board.AddPiece(e1, whiteKing).AddPiece(e8, blackKing);
 
             var whitePositions = board.GetPositions(PieceColour.White);
 
@@ -105,9 +104,33 @@ namespace SicTransit.Woodpusher.Tests
         }
 
         [TestMethod]
+        public void GetPositionsOnFileByTypeTest()
+        {
+            var board = new Board();
+
+            var blackPawn1 = new Piece(PieceType.Pawn, PieceColour.Black);
+            var e2 = Square.FromAlgebraicNotation("e2");
+
+            var blackPawn2 = new Piece(PieceType.Pawn, PieceColour.Black);
+            var e3 = Square.FromAlgebraicNotation("e3");
+
+            var blackPawn3 = new Piece(PieceType.Pawn, PieceColour.Black);
+            var e4 = Square.FromAlgebraicNotation("e4");
+
+            board = board.AddPiece(e2, blackPawn1).AddPiece(e3, blackPawn2).AddPiece(e4, blackPawn3);
+
+            var positions = board.GetPositions(PieceColour.Black, PieceType.Pawn, 4);
+
+            Assert.AreEqual(3, positions.Count());
+
+            Assert.IsTrue(positions.All(p => p.Piece.Type == PieceType.Pawn));
+            Assert.IsTrue(positions.All(p => new[] { e2, e3, e4 }.Contains(p.Square)));
+        }
+
+        [TestMethod]
         public void GetPositionsOnFileTest()
         {
-            Board board = new Board();
+            Board board = new();
 
             var pieces = new HashSet<Piece>();
 
@@ -122,12 +145,12 @@ namespace SicTransit.Woodpusher.Tests
                 board = board.AddPiece(new Square(file, rank++), piece);
             }
 
-            foreach (var position in board.GetPositionsOnFile(PieceColour.Black, file))
+            foreach (var position in board.GetPositions(PieceColour.Black, file))
             {
                 Assert.IsTrue(pieces.Contains(position.Piece));
             }
 
-            Assert.AreEqual(0, board.GetPositionsOnFile(PieceColour.White, file).Count());
+            Assert.AreEqual(0, board.GetPositions(PieceColour.White, file).Count());
         }
 
         [TestMethod]

@@ -71,6 +71,17 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Peek(Square square) => Peek(square.ToMask());
 
+        private ulong GetBitmap(PieceType pieceType) => pieceType switch
+        {
+            PieceType.Pawn => Pawn,
+            PieceType.Knight => Knight,
+            PieceType.Bishop => Bishop,
+            PieceType.Rook => Rook,
+            PieceType.Queen => Queen,
+            PieceType.King => King,
+            _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
+        };
+
         public IEnumerable<Position> GetPieces()
         {
             for (int shift = 0; shift < 64; shift++)
@@ -93,6 +104,21 @@ namespace SicTransit.Woodpusher.Model
                 if (IsOccupied(mask))
                 {
                     yield return new Position(Peek(mask), mask.ToSquare());
+                }
+            }
+        }
+
+        public IEnumerable<Position> GetPieces(PieceType type, int file)
+        {
+            var bitmap = GetBitmap(type);
+
+            for (int shift = file; shift < 64; shift += 8)
+            {
+                var mask = 1ul << shift;
+
+                if ((bitmap & mask) != 0)
+                {
+                    yield return new Position(new Piece(type, SetColour), mask.ToSquare());
                 }
             }
         }
