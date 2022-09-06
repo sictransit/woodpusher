@@ -15,9 +15,9 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             this.square = square;
         }
 
-        protected override void Apply(IEngine engine)
+        protected override Move CreateMove(IEngine engine)
         {
-            Log.Debug($"applying {this}");
+            return default;
         }
 
         public override string ToString()

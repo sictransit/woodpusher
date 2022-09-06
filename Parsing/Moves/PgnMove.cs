@@ -72,7 +72,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParseNamedPieceOnFileMove(string s, out SimplePieceMove? move)
+        private static bool TryParseNamedPieceOnFileMove(string s, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -128,6 +128,6 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             return move != default;
         }
 
-        protected abstract void Apply(IEngine engine);
+        protected abstract Move CreateMove(IEngine engine);
     }
 }
