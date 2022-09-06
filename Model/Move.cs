@@ -1,8 +1,8 @@
 ﻿namespace SicTransit.Woodpusher.Model
 {
-    public struct Ply
+    public struct Move
     {
-        public Ply(Position position, Target target)
+        public Move(Position position, Target target)
         {
             Position = position;
             Target = target;

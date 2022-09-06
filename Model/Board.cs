@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Model
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
-        public Board Play(Ply ply)
+        public Board Play(Move move)
         {
             var castlings = Counters.Castlings;
             var fullmoveCounter = Counters.FullmoveNumber + (Counters.ActiveColour == PieceColour.Black ? 1 : 0);
@@ -50,16 +50,16 @@ namespace SicTransit.Woodpusher.Model
 
             Piece? targetPiece = null;
 
-            if (opponentBitboard.IsOccupied(ply.Target.Square))
+            if (opponentBitboard.IsOccupied(move.Target.Square))
             {
-                targetPiece = opponentBitboard.Peek(ply.Target.Square);
+                targetPiece = opponentBitboard.Peek(move.Target.Square);
 
-                opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, ply.Target.Square);
+                opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.Target.Square);
             }
 
-            var activeBitboard = GetBitboard(Counters.ActiveColour).Move(ply.Position.Piece.Type, ply.Position.Square, ply.Target.Square);
+            var activeBitboard = GetBitboard(Counters.ActiveColour).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
 
-            if (ply.Position.Piece.Type == PieceType.King)
+            if (move.Position.Piece.Type == PieceType.King)
             {
                 switch (Counters.ActiveColour)
                 {
@@ -74,12 +74,12 @@ namespace SicTransit.Woodpusher.Model
                 }
             }
 
-            var halvmoveClock = (ply.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue) ? 0 : Counters.HalfmoveClock + 1;
+            var halvmoveClock = (move.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue) ? 0 : Counters.HalfmoveClock + 1;
             Square? enPassantTarget = null;
 
-            if (ply.Position.Piece.Type == PieceType.Pawn)
+            if (move.Position.Piece.Type == PieceType.Pawn)
             {
-                enPassantTarget = ply.Target.ReferenceSquare;
+                enPassantTarget = move.Target.ReferenceSquare;
             }
 
             var activeColour = Counters.ActiveColour.OpponentColour();

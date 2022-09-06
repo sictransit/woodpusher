@@ -28,31 +28,31 @@ namespace SicTransit.Woodpusher.Tests
         }
 
         [TestMethod()]
-        public void PlyFromStartingPositionTest()
+        public void MovesFromStartingPositionTest()
         {
             patzer!.Initialize();
 
-            var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
+            var moves = patzer.GetValidMoves(patzer.Board.Counters.ActiveColour).ToArray();
 
-            Assert.AreEqual(20, ply.Length);
-            Assert.AreEqual(16, ply.Count(p => p.Position.Piece.Type == PieceType.Pawn));
-            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(20, moves.Length);
+            Assert.AreEqual(16, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(4, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
         }
 
         [TestMethod()]
-        public void PlyFromSicilianOpeningTest()
+        public void MovesFromSicilianOpeningTest()
         {
             var fen = @"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
+            var moves = patzer.GetValidMoves(patzer.Board.Counters.ActiveColour).ToArray();
 
-            Assert.AreEqual(15, ply.Count(p => p.Position.Piece.Type == PieceType.Pawn));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.King));
-            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.Type == PieceType.Knight));
-            Assert.AreEqual(5, ply.Count(p => p.Position.Piece.Type == PieceType.Bishop));
-            Assert.AreEqual(4, ply.Count(p => p.Position.Piece.Type == PieceType.Queen));
+            Assert.AreEqual(15, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.King));
+            Assert.AreEqual(5, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(5, moves.Count(p => p.Position.Piece.Type == PieceType.Bishop));
+            Assert.AreEqual(4, moves.Count(p => p.Position.Piece.Type == PieceType.Queen));
         }
 
         [TestMethod]
@@ -62,15 +62,15 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
+            var moves = patzer.GetValidMoves(patzer.Board.Counters.ActiveColour).ToArray();
 
-            Assert.AreEqual(11, ply.Count(p => p.Position.Piece.Type == PieceType.Pawn));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.Queen));
-            Assert.AreEqual(7, ply.Count(p => p.Position.Piece.Type == PieceType.Knight));
-            Assert.AreEqual(9, ply.Count(p => p.Position.Piece.Type == PieceType.Bishop));
-            Assert.AreEqual(2, ply.Count(p => p.Position.Piece.Type == PieceType.Rook));
-            Assert.AreEqual(3, ply.Count(p => p.Position.Piece.Type == PieceType.King));
-            Assert.AreEqual(1, ply.Count(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.AreEqual(11, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.Queen));
+            Assert.AreEqual(7, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(9, moves.Count(p => p.Position.Piece.Type == PieceType.Bishop));
+            Assert.AreEqual(2, moves.Count(p => p.Position.Piece.Type == PieceType.Rook));
+            Assert.AreEqual(3, moves.Count(p => p.Position.Piece.Type == PieceType.King));
+            Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod]
@@ -80,9 +80,9 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
+            var moves = patzer.GetValidMoves(patzer.Board.Counters.ActiveColour).ToArray();
 
-            var enPassantMove = ply.SingleOrDefault(p => p.Target.Flags.HasFlag(SpecialMove.EnPassant));
+            var enPassantMove = moves.SingleOrDefault(p => p.Target.Flags.HasFlag(SpecialMove.EnPassant));
 
             Assert.IsNotNull(enPassantMove);
 
@@ -96,11 +96,11 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            var ply = patzer.GetValidPly(patzer.Board.Counters.ActiveColour).ToArray();
+            var moves = patzer.GetValidMoves(patzer.Board.Counters.ActiveColour).ToArray();
 
             Assert.AreEqual(PieceColour.Black, patzer.Board.Counters.ActiveColour);
 
-            Assert.IsTrue(!ply.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.IsTrue(!moves.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod()]

@@ -30,13 +30,13 @@ namespace SicTransit.Woodpusher.Engine
             Board = ForsythEdwardsNotation.Parse(position);
         }
 
-        public IEnumerable<Ply> GetValidPly(PieceColour colour)
+        public IEnumerable<Move> GetValidMoves(PieceColour colour)
         {
             foreach (var position in Board.GetPositions(colour))
             {
-                foreach (var ply in GetValidMoves(position))
+                foreach (var move in GetValidMoves(position))
                 {
-                    yield return ply;
+                    yield return move;
                 }
             }
         }
@@ -45,52 +45,50 @@ namespace SicTransit.Woodpusher.Engine
         {
             var kingSquare = Board.FindKing(Board.Counters.ActiveColour);
 
-            var validPly = GetValidPly(Board.Counters.ActiveColour.OpponentColour());
+            var validMoves = GetValidMoves(Board.Counters.ActiveColour.OpponentColour());
 
-            return validPly.Any(p => p.Target.Square.Equals(kingSquare));
+            return validMoves.Any(m => m.Target.Square.Equals(kingSquare));
         }
 
-        private IEnumerable<Ply> GetValidMoves(Position position)
+        private IEnumerable<Move> GetValidMoves(Position position)
         {
             foreach (IEnumerable<Target> vector in movementCache.GetVectors(position))
             {
-                foreach (var move in vector)
+                foreach (var target in vector)
                 {
-                    var ply = new Ply(position, move);
+                    var move = new Move(position, target);
 
-                    if (TakingOwnPiece(ply))
+                    if (TakingOwnPiece(move))
                     {
                         break;
                     }
 
-                    if (MustTakeButCannot(ply))
+                    if (MustTakeButCannot(move))
                     {
                         break;
                     }
 
                     if (position.Piece.Type == PieceType.Pawn)
                     {
-                        if (EnPassantWithoutTarget(ply))
+                        if (EnPassantWithoutTarget(move))
                         {
                             break;
                         }
 
-                        if (PawnCannotTakeForward(ply))
+                        if (PawnCannotTakeForward(move))
                         {
                             break;
                         }
                     }
 
-                    if (CastleButMayNot(move))
+                    if (CastleButMayNot(target))
                     {
                         break;
                     }
 
-                    //Log.Debug($"valid: {ply}");
+                    yield return move;
 
-                    yield return ply;
-
-                    if (TookPiece(ply))
+                    if (TookPiece(move))
                     {
                         break;
                     }
@@ -101,15 +99,15 @@ namespace SicTransit.Woodpusher.Engine
         // TODO: Something clever with the flags, making it easy to evaluate regardless of active colour.
         private bool CastleButMayNot(Target move) => false;
 
-        private bool TakingOwnPiece(Ply ply) => Board.IsOccupied(ply.Target.Square, ply.Position.Piece.Colour);
+        private bool TakingOwnPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour);
 
-        private bool MustTakeButCannot(Ply ply) => ply.Target.Flags.HasFlag(SpecialMove.MustTake) && (!Board.IsOccupied(ply.Target.Square, ply.Position.Piece.Colour.OpponentColour()));
+        private bool MustTakeButCannot(Move move) => move.Target.Flags.HasFlag(SpecialMove.MustTake) && (!Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour()));
 
-        private bool PawnCannotTakeForward(Ply ply) => Board.IsOccupied(ply.Target.Square);
+        private bool PawnCannotTakeForward(Move move) => Board.IsOccupied(move.Target.Square);
 
-        private bool EnPassantWithoutTarget(Ply ply) => ply.Target.Flags.HasFlag(SpecialMove.EnPassant) && !ply.Target.Square.Equals(Board.Counters.EnPassantTarget);
+        private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Board.Counters.EnPassantTarget);
 
-        private bool TookPiece(Ply ply) => Board.IsOccupied(ply.Target.Square, ply.Position.Piece.Colour.OpponentColour());
+        private bool TookPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
 
     }
 }
