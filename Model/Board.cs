@@ -1,14 +1,21 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Board
+    public struct Board : IBoard
     {
         private readonly Bitboard white;
         private readonly Bitboard black;
 
         public Counters Counters { get; init; }
+
+        public PieceColour ActiveColour => Counters.ActiveColour;
+
+        public Castlings Castlings => Counters.Castlings;
+
+        public Square? EnPassantTarget => Counters.EnPassantTarget;
 
         public Board() : this(new Bitboard(PieceColour.White), new Bitboard(PieceColour.Black), Counters.Default)
         {
@@ -44,9 +51,9 @@ namespace SicTransit.Woodpusher.Model
         public Board Play(Move move)
         {
             var castlings = Counters.Castlings;
-            var fullmoveCounter = Counters.FullmoveNumber + (Counters.ActiveColour == PieceColour.Black ? 1 : 0);
+            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColour == PieceColour.Black ? 1 : 0);
 
-            var opponentBitboard = GetBitboard(Counters.ActiveColour.OpponentColour());
+            var opponentBitboard = GetBitboard(ActiveColour.OpponentColour());
 
             Piece? targetPiece = null;
 
@@ -57,11 +64,11 @@ namespace SicTransit.Woodpusher.Model
                 opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.Target.Square);
             }
 
-            var activeBitboard = GetBitboard(Counters.ActiveColour).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
+            var activeBitboard = GetBitboard(ActiveColour).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
 
             if (move.Position.Piece.Type == PieceType.King)
             {
-                switch (Counters.ActiveColour)
+                switch (ActiveColour)
                 {
                     case PieceColour.White:
                         castlings &= ~Castlings.WhiteQueenside;
@@ -82,11 +89,11 @@ namespace SicTransit.Woodpusher.Model
                 enPassantTarget = move.Target.ReferenceSquare;
             }
 
-            var activeColour = Counters.ActiveColour.OpponentColour();
+            var activeColour = ActiveColour.OpponentColour();
 
             var counters = new Counters(activeColour, castlings, enPassantTarget, halvmoveClock, fullmoveCounter);
 
-            return Counters.ActiveColour == PieceColour.White
+            return ActiveColour == PieceColour.White
                 ? new Board(activeBitboard, opponentBitboard, counters)
                 : new Board(opponentBitboard, activeBitboard, counters);
         }

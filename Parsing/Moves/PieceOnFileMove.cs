@@ -24,7 +24,13 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         protected override Move CreateMove(IEngine engine)
         {
-            throw new NotImplementedException();
+            var board = engine.Board;
+
+            var positions = board.GetPositions(board.ActiveColour, pieceType, file);
+
+            return default;
+
+            //TODO: continue coding here: get positions, check against valid moves, find exactly one, return it or throw if != 1.
         }
     }
 }

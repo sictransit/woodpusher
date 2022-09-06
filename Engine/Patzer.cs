@@ -1,14 +1,18 @@
 ﻿using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Engine
 {
-    public class Patzer
+    public class Patzer : IEngine
     {
-        public Board Board { get; private set; }
+        public IBoard Board { get; private set; }
+
+        IBoard IEngine.Board => Board;
 
         private readonly MovementCache movementCache;
 
@@ -17,13 +21,9 @@ namespace SicTransit.Woodpusher.Engine
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
 
             movementCache = new MovementCache();
-        }
 
-        public void Initialize()
-        {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
         }
-
 
         public void Initialize(string position)
         {
@@ -43,9 +43,9 @@ namespace SicTransit.Woodpusher.Engine
 
         public bool IsChecked()
         {
-            var kingSquare = Board.FindKing(Board.Counters.ActiveColour);
+            var kingSquare = Board.FindKing(Board.ActiveColour);
 
-            var validMoves = GetValidMoves(Board.Counters.ActiveColour.OpponentColour());
+            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour());
 
             return validMoves.Any(m => m.Target.Square.Equals(kingSquare));
         }
@@ -105,7 +105,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool PawnCannotTakeForward(Move move) => Board.IsOccupied(move.Target.Square);
 
-        private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Board.Counters.EnPassantTarget);
+        private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Board.EnPassantTarget);
 
         private bool TookPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
 
