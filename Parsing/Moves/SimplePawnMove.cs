@@ -5,7 +5,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public class SimplePawnMove : SimplePieceMove
     {
-        public SimplePawnMove(Square square) : base(PieceType.Pawn, square)
+        public SimplePawnMove(string raw, Square square) : base(raw, PieceType.Pawn, square)
         {
         }
     }

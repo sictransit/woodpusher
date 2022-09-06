@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Parsing.Exceptions;
 
 namespace SicTransit.Woodpusher.Parsing.Moves
 {
@@ -10,7 +11,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         private readonly int file;
         private readonly Square square;
 
-        public PieceOnFileMove(PieceType pieceType, int file, Square square)
+        public PieceOnFileMove(string raw, PieceType pieceType, int file, Square square) : base(raw)
         {
             this.pieceType = pieceType;
             this.file = file;
@@ -19,7 +20,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         public override string ToString()
         {
-            return $"{pieceType} from file {file} to {square}";
+            return $"[{base.ToString()}] {pieceType} from file {file} to {square}";
         }
 
         protected override Move CreateMove(IEngine engine)
@@ -28,9 +29,16 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             var positions = board.GetPositions(board.ActiveColour, pieceType, file);
 
-            return default;
+            var moves = positions.Select(p => new Move(p, new Target(square)));
 
-            //TODO: continue coding here: get positions, check against valid moves, find exactly one, return it or throw if != 1.
+            var validMoves = moves.Where(m => engine.IsValidMove(m) && m.Target.Equals(square));
+
+            if (validMoves.Count() != 1)
+            {
+                throw new PgnParsingException(Raw, "unable to find one unique valid move to match");
+            }
+
+            return new Move(validMoves.Single().Position, new Target(square));
         }
     }
 }

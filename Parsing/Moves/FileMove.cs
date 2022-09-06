@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         private readonly int file;
         private readonly Square square;
 
-        public FileMove(int file, Square square)
+        public FileMove(string raw, int file, Square square) : base(raw)
         {
             this.file = file;
             this.square = square;
@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         public override string ToString()
         {
-            return $"from file {file}, {square}";
+            return $"[{base.ToString()}] from file {file}, {square}";
         }
 
     }

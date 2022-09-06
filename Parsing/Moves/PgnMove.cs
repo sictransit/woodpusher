@@ -7,6 +7,13 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public abstract class PgnMove
     {
+        protected string Raw { get; init; }
+
+        public PgnMove(string raw)
+        {
+            Raw = raw;
+        }
+
         public static PgnMove Parse(string s)
         {
             s = s.Replace("x", string.Empty).Replace("+", string.Empty);
@@ -50,7 +57,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePawnMove(Square.FromAlgebraicNotation(match.Captures[0].Value));
+                move = new SimplePawnMove(s, Square.FromAlgebraicNotation(match.Captures[0].Value));
             }
 
             return move != default;
@@ -66,7 +73,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePieceMove(match.Groups[1].Value[0].ToPieceType(), Square.FromAlgebraicNotation(match.Groups[2].Value));
+                move = new SimplePieceMove(s, match.Groups[1].Value[0].ToPieceType(), Square.FromAlgebraicNotation(match.Groups[2].Value));
             }
 
             return move != default;
@@ -82,7 +89,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), Square.FromAlgebraicNotation(match.Groups[3].Value));
+                move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), Square.FromAlgebraicNotation(match.Groups[3].Value));
             }
 
             return move != default;
@@ -98,7 +105,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new FileMove(match.Groups[1].Value[0].ToFile(), Square.FromAlgebraicNotation(match.Groups[2].Value));
+                move = new FileMove(s, match.Groups[1].Value[0].ToFile(), Square.FromAlgebraicNotation(match.Groups[2].Value));
             }
 
             return move != default;
@@ -117,11 +124,11 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             {
                 if (string.IsNullOrEmpty(match.Groups[2].Value))
                 {
-                    move = new CastlingKingMove();
+                    move = new CastlingKingMove(s);
                 }
                 else
                 {
-                    move = new CastlingQueenMove();
+                    move = new CastlingQueenMove(s);
                 }
             }
 
@@ -129,5 +136,10 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         }
 
         protected abstract Move CreateMove(IEngine engine);
+
+        public override string ToString()
+        {
+            return Raw;
+        }
     }
 }

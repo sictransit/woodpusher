@@ -23,6 +23,6 @@ namespace SicTransit.Woodpusher.Model
             FullmoveNumber = fullmoveNumber;
         }
 
-        public static Counters Default => new Counters(PieceColour.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, null, 0, 0);
+        public static Counters Default => new(PieceColour.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, null, 0, 0);
     }
 }

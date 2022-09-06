@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         private readonly PieceType pieceType;
         private readonly Square square;
 
-        public SimplePieceMove(PieceType pieceType, Square square)
+        public SimplePieceMove(string raw, PieceType pieceType, Square square) : base(raw)
         {
             this.pieceType = pieceType;
             this.square = square;
@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         public override string ToString()
         {
-            return $"{pieceType} to {square}";
+            return $"[{base.ToString()}] {pieceType} to {square}";
         }
     }
 }

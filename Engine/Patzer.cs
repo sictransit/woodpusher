@@ -58,30 +58,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     var move = new Move(position, target);
 
-                    if (TakingOwnPiece(move))
-                    {
-                        break;
-                    }
-
-                    if (MustTakeButCannot(move))
-                    {
-                        break;
-                    }
-
-                    if (position.Piece.Type == PieceType.Pawn)
-                    {
-                        if (EnPassantWithoutTarget(move))
-                        {
-                            break;
-                        }
-
-                        if (PawnCannotTakeForward(move))
-                        {
-                            break;
-                        }
-                    }
-
-                    if (CastleButMayNot(target))
+                    if (!IsValidMove(move))
                     {
                         break;
                     }
@@ -109,5 +86,37 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool TookPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
 
+        public bool IsValidMove(Move move)
+        {
+            if (TakingOwnPiece(move))
+            {
+                return false;
+            }
+
+            if (MustTakeButCannot(move))
+            {
+                return false;
+            }
+
+            if (move.Position.Piece.Type == PieceType.Pawn)
+            {
+                if (EnPassantWithoutTarget(move))
+                {
+                    return false;
+                }
+
+                if (PawnCannotTakeForward(move))
+                {
+                    return false;
+                }
+            }
+
+            if (CastleButMayNot(move.Target))
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

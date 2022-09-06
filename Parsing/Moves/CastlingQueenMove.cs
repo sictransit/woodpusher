@@ -2,9 +2,13 @@
 {
     public class CastlingQueenMove : CastlingMove
     {
+        public CastlingQueenMove(string raw) : base(raw)
+        {
+        }
+
         public override string ToString()
         {
-            return "castle kingside";
+            return $"[{base.ToString()}] castle queenside";
         }
     }
 }

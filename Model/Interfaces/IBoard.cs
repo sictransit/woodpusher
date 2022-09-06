@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model;
 
 namespace SicTransit.Woodpusher.Model.Interfaces
 {
