@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Parsing.Exceptions;
 
 namespace SicTransit.Woodpusher.Parsing.Moves
 {
@@ -17,7 +18,21 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         protected override Move CreateMove(IEngine engine)
         {
-            return default;
+            var board = engine.Board;
+
+            var positions = board.GetPositions(board.ActiveColour, pieceType);
+
+            foreach (var position in positions)
+            {
+                var move = engine.GetMove(position, square);
+
+                if (move != null)
+                {
+                    return move;
+                }
+            }
+
+            throw new PgnParsingException(Raw, "unable to a valid move to match");
         }
 
         public override string ToString()

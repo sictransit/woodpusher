@@ -3,16 +3,15 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public IBoard Board { get; private set; }
+        public Board Board { get; private set; }        
 
-        IBoard IEngine.Board => Board;
+        private readonly Stack<Board> game;
 
         private readonly MovementCache movementCache;
 
@@ -21,13 +20,23 @@ namespace SicTransit.Woodpusher.Engine
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
 
             movementCache = new MovementCache();
+            game = new Stack<Board>();
 
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
         }
 
         public void Initialize(string position)
         {
+            game.Clear();
+
             Board = ForsythEdwardsNotation.Parse(position);
+        }
+
+        public void Play(Move move)
+        {
+            game.Push(Board);
+
+            Board = Board.Play(move);
         }
 
         public IEnumerable<Move> GetValidMoves(PieceColour colour)
@@ -41,11 +50,9 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        public bool IsChecked()
+        public bool IsChecked(Square kingSquare)
         {
-            var kingSquare = Board.FindKing(Board.ActiveColour);
-
-            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour());
+            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour()).ToArray();
 
             return validMoves.Any(m => m.Target.Square.Equals(kingSquare));
         }
@@ -58,7 +65,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     var move = new Move(position, target);
 
-                    if (!IsValidMove(move))
+                    if (!Validate(move))
                     {
                         break;
                     }
@@ -74,7 +81,7 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         // TODO: Something clever with the flags, making it easy to evaluate regardless of active colour.
-        private bool CastleButMayNot(Target move) => false;
+        private bool CastleButMayNot(Move move) => IsChecked(move.Position.Square);
 
         private bool TakingOwnPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour);
 
@@ -82,11 +89,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool PawnCannotTakeForward(Move move) => Board.IsOccupied(move.Target.Square);
 
-        private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Board.EnPassantTarget);
+        private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Board.Counters.EnPassantTarget);
 
         private bool TookPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
 
-        public bool IsValidMove(Move move)
+        private bool Validate(Move move)
         {
             if (TakingOwnPiece(move))
             {
@@ -111,12 +118,21 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (CastleButMayNot(move.Target))
+            if (CastleButMayNot(move))
             {
                 return false;
             }
 
             return true;
         }
+
+        public Move GetMove(Position position, Square targetSquare)
+        {
+            var validMoves = GetValidMoves(position);
+
+            return validMoves.SingleOrDefault(m => m.Target.Square.Equals(targetSquare));
+        }
+
+        public IEnumerable<Move> GetMoves(Position position) => GetValidMoves(position);
     }
 }

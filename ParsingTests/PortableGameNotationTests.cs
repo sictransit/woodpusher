@@ -1,5 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Tests
@@ -7,6 +10,8 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class PortableGameNotationTests
     {
+        private IEngine engine;
+
         private static string pgnFischerSpassky = @"
 [Event ""F/S Return Match""]
 [Site ""Belgrade, Serbia JUG""]
@@ -30,6 +35,8 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         public void Initialize()
         {
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
+
+            engine = new Patzer();
         }
 
         [TestMethod]
@@ -42,6 +49,15 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
 
             Assert.IsNotNull(pgn.PgnMoves);
             Assert.IsTrue(pgn.PgnMoves.Any());
+
+            foreach (var pgnMove in pgn.PgnMoves)
+            {
+                var move = pgnMove.GetMove(engine);
+
+                Log.Debug($"{pgnMove} -> {move}");
+
+                engine.Play(move);
+            }
         }
     }
 }

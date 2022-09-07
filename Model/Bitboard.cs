@@ -108,6 +108,22 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
+        public IEnumerable<Position> GetPieces(PieceType type)
+        {
+            var bitmap = GetBitmap(type);
+
+            for (int shift = 0; shift < 64; shift++)
+            {
+                var mask = 1ul << shift;
+
+                if ((bitmap & mask) != 0)
+                {
+                    yield return new Position(new Piece(type, SetColour), mask.ToSquare());
+                }
+            }
+        }
+
+
         public IEnumerable<Position> GetPieces(PieceType type, int file)
         {
             var bitmap = GetBitmap(type);
@@ -169,5 +185,6 @@ namespace SicTransit.Woodpusher.Model
             PieceType.King => new Bitboard(SetColour, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
+
     }
 }

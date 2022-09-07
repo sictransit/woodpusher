@@ -135,6 +135,8 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             return move != default;
         }
 
+        public Move GetMove(IEngine engine) => CreateMove(engine);
+
         protected abstract Move CreateMove(IEngine engine);
 
         public override string ToString()

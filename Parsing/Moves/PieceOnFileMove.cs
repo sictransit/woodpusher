@@ -29,16 +29,17 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             var positions = board.GetPositions(board.ActiveColour, pieceType, file);
 
-            var moves = positions.Select(p => new Move(p, new Target(square)));
-
-            var validMoves = moves.Where(m => engine.IsValidMove(m) && m.Target.Equals(square));
-
-            if (validMoves.Count() != 1)
+            foreach (var position in positions)
             {
-                throw new PgnParsingException(Raw, "unable to find one unique valid move to match");
+                var move = engine.GetMove(position, square);
+
+                if (move != null)
+                {
+                    return move;
+                }
             }
 
-            return new Move(validMoves.Single().Position, new Target(square));
+            throw new PgnParsingException(Raw, "unable to a valid move to match");
         }
     }
 }

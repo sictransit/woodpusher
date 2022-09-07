@@ -28,7 +28,8 @@ namespace SicTransit.Woodpusher.Parsing
 
             var activeColour = ParseActiveColour(parts[1]);
 
-            var castling = ParseCastling(parts[2]);
+            var whiteCastling = ParseCastling(parts[2], PieceColour.White);
+            var blackCastling = ParseCastling(parts[2], PieceColour.Black);
 
             var enPassantTarget = ParseEnPassantTarget(parts[3]);
 
@@ -36,7 +37,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            var counters = new Counters(activeColour, castling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            var counters = new Counters(activeColour, whiteCastling, blackCastling, enPassantTarget, halfmoveClock, fullmoveNumber);
 
             return new Board(board, counters);
         }
@@ -113,7 +114,7 @@ namespace SicTransit.Woodpusher.Parsing
             };
         }
 
-        private static Castlings ParseCastling(string s)
+        private static Castlings ParseCastling(string s, PieceColour pieceColour)
         {
             if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s, "^-$"))
             {
@@ -126,17 +127,17 @@ namespace SicTransit.Woodpusher.Parsing
             {
                 switch (c)
                 {
-                    case 'K':
-                        castlings |= Castlings.WhiteKingside;
+                    case 'K' when pieceColour == PieceColour.White:
+                        castlings |= Castlings.Kingside;
                         break;
-                    case 'Q':
-                        castlings |= Castlings.WhiteQueenside;
+                    case 'Q' when pieceColour == PieceColour.White:
+                        castlings |= Castlings.Queenside;
                         break;
-                    case 'k':
-                        castlings |= Castlings.BlackKingside;
+                    case 'k' when pieceColour == PieceColour.Black:
+                        castlings |= Castlings.Kingside;
                         break;
-                    case 'q':
-                        castlings |= Castlings.BlackQueenside;
+                    case 'q' when pieceColour == PieceColour.Black:
+                        castlings |= Castlings.Queenside;
                         break;
                 }
             }

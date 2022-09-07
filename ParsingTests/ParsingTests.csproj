@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Engine\Engine.csproj" />
     <ProjectReference Include="..\Parsing\Parsing.csproj" />
   </ItemGroup>
 

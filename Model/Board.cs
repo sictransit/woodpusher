@@ -1,10 +1,9 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using SicTransit.Woodpusher.Model.Interfaces;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Board : IBoard
+    public struct Board 
     {
         private readonly Bitboard white;
         private readonly Bitboard black;
@@ -12,10 +11,6 @@ namespace SicTransit.Woodpusher.Model
         public Counters Counters { get; init; }
 
         public PieceColour ActiveColour => Counters.ActiveColour;
-
-        public Castlings Castlings => Counters.Castlings;
-
-        public Square? EnPassantTarget => Counters.EnPassantTarget;
 
         public Board() : this(new Bitboard(PieceColour.White), new Bitboard(PieceColour.Black), Counters.Default)
         {
@@ -50,7 +45,8 @@ namespace SicTransit.Woodpusher.Model
 
         public Board Play(Move move)
         {
-            var castlings = Counters.Castlings;
+            var whiteCastlings = Counters.WhiteCastlings;
+            var blackCastlings = Counters.BlackCastlings;
             var fullmoveCounter = Counters.FullmoveNumber + (ActiveColour == PieceColour.Black ? 1 : 0);
 
             var opponentBitboard = GetBitboard(ActiveColour.OpponentColour());
@@ -71,12 +67,10 @@ namespace SicTransit.Woodpusher.Model
                 switch (ActiveColour)
                 {
                     case PieceColour.White:
-                        castlings &= ~Castlings.WhiteQueenside;
-                        castlings &= ~Castlings.WhiteKingside;
+                        whiteCastlings = Castlings.None;                        
                         break;
                     case PieceColour.Black:
-                        castlings &= ~Castlings.BlackQueenside;
-                        castlings &= ~Castlings.BlackKingside;
+                        blackCastlings = Castlings.None;                        
                         break;
                 }
             }
@@ -91,7 +85,7 @@ namespace SicTransit.Woodpusher.Model
 
             var activeColour = ActiveColour.OpponentColour();
 
-            var counters = new Counters(activeColour, castlings, enPassantTarget, halvmoveClock, fullmoveCounter);
+            var counters = new Counters(activeColour, whiteCastlings, blackCastlings, enPassantTarget, halvmoveClock, fullmoveCounter);
 
             return ActiveColour == PieceColour.White
                 ? new Board(activeBitboard, opponentBitboard, counters)
@@ -110,8 +104,12 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPositions(PieceColour colour, int file) => GetBitboard(colour).GetPieces(file);
 
+        public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type) => GetBitboard(colour).GetPieces(type);
+
         public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, int file) => GetBitboard(colour).GetPieces(type, file);
 
         public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
+
+
     }
 }

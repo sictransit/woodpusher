@@ -22,7 +22,8 @@ namespace SicTransit.Woodpusher.Tests
         {
             Assert.IsNotNull(patzer!.Board);
             Assert.AreEqual(PieceColour.White, patzer.Board.ActiveColour);
-            Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, patzer.Board.Castlings);
+            Assert.AreEqual(Castlings.Kingside | Castlings.Queenside , patzer.Board.Counters.WhiteCastlings);
+            Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.BlackCastlings);
         }
 
         [TestMethod]
@@ -106,7 +107,7 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer!.Initialize(fen);
 
-            Assert.IsTrue(patzer.IsChecked());
+            Assert.IsTrue(patzer.IsChecked(patzer.Board.FindKing(PieceColour.White)));
 
         }
 
@@ -115,7 +116,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             patzer!.Initialize(ForsythEdwardsNotation.StartingPosition);
 
-            Assert.IsFalse(patzer.IsChecked());
+            Assert.IsFalse(patzer.IsChecked(patzer.Board.FindKing(PieceColour.White)));
         }
 
     }

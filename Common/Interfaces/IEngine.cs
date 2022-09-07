@@ -1,12 +1,15 @@
 ﻿using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Interfaces;
 
 namespace SicTransit.Woodpusher.Common.Interfaces
 {
     public interface IEngine
     {
-        IBoard Board { get; }
+        Board Board { get; }
 
-        bool IsValidMove(Move move);
+        Move GetMove(Position position, Square targetSquare);
+
+        IEnumerable<Move> GetMoves(Position position);
+
+        void Play(Move move);
     }
 }
