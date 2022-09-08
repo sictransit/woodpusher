@@ -3,7 +3,7 @@ using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Board 
+    public struct Board
     {
         private readonly Bitboard white;
         private readonly Bitboard black;
@@ -67,10 +67,10 @@ namespace SicTransit.Woodpusher.Model
                 switch (ActiveColour)
                 {
                     case PieceColour.White:
-                        whiteCastlings = Castlings.None;                        
+                        whiteCastlings = Castlings.None;
                         break;
                     case PieceColour.Black:
-                        blackCastlings = Castlings.None;                        
+                        blackCastlings = Castlings.None;
                         break;
                 }
             }

@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public Board Board { get; private set; }        
+        public Board Board { get; private set; }
 
         private readonly Stack<Board> game;
 

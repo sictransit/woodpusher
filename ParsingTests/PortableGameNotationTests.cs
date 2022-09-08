@@ -52,6 +52,8 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
 
             foreach (var pgnMove in pgn.PgnMoves)
             {
+                // TODO: Implement a take flag, instead of CannotTake! It is easier to validate checks if you only filter on takes. Hopefully!
+
                 var move = pgnMove.GetMove(engine);
 
                 Log.Information($"{pgnMove} -> {move}");
