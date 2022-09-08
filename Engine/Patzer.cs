@@ -54,9 +54,11 @@ namespace SicTransit.Woodpusher.Engine
         {
             var checkMask = movementCache.GetCheckMask(kingSquare);
 
-            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour(), checkMask).ToArray();
+            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour(), checkMask)
+                .Where(m => !m.Target.Flags.HasFlag(SpecialMove.CannotTake))
+                .Where(m => m.Target.Square.Equals(kingSquare));
 
-            return validMoves.Any(m => m.Target.Square.Equals(kingSquare));
+            return validMoves.Any();
         }
 
         private IEnumerable<Move> GetValidMoves(Position position)
