@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     internal class MovementCache
     {
-        private readonly Dictionary<Position, List<Target[]>> vectors = new();
+        private readonly Dictionary<Piece, Dictionary<Square, List<Target[]>>> vectors = new();
         private readonly Dictionary<Square, ulong> checks = new();
 
         public MovementCache()
@@ -24,11 +24,13 @@ namespace SicTransit.Woodpusher.Engine
 
             pieces.ForEach(piece =>
             {
+                vectors.Add(piece, new Dictionary<Square, List<Target[]>>());
+
                 squares.ForEach(square =>
                 {
                     var position = new Position(piece, square);
 
-                    vectors.Add(position, CreateVectors(position).Select(v => v.ToArray()).ToList());
+                    vectors[piece].Add(square, CreateVectors(position).Select(v => v.ToArray()).ToList());
 
                     Log.Debug($"Calculated vectors: {position}");
                 });
@@ -62,7 +64,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public List<Target[]> GetVectors(Position position)
         {
-            return vectors[position];
+            return vectors[position.Piece][position.Square];
         }
 
         public ulong GetCheckMask(Square square)

@@ -2,7 +2,7 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Target
+    public class Target
     {
         public Target(Square square) : this(square, SpecialMove.None)
         {

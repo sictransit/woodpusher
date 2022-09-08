@@ -39,9 +39,9 @@ namespace SicTransit.Woodpusher.Engine
             Board = Board.Play(move);
         }
 
-        public IEnumerable<Move> GetValidMoves(PieceColour colour)
+        public IEnumerable<Move> GetValidMoves(PieceColour colour, ulong mask = ulong.MaxValue)
         {
-            foreach (var position in Board.GetPositions(colour))
+            foreach (var position in Board.GetPositions(colour, mask))
             {
                 foreach (var move in GetValidMoves(position))
                 {
@@ -52,7 +52,9 @@ namespace SicTransit.Woodpusher.Engine
 
         public bool IsChecked(Square kingSquare)
         {
-            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour()).ToArray();
+            var checkMask = movementCache.GetCheckMask(kingSquare);
+
+            var validMoves = GetValidMoves(Board.ActiveColour.OpponentColour(), checkMask).ToArray();
 
             return validMoves.Any(m => m.Target.Square.Equals(kingSquare));
         }
@@ -70,6 +72,17 @@ namespace SicTransit.Woodpusher.Engine
                         break;
                     }
 
+                    if (move.Position.Piece.Type == PieceType.King)
+                    {
+                        if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen) || move.Target.Flags.HasFlag(SpecialMove.CastleKing))
+                        {
+                            if (CastleFromOrIntoCheck(move))
+                            {
+                                break;
+                            }
+                        }
+                    }
+
                     yield return move;
 
                     if (TookPiece(move))
@@ -81,7 +94,7 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         // TODO: Something clever with the flags, making it easy to evaluate regardless of active colour.
-        private bool CastleButMayNot(Move move) => IsChecked(move.Position.Square);
+        private bool CastleFromOrIntoCheck(Move move) => IsChecked(move.Position.Square) || IsChecked(move.Target.ReferenceSquare!.Value) || IsChecked(move.Target.Square);
 
         private bool TakingOwnPiece(Move move) => Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour);
 
@@ -118,11 +131,6 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (CastleButMayNot(move))
-            {
-                return false;
-            }
-
             return true;
         }
 
@@ -130,7 +138,9 @@ namespace SicTransit.Woodpusher.Engine
         {
             var validMoves = GetValidMoves(position);
 
-            return validMoves.SingleOrDefault(m => m.Target.Square.Equals(targetSquare));
+            Move move = validMoves.SingleOrDefault(m => m.Target.Square.Equals(targetSquare));
+
+            return move;
         }
 
         public IEnumerable<Move> GetMoves(Position position) => GetValidMoves(position);

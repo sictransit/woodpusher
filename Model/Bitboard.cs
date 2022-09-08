@@ -123,6 +123,18 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
+        internal IEnumerable<Position> GetPieces(ulong mask)
+        {
+            for (int shift = 0; shift < 64; shift++)
+            {
+                var checkMask = mask & (1ul << shift);
+
+                if (checkMask != 0 && IsOccupied(checkMask))
+                {
+                    yield return new Position(Peek(checkMask), checkMask.ToSquare());
+                }
+            }
+        }
 
         public IEnumerable<Position> GetPieces(PieceType type, int file)
         {
@@ -185,6 +197,5 @@ namespace SicTransit.Woodpusher.Model
             PieceType.King => new Bitboard(SetColour, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
-
     }
 }

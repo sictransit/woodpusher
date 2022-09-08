@@ -34,7 +34,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         [TestInitialize]
         public void Initialize()
         {
-            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
+            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
 
             engine = new Patzer();
         }
@@ -54,7 +54,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
             {
                 var move = pgnMove.GetMove(engine);
 
-                Log.Debug($"{pgnMove} -> {move}");
+                Log.Information($"{pgnMove} -> {move}");
 
                 engine.Play(move);
             }
