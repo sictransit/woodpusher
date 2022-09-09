@@ -72,18 +72,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (!Validate(move))
                     {
                         break;
-                    }
-
-                    if (move.Position.Piece.Type == PieceType.King)
-                    {
-                        if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen) || move.Target.Flags.HasFlag(SpecialMove.CastleKing))
-                        {
-                            if (CastleFromOrIntoCheck(move))
-                            {
-                                break;
-                            }
-                        }
-                    }
+                    }                    
 
                     yield return move;
 
@@ -130,6 +119,17 @@ namespace SicTransit.Woodpusher.Engine
                 if (PawnCannotTakeForward(move))
                 {
                     return false;
+                }
+            }
+
+            if (move.Position.Piece.Type == PieceType.King)
+            {
+                if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen) || move.Target.Flags.HasFlag(SpecialMove.CastleKing))
+                {
+                    if (CastleFromOrIntoCheck(move))
+                    {
+                        return false;
+                    }
                 }
             }
 
