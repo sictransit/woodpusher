@@ -26,6 +26,7 @@ namespace SicTransit.Woodpusher.Model
         {
             this.white = white;
             this.black = black;
+
             Counters = counters;
         }
 

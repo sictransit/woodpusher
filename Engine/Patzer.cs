@@ -72,7 +72,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (!Validate(move))
                     {
                         break;
-                    }                    
+                    }
 
                     yield return move;
 
