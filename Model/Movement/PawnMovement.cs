@@ -1,8 +1,7 @@
-﻿
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 
-namespace SicTransit.Woodpusher.Engine.Movement
+namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class PawnMovement
     {

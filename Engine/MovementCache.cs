@@ -1,8 +1,8 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Engine.Movement;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Movement;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -10,6 +10,8 @@ namespace SicTransit.Woodpusher.Engine
     {
         private readonly Dictionary<Piece, Dictionary<Square, List<Target[]>>> vectors = new();
         private readonly Dictionary<Square, ulong> checks = new();
+
+        
 
         public MovementCache()
         {

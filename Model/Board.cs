@@ -3,7 +3,7 @@ using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Board
+    public class Board
     {
         private readonly Bitboard white;
         private readonly Bitboard black;

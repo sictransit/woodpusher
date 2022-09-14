@@ -1,6 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model;
 
-namespace SicTransit.Woodpusher.Engine.Movement
+namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class KnightMovement
     {

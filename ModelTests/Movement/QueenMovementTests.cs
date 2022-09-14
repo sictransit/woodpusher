@@ -1,24 +1,25 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Movement;
 
-namespace SicTransit.Woodpusher.Engine.Movement.Tests
+namespace SicTransit.Woodpusher.Tests.Movement
 {
     [TestClass()]
-    public class KnightMovementTests
+    public class QueenMovementTests
     {
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            var d4 = new Square("d4");
+            var b2 = new Square("b2");
 
             var targets = new List<Target>();
 
-            foreach (var vector in KnightMovement.GetTargetVectors(d4))
+            foreach (var vector in QueenMovement.GetTargetVectors(b2))
             {
                 targets.AddRange(vector);
             }
 
-            Assert.AreEqual(8, targets.Count);
+            Assert.AreEqual(23, targets.Count);
         }
     }
 }
