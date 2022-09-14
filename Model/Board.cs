@@ -130,6 +130,8 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, int file) => GetBitboard(colour).GetPieces(type, file);
 
+        public IEnumerable<Position> GetPositionsByTypeAndMask(PieceColour colour, PieceType type, ulong mask) => GetBitboard(colour).GetPieces(type, mask);
+
         public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
 
         public IEnumerable<Position> GetAttackers(Square square)
@@ -139,10 +141,17 @@ namespace SicTransit.Woodpusher.Model
                 return Enumerable.Empty<Position>();
             }
 
-            var targetPiece = Get(square);
+            var threatMask = Attacks.GetThreatMask(ActiveColour, square);
+
+            var queens = GetPositionsByTypeAndMask(ActiveColour.OpponentColour(), PieceType.Queen, threatMask.QueenMask);
+
             return null;
 
         }
 
+        private object GetPositions(PieceColour pieceColour, PieceType queen, ulong queenMask)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -40,8 +40,8 @@ namespace SicTransit.Woodpusher.Tests.Lookup
             var attacks = new Attacks();
 
             var threats = attacks.GetThreatMask(PieceColour.White, new Square("e8"));
-            
-            Assert.AreEqual(0, threats.PawnMask.ToSquares().Count());            
+
+            Assert.AreEqual(0, threats.PawnMask.ToSquares().Count());
             Assert.AreEqual(4, threats.KnightMask.ToSquares().Count());
             Assert.AreEqual(21, threats.QueenMask.ToSquares().Count());
             Assert.AreEqual(14, threats.RookMask.ToSquares().Count());

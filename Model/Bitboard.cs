@@ -123,6 +123,15 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
+        public IEnumerable<Position> GetPieces(PieceType type, ulong mask)
+        {
+            var bitmap = GetBitmap(type);
+
+            var setColour = SetColour;
+
+            return (bitmap & mask).ToSquares().Select(s => new Position(new Piece(type, setColour), s));
+        }
+
         internal IEnumerable<Position> GetPieces(ulong mask)
         {
             for (int shift = 0; shift < 64; shift++)

@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Movement;
 
