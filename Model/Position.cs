@@ -2,7 +2,7 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public class Position
+    public struct Position
     {
         public Position(Piece piece, Square square)
         {

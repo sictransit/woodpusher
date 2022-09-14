@@ -113,5 +113,17 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
 
+        public IEnumerable<Position> GetAttackers(Square square)
+        {
+            if (!IsOccupied(square))
+            {
+                return Enumerable.Empty<Position>();
+            }
+
+            var targetPiece = Get(square);
+
+
+        }
+
     }
 }

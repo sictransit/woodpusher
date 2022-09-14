@@ -11,8 +11,6 @@ namespace SicTransit.Woodpusher.Engine
         private readonly Dictionary<Piece, Dictionary<Square, List<Target[]>>> vectors = new();
         private readonly Dictionary<Square, ulong> checks = new();
 
-        
-
         public MovementCache()
         {
             InitializeVectors();
