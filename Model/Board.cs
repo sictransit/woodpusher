@@ -1,5 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Lookup;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -9,6 +10,10 @@ namespace SicTransit.Woodpusher.Model
         private readonly Bitboard black;
 
         public Counters Counters { get; init; }
+
+        public Attacks Attacks { get; init; }
+
+        public Moves Moves { get; init; }
 
         public PieceColour ActiveColour => Counters.ActiveColour;
 
@@ -22,25 +27,39 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        internal Board(Bitboard white, Bitboard black, Counters counters)
+        internal static Board NewBoardCopyWhite(Board board, Bitboard black)
+        {
+            return new Board(board.white, black, board.Counters, board.Moves, board.Attacks);
+        }
+
+        internal static Board NewBoardCopyBlack(Board board, Bitboard white)
+        {
+            return new Board(white, board.black, board.Counters, board.Moves, board.Attacks);
+        }
+
+
+        internal Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null)
         {
             this.white = white;
             this.black = black;
 
             Counters = counters;
+
+            Moves = moves ?? new Moves();
+            Attacks = attacks ?? new Attacks();
         }
 
         public Board AddPiece(Square square, Piece piece) => piece.Colour switch
         {
-            PieceColour.White => new Board(white.Add(piece.Type, square), black, Counters),
-            PieceColour.Black => new Board(white, black.Add(piece.Type, square), Counters),
+            PieceColour.White => NewBoardCopyBlack(this, white.Add(piece.Type, square)),
+            PieceColour.Black => NewBoardCopyWhite(this, black.Add(piece.Type, square)),
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
         public Board RemovePiece(Square square, Piece piece) => piece.Colour switch
         {
-            PieceColour.White => new Board(white.Remove(piece.Type, square), black, Counters),
-            PieceColour.Black => new Board(white, black.Remove(piece.Type, square), Counters),
+            PieceColour.White => NewBoardCopyBlack(this, white.Remove(piece.Type, square)),
+            PieceColour.Black => NewBoardCopyWhite(this, black.Remove(piece.Type, square)),
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
@@ -76,7 +95,7 @@ namespace SicTransit.Woodpusher.Model
                 }
             }
 
-            var halvmoveClock = (move.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue) ? 0 : Counters.HalfmoveClock + 1;
+            var halfmoveClock = (move.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue) ? 0 : Counters.HalfmoveClock + 1;
             Square? enPassantTarget = null;
 
             if (move.Position.Piece.Type == PieceType.Pawn)
@@ -86,11 +105,11 @@ namespace SicTransit.Woodpusher.Model
 
             var activeColour = ActiveColour.OpponentColour();
 
-            var counters = new Counters(activeColour, whiteCastlings, blackCastlings, enPassantTarget, halvmoveClock, fullmoveCounter);
+            var counters = new Counters(activeColour, whiteCastlings, blackCastlings, enPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColour == PieceColour.White
-                ? new Board(activeBitboard, opponentBitboard, counters)
-                : new Board(opponentBitboard, activeBitboard, counters);
+                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks)
+                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks);
         }
 
         public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);

@@ -3,13 +3,13 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Movement;
 
-namespace SicTransit.Woodpusher.Engine
+namespace SicTransit.Woodpusher.Model.Lookup
 {
-    internal class MovementCache
+    public class Moves
     {
         private readonly Dictionary<Piece, Dictionary<Square, List<Target[]>>> vectors = new();
 
-        public MovementCache()
+        public Moves()
         {
             InitializeVectors();
         }
@@ -33,7 +33,6 @@ namespace SicTransit.Woodpusher.Engine
                 });
             });
         }
-
 
         public List<Target[]> GetVectors(Position position)
         {

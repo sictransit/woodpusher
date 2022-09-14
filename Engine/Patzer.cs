@@ -3,6 +3,7 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Lookup;
 using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Engine
@@ -13,13 +14,13 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stack<Board> game;
 
-        private readonly MovementCache movementCache;
+        private readonly Moves movementCache;
 
         public Patzer()
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug);
 
-            movementCache = new MovementCache();
+            movementCache = new Moves();
             game = new Stack<Board>();
 
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
