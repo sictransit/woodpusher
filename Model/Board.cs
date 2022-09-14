@@ -121,7 +121,7 @@ namespace SicTransit.Woodpusher.Model
             }
 
             var targetPiece = Get(square);
-
+            return null;
 
         }
 

@@ -1,6 +1,4 @@
-﻿using SicTransit.Woodpusher.Model;
-
-namespace SicTransit.Woodpusher.Model.Movement
+﻿namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class RookMovement
     {

@@ -24,5 +24,20 @@ namespace SicTransit.Woodpusher.Tests.Extensions
             Assert.AreEqual(new Square("b2"), (1ul << 9).ToSquare());
             Assert.AreEqual(new Square("h8"), (1ul << 63).ToSquare());
         }
+
+        [TestMethod()]
+        public void ToSquaresTest()
+        {
+            var a1 = new Square("a1");
+            var h8 = new Square("h8");
+
+            var mask = a1.ToMask();
+            mask |= h8.ToMask();
+
+            var squares = mask.ToSquares().ToArray();
+
+            Assert.IsTrue(squares.Contains(a1));
+            Assert.IsTrue(squares.Contains(h8));
+        }
     }
 }

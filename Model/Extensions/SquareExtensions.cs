@@ -22,9 +22,10 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             for (int i = 0; i < 64; i++)
             {
-                if (((1ul >> i) & mask) == 1)
+                var test = 1ul << i;
+                if ((test & mask) != 0)
                 {
-                    yield return ToSquare(mask);
+                    yield return ToSquare(test);
                 }
             }
         }
