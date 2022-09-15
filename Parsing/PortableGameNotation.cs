@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Parsing
 {
     public class PortableGameNotation
     {
-        private static Regex ResultRegex = new(@"(0\-0|1-1|1\/2-1\/2|\*)", RegexOptions.Compiled);
+        private static Regex ResultRegex = new(@"(1\-0|0-1|1\/2-1\/2|\*)", RegexOptions.Compiled);
 
         public IDictionary<string, string> Tags { get; private set; }
 
