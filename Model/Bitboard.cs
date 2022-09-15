@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Model
 
         public bool IsOccupied(Square square) => IsOccupied(square.ToMask());
 
-        private bool IsOccupied(ulong mask) => (All & mask) != 0;
+        public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         private Bitboard Add(PieceType pieceType, ulong mask)
         {

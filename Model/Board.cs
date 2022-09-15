@@ -114,6 +114,8 @@ namespace SicTransit.Woodpusher.Model
 
         public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);
 
+        public bool IsOccupied(ulong mask) => white.IsOccupied(mask) || black.IsOccupied(mask);
+
         public bool IsOccupied(Square square, PieceColour colour) => GetBitboard(colour).IsOccupied(square);
 
         private Bitboard GetBitboard(PieceColour colour) => colour == PieceColour.White ? white : black;
@@ -130,7 +132,7 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, int file) => GetBitboard(colour).GetPieces(type, file);
 
-        public IEnumerable<Position> GetPositionsByTypeAndMask(PieceColour colour, PieceType type, ulong mask) => GetBitboard(colour).GetPieces(type, mask);
+        public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, ulong mask) => GetBitboard(colour).GetPieces(type, mask);
 
         public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
 
@@ -138,20 +140,59 @@ namespace SicTransit.Woodpusher.Model
         {
             if (!IsOccupied(square))
             {
-                return Enumerable.Empty<Position>();
+                yield break;
             }
 
             var threatMask = Attacks.GetThreatMask(ActiveColour, square);
+            var opponentColour = ActiveColour.OpponentColour();
 
-            var queens = GetPositionsByTypeAndMask(ActiveColour.OpponentColour(), PieceType.Queen, threatMask.QueenMask);
+            foreach (var pawn in GetPositions(opponentColour, PieceType.Pawn, threatMask.PawnMask))
+            {
+                if (!IsOccupied(pawn.Square.ToTravelMask(square)))
+                {
+                    yield return pawn;
+                }
+            }
 
-            return null;
+            foreach (var queen in GetPositions(opponentColour, PieceType.Queen, threatMask.QueenMask))
+            {
+                if (!IsOccupied(queen.Square.ToTravelMask(square)))
+                {
+                    yield return queen;
+                }
+            }
 
-        }
+            foreach (var rook in GetPositions(opponentColour, PieceType.Rook, threatMask.RookMask))
+            {
+                if (!IsOccupied(rook.Square.ToTravelMask(square)))
+                {
+                    yield return rook;
+                }
+            }
 
-        private object GetPositions(PieceColour pieceColour, PieceType queen, ulong queenMask)
-        {
-            throw new NotImplementedException();
+            foreach (var knight in GetPositions(opponentColour, PieceType.Knight, threatMask.KnightMask))
+            {
+                if (!IsOccupied(knight.Square.ToTravelMask(square)))
+                {
+                    yield return knight;
+                }
+            }
+
+            foreach (var bishop in GetPositions(opponentColour, PieceType.Bishop, threatMask.BishopMask))
+            {
+                if (!IsOccupied(bishop.Square.ToTravelMask(square)))
+                {
+                    yield return bishop;
+                }
+            }
+
+            foreach (var king in GetPositions(opponentColour, PieceType.King, threatMask.KingMask))
+            {
+                if (!IsOccupied(king.Square.ToTravelMask(square)))
+                {
+                    yield return king;
+                }
+            }
         }
     }
 }

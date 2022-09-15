@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Tests
@@ -202,5 +203,18 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
         }
+
+        [TestMethod()]
+        public void GetAttackersTest()
+        {
+            var board = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
+
+            var attackers = board.GetAttackers(new Square("f7")).ToArray();
+
+            Assert.AreEqual(2, attackers.Length);
+            Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Queen && a.Piece.Colour == PieceColour.White));
+            Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Bishop && a.Piece.Colour == PieceColour.White));
+        }
+
     }
 }
