@@ -148,7 +148,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var pawn in GetPositions(opponentColour, PieceType.Pawn, threatMask.PawnMask))
             {
-                if (!IsOccupied(pawn.Square.ToTravelMask(square)))
+                if (!IsOccupied(Moves.GetTravelMask(pawn.Square, square)))
                 {
                     yield return pawn;
                 }
@@ -156,7 +156,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var queen in GetPositions(opponentColour, PieceType.Queen, threatMask.QueenMask))
             {
-                if (!IsOccupied(queen.Square.ToTravelMask(square)))
+                if (!IsOccupied(Moves.GetTravelMask(queen.Square, square)))
                 {
                     yield return queen;
                 }
@@ -164,7 +164,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var rook in GetPositions(opponentColour, PieceType.Rook, threatMask.RookMask))
             {
-                if (!IsOccupied(rook.Square.ToTravelMask(square)))
+                if (!IsOccupied(Moves.GetTravelMask(rook.Square, square)))
                 {
                     yield return rook;
                 }
@@ -172,7 +172,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var knight in GetPositions(opponentColour, PieceType.Knight, threatMask.KnightMask))
             {
-                if (!IsOccupied(knight.Square.ToTravelMask(square)))
+                if (!IsOccupied(Moves.GetTravelMask(knight.Square, square)))
                 {
                     yield return knight;
                 }
@@ -180,7 +180,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var bishop in GetPositions(opponentColour, PieceType.Bishop, threatMask.BishopMask))
             {
-                if (!IsOccupied(bishop.Square.ToTravelMask(square)))
+                if (!IsOccupied(Moves.GetTravelMask(bishop.Square, square)))
                 {
                     yield return bishop;
                 }
@@ -188,7 +188,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var king in GetPositions(opponentColour, PieceType.King, threatMask.KingMask))
             {
-                if (!IsOccupied(king.Square.ToTravelMask(square)))
+                if (!IsOccupied(Moves.GetTravelMask(king.Square, square)))
                 {
                     yield return king;
                 }

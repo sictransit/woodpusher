@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Movement;
 
 namespace SicTransit.Woodpusher.Model.Lookup
@@ -7,11 +8,31 @@ namespace SicTransit.Woodpusher.Model.Lookup
     public class Moves
     {
         private readonly Dictionary<Piece, Dictionary<Square, List<Target[]>>> vectors = new();
+        private readonly Dictionary<Square, Dictionary<Square, ulong>> travelMasks = new();
 
         public Moves()
         {
             InitializeVectors();
+
+            InitializeTravelMasks();
         }
+
+        private void InitializeTravelMasks()
+        {
+            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToArray();
+
+            foreach (var square in squares)
+            {
+                travelMasks.Add(square, new Dictionary<Square, ulong>());
+
+                foreach (var target in squares)
+                {
+                    travelMasks[square].Add(target, square.ToTravelMask(target));
+                }
+            }
+        }
+
+        public ulong GetTravelMask(Square square, Square target) => travelMasks[square][target];
 
         private void InitializeVectors()
         {
