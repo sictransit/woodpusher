@@ -1,5 +1,4 @@
-﻿using Serilog;
-using SicTransit.Woodpusher.Model.Enums;
+﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Movement;
 
@@ -49,7 +48,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
                     vectors[piece].Add(square, CreateVectors(position).Select(v => v.ToArray()).ToList());
 
-                    Log.Debug($"Calculated vectors: {position}");
+                    //Log.Debug($"Calculated vectors: {position}");
                 });
             });
         }

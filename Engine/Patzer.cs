@@ -86,7 +86,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool MustTakeButCannot(Move move) => move.Target.Flags.HasFlag(SpecialMove.MustTake) && (!Board.IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour()));
 
-        private bool PawnCannotTakeForward(Move move) => Board.IsOccupied(move.Target.Square);
+        private bool PawnCannotTakeForward(Move move) => move.Target.Flags.HasFlag(SpecialMove.CannotTake) && Board.IsOccupied(move.Target.Square);
 
         private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Board.Counters.EnPassantTarget);
 

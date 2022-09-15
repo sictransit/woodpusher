@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public abstract class PgnMove
     {
-        protected string Raw { get; init; }
+        public string Raw { get; init; }
 
         public PgnMove(string raw)
         {

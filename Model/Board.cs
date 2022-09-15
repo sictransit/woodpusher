@@ -96,8 +96,8 @@ namespace SicTransit.Woodpusher.Model
 
                 if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen))
                 {
-                    activeBitboard = activeBitboard.SetColour == PieceColour.White ? 
-                        activeBitboard.Move(PieceType.Rook, new Square("a1"), new Square("d1")) : 
+                    activeBitboard = activeBitboard.SetColour == PieceColour.White ?
+                        activeBitboard.Move(PieceType.Rook, new Square("a1"), new Square("d1")) :
                         activeBitboard.Move(PieceType.Rook, new Square("a8"), new Square("d8"));
                 }
                 else if (move.Target.Flags.HasFlag(SpecialMove.CastleKing))
