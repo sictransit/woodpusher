@@ -93,6 +93,19 @@ namespace SicTransit.Woodpusher.Model
                         blackCastlings = Castlings.None;
                         break;
                 }
+
+                if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen))
+                {
+                    activeBitboard = activeBitboard.SetColour == PieceColour.White ? 
+                        activeBitboard.Move(PieceType.Rook, new Square("a1"), new Square("d1")) : 
+                        activeBitboard.Move(PieceType.Rook, new Square("a8"), new Square("d8"));
+                }
+                else if (move.Target.Flags.HasFlag(SpecialMove.CastleKing))
+                {
+                    activeBitboard = activeBitboard.SetColour == PieceColour.White ?
+                        activeBitboard.Move(PieceType.Rook, new Square("h1"), new Square("f1")) :
+                        activeBitboard.Move(PieceType.Rook, new Square("h8"), new Square("f8"));
+                }
             }
 
             var halfmoveClock = (move.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue) ? 0 : Counters.HalfmoveClock + 1;
