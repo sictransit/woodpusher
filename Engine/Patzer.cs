@@ -119,12 +119,22 @@ namespace SicTransit.Woodpusher.Engine
 
             if (move.Position.Piece.Type == PieceType.King)
             {
-                if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen) || move.Target.Flags.HasFlag(SpecialMove.CastleKing))
+                var flags = move.Target.Flags;
+                var castlings = Board.ActiveColour == PieceColour.White ? Board.Counters.WhiteCastlings : Board.Counters.BlackCastlings;
+
+                if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
                 {
-                    if (CastleFromOrIntoCheck(move))
-                    {
-                        return false;
-                    }
+                    return false;
+                }
+
+                if (flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
+                {
+                    return false;
+                }
+
+                if ((flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing)) && CastleFromOrIntoCheck(move))
+                {
+                    return false;
                 }
             }
 
