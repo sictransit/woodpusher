@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public bool IsChecked(Square kingSquare)
         {
-            return false;
+            return Board.GetAttackers(kingSquare).Any();
         }
 
         private IEnumerable<Move> GetValidMoves(Position position)

@@ -42,7 +42,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         [TestMethod]
         public void ParseTest()
         {
-            Assert.Fail("not implemented yet");
+            //Assert.Fail("not implemented yet");
 
             var pgn = PortableGameNotation.Parse(pgnFischerSpassky);
 
