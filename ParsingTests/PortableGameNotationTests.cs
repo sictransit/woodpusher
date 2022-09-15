@@ -3,7 +3,7 @@ using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Engine;
-using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Tests
@@ -43,8 +43,6 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         [TestMethod]
         public void ParseTest()
         {
-            //Assert.Fail("not implemented yet");
-
             var pgn = PortableGameNotation.Parse(pgnFischerSpassky);
 
             Assert.IsNotNull(pgn.Tags);
@@ -55,18 +53,14 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
 
             foreach (var pgnMove in pgn.PgnMoves)
             {
-                // TODO: Implement a take flag, instead of CannotTake! It is easier to validate checks if you only filter on takes. Hopefully!
-
-                Log.Information($"parsing: {pgnMove}");
-
                 var move = pgnMove.GetMove(engine);
 
                 Log.Information($"{pgnMove} -> {move}");
 
                 engine.Play(move);
-
-                Log.Information(Environment.NewLine + engine.Board.PrettyPrint());
             }
+
+            Assert.AreEqual(Result.Draw, pgn.Result);
         }
     }
 }
