@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Parsing;
+using System.Diagnostics;
 
 namespace SicTransit.Woodpusher
 {
@@ -18,6 +19,8 @@ namespace SicTransit.Woodpusher
             foreach (var move in patzer.GetValidMoves(patzer.Board.ActiveColour))
             {
                 Log.Debug(move.ToString());
+
+                Debugger.Launch();
             }
         }
     }

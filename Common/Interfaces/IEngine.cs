@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
     {
         Board Board { get; }
 
-        Move GetMove(Position position, Square targetSquare);
+        Move? GetMove(Position position, Square targetSquare);
 
         IEnumerable<Move> GetMoves(Position position);
 

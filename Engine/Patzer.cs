@@ -141,13 +141,11 @@ namespace SicTransit.Woodpusher.Engine
             return true;
         }
 
-        public Move GetMove(Position position, Square targetSquare)
+        public Move? GetMove(Position position, Square targetSquare)
         {
-            var validMoves = GetValidMoves(position);
+            var validMoves = GetValidMoves(position);            
 
-            Move move = validMoves.SingleOrDefault(m => m.Target.Square.Equals(targetSquare));
-
-            return move;
+            return validMoves.SingleOrDefault(m => m.Target.Square.Equals(targetSquare));
         }
 
         public IEnumerable<Move> GetMoves(Position position) => GetValidMoves(position);
