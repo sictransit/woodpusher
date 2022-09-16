@@ -7,9 +7,9 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public abstract class PgnMove
     {
-        public string Raw { get; init; }
+        protected string Raw { get; }
 
-        public PgnMove(string raw)
+        protected PgnMove(string raw)
         {
             Raw = raw;
         }
@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             Regex regex = new(@"^([a-h][1-8])$"); // e4
 
-            Match match = regex.Match(s);
+            var match = regex.Match(s);
 
             if (match.Success)
             {
@@ -69,7 +69,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             Regex regex = new(@"^([PRNBQK])([a-h][1-8])$"); // Nf3
 
-            Match match = regex.Match(s);
+            var match = regex.Match(s);
 
             if (match.Success)
             {
@@ -85,7 +85,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             Regex regex = new(@"^([PRNBQK])([a-h])([a-h][1-8])$"); // Nbd7
 
-            Match match = regex.Match(s);
+            var match = regex.Match(s);
 
             if (match.Success)
             {
@@ -101,7 +101,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             Regex regex = new(@"^([a-h])([a-h][1-8])$"); // cb5
 
-            Match match = regex.Match(s);
+            var match = regex.Match(s);
 
             if (match.Success)
             {

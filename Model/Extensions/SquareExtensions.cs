@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
         public static IEnumerable<Square> ToSquares(this ulong mask)
         {
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 var test = 1ul << i;
                 if ((test & mask) != 0)
@@ -53,14 +53,14 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             if (distance < 2)
             {
-                // No squares inbetween.
+                // No squares in between.
                 yield break;
             }
 
             var df = Math.Sign(deltaFile);
             var dr = Math.Sign(deltaRank);
 
-            for (int step = 1; step < distance; step++)
+            for (var step = 1; step < distance; step++)
             {
                 yield return square.AddFileAndRank(df * step, dr * step);
             }

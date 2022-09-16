@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Tests.Extensions
     [TestClass()]
     public class PgnExtensionsTests
     {
-        private static string pgn = @"
+        private const string Pgn = @"
 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 {This opening is called the Ruy Lopez.}
 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4 Nbd7 { This is
 a multiline annotation. } 11. c4 c6 12. cxb5 axb5 13. Nc3 Bb7 14. Bg5 b4 15. Nb1 
@@ -21,7 +21,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         [TestMethod]
         public void RemoveCommentsTest()
         {
-            var cleaned = pgn.RemoveComments();
+            var cleaned = Pgn.RemoveComments();
 
             Assert.IsTrue(!cleaned.Contains('{') && !cleaned.Contains('}'));
         }
@@ -29,7 +29,7 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
         [TestMethod]
         public void RemoveVariationsTest()
         {
-            var cleaned = pgn.RemoveVariations();
+            var cleaned = Pgn.RemoveVariations();
 
             Assert.IsTrue(!cleaned.Contains('(') && !cleaned.Contains(')'));
         }

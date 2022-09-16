@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher
 
                 client.SendFrame(line!);
 
-                string response = client.ReceiveFrameString();
+                var response = client.ReceiveFrameString();
 
                 Log.Information($"Received: {response}");
             }

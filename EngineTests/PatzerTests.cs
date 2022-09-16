@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             Assert.IsNotNull(patzer!.Board);
 
-            Assert.AreEqual(PieceColour.White, patzer.Board.ActiveColour);
+            Assert.AreEqual(PieceColor.White, patzer.Board.ActiveColor);
 
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.BlackCastlings);

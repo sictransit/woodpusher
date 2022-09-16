@@ -3,42 +3,44 @@ using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
-    internal struct Bitboard
+    internal class Bitboard
     {
         // 00 .. 63
         // A1 .. H8
 
-        public Bitboard(PieceColour colour, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
+        public Bitboard(PieceColor color, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
         {
-            Colour = colour;
-            Pawn = pawn;
-            Rook = rook;
-            Knight = knight;
-            Bishop = bishop;
-            Queen = queen;
-            King = king;
+            this.color = color;
+            this.pawn = pawn;
+            this.rook = rook;
+            this.knight = knight;
+            this.bishop = bishop;
+            this.queen = queen;
+            this.king = king;
 
-            All = Pawn | Rook | Knight | Bishop | Queen | King;
+            all = this.pawn | this.rook | this.knight | this.bishop | this.queen | this.king;
         }
 
-        public PieceColour Colour { get; }
+        private readonly PieceColor color;
 
-        public ulong All { get; private set; }
+        private readonly ulong all;
 
-        public ulong Pawn { get; init; }
-        public ulong Rook { get; init; }
-        public ulong Knight { get; init; }
-        public ulong Bishop { get; init; }
-        public ulong Queen { get; init; }
-        public ulong King { get; init; }
+        private readonly ulong pawn;
+        private readonly ulong rook;
+        private readonly ulong knight;
+        private readonly ulong bishop;
+        private readonly ulong queen;
+        private readonly ulong king;
+
+        public Square FindKing() => king.ToSquare();
 
         public bool IsOccupied(Square square) => IsOccupied(square.ToMask());
 
-        public bool IsOccupied(ulong mask) => (All & mask) != 0;
+        public bool IsOccupied(ulong mask) => (all & mask) != 0;
 
         private Bitboard Add(PieceType pieceType, ulong mask)
         {
-            if ((All & mask) != 0)
+            if ((all & mask) != 0)
             {
                 throw new InvalidOperationException("That square is already occupied.");
             }
@@ -50,7 +52,7 @@ namespace SicTransit.Woodpusher.Model
 
         private Bitboard Remove(PieceType pieceType, ulong mask)
         {
-            if ((All & mask) == 0)
+            if ((all & mask) == 0)
             {
                 throw new InvalidOperationException("There is no piece on that square.");
             }
@@ -69,18 +71,18 @@ namespace SicTransit.Woodpusher.Model
 
         private ulong GetBitmap(PieceType pieceType) => pieceType switch
         {
-            PieceType.Pawn => Pawn,
-            PieceType.Knight => Knight,
-            PieceType.Bishop => Bishop,
-            PieceType.Rook => Rook,
-            PieceType.Queen => Queen,
-            PieceType.King => King,
+            PieceType.Pawn => pawn,
+            PieceType.Knight => knight,
+            PieceType.Bishop => bishop,
+            PieceType.Rook => rook,
+            PieceType.Queen => queen,
+            PieceType.King => king,
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
 
         public IEnumerable<Position> GetPieces()
         {
-            for (int shift = 0; shift < 64; shift++)
+            for (var shift = 0; shift < 64; shift++)
             {
                 var mask = 1ul << shift;
 
@@ -93,7 +95,7 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPieces(int file)
         {
-            for (int shift = file; shift < 64; shift += 8)
+            for (var shift = file; shift < 64; shift += 8)
             {
                 var mask = 1ul << shift;
 
@@ -108,13 +110,13 @@ namespace SicTransit.Woodpusher.Model
         {
             var bitmap = GetBitmap(type);
 
-            for (int shift = 0; shift < 64; shift++)
+            for (var shift = 0; shift < 64; shift++)
             {
                 var mask = 1ul << shift;
 
                 if ((bitmap & mask) != 0)
                 {
-                    yield return new Position(new Piece(type, Colour), mask.ToSquare());
+                    yield return new Position(new Piece(type, color), mask.ToSquare());
                 }
             }
         }
@@ -123,35 +125,22 @@ namespace SicTransit.Woodpusher.Model
         {
             var bitmap = GetBitmap(type);
 
-            var colour = Colour;
+            var colour = this.color;
 
             return (bitmap & mask).ToSquares().Select(s => new Position(new Piece(type, colour), s));
-        }
-
-        internal IEnumerable<Position> GetPieces(ulong mask)
-        {
-            for (int shift = 0; shift < 64; shift++)
-            {
-                var checkMask = mask & (1ul << shift);
-
-                if (checkMask != 0 && IsOccupied(checkMask))
-                {
-                    yield return new Position(Peek(checkMask), checkMask.ToSquare());
-                }
-            }
         }
 
         public IEnumerable<Position> GetPieces(PieceType type, int file)
         {
             var bitmap = GetBitmap(type);
 
-            for (int shift = file; shift < 64; shift += 8)
+            for (var shift = file; shift < 64; shift += 8)
             {
                 var mask = 1ul << shift;
 
                 if ((bitmap & mask) != 0)
                 {
-                    yield return new Position(new Piece(type, Colour), mask.ToSquare());
+                    yield return new Position(new Piece(type, color), mask.ToSquare());
                 }
             }
         }
@@ -160,27 +149,27 @@ namespace SicTransit.Woodpusher.Model
         {
             PieceType pieceType;
 
-            if ((Pawn & mask) != 0)
+            if ((pawn & mask) != 0)
             {
                 pieceType = PieceType.Pawn;
             }
-            else if ((Rook & mask) != 0)
+            else if ((rook & mask) != 0)
             {
                 pieceType = PieceType.Rook;
             }
-            else if ((Knight & mask) != 0)
+            else if ((knight & mask) != 0)
             {
                 pieceType = PieceType.Knight;
             }
-            else if ((Bishop & mask) != 0)
+            else if ((bishop & mask) != 0)
             {
                 pieceType = PieceType.Bishop;
             }
-            else if ((Queen & mask) != 0)
+            else if ((queen & mask) != 0)
             {
                 pieceType = PieceType.Queen;
             }
-            else if ((King & mask) != 0)
+            else if ((king & mask) != 0)
             {
                 pieceType = PieceType.King;
             }
@@ -189,17 +178,17 @@ namespace SicTransit.Woodpusher.Model
                 throw new ArgumentOutOfRangeException(nameof(mask));
             }
 
-            return new Piece(pieceType, Colour);
+            return new Piece(pieceType, color);
         }
 
         private Bitboard Toggle(PieceType pieceType, ulong mask) => pieceType switch
         {
-            PieceType.Pawn => new Bitboard(Colour, Pawn ^ mask, Rook, Knight, Bishop, Queen, King),
-            PieceType.Rook => new Bitboard(Colour, Pawn, Rook ^ mask, Knight, Bishop, Queen, King),
-            PieceType.Knight => new Bitboard(Colour, Pawn, Rook, Knight ^ mask, Bishop, Queen, King),
-            PieceType.Bishop => new Bitboard(Colour, Pawn, Rook, Knight, Bishop ^ mask, Queen, King),
-            PieceType.Queen => new Bitboard(Colour, Pawn, Rook, Knight, Bishop, Queen ^ mask, King),
-            PieceType.King => new Bitboard(Colour, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
+            PieceType.Pawn => new Bitboard(color, pawn ^ mask, rook, knight, bishop, queen, king),
+            PieceType.Rook => new Bitboard(color, pawn, rook ^ mask, knight, bishop, queen, king),
+            PieceType.Knight => new Bitboard(color, pawn, rook, knight ^ mask, bishop, queen, king),
+            PieceType.Bishop => new Bitboard(color, pawn, rook, knight, bishop ^ mask, queen, king),
+            PieceType.Queen => new Bitboard(color, pawn, rook, knight, bishop, queen ^ mask, king),
+            PieceType.King => new Bitboard(color, pawn, rook, knight, bishop, queen, king ^ mask),
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
     }

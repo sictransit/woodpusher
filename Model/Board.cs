@@ -9,15 +9,15 @@ namespace SicTransit.Woodpusher.Model
         private readonly Bitboard white;
         private readonly Bitboard black;
 
-        public Counters Counters { get; init; }
+        public Counters Counters { get; }
 
-        public Attacks Attacks { get; init; }
+        private Attacks Attacks { get; }
 
-        public Moves Moves { get; init; }
+        private Moves Moves { get; }
 
-        public PieceColour ActiveColour => Counters.ActiveColour;
+        public PieceColor ActiveColor => Counters.ActiveColor;
 
-        public Board() : this(new Bitboard(PieceColour.White), new Bitboard(PieceColour.Black), Counters.Default)
+        public Board() : this(new Bitboard(PieceColor.White), new Bitboard(PieceColor.Black), Counters.Default)
         {
 
         }
@@ -49,17 +49,17 @@ namespace SicTransit.Woodpusher.Model
             Attacks = attacks ?? new Attacks();
         }
 
-        public Board AddPiece(Square square, Piece piece) => piece.Colour switch
+        public Board AddPiece(Square square, Piece piece) => piece.Color switch
         {
-            PieceColour.White => NewBoardCopyBlack(white.Add(piece.Type, square)),
-            PieceColour.Black => NewBoardCopyWhite(black.Add(piece.Type, square)),
+            PieceColor.White => NewBoardCopyBlack(white.Add(piece.Type, square)),
+            PieceColor.Black => NewBoardCopyWhite(black.Add(piece.Type, square)),
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
-        public Board RemovePiece(Square square, Piece piece) => piece.Colour switch
+        public Board RemovePiece(Square square, Piece piece) => piece.Color switch
         {
-            PieceColour.White => NewBoardCopyBlack(white.Remove(piece.Type, square)),
-            PieceColour.Black => NewBoardCopyWhite(black.Remove(piece.Type, square)),
+            PieceColor.White => NewBoardCopyBlack(white.Remove(piece.Type, square)),
+            PieceColor.Black => NewBoardCopyWhite(black.Remove(piece.Type, square)),
             _ => throw new ArgumentOutOfRangeException(nameof(piece)),
         };
 
@@ -67,9 +67,9 @@ namespace SicTransit.Woodpusher.Model
         {
             var whiteCastlings = Counters.WhiteCastlings;
             var blackCastlings = Counters.BlackCastlings;
-            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColour == PieceColour.Black ? 1 : 0);
+            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor == PieceColor.Black ? 1 : 0);
 
-            var opponentBitboard = GetBitboard(ActiveColour.OpponentColour());
+            var opponentBitboard = GetBitboard(ActiveColor.OpponentColour());
 
             Piece? targetPiece = null;
 
@@ -80,29 +80,29 @@ namespace SicTransit.Woodpusher.Model
                 opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.Target.Square);
             }
 
-            var activeBitboard = GetBitboard(ActiveColour).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
+            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
 
             if (move.Position.Piece.Type == PieceType.King)
             {
-                switch (ActiveColour)
+                switch (ActiveColor)
                 {
-                    case PieceColour.White:
+                    case PieceColor.White:
                         whiteCastlings = Castlings.None;
                         break;
-                    case PieceColour.Black:
+                    case PieceColor.Black:
                         blackCastlings = Castlings.None;
                         break;
                 }
 
                 if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen))
                 {
-                    activeBitboard = activeBitboard.Colour == PieceColour.White ?
+                    activeBitboard = ActiveColor == PieceColor.White ?
                         activeBitboard.Move(PieceType.Rook, new Square("a1"), new Square("d1")) :
                         activeBitboard.Move(PieceType.Rook, new Square("a8"), new Square("d8"));
                 }
                 else if (move.Target.Flags.HasFlag(SpecialMove.CastleKing))
                 {
-                    activeBitboard = activeBitboard.Colour == PieceColour.White ?
+                    activeBitboard = ActiveColor == PieceColor.White ?
                         activeBitboard.Move(PieceType.Rook, new Square("h1"), new Square("f1")) :
                         activeBitboard.Move(PieceType.Rook, new Square("h8"), new Square("f8"));
                 }
@@ -116,36 +116,34 @@ namespace SicTransit.Woodpusher.Model
                 enPassantTarget = move.Target.ReferenceSquare;
             }
 
-            var activeColour = ActiveColour.OpponentColour();
+            var activeColour = ActiveColor.OpponentColour();
 
             var counters = new Counters(activeColour, whiteCastlings, blackCastlings, enPassantTarget, halfmoveClock, fullmoveCounter);
 
-            return ActiveColour == PieceColour.White
+            return ActiveColor == PieceColor.White
                 ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks)
                 : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks);
         }
 
         public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);
 
-        public bool IsOccupied(ulong mask) => white.IsOccupied(mask) || black.IsOccupied(mask);
+        private bool IsOccupied(ulong mask) => white.IsOccupied(mask) || black.IsOccupied(mask);
 
-        public bool IsOccupied(Square square, PieceColour colour) => GetBitboard(colour).IsOccupied(square);
+        private bool IsOccupied(Square square, PieceColor color) => GetBitboard(color).IsOccupied(square);
 
-        private Bitboard GetBitboard(PieceColour colour) => colour == PieceColour.White ? white : black;
+        private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 
-        public Square FindKing(PieceColour colour) => GetBitboard(colour).King.ToSquare();
+        public Square FindKing(PieceColor color) => GetBitboard(color).FindKing();
 
-        public IEnumerable<Position> GetPositions(PieceColour colour) => GetBitboard(colour).GetPieces();
+        public IEnumerable<Position> GetPositions(PieceColor color) => GetBitboard(color).GetPieces();
 
-        public IEnumerable<Position> GetPositions(PieceColour colour, ulong mask) => GetBitboard(colour).GetPieces(mask);
+        public IEnumerable<Position> GetPositions(PieceColor color, int file) => GetBitboard(color).GetPieces(file);
 
-        public IEnumerable<Position> GetPositions(PieceColour colour, int file) => GetBitboard(colour).GetPieces(file);
+        public IEnumerable<Position> GetPositions(PieceColor color, PieceType type) => GetBitboard(color).GetPieces(type);
 
-        public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type) => GetBitboard(colour).GetPieces(type);
+        public IEnumerable<Position> GetPositions(PieceColor color, PieceType type, int file) => GetBitboard(color).GetPieces(type, file);
 
-        public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, int file) => GetBitboard(colour).GetPieces(type, file);
-
-        public IEnumerable<Position> GetPositions(PieceColour colour, PieceType type, ulong mask) => GetBitboard(colour).GetPieces(type, mask);
+        private IEnumerable<Position> GetPositions(PieceColor color, PieceType type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
 
         public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
 
@@ -156,8 +154,8 @@ namespace SicTransit.Woodpusher.Model
                 yield break;
             }
 
-            var threatMask = Attacks.GetThreatMask(ActiveColour, square);
-            var opponentColour = ActiveColour.OpponentColour();
+            var threatMask = Attacks.GetThreatMask(ActiveColor, square);
+            var opponentColour = ActiveColor.OpponentColour();
 
             foreach (var pawn in GetPositions(opponentColour, PieceType.Pawn, threatMask.PawnMask))
             {
@@ -210,7 +208,7 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Move> GetValidMoves()
         {
-            foreach (var position in GetPositions(ActiveColour))
+            foreach (var position in GetPositions(ActiveColor))
             {
                 foreach (var move in GetValidMovesFromPosition(position))
                 {
@@ -270,7 +268,7 @@ namespace SicTransit.Woodpusher.Model
             if (move.Position.Piece.Type == PieceType.King)
             {
                 var flags = move.Target.Flags;
-                var castlings = ActiveColour == PieceColour.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
+                var castlings = ActiveColor == PieceColor.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
 
                 if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
                 {
@@ -295,14 +293,14 @@ namespace SicTransit.Woodpusher.Model
 
         private bool CastleFromOrIntoCheck(Move move) => IsChecked(move.Position.Square) || IsChecked(move.Target.ReferenceSquare!.Value) || IsChecked(move.Target.Square);
 
-        private bool TakingOwnPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Colour);
+        private bool TakingOwnPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Color);
 
-        private bool MustTakeButCannot(Move move) => move.Target.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
+        private bool MustTakeButCannot(Move move) => move.Target.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.Target.Square, move.Position.Piece.Color.OpponentColour());
 
         private bool PawnCannotTakeForward(Move move) => move.Target.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.Target.Square);
 
         private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Counters.EnPassantTarget);
 
-        private bool TookPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
+        private bool TookPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Color.OpponentColour());
     }
 }

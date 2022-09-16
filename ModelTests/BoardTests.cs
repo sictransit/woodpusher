@@ -15,8 +15,8 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whiteKing = new Piece(PieceType.King, PieceColour.White);
-            var blackKing = new Piece(PieceType.King, PieceColour.Black);
+            var whiteKing = new Piece(PieceType.King, PieceColor.White);
+            var blackKing = new Piece(PieceType.King, PieceColor.Black);
 
             var e1 = new Square("e1");
 
@@ -43,7 +43,7 @@ namespace SicTransit.Woodpusher.Tests
             var board = new Board();
 
             var e1 = new Square("e1");
-            var whiteKing = new Piece(PieceType.King, PieceColour.White);
+            var whiteKing = new Piece(PieceType.King, PieceColor.White);
 
             board = board.AddPiece(e1, whiteKing);
             board.AddPiece(e1, whiteKing);
@@ -57,7 +57,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var e1 = new Square("e1");
 
-            board.RemovePiece(e1, new Piece(PieceType.King, PieceColour.White));
+            board.RemovePiece(e1, new Piece(PieceType.King, PieceColor.White));
         }
 
         [TestMethod]
@@ -65,11 +65,11 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whitePawn = new Piece(PieceType.Pawn, PieceColour.White);
+            var whitePawn = new Piece(PieceType.Pawn, PieceColor.White);
 
-            for (int f = 0; f < 8; f++)
+            for (var f = 0; f < 8; f++)
             {
-                for (int r = 0; r < 8; r++)
+                for (var r = 0; r < 8; r++)
                 {
                     var square = new Square(f, r);
 
@@ -85,20 +85,20 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var whiteKing = new Piece(PieceType.King, PieceColour.White);
+            var whiteKing = new Piece(PieceType.King, PieceColor.White);
             var e1 = new Square("e1");
 
-            var blackKing = new Piece(PieceType.King, PieceColour.Black);
+            var blackKing = new Piece(PieceType.King, PieceColor.Black);
             var e8 = new Square("e8");
 
             board = board.AddPiece(e1, whiteKing).AddPiece(e8, blackKing);
 
-            var whitePositions = board.GetPositions(PieceColour.White).ToArray();
+            var whitePositions = board.GetPositions(PieceColor.White).ToArray();
 
             Assert.AreEqual(whiteKing, whitePositions.Single().Piece);
             Assert.AreEqual(e1, whitePositions.Single().Square);
 
-            var blackPositions = board.GetPositions(PieceColour.Black).ToArray();
+            var blackPositions = board.GetPositions(PieceColor.Black).ToArray();
 
             Assert.AreEqual(blackKing, blackPositions.Single().Piece);
             Assert.AreEqual(e8, blackPositions.Single().Square);
@@ -109,20 +109,20 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = new Board();
 
-            var blackPawn1 = new Piece(PieceType.Pawn, PieceColour.Black);
+            var blackPawn1 = new Piece(PieceType.Pawn, PieceColor.Black);
             var e2 = new Square("e2");
 
-            var blackPawn2 = new Piece(PieceType.Pawn, PieceColour.Black);
+            var blackPawn2 = new Piece(PieceType.Pawn, PieceColor.Black);
             var e3 = new Square("e3");
 
-            var blackPawn3 = new Piece(PieceType.Pawn, PieceColour.Black);
+            var blackPawn3 = new Piece(PieceType.Pawn, PieceColor.Black);
             var e4 = new Square("e4");
 
             board = board.AddPiece(e2, blackPawn1).AddPiece(e3, blackPawn2).AddPiece(e4, blackPawn3);
 
-            var positions = board.GetPositions(PieceColour.Black, PieceType.Pawn, 4).ToArray();
+            var positions = board.GetPositions(PieceColor.Black, PieceType.Pawn, 4).ToArray();
 
-            Assert.AreEqual(3, positions.Count());
+            Assert.AreEqual(3, positions.Length);
 
             Assert.IsTrue(positions.All(p => p.Piece.Type == PieceType.Pawn));
             Assert.IsTrue(positions.All(p => new[] { e2, e3, e4 }.Contains(p.Square)));
@@ -140,25 +140,25 @@ namespace SicTransit.Woodpusher.Tests
 
             foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
             {
-                var piece = new Piece(pieceType, PieceColour.Black);
+                var piece = new Piece(pieceType, PieceColor.Black);
                 pieces.Add(piece);
 
                 board = board.AddPiece(new Square(file, rank++), piece);
             }
 
-            foreach (var position in board.GetPositions(PieceColour.Black, file))
+            foreach (var position in board.GetPositions(PieceColor.Black, file))
             {
                 Assert.IsTrue(pieces.Contains(position.Piece));
             }
 
-            Assert.AreEqual(0, board.GetPositions(PieceColour.White, file).Count());
+            Assert.AreEqual(0, board.GetPositions(PieceColor.White, file).Count());
         }
 
         [TestMethod]
         public void PlayTest()
         {
-            var whiteBishop = new Piece(PieceType.Bishop, PieceColour.White);
-            var blackPawn = new Piece(PieceType.Pawn, PieceColour.Black);
+            var whiteBishop = new Piece(PieceType.Bishop, PieceColor.White);
+            var blackPawn = new Piece(PieceType.Pawn, PieceColor.Black);
 
             var c1 = new Square("c1");
             var g7 = new Square("g7");
@@ -167,7 +167,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(0, board.Counters.FullmoveNumber);
-            Assert.AreEqual(PieceColour.White, board.Counters.ActiveColour);
+            Assert.AreEqual(PieceColor.White, board.Counters.ActiveColor);
             Assert.IsNull(board.Counters.EnPassantTarget);
 
             Trace.WriteLine(board.PrettyPrint());
@@ -175,7 +175,7 @@ namespace SicTransit.Woodpusher.Tests
             var d2 = new Square("d2");
 
             board = board.Play(new(new(whiteBishop, c1), new(d2)));
-            Assert.AreEqual(PieceColour.Black, board.Counters.ActiveColour);
+            Assert.AreEqual(PieceColor.Black, board.Counters.ActiveColor);
             Assert.AreEqual(1, board.Counters.HalfmoveClock);
             Assert.AreEqual(0, board.Counters.FullmoveNumber);
 
@@ -184,7 +184,7 @@ namespace SicTransit.Woodpusher.Tests
             var g5 = new Square("g5");
 
             board = board.Play(new(new(blackPawn, g7), new(g5, SpecialMove.CannotTake, new Square("g6"))));
-            Assert.AreEqual(PieceColour.White, board.Counters.ActiveColour);
+            Assert.AreEqual(PieceColor.White, board.Counters.ActiveColor);
             Assert.AreEqual(new Square("g6"), board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(1, board.Counters.FullmoveNumber);
@@ -196,8 +196,8 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(1, board.Counters.FullmoveNumber);
 
-            Assert.AreEqual(0, board.GetPositions(PieceColour.Black).Count());
-            Assert.AreEqual(1, board.GetPositions(PieceColour.White).Count());
+            Assert.AreEqual(0, board.GetPositions(PieceColor.Black).Count());
+            Assert.AreEqual(1, board.GetPositions(PieceColor.White).Count());
 
             Assert.AreEqual(whiteBishop, board.Get(g5));
 
@@ -212,8 +212,8 @@ namespace SicTransit.Woodpusher.Tests
             var attackers = board.GetAttackers(new Square("f7")).ToArray();
 
             Assert.AreEqual(2, attackers.Length);
-            Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Queen && a.Piece.Colour == PieceColour.White));
-            Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Bishop && a.Piece.Colour == PieceColour.White));
+            Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Queen && a.Piece.Color == PieceColor.White));
+            Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Bishop && a.Piece.Color == PieceColor.White));
         }
 
         [TestMethod]
@@ -287,7 +287,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var moves = board.GetValidMoves().ToArray();
 
-            Assert.AreEqual(PieceColour.Black, board.ActiveColour);
+            Assert.AreEqual(PieceColor.Black, board.ActiveColor);
 
             Assert.IsTrue(!moves.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
         }

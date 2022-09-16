@@ -4,14 +4,14 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Piece
     {
-        public Piece(PieceType type, PieceColour colour)
+        public Piece(PieceType type, PieceColor color)
         {
             Type = type;
-            Colour = colour;
+            Color = color;
         }
 
-        public PieceType Type { get; init; }
+        public PieceType Type { get; }
 
-        public PieceColour Colour { get; init; }
+        public PieceColor Color { get; }
     }
 }

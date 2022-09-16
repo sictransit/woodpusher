@@ -9,11 +9,11 @@ namespace SicTransit.Woodpusher.Parsing
 {
     public class PortableGameNotation
     {
-        private static Regex ResultRegex = new(@"(1\-0|0-1|1\/2-1\/2|\*)", RegexOptions.Compiled);
+        private static readonly Regex ResultRegex = new(@"(1\-0|0-1|1\/2-1\/2|\*)", RegexOptions.Compiled);
 
-        public IDictionary<string, string> Tags { get; private set; }
+        public IDictionary<string, string> Tags { get; }
 
-        public IList<PgnMove> PgnMoves { get; private set; }
+        public IList<PgnMove> PgnMoves { get; }
 
         public Result Result { get; private set; }
 

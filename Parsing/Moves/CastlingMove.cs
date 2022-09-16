@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         {
             var board = engine.Board;
 
-            var kingPosition = board.GetPositions(board.ActiveColour, PieceType.King).Single();
+            var kingPosition = board.GetPositions(board.ActiveColor, PieceType.King).Single();
 
             var moves = board.GetValidMovesFromPosition(kingPosition);
 

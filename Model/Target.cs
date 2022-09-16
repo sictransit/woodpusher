@@ -14,11 +14,11 @@ namespace SicTransit.Woodpusher.Model
             ReferenceSquare = referenceSquare;
         }
 
-        public Square Square { get; init; }
+        public Square Square { get; }
 
-        public Square? ReferenceSquare { get; init; }
+        public Square? ReferenceSquare { get; }
 
-        public SpecialMove Flags { get; init; }
+        public SpecialMove Flags { get; }
 
         public override string ToString()
         {

@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher
             using var server = new ResponseSocket("@tcp://localhost:5556");
             while (true)
             {
-                string message = server.ReceiveFrameString();
+                var message = server.ReceiveFrameString();
 
                 Log.Information($"Received: {message}");
 

@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            Assert.AreEqual(PieceColour.White, board.Counters.ActiveColour);
+            Assert.AreEqual(PieceColor.White, board.Counters.ActiveColor);
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, board.Counters.BlackCastlings);
             Assert.IsNull(board.Counters.EnPassantTarget);
@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
 
-            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.White), board.Get(new Square("a1")));
+            Assert.AreEqual(new Piece(PieceType.Rook, PieceColor.White), board.Get(new Square("a1")));
         }
 
         [TestMethod]
@@ -34,12 +34,12 @@ namespace SicTransit.Woodpusher.Tests
 
             Trace.WriteLine(board.PrettyPrint());
 
-            Assert.AreEqual(PieceColour.Black, board.Counters.ActiveColour);
+            Assert.AreEqual(PieceColor.Black, board.Counters.ActiveColor);
             Assert.AreEqual(Castlings.None, board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.None, board.Counters.BlackCastlings);
             Assert.AreEqual(new Square("a3"), board.Counters.EnPassantTarget);
-            Assert.AreEqual(new Piece(PieceType.Queen, PieceColour.White), board.Get(new Square("c7")));
-            Assert.AreEqual(new Piece(PieceType.Rook, PieceColour.Black), board.Get(new Square("h5")));
+            Assert.AreEqual(new Piece(PieceType.Queen, PieceColor.White), board.Get(new Square("c7")));
+            Assert.AreEqual(new Piece(PieceType.Rook, PieceColor.Black), board.Get(new Square("h5")));
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(34, board.Counters.FullmoveNumber);
         }

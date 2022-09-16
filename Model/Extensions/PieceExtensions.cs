@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             var pieceType = ToPieceType(char.ToUpperInvariant(c));
 
-            var pieceColour = char.IsUpper(c) ? PieceColour.White : PieceColour.Black;
+            var pieceColour = char.IsUpper(c) ? PieceColor.White : PieceColor.Black;
 
             return new Piece(pieceType, pieceColour);
         }
@@ -40,9 +40,9 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             var c = p.ToChar();
 
-            return p.Colour == PieceColour.White ? c : char.ToLowerInvariant(c);
+            return p.Color == PieceColor.White ? c : char.ToLowerInvariant(c);
         }
 
-        public static PieceColour OpponentColour(this PieceColour p) => p == PieceColour.White ? PieceColour.Black : PieceColour.White;
+        public static PieceColor OpponentColour(this PieceColor p) => p == PieceColor.White ? PieceColor.Black : PieceColor.White;
     }
 }

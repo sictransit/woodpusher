@@ -4,21 +4,21 @@ namespace SicTransit.Woodpusher.Model
 {
     public struct Counters
     {
-        public PieceColour ActiveColour { get; init; }
+        public PieceColor ActiveColor { get; }
 
-        public Castlings WhiteCastlings { get; init; }
+        public Castlings WhiteCastlings { get; }
 
-        public Castlings BlackCastlings { get; init; }
+        public Castlings BlackCastlings { get; }
 
-        public Square? EnPassantTarget { get; init; }
+        public Square? EnPassantTarget { get; }
 
-        public int HalfmoveClock { get; init; }
+        public int HalfmoveClock { get; }
 
-        public int FullmoveNumber { get; init; }
+        public int FullmoveNumber { get; }
 
-        public Counters(PieceColour activeColour, Castlings whiteCastlings, Castlings blackCastlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        public Counters(PieceColor activeColor, Castlings whiteCastlings, Castlings blackCastlings, Square? enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
-            ActiveColour = activeColour;
+            ActiveColor = activeColor;
             WhiteCastlings = whiteCastlings;
             BlackCastlings = blackCastlings;
             EnPassantTarget = enPassantTarget;
@@ -26,6 +26,6 @@ namespace SicTransit.Woodpusher.Model
             FullmoveNumber = fullmoveNumber;
         }
 
-        public static Counters Default => new(PieceColour.White, Castlings.Kingside | Castlings.Queenside, Castlings.Kingside | Castlings.Queenside, null, 0, 0);
+        public static Counters Default => new(PieceColor.White, Castlings.Kingside | Castlings.Queenside, Castlings.Kingside | Castlings.Queenside, null, 0, 0);
     }
 }

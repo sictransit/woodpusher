@@ -4,10 +4,10 @@ namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class KingMovement
     {
-        private static Square WhiteStartPosition = new("e1");
-        private static Square BlackStartPosition = new("e8");
+        private static readonly Square WhiteStartPosition = new("e1");
+        private static readonly Square BlackStartPosition = new("e8");
 
-        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColour pieceColour)
+        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColor pieceColor)
         {
             var r = square.Rank;
             var f = square.File;
@@ -52,7 +52,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 }
             }
 
-            if (pieceColour == PieceColour.White)
+            if (pieceColor == PieceColor.White)
             {
                 if (square.Equals(WhiteStartPosition))
                 {

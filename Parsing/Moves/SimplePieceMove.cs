@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         {
             var board = engine.Board;
 
-            var positions = board.GetPositions(board.ActiveColour, pieceType);
+            var positions = board.GetPositions(board.ActiveColor, pieceType);
 
             foreach (var position in positions)
             {

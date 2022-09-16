@@ -2,10 +2,10 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Square
+    public readonly struct Square
     {
-        public int File { get; set; }
-        public int Rank { get; set; }
+        public int File { get; }
+        public int Rank { get; }
 
         public Square(int file, int rank)
         {
@@ -33,7 +33,7 @@ namespace SicTransit.Woodpusher.Model
             return true;
         }
 
-        public string ToAlgebraicNotation()
+        private string ToAlgebraicNotation()
         {
             var f = (char)(File + 'a');
             var r = (char)(Rank + '1');

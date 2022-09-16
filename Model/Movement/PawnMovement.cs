@@ -4,7 +4,7 @@ namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class PawnMovement
     {
-        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColour colour)
+        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColor color)
         {
             var rank = square.Rank;
 
@@ -15,9 +15,9 @@ namespace SicTransit.Woodpusher.Model.Movement
 
             var file = square.File;
 
-            if (colour == PieceColour.White)
+            if (color == PieceColor.White)
             {
-                var forward = new List<Target>() { new(square.NewRank(rank + 1), rank == 6 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
+                var forward = new List<Target> { new(square.NewRank(rank + 1), rank == 6 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
 
                 if (rank == 1)
                 {

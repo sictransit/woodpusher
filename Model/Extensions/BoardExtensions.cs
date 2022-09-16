@@ -8,10 +8,10 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             var sb = new StringBuilder();
 
-            for (int rank = 7; rank >= 0; rank--)
+            for (var rank = 7; rank >= 0; rank--)
             {
                 sb.Append($"{rank + 1} ");
-                for (int file = 0; file < 8; file++)
+                for (var file = 0; file < 8; file++)
                 {
                     var square = new Square(file, rank);
 
@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             sb.Append("  ");
 
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 sb.Append($"{(char)('A' + i)} ");
             }

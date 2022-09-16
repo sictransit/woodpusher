@@ -2,12 +2,12 @@
 {
     public struct ThreatMask
     {
-        public ulong PawnMask { get; init; }
-        public ulong RookMask { get; init; }
-        public ulong KnightMask { get; init; }
-        public ulong BishopMask { get; init; }
-        public ulong QueenMask { get; init; }
-        public ulong KingMask { get; init; }
+        public ulong PawnMask { get; }
+        public ulong RookMask { get; }
+        public ulong KnightMask { get; }
+        public ulong BishopMask { get; }
+        public ulong QueenMask { get; }
+        public ulong KingMask { get; }
 
         public ThreatMask(ulong pawnMask, ulong rookMask, ulong knightMask, ulong bishopMask, ulong queenMask, ulong kingMask)
         {
