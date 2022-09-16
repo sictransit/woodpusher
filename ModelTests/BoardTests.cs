@@ -216,5 +216,80 @@ namespace SicTransit.Woodpusher.Tests
             Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Bishop && a.Piece.Colour == PieceColour.White));
         }
 
+        [TestMethod]
+        public void MovesFromStartingPositionTest()
+        {
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            var moves = board.GetValidMoves().ToArray();
+
+            Assert.AreEqual(20, moves.Length);
+            Assert.AreEqual(16, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(4, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
+        }
+
+        [TestMethod]
+        public void MovesFromSicilianOpeningTest()
+        {
+            var fen = @"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
+
+            var board = ForsythEdwardsNotation.Parse(fen);            
+
+            var moves = board.GetValidMoves().ToArray();
+
+            Assert.AreEqual(15, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.King));
+            Assert.AreEqual(5, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(5, moves.Count(p => p.Position.Piece.Type == PieceType.Bishop));
+            Assert.AreEqual(4, moves.Count(p => p.Position.Piece.Type == PieceType.Queen));
+        }
+
+        [TestMethod]
+        public void WhiteCastlingKingsideTest()
+        {
+            var fen = @"r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
+
+            var board = ForsythEdwardsNotation.Parse(fen);
+
+            var moves = board.GetValidMoves().ToArray();
+
+            Assert.AreEqual(11, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.Queen));
+            Assert.AreEqual(7, moves.Count(p => p.Position.Piece.Type == PieceType.Knight));
+            Assert.AreEqual(9, moves.Count(p => p.Position.Piece.Type == PieceType.Bishop));
+            Assert.AreEqual(2, moves.Count(p => p.Position.Piece.Type == PieceType.Rook));
+            Assert.AreEqual(3, moves.Count(p => p.Position.Piece.Type == PieceType.King));
+            Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
+        }
+
+        [TestMethod]
+        public void EnPassantWithoutTargetTest()
+        {
+            var fen = @"r1bqkb1r/ppp1p1pp/2np3n/3PPp2/8/8/PPP2PPP/RNBQKBNR w KQkq f6 0 5";
+
+            var board = ForsythEdwardsNotation.Parse(fen);
+
+            var moves = board.GetValidMoves().ToArray();
+
+            var enPassantMove = moves.SingleOrDefault(p => p.Target.Flags.HasFlag(SpecialMove.EnPassant));
+
+            Assert.IsNotNull(enPassantMove);
+
+            Assert.AreEqual(new Square("f6"), enPassantMove.Target.Square);
+        }
+
+        [TestMethod]
+        public void BlackCannotCastleTest()
+        {
+            var fen = @"r1bqk2r/pppp1Npp/2n2n2/2b4Q/2B1P3/8/PPPP1PPP/RNB2RK1 b - - 0 7";
+
+            var board = ForsythEdwardsNotation.Parse(fen);
+
+            var moves = board.GetValidMoves().ToArray();
+
+            Assert.AreEqual(PieceColour.Black, board.ActiveColour);
+
+            Assert.IsTrue(!moves.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
+        }
     }
 }

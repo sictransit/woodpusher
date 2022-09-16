@@ -207,5 +207,102 @@ namespace SicTransit.Woodpusher.Model
                 }
             }
         }
+
+        public IEnumerable<Move> GetValidMoves()
+        {
+            foreach (var position in GetPositions(ActiveColour))
+            {
+                foreach (var move in GetValidMovesFromPosition(position))
+                {
+                    yield return move;
+                }
+            }
+        }
+
+        public IEnumerable<Move> GetValidMovesFromPosition(Position position)
+        {
+            foreach (IEnumerable<Target> vector in Moves.GetVectors(position))
+            {
+                foreach (var target in vector)
+                {
+                    var move = new Move(position, target);
+
+                    if (!ValidateMove(move))
+                    {
+                        break;
+                    }
+
+                    yield return move;
+
+                    if (TookPiece(move))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        private bool ValidateMove(Move move)
+        {
+            if (TakingOwnPiece(move))
+            {
+                return false;
+            }
+
+            if (MustTakeButCannot(move))
+            {
+                return false;
+            }
+
+            if (move.Position.Piece.Type == PieceType.Pawn)
+            {
+                if (EnPassantWithoutTarget(move))
+                {
+                    return false;
+                }
+
+                if (PawnCannotTakeForward(move))
+                {
+                    return false;
+                }
+            }
+
+            if (move.Position.Piece.Type == PieceType.King)
+            {
+                var flags = move.Target.Flags;
+                var castlings = ActiveColour == PieceColour.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
+
+                if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
+                {
+                    return false;
+                }
+
+                if (flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
+                {
+                    return false;
+                }
+
+                if ((flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing)) && CastleFromOrIntoCheck(move))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsChecked(Square kingSquare) => GetAttackers(kingSquare).Any();
+
+        private bool CastleFromOrIntoCheck(Move move) => IsChecked(move.Position.Square) || IsChecked(move.Target.ReferenceSquare!.Value) || IsChecked(move.Target.Square);
+
+        private bool TakingOwnPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Colour);
+
+        private bool MustTakeButCannot(Move move) => move.Target.Flags.HasFlag(SpecialMove.MustTake) && (!IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour()));
+
+        private bool PawnCannotTakeForward(Move move) => move.Target.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.Target.Square);
+
+        private bool EnPassantWithoutTarget(Move move) => move.Target.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Square.Equals(Counters.EnPassantTarget);
+
+        private bool TookPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Colour.OpponentColour());
     }
 }

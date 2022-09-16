@@ -16,10 +16,10 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         protected override Move CreateMove(IEngine engine)
         {
             var board = engine.Board;
+            
+            var kingPosition = board.GetPositions(board.ActiveColour, PieceType.King).Single();
 
-            var position = board.GetPositions(board.ActiveColour, PieceType.King).Single();
-
-            var moves = engine.GetMoves(position).ToArray();
+            var moves = board.GetValidMovesFromPosition(kingPosition);
 
             foreach (var move in moves)
             {
@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             }
 
 
-            throw new PgnParsingException(Raw, "unable to a valid move to match");
+            throw new PgnParsingException(Raw, "unable to find a valid move to match");
         }
     }
 }

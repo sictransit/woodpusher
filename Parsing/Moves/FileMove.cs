@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var position in positions)
             {
-                var move = engine.GetMove(position, square);
+                var move = board.GetValidMovesFromPosition(position).SingleOrDefault(m => m.Target.Square.Equals(square));
 
                 if (move != null)
                 {
@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
                 }
             }
 
-            throw new PgnParsingException(Raw, "unable to a valid move to match");
+            throw new PgnParsingException(Raw, "unable to find a valid move to match");
         }
 
         public override string ToString()

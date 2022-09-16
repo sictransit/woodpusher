@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var position in positions)
             {
-                var move = engine.GetMove(position, square);
+                var move = engine.Board.GetValidMovesFromPosition(position).SingleOrDefault(m=>m.Target.Square.Equals(square));
 
                 if (move != null)
                 {
