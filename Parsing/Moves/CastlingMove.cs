@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         protected override Move CreateMove(IEngine engine)
         {
             var board = engine.Board;
-            
+
             var kingPosition = board.GetPositions(board.ActiveColour, PieceType.King).Single();
 
             var moves = board.GetValidMovesFromPosition(kingPosition);

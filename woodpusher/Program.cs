@@ -2,9 +2,6 @@
 using NetMQ.Sockets;
 using Serilog;
 using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Engine;
-using SicTransit.Woodpusher.Parsing;
-using System.Diagnostics;
 
 namespace SicTransit.Woodpusher
 {
@@ -16,7 +13,7 @@ namespace SicTransit.Woodpusher
 
             using (var client = new RequestSocket(">tcp://localhost:5556"))
             {
-                
+
                 while (true)
                 {
                     var line = Console.ReadLine();
@@ -25,7 +22,7 @@ namespace SicTransit.Woodpusher
 
                     string response = client.ReceiveFrameString();
 
-                    Log.Information($"Received: {response}");                    
+                    Log.Information($"Received: {response}");
                 }
             }
         }

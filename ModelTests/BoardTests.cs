@@ -233,7 +233,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var fen = @"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
 
-            var board = ForsythEdwardsNotation.Parse(fen);            
+            var board = ForsythEdwardsNotation.Parse(fen);
 
             var moves = board.GetValidMoves().ToArray();
 
