@@ -11,13 +11,14 @@ namespace SicTransit.Woodpusher
     {
         public static void Main(string[] args)
         {
-            Logging.EnableLogging(Serilog.Events.LogEventLevel.Information);
+            Logging.EnableLogging();
 
             var patzer = new Patzer();
 
             patzer.Initialize(ForsythEdwardsNotation.StartingPosition);
 
             using var server = new ResponseSocket("@tcp://localhost:5556");
+
             while (true)
             {
                 var message = server.ReceiveFrameString();
@@ -25,6 +26,8 @@ namespace SicTransit.Woodpusher
                 Log.Information($"Received: {message}");
 
                 server.SendFrame(message);
+
+                Log.Information($"Sent: {message}");
             }
         }
     }

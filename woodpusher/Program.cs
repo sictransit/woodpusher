@@ -9,14 +9,17 @@ namespace SicTransit.Woodpusher
     {
         public static void Main(string[] args)
         {
-            Logging.EnableLogging(Serilog.Events.LogEventLevel.Information);
+            Logging.EnableLogging();
 
             using var client = new RequestSocket(">tcp://localhost:5556");
+
             while (true)
             {
                 var line = Console.ReadLine();
 
                 client.SendFrame(line!);
+
+                Log.Information($"Sent: {line}");
 
                 var response = client.ReceiveFrameString();
 
