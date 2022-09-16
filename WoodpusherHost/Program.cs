@@ -4,7 +4,6 @@ using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Parsing;
-using System.Diagnostics;
 
 namespace SicTransit.Woodpusher
 {
@@ -14,18 +13,19 @@ namespace SicTransit.Woodpusher
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Information);
 
-            using (var client = new RequestSocket(">tcp://localhost:5556"))
+            var patzer = new Patzer();
+
+            patzer.Initialize(ForsythEdwardsNotation.StartingPosition);
+
+            using (var server = new ResponseSocket("@tcp://localhost:5556"))
             {
-                
                 while (true)
                 {
-                    var line = Console.ReadLine();
+                    string message = server.ReceiveFrameString();
 
-                    client.SendFrame(line!);
+                    Log.Information($"Received: {message}");
 
-                    string response = client.ReceiveFrameString();
-
-                    Log.Information($"Received: {response}");                    
+                    server.SendFrame(message);
                 }
             }
         }
