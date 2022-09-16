@@ -35,9 +35,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             using (var reader = new StringReader(s))
             {
-                string line;
-
-                while ((line = reader.ReadLine()) != null)
+                while (reader.ReadLine() is { } line)
                 {
                     if (TryParseTag(line, out var tag))
                     {

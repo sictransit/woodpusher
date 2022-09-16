@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Model
         {
             square = default;
 
-            if ((file is < 0 or > 7) || (rank is < 0 or > 7))
+            if (file is < 0 or > 7 || rank is < 0 or > 7)
             {
                 return false;
             }

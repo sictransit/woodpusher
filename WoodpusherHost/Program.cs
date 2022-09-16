@@ -7,9 +7,9 @@ using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher
 {
-    public class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Information);
 
@@ -17,16 +17,14 @@ namespace SicTransit.Woodpusher
 
             patzer.Initialize(ForsythEdwardsNotation.StartingPosition);
 
-            using (var server = new ResponseSocket("@tcp://localhost:5556"))
+            using var server = new ResponseSocket("@tcp://localhost:5556");
+            while (true)
             {
-                while (true)
-                {
-                    string message = server.ReceiveFrameString();
+                string message = server.ReceiveFrameString();
 
-                    Log.Information($"Received: {message}");
+                Log.Information($"Received: {message}");
 
-                    server.SendFrame(message);
-                }
+                server.SendFrame(message);
             }
         }
     }

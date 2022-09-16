@@ -4,49 +4,15 @@
     {
         public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square)
         {
-            var f = square.File;
-            var r = square.Rank;
-
-            Square s;
-
-            if (Square.TryCreate(f + 1, r + 2, out s))
+            foreach (var df in new[]{-2,-1,1,2})
             {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f + 2, r + 1, out s))
-            {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f + 2, r - 1, out s))
-            {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f + 1, r - 2, out s))
-            {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f - 1, r - 2, out s))
-            {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f - 2, r - 1, out s))
-            {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f - 2, r + 1, out s))
-            {
-                yield return new[] { new Target(s) };
-            }
-
-            if (Square.TryCreate(f - 1, r + 2, out s))
-            {
-                yield return new[] { new Target(s) };
+                foreach (var dr in Math.Abs(df) == 2 ? new[] { -1, 1 } : new[] { -2, 2 })
+                {
+                    if (Square.TryCreate(square.File + df, square.Rank + dr, out var s))
+                    {
+                        yield return new[] { new Target(s) };
+                    }
+                }
             }
         }
     }

@@ -4,12 +4,7 @@ namespace SicTransit.Woodpusher.Model
 {
     public class Target
     {
-        public Target(Square square) : this(square, SpecialMove.None)
-        {
-
-        }
-
-        public Target(Square square, SpecialMove flags) : this(square, flags, null)
+        public Target(Square square, SpecialMove flags = SpecialMove.None) : this(square, flags, null)
         { }
 
         public Target(Square square, SpecialMove flags, Square? referenceSquare)

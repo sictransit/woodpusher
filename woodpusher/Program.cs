@@ -5,25 +5,22 @@ using SicTransit.Woodpusher.Common;
 
 namespace SicTransit.Woodpusher
 {
-    public class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Information);
 
-            using (var client = new RequestSocket(">tcp://localhost:5556"))
+            using var client = new RequestSocket(">tcp://localhost:5556");
+            while (true)
             {
+                var line = Console.ReadLine();
 
-                while (true)
-                {
-                    var line = Console.ReadLine();
+                client.SendFrame(line!);
 
-                    client.SendFrame(line!);
+                string response = client.ReceiveFrameString();
 
-                    string response = client.ReceiveFrameString();
-
-                    Log.Information($"Received: {response}");
-                }
+                Log.Information($"Received: {response}");
             }
         }
     }

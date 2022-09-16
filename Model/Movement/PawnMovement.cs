@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Model.Movement
 
             if (colour == PieceColour.White)
             {
-                var forward = new List<Target>() { new Target(square.NewRank(rank + 1), rank == 6 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
+                var forward = new List<Target>() { new(square.NewRank(rank + 1), rank == 6 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
 
                 if (rank == 1)
                 {
@@ -48,7 +48,7 @@ namespace SicTransit.Woodpusher.Model.Movement
             }
             else
             {
-                var forward = new List<Target>() { new Target(square.NewRank(rank - 1), rank == 1 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
+                var forward = new List<Target> { new(square.NewRank(rank - 1), rank == 1 ? SpecialMove.Promote | SpecialMove.CannotTake : SpecialMove.CannotTake) };
 
                 if (rank == 6)
                 {

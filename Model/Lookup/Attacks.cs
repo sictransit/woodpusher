@@ -34,26 +34,33 @@ namespace SicTransit.Woodpusher.Model.Lookup
                     // TODO: There should probably be some enpassant handling somewhere, maybe in here?
                     var pawnMask = 0ul;
 
-                    if (colour == PieceColour.White && square.Rank < 6)
+                    switch (colour)
                     {
-                        if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
+                        case PieceColour.White when square.Rank < 6:
                         {
-                            pawnMask |= upLeft.ToMask();
+                            if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
+                            {
+                                pawnMask |= upLeft.ToMask();
+                            }
+                            if (Square.TryCreate(square.File + 1, square.Rank + 1, out var upRight))
+                            {
+                                pawnMask |= upRight.ToMask();
+                            }
+
+                            break;
                         }
-                        if (Square.TryCreate(square.File + 1, square.Rank + 1, out var upRight))
+                        case PieceColour.Black when square.Rank > 1:
                         {
-                            pawnMask |= upRight.ToMask();
-                        }
-                    }
-                    else if (colour == PieceColour.Black && square.Rank > 1)
-                    {
-                        if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
-                        {
-                            pawnMask |= downLeft.ToMask();
-                        }
-                        if (Square.TryCreate(square.File + 1, square.Rank - 1, out var downRight))
-                        {
-                            pawnMask |= downRight.ToMask();
+                            if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
+                            {
+                                pawnMask |= downLeft.ToMask();
+                            }
+                            if (Square.TryCreate(square.File + 1, square.Rank - 1, out var downRight))
+                            {
+                                pawnMask |= downRight.ToMask();
+                            }
+
+                            break;
                         }
                     }
 

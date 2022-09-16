@@ -57,11 +57,11 @@ namespace SicTransit.Woodpusher.Parsing
 
             var rank = 7;
 
-            for (int p = 0; p < parts.Length; p++)
+            foreach (var part in parts)
             {
                 var file = 0;
 
-                foreach (var c in parts[p])
+                foreach (var c in part)
                 {
                     if (char.IsDigit(c))
                     {
@@ -92,7 +92,7 @@ namespace SicTransit.Woodpusher.Parsing
                 return null;
             }
 
-            if (!StringExtensions.IsAlgebraicNotation(s))
+            if (!s.IsAlgebraicNotation())
             {
                 throw new FenParsingException(s, "en passant target should be in algebraic notation or '-'");
             }

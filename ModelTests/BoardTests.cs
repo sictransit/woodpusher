@@ -93,12 +93,12 @@ namespace SicTransit.Woodpusher.Tests
 
             board = board.AddPiece(e1, whiteKing).AddPiece(e8, blackKing);
 
-            var whitePositions = board.GetPositions(PieceColour.White);
+            var whitePositions = board.GetPositions(PieceColour.White).ToArray();
 
             Assert.AreEqual(whiteKing, whitePositions.Single().Piece);
             Assert.AreEqual(e1, whitePositions.Single().Square);
 
-            var blackPositions = board.GetPositions(PieceColour.Black);
+            var blackPositions = board.GetPositions(PieceColour.Black).ToArray();
 
             Assert.AreEqual(blackKing, blackPositions.Single().Piece);
             Assert.AreEqual(e8, blackPositions.Single().Square);
@@ -120,7 +120,7 @@ namespace SicTransit.Woodpusher.Tests
 
             board = board.AddPiece(e2, blackPawn1).AddPiece(e3, blackPawn2).AddPiece(e4, blackPawn3);
 
-            var positions = board.GetPositions(PieceColour.Black, PieceType.Pawn, 4);
+            var positions = board.GetPositions(PieceColour.Black, PieceType.Pawn, 4).ToArray();
 
             Assert.AreEqual(3, positions.Count());
 
