@@ -62,6 +62,8 @@ namespace SicTransit.Woodpusher
 
         private void Uci(object? o)
         {
+            consoleOutput($"id name Woodpusher v0.0");
+            consoleOutput($"id author Mikael Fredriksson <micke@sictransit.net>");
             consoleOutput("uciok");
         }
 
