@@ -13,7 +13,7 @@ namespace SicTransit.Woodpusher
         private static Regex uciCommand = new(@"^uci$", RegexOptions.Compiled);
         private static Regex isReadyCommand = new(@"^isready$", RegexOptions.Compiled);
         private static Regex uciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
-        private static Regex stopCommand = new(@"^stop$", RegexOptions.Compiled);
+        private static Regex quitCommand = new(@"^quit$", RegexOptions.Compiled);
         private static Regex positionCommand = new(@"^position", RegexOptions.Compiled);
         private static Regex goCommand = new(@"^go", RegexOptions.Compiled);
 
@@ -48,9 +48,9 @@ namespace SicTransit.Woodpusher
             {
                 ThreadPool.QueueUserWorkItem(Go, command);
             }
-            else if (stopCommand.IsMatch(command))
+            else if (quitCommand.IsMatch(command))
             {
-                Stop = true;
+                Quit = true;
             }
             else
             {
@@ -58,7 +58,7 @@ namespace SicTransit.Woodpusher
             }
         }
 
-        public bool Stop { get; private set; }
+        public bool Quit { get; private set; }
 
         private void Uci(object? o)
         {

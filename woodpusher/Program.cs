@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher
 
             uci.RegisterConsoleCallback(consoleOutput);
 
-            while (!uci.Stop)
+            while (!uci.Quit)
             {
                 var line = Console.ReadLine();
 
