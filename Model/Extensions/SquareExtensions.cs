@@ -70,5 +70,13 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             return square.ToTravelPath(target).ToMask();
         }
+
+        public static string ToAlgebraicNotation(this Square square)
+        {
+            var f = (char)(square.File + 'a');
+            var r = (char)(square.Rank + '1');
+
+            return $"{f}{r}";
+        }
     }
 }

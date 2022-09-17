@@ -37,31 +37,31 @@ namespace SicTransit.Woodpusher.Model.Lookup
                     switch (colour)
                     {
                         case PieceColor.White when square.Rank < 6:
-                        {
-                            if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
                             {
-                                pawnMask |= upLeft.ToMask();
-                            }
-                            if (Square.TryCreate(square.File + 1, square.Rank + 1, out var upRight))
-                            {
-                                pawnMask |= upRight.ToMask();
-                            }
+                                if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
+                                {
+                                    pawnMask |= upLeft.ToMask();
+                                }
+                                if (Square.TryCreate(square.File + 1, square.Rank + 1, out var upRight))
+                                {
+                                    pawnMask |= upRight.ToMask();
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
                         case PieceColor.Black when square.Rank > 1:
-                        {
-                            if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
                             {
-                                pawnMask |= downLeft.ToMask();
-                            }
-                            if (Square.TryCreate(square.File + 1, square.Rank - 1, out var downRight))
-                            {
-                                pawnMask |= downRight.ToMask();
-                            }
+                                if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
+                                {
+                                    pawnMask |= downLeft.ToMask();
+                                }
+                                if (Square.TryCreate(square.File + 1, square.Rank - 1, out var downRight))
+                                {
+                                    pawnMask |= downRight.ToMask();
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
                     }
 
                     threatMasks[colour].Add(square, new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));

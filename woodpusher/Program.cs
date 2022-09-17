@@ -1,6 +1,4 @@
-﻿using NetMQ;
-using NetMQ.Sockets;
-using Serilog;
+﻿using Serilog;
 using SicTransit.Woodpusher.Common;
 
 namespace SicTransit.Woodpusher
@@ -9,21 +7,29 @@ namespace SicTransit.Woodpusher
     {
         public static void Main(string[] args)
         {
-            Logging.EnableLogging();
+            Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug, false);
 
-            using var client = new RequestSocket(">tcp://localhost:5556");
+            Action<string> consoleOutput = new(s =>
+            {
+                Console.WriteLine(s);
 
-            while (true)
+                Log.Information($"Sent: {s}");
+            });
+
+            var uci = new UniversalChessInterface();
+
+            uci.RegisterConsoleCallback(consoleOutput);
+
+            while (!uci.Stop)
             {
                 var line = Console.ReadLine();
 
-                client.SendFrame(line!);
+                Log.Information($"Received: {line}");
 
-                Log.Information($"Sent: {line}");
-
-                var response = client.ReceiveFrameString();
-
-                Log.Information($"Received: {response}");
+                if (line != null)
+                {
+                    uci.ProcessCommand(line);
+                }
             }
         }
     }

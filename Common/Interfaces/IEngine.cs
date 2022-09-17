@@ -7,5 +7,9 @@ namespace SicTransit.Woodpusher.Common.Interfaces
         Board Board { get; }
 
         void Play(Move move);
+
+        void Play(string algebraic);
+
+        Move PlayBestMove();
     }
 }

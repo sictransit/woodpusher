@@ -33,14 +33,6 @@ namespace SicTransit.Woodpusher.Model
             return true;
         }
 
-        private string ToAlgebraicNotation()
-        {
-            var f = (char)(File + 'a');
-            var r = (char)(Rank + '1');
-
-            return $"{f}{r}";
-        }
-
         public Square NewRank(int rank) => new(File, rank);
 
         public Square NewFile(int file) => new(file, Rank);
@@ -49,7 +41,7 @@ namespace SicTransit.Woodpusher.Model
 
         public override string ToString()
         {
-            return ToAlgebraicNotation();
+            return this.ToAlgebraicNotation();
         }
     }
 }

@@ -6,14 +6,18 @@ namespace SicTransit.Woodpusher.Common
 {
     public static class Logging
     {
-        public static void EnableLogging(LogEventLevel level = LogEventLevel.Information)
+        public static void EnableLogging(LogEventLevel level = LogEventLevel.Information, bool enableConsole = true)
         {
             var logFilename = $"{Assembly.GetCallingAssembly().GetName().Name}.log";
 
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .Enrich.FromLogContext()
-                .WriteTo.Console(level)
+            var loggerConfiguration = new LoggerConfiguration().MinimumLevel.Debug().Enrich.FromLogContext();
+
+            if (enableConsole)
+            {
+                loggerConfiguration = loggerConfiguration.WriteTo.Console(level);
+            }
+
+            Log.Logger = loggerConfiguration
                 .WriteTo.File(logFilename, LogEventLevel.Information)
                 .CreateLogger();
         }

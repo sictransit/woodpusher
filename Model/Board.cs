@@ -27,6 +27,11 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
+        public Board Copy(Board board)
+        {
+            return new Board(white, black, Counters, Moves, Attacks);
+        }
+
         private Board NewBoardCopyWhite(Bitboard blackBitboard)
         {
             return new Board(white, blackBitboard, Counters, Moves, Attacks);
@@ -36,7 +41,6 @@ namespace SicTransit.Woodpusher.Model
         {
             return new Board(whiteBitboard, black, Counters, Moves, Attacks);
         }
-
 
         private Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null)
         {

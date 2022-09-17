@@ -4,7 +4,7 @@
     {
         public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square)
         {
-            foreach (var df in new[]{-2,-1,1,2})
+            foreach (var df in new[] { -2, -1, 1, 2 })
             {
                 foreach (var dr in Math.Abs(df) == 2 ? new[] { -1, 1 } : new[] { -2, 2 })
                 {

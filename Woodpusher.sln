@@ -21,8 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parsing", "Parsing\Parsing.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParsingTests", "ParsingTests\ParsingTests.csproj", "{33A25726-E5AC-49EC-93BA-413B8F2F2388}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoodpusherHost", "WoodpusherHost\WoodpusherHost.csproj", "{EBCBF4BD-856F-4C85-BE8D-D0AB2D15064C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,10 +63,6 @@ Global
 		{33A25726-E5AC-49EC-93BA-413B8F2F2388}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33A25726-E5AC-49EC-93BA-413B8F2F2388}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33A25726-E5AC-49EC-93BA-413B8F2F2388}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EBCBF4BD-856F-4C85-BE8D-D0AB2D15064C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EBCBF4BD-856F-4C85-BE8D-D0AB2D15064C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EBCBF4BD-856F-4C85-BE8D-D0AB2D15064C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EBCBF4BD-856F-4C85-BE8D-D0AB2D15064C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
