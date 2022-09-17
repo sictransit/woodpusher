@@ -30,39 +30,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
                     var knightMask = KnightMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
                     var rookMask = RookMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
                     var kingMask = KingMovement.GetTargetVectors(square, colour.OpponentColour()).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
-
-                    // TODO: There should probably be some en passant handling somewhere, maybe in here?
-                    var pawnMask = 0ul;
-
-                    switch (colour)
-                    {
-                        case PieceColor.White when square.Rank < 6:
-                            {
-                                if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
-                                {
-                                    pawnMask |= upLeft.ToMask();
-                                }
-                                if (Square.TryCreate(square.File + 1, square.Rank + 1, out var upRight))
-                                {
-                                    pawnMask |= upRight.ToMask();
-                                }
-
-                                break;
-                            }
-                        case PieceColor.Black when square.Rank > 1:
-                            {
-                                if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
-                                {
-                                    pawnMask |= downLeft.ToMask();
-                                }
-                                if (Square.TryCreate(square.File + 1, square.Rank - 1, out var downRight))
-                                {
-                                    pawnMask |= downRight.ToMask();
-                                }
-
-                                break;
-                            }
-                    }
+                    var pawnMask = PawnMovement.GetTargetVectors(square, colour.OpponentColour()).SelectMany(v=>v).Where(v=>v.Flags.HasFlag(SpecialMove.MustTake)).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
 
                     threatMasks[colour].Add(square, new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
                 }

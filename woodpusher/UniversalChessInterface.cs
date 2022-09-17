@@ -89,9 +89,17 @@ namespace SicTransit.Woodpusher
         {
             lock (engine)
             {
-                var move = engine.PlayBestMove();
+                try
+                {
+                    var move = engine.PlayBestMove();
 
-                consoleOutput($"bestmove {move.ToAlgebraicMoveNotation()}");
+                    consoleOutput($"bestmove {move.ToAlgebraicMoveNotation()}");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Caught exception in Go().", ex);
+                    throw;
+                }
             }
         }
     }
