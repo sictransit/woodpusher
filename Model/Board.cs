@@ -118,6 +118,11 @@ namespace SicTransit.Woodpusher.Model
             if (move.Position.Piece.Type == PieceType.Pawn)
             {
                 enPassantTarget = move.Target.EnPassantTarget;
+
+                if (move.Target.Flags.HasFlag(SpecialMove.Promote))
+                {
+                    activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target.Square).Add(move.Target.PromotionType!.Value, move.Target.Square);
+                }
             }
 
             var activeColour = ActiveColor.OpponentColour();
@@ -325,7 +330,7 @@ namespace SicTransit.Woodpusher.Model
 
         private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Square) || IsAttacked(move.Target.CastlingCheckSquare!.Value) || IsAttacked(move.Target.Square);
 
-        private bool CastlnigPathIsBlocked(Move move) => move.Target.CastlingEmptySquare.HasValue && IsOccupied(move.Target.CastlingEmptySquare.Value);
+        private bool CastlnigPathIsBlocked(Move move) => move.Target.CastlingEmptySquares.Any(s => IsOccupied(s));
 
         private bool CastleRookIsMissing(Move move) => !move.Target.CastlingRookSquare.HasValue && GetPositions(move.Position.Piece.Color, PieceType.Rook, move.Target.CastlingRookSquare.Value.ToMask()).Any();
 

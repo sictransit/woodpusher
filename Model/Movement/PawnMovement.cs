@@ -28,7 +28,17 @@ namespace SicTransit.Woodpusher.Model.Movement
 
                 if (Square.TryCreate(file - 1, rank + 1, out var takeLeft))
                 {
-                    yield return new[] { new Target(takeLeft, rank == 6 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
+                    if (rank == 6)
+                    {
+                        foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
+                        {
+                            yield return new[] { new Target(takeLeft, SpecialMove.MustTake | SpecialMove.Promote, promotionType: promotionType) };
+                        }
+                    }
+                    else
+                    {
+                        yield return new[] { new Target(takeLeft, SpecialMove.MustTake) };
+                    }
 
                     if (rank == 4)
                     {
@@ -38,7 +48,17 @@ namespace SicTransit.Woodpusher.Model.Movement
 
                 if (Square.TryCreate(file + 1, rank + 1, out var takeRight))
                 {
-                    yield return new[] { new Target(takeRight, rank == 6 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
+                    if (rank == 6)
+                    {
+                        foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
+                        {
+                            yield return new[] { new Target(takeRight, SpecialMove.MustTake | SpecialMove.Promote, promotionType: promotionType) };
+                        }
+                    }
+                    else
+                    {
+                        yield return new[] { new Target(takeRight, SpecialMove.MustTake) };
+                    }
 
                     if (rank == 4)
                     {
@@ -59,7 +79,17 @@ namespace SicTransit.Woodpusher.Model.Movement
 
                 if (Square.TryCreate(file - 1, rank - 1, out var takeLeft))
                 {
-                    yield return new[] { new Target(takeLeft, rank == 1 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
+                    if (rank == 1)
+                    {
+                        foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
+                        {
+                            yield return new[] { new Target(takeLeft, SpecialMove.MustTake | SpecialMove.Promote, promotionType: promotionType) };
+                        }
+                    }
+                    else
+                    {
+                        yield return new[] { new Target(takeLeft, SpecialMove.MustTake ) };
+                    }
 
                     if (rank == 3)
                     {
@@ -69,7 +99,17 @@ namespace SicTransit.Woodpusher.Model.Movement
 
                 if (Square.TryCreate(file + 1, rank - 1, out var takeRight))
                 {
-                    yield return new[] { new Target(takeRight, rank == 1 ? SpecialMove.MustTake | SpecialMove.Promote : SpecialMove.MustTake) };
+                    if (rank == 1)
+                    {
+                        foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
+                        {
+                            yield return new[] { new Target(takeRight, SpecialMove.MustTake | SpecialMove.Promote, promotionType: promotionType) };
+                        }
+                    }
+                    else
+                    {
+                        yield return new[] { new Target(takeRight, SpecialMove.MustTake) };
+                    }
 
                     if (rank == 3)
                     {

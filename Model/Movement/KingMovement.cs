@@ -56,16 +56,16 @@ namespace SicTransit.Woodpusher.Model.Movement
             {
                 if (square.Equals(WhiteStartPosition))
                 {
-                    yield return new[] { new Target(new Square(6, 0), SpecialMove.CastleKing | SpecialMove.CannotTake, null, new Square(5, 0), null, new Square(7, 0)) };
-                    yield return new[] { new Target(new Square(2, 0), SpecialMove.CastleQueen | SpecialMove.CannotTake, null, new Square(3, 0), new Square(1, 0), new Square(0, 0)) };
+                    yield return new[] { new Target(new Square(6, 0), SpecialMove.CastleKing | SpecialMove.CannotTake, null, new Square(5, 0), new[] { new Square(5, 0), new Square(6, 0) }, new Square(7, 0)) };
+                    yield return new[] { new Target(new Square(2, 0), SpecialMove.CastleQueen | SpecialMove.CannotTake, null, new Square(3, 0), new[] { new Square(2, 0), new Square(1, 0) }, new Square(0, 0)) };
                 }
             }
             else
             {
                 if (square.Equals(BlackStartPosition))
                 {
-                    yield return new[] { new Target(new Square(6, 7), SpecialMove.CastleKing | SpecialMove.CannotTake, null, new Square(5, 7), new Square(7, 7)) };
-                    yield return new[] { new Target(new Square(2, 7), SpecialMove.CastleQueen | SpecialMove.CannotTake, null, new Square(3, 7), new Square(1, 7), new Square(0, 7)) };
+                    yield return new[] { new Target(new Square(6, 7), SpecialMove.CastleKing | SpecialMove.CannotTake, null, new Square(5, 7), new[] { new Square(5, 7), new Square(6, 7) }, new Square(7, 7)) };
+                    yield return new[] { new Target(new Square(2, 7), SpecialMove.CastleQueen | SpecialMove.CannotTake, null, new Square(3, 7), new[] { new Square(2, 7), new Square(1, 7) }, new Square(0, 7)) };
                 }
             }
         }
