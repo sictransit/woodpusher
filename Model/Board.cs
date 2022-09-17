@@ -1,5 +1,4 @@
-﻿using Serilog;
-using SicTransit.Woodpusher.Model.Enums;
+﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Lookup;
 
@@ -118,7 +117,7 @@ namespace SicTransit.Woodpusher.Model
 
             if (move.Position.Piece.Type == PieceType.Pawn)
             {
-                enPassantTarget = move.Target.ReferenceSquare;
+                enPassantTarget = move.Target.EnPassantTarget;
             }
 
             var activeColour = ActiveColor.OpponentColour();
@@ -198,7 +197,7 @@ namespace SicTransit.Woodpusher.Model
             }
 
             foreach (var bishop in GetPositions(opponentColor, PieceType.Bishop, threatMask.BishopMask))
-            {               
+            {
                 if (!IsOccupied(Moves.GetTravelMask(bishop.Square, square)))
                 {
                     yield return bishop;
@@ -283,19 +282,32 @@ namespace SicTransit.Woodpusher.Model
                 var flags = move.Target.Flags;
                 var castlings = ActiveColor == PieceColor.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
 
-                if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
+                if ((flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing)))
                 {
-                    return false;
-                }
+                    if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
+                    {
+                        return false;
+                    }
 
-                if (flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
-                {
-                    return false;
-                }
+                    if (flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
+                    {
+                        return false;
+                    }
 
-                if ((flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing)) && CastleFromOrIntoCheck(move))
-                {
-                    return false;
+                    if (CastlingFromOrIntoCheck(move))
+                    {
+                        return false;
+                    }
+
+                    if (CastlnigPathIsBlocked(move))
+                    {
+                        return false;
+                    }
+
+                    if (CastleRookIsMissing(move))
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -311,7 +323,11 @@ namespace SicTransit.Woodpusher.Model
 
         private bool IsAttacked(Square square) => GetAttackers(square).Any();
 
-        private bool CastleFromOrIntoCheck(Move move) => IsAttacked(move.Position.Square) || IsAttacked(move.Target.ReferenceSquare!.Value) || IsAttacked(move.Target.Square);
+        private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Square) || IsAttacked(move.Target.CastlingCheckSquare!.Value) || IsAttacked(move.Target.Square);
+
+        private bool CastlnigPathIsBlocked(Move move) => move.Target.CastlingEmptySquare.HasValue && IsOccupied(move.Target.CastlingEmptySquare.Value);
+
+        private bool CastleRookIsMissing(Move move) => !move.Target.CastlingRookSquare.HasValue && GetPositions(move.Position.Piece.Color, PieceType.Rook, move.Target.CastlingRookSquare.Value.ToMask()).Any();
 
         private bool TakingOwnPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Color);
 

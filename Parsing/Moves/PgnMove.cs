@@ -1,5 +1,6 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
@@ -95,7 +96,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParseFileMove(string s, out FileMove? move)
+        private static bool TryParseFileMove(string s, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -105,7 +106,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new FileMove(s, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value));
+                move = new PieceOnFileMove(s, PieceType.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value));
             }
 
             return move != default;

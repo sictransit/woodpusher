@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
                     var knightMask = KnightMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
                     var rookMask = RookMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
                     var kingMask = KingMovement.GetTargetVectors(square, colour.OpponentColour()).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
-                    var pawnMask = PawnMovement.GetTargetVectors(square, colour.OpponentColour()).SelectMany(v=>v).Where(v=>v.Flags.HasFlag(SpecialMove.MustTake)).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
+                    var pawnMask = PawnMovement.GetTargetVectors(square, colour.OpponentColour()).SelectMany(v => v).Where(v => v.Flags.HasFlag(SpecialMove.MustTake)).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
 
                     threatMasks[colour].Add(square, new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
                 }

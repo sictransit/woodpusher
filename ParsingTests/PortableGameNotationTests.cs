@@ -181,11 +181,11 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
             }
 
             Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
-            
+
             var validMoves = engine.Board.GetValidMoves().ToArray();
 
             Assert.AreEqual(1, validMoves.Count(m => m.Position.Piece.Type == PieceType.Knight));
-            Assert.AreEqual(3, validMoves.Count(m => m.Position.Piece.Type == PieceType.King));            
+            Assert.AreEqual(3, validMoves.Count(m => m.Position.Piece.Type == PieceType.King));
         }
 
         [TestMethod]
@@ -312,12 +312,11 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
             {
-                engine.Play(pgnMove.GetMove(engine));
-
                 Trace.WriteLine(engine.Board.PrettyPrint());
-            }
+                Trace.WriteLine($"will try to play: {pgnMove}");
 
-            
+                engine.Play(pgnMove.GetMove(engine));
+            }
 
             Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
 

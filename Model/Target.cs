@@ -7,16 +7,27 @@ namespace SicTransit.Woodpusher.Model
         public Target(Square square, SpecialMove flags = SpecialMove.None) : this(square, flags, null)
         { }
 
-        public Target(Square square, SpecialMove flags, Square? referenceSquare)
+        public Target(Square square, SpecialMove flags, Square? enPassantTarget = null, Square? castlingCheckSquare = null, Square? castlingEmptySquare = null, Square? castlingRookSquare = null)
         {
             Square = square;
             Flags = flags;
-            ReferenceSquare = referenceSquare;
+
+            EnPassantTarget = enPassantTarget;
+
+            CastlingCheckSquare = castlingCheckSquare;
+            CastlingEmptySquare = castlingEmptySquare;
+            CastlingRookSquare = castlingRookSquare;
         }
 
         public Square Square { get; }
 
-        public Square? ReferenceSquare { get; }
+        public Square? CastlingCheckSquare { get; }
+
+        public Square? CastlingEmptySquare { get; }
+
+        public Square? CastlingRookSquare { get; }
+
+        public Square? EnPassantTarget { get; }
 
         public SpecialMove Flags { get; }
 
