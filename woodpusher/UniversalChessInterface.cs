@@ -2,7 +2,6 @@
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
@@ -107,7 +106,7 @@ namespace SicTransit.Woodpusher
             {
                 try
                 {
-                    
+
                     var move = engine.PlayBestMove();
 
                     consoleOutput($"bestmove {move.Notation}");

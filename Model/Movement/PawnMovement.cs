@@ -1,11 +1,10 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
-using System.Formats.Asn1;
 
 namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class PawnMovement
     {
-        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColor color) 
+        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColor color)
         {
             var rank = square.Rank;
 
@@ -14,7 +13,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 yield break;
             }
 
-            int dRank ;
+            int dRank;
             int promoteRank;
             int doubleStepRank;
             int enPassantRank;
@@ -38,7 +37,7 @@ namespace SicTransit.Woodpusher.Model.Movement
 
             if (rank == promoteRank)
             {
-                foreach (var dFile in new[] { -1,0,1})
+                foreach (var dFile in new[] { -1, 0, 1 })
                 {
                     if (Square.TryCreate(file + dFile, rank + dRank, out var promoteSquare))
                     {
@@ -49,12 +48,12 @@ namespace SicTransit.Woodpusher.Model.Movement
                     }
                 }
             }
-            else 
+            else
             {
                 yield return new[] {
                 new Target(square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
                     rank == doubleStepRank
-                    ? new[] { new Target(square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank+dRank)) }
+                    ? new[] { new Target(square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank)) }
                     : Enumerable.Empty<Target>()
                     );
 

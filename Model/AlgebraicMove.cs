@@ -1,11 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -19,7 +13,7 @@ namespace SicTransit.Woodpusher.Model
         }
 
         public AlgebraicMove(Move move) : this(move.Position.Square, move.Target.Square, move.Target.PromotionType)
-        { 
+        {
         }
 
         public Square From { get; }

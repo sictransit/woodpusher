@@ -21,10 +21,10 @@ namespace SicTransit.Woodpusher.Parsing.Extensions
         public static string RemoveAnnotations(this string s)
         {
             char[] separators = new char[] { '?', '!', '+', '#' };
-            
+
             string[] parts = s.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-            
-            return string.Concat( parts);
+
+            return string.Concat(parts);
         }
 
         private static string RepeatReplace(Regex regex, string s)

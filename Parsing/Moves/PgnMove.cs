@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public abstract class PgnMove
     {
-        private static Regex promotionRegex = new Regex(@"^(.+)=([QRNB])$", RegexOptions.Compiled);
+        private static Regex promotionRegex = new(@"^(.+)=([QRNB])$", RegexOptions.Compiled);
 
         protected string Raw { get; }
 

@@ -163,7 +163,7 @@ namespace SicTransit.Woodpusher.Model
                 yield break;
             }
 
-            var piece = Get(square);            
+            var piece = Get(square);
 
             var threatMask = Attacks.GetThreatMask(piece.Color, square);
 

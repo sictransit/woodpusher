@@ -311,7 +311,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 ";
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
-            {                
+            {
                 Trace.WriteLine($"will try to play: {pgnMove}");
 
                 engine.Play(pgnMove.GetMove(engine));
@@ -351,7 +351,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 ";
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
-            {                
+            {
                 Trace.WriteLine($"will try to play: {pgnMove}");
 
                 engine.Play(pgnMove.GetMove(engine));
