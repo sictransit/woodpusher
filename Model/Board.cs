@@ -163,11 +163,11 @@ namespace SicTransit.Woodpusher.Model
                 yield break;
             }
 
-            var piece = Get(square);
+            var piece = Get(square);            
+
+            var threatMask = Attacks.GetThreatMask(piece.Color, square);
 
             var opponentColor = piece.Color.OpponentColour();
-
-            var threatMask = Attacks.GetThreatMask(opponentColor, square);
 
             foreach (var pawn in GetPositions(opponentColor, PieceType.Pawn, threatMask.PawnMask))
             {

@@ -36,7 +36,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
                     switch (colour)
                     {
-                        case PieceColor.Black when square.Rank < 6:
+                        case PieceColor.White when square.Rank < 6:
                             {
                                 if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
                                 {
@@ -49,7 +49,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
                                 break;
                             }
-                        case PieceColor.White when square.Rank > 1:
+                        case PieceColor.Black when square.Rank > 1:
                             {
                                 if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
                                 {
