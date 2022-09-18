@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Lookup;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -27,9 +28,9 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public Board Copy(Board board)
+        public static Board Copy(Board board)
         {
-            return new Board(white, black, Counters, Moves, Attacks);
+            return new Board(board.white, board.black, board.Counters, board.Moves, board.Attacks);
         }
 
         private Board NewBoardCopyWhite(Bitboard blackBitboard)
@@ -51,6 +52,37 @@ namespace SicTransit.Woodpusher.Model
 
             Moves = moves ?? new Moves();
             Attacks = attacks ?? new Attacks();
+        }
+
+        public int Score
+        {
+            get
+            {
+                const int PAWN_VALUE = 1;
+                const int KNIGHT_VALUE = 3;
+                const int BISHOP_VALUE = 3;
+                const int ROOK_VALUE = 5;
+                const int QUEEN_VALUE = 9;
+                const int KING_VALUE = 4711;
+
+                var whiteEvaluation =
+                    BitOperations.PopCount(white.Pawn) * PAWN_VALUE +
+                    BitOperations.PopCount(white.Knight) * KNIGHT_VALUE +
+                    BitOperations.PopCount(white.Bishop) * BISHOP_VALUE +
+                    BitOperations.PopCount(white.Rook) * ROOK_VALUE +
+                    BitOperations.PopCount(white.Queen) * QUEEN_VALUE +
+                    BitOperations.PopCount(white.King) * KING_VALUE;
+
+                var blackEvaluation =
+                    BitOperations.PopCount(black.Pawn) * PAWN_VALUE +
+                    BitOperations.PopCount(black.Knight) * KNIGHT_VALUE +
+                    BitOperations.PopCount(black.Bishop) * BISHOP_VALUE +
+                    BitOperations.PopCount(black.Rook) * ROOK_VALUE +
+                    BitOperations.PopCount(black.Queen) * QUEEN_VALUE +
+                    BitOperations.PopCount(black.King) * KING_VALUE;
+
+                return whiteEvaluation - blackEvaluation;
+            }
         }
 
         public Board AddPiece(Square square, Piece piece) => piece.Color switch

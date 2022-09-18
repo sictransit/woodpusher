@@ -50,13 +50,28 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove PlayBestMove()
         {
-            var moves = Board.GetValidMoves().ToArray();
+            Move bestMove = null;
 
-            var move = moves[random.Next(moves.Length)];
+            int bestScore = int.MinValue;
 
-            Play(move);
+            var sign = Board.ActiveColor == Model.Enums.PieceColor.White ? 1 : -1;
 
-            return new AlgebraicMove(move);
+            foreach (var move in Board.GetValidMoves().OrderBy(_=>Guid.NewGuid().ToString()))
+            {
+                var testBoard = Board.Play(move);
+
+                var score = testBoard.Score * sign;
+
+                if (score > bestScore)
+                {
+                    bestMove = move;
+                    bestScore = score;
+                }
+            }
+
+            Play(bestMove);
+
+            return new AlgebraicMove(bestMove);
         }
     }
 }
