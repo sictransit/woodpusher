@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Parsing;
 
 namespace SicTransit.Woodpusher.Engine
@@ -72,6 +73,39 @@ namespace SicTransit.Woodpusher.Engine
             Play(bestMove);
 
             return new AlgebraicMove(bestMove);
+        }
+
+        private static int EvaluateMove(Board board, Move move, int depth, int alpha, int beta)
+        {
+            var testBoard = board.Play(move);
+
+            if (depth == 0)
+            {
+                if (testBoard.ActiveColor == PieceColor.White)
+                {
+                    return Math.Max(alpha, testBoard.Score);
+                }
+                else
+                {
+                    return Math.Min(beta, testBoard.Score);
+                }
+            }
+            else
+            {
+                foreach (var moves in testBoard.GetValidMoves())
+                {                    
+                    if (testBoard.ActiveColor == PieceColor.White)
+                    {
+                        return Math.Max(alpha, testBoard.Score);
+                    }
+                    else
+                    {
+                        return Math.Min(beta, testBoard.Score);
+                    }
+
+                }
+            }
+
         }
     }
 }
