@@ -36,27 +36,19 @@ namespace SicTransit.Woodpusher.Engine
             Log.Information($"played: {move}");
         }
 
-        public void Play(string algebraic)
+        public void Play(AlgebraicMove algebraicMove)
         {
-            if (string.IsNullOrEmpty(algebraic))
-            {
-                throw new ArgumentException($"'{nameof(algebraic)}' cannot be null or != 4 chars.", nameof(algebraic));
-            }
-
-            var fromSquare = new Square(algebraic[..2]);
-            var toSquare = new Square(algebraic[2..]);
-
-            var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(fromSquare) && m.Target.Square.Equals(toSquare));
+            var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To));
 
             if (move == null)
             {
-                throw new ArgumentOutOfRangeException(nameof(algebraic), $"unable to play: {algebraic}");
+                throw new ArgumentOutOfRangeException(nameof(algebraicMove), $"unable to play: {algebraicMove}");
             }
 
             Play(move);
         }
 
-        public Move PlayBestMove()
+        public AlgebraicMove PlayBestMove()
         {
             var moves = Board.GetValidMoves().ToArray();
 
@@ -64,7 +56,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Play(move);
 
-            return move;
+            return new AlgebraicMove(move);
         }
     }
 }

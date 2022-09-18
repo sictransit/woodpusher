@@ -48,7 +48,7 @@ namespace SicTransit.Woodpusher.Parsing
                 }
             }
 
-            var moveSection = sb.ToString().RemoveComments().RemoveVariations();
+            var moveSection = sb.ToString().RemoveComments().RemoveVariations().RemoveAnnotations();
 
             foreach (var move in ParseMoves(moveSection))
             {
@@ -106,7 +106,7 @@ namespace SicTransit.Woodpusher.Parsing
             var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             var indexRegex = new Regex(@"(\d+)\.");
-            var moveRegex = new Regex(@"[abcdefgh12345678RNBQKPO\-x]+");
+            var moveRegex = new Regex(@"[abcdefgh12345678RNBQKPO\-x=]+");
 
 
             foreach (var part in parts)
@@ -123,6 +123,10 @@ namespace SicTransit.Woodpusher.Parsing
                 if (moveMatch.Success && !ResultRegex.IsMatch(part))
                 {
                     yield return PgnMove.Parse(part);
+                }
+                else
+                {
+                    Log.Debug($"failed to parse: {part}");
                 }
             }
         }

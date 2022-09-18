@@ -8,8 +8,8 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         void Play(Move move);
 
-        void Play(string algebraic);
+        void Play(AlgebraicMove algebraicMove);
 
-        Move PlayBestMove();
+        AlgebraicMove PlayBestMove();
     }
 }

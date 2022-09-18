@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Model
 
         public override string ToString()
         {
-            return $"{Piece.ToChar()}{Square}";
+            return $"{Piece.Type.ToChar()}{Square}";
         }
     }
 }

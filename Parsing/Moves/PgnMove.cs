@@ -8,6 +8,8 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 {
     public abstract class PgnMove
     {
+        private static Regex promotionRegex = new Regex(@"^(.+)=([QRNB])$", RegexOptions.Compiled);
+
         protected string Raw { get; }
 
         protected PgnMove(string raw)
@@ -17,7 +19,17 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
         public static PgnMove Parse(string s)
         {
-            s = s.Replace("x", string.Empty).Replace("+", string.Empty);
+            s = s.Replace("x", string.Empty);
+
+            var promotionMatch = promotionRegex.Match(s);
+
+            PieceType promotionType = PieceType.None;
+
+            if (promotionMatch.Success)
+            {
+                s = promotionMatch.Groups[1].Value;
+                promotionType = promotionMatch.Groups[2].Value[0].ToPieceType();
+            }
 
             if (TryParseSimplePawnMove(s, out var simplePawnMove))
             {
@@ -34,12 +46,12 @@ namespace SicTransit.Woodpusher.Parsing.Moves
                 return castlingMove!;
             }
 
-            if (TryParseNamedPieceOnFileMove(s, out var pieceOnFileMove))
+            if (TryParseNamedPieceOnFileMove(s, promotionType, out var pieceOnFileMove))
             {
                 return pieceOnFileMove!;
             }
 
-            if (TryParseFileMove(s, out var fileMove))
+            if (TryParseFileMove(s, promotionType, out var fileMove))
             {
                 return fileMove!;
             }
@@ -80,7 +92,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParseNamedPieceOnFileMove(string s, out PieceOnFileMove? move)
+        private static bool TryParseNamedPieceOnFileMove(string s, PieceType promotionType, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -90,13 +102,13 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), new Square(match.Groups[3].Value));
+                move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), new Square(match.Groups[3].Value), promotionType);
             }
 
             return move != default;
         }
 
-        private static bool TryParseFileMove(string s, out PieceOnFileMove? move)
+        private static bool TryParseFileMove(string s, PieceType promotionType, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -106,7 +118,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(s, PieceType.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value));
+                move = new PieceOnFileMove(s, PieceType.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value), promotionType);
             }
 
             return move != default;

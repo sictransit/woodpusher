@@ -311,11 +311,12 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 ";
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
-            {
-                Trace.WriteLine(engine.Board.PrettyPrint());
+            {                
                 Trace.WriteLine($"will try to play: {pgnMove}");
 
                 engine.Play(pgnMove.GetMove(engine));
+
+                Trace.WriteLine(engine.Board.PrettyPrint());
             }
 
             Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
@@ -323,6 +324,51 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
             var validMoves = engine.Board.GetValidMoves().ToArray();
 
             Assert.IsFalse(validMoves.Any(m => m.Position.Piece.Type == PieceType.King && m.Target.Square.Equals(new Square("c8"))));
+        }
+
+        [TestMethod]
+        public void PromotionToQueenCrashTest()
+        {
+            var game = @"
+[Event ""?""]
+[Site ""?""]
+[Date ""2022.09.18""]
+[Round ""?""]
+[White ""micke""]
+[Black ""Woodpusher""]
+[Result ""1-0""]
+[ECO ""B00""]
+[GameDuration ""00:01:09""]
+[GameEndTime ""2022-09-18T10:08:37.811 W. Europe Summer Time""]
+[GameStartTime ""2022-09-18T10:07:27.878 W. Europe Summer Time""]
+[Opening ""Corn stalk defense""]
+[PlyCount ""47""]
+[Termination ""abandoned""]
+[TimeControl ""40/300""]
+
+1. e4 a5 2. d4 {2.5s} Nh6 3. Nf3 {1.3s} f5 4. Nc3 {1.3s} g5 5. Nxg5 {5.2s} Nc6
+6. exf5 {4.4s} d6 7. d5 {2.7s} Bd7 8. Bb5 {5.0s} Ng8 9. Bxc6 {3.9s} Bg7
+10. Bxd7+ {2.0s} Kxd7 11. Nf7 {3.4s} b6 12. Nxd8 {1.8s} Bxc3+ 13. Bd2 {3.6s}
+Rxd8 14. Bxc3 {1.6s} Ke8 15. Bxh8 {3.0s} c5 16. Qd3 {6.3s} Kf8 17. O-O-O {2.5s}
+a4 18. a3 {2.1s} Ke8 19. b4 {1.6s} Nf6 20. bxc5 {1.2s} Ng8 21. cxb6 {2.2s} h6
+22. f6 {6.1s} Kf8 23. fxe7+ {1.4s} Ke8 24. exd8=Q+ {2.8s, Black disconnects} 1-0
+
+";
+
+            foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
+            {                
+                Trace.WriteLine($"will try to play: {pgnMove}");
+
+                engine.Play(pgnMove.GetMove(engine));
+
+                Trace.WriteLine(engine.Board.PrettyPrint());
+            }
+
+            Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
+
+            var validMoves = engine.Board.GetValidMoves().ToArray();
+
+            Assert.IsTrue(validMoves.Any());
         }
     }
 }

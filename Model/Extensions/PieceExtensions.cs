@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return new Piece(pieceType, pieceColour);
         }
 
-        public static char ToChar(this Piece p) => p.Type switch
+        public static char ToChar(this PieceType t) => t switch
         {
             PieceType.Pawn => 'P',
             PieceType.Rook => 'R',
@@ -33,12 +33,12 @@ namespace SicTransit.Woodpusher.Model.Extensions
             PieceType.Bishop => 'B',
             PieceType.Queen => 'Q',
             PieceType.King => 'K',
-            _ => throw new NotImplementedException(p.ToString()),
+            _ => throw new NotImplementedException(t.ToString()),
         };
 
         public static char ToAlgebraicNotation(this Piece p)
         {
-            var c = p.ToChar();
+            var c = p.Type.ToChar();
 
             return p.Color == PieceColor.White ? c : char.ToLowerInvariant(c);
         }

@@ -121,7 +121,7 @@ namespace SicTransit.Woodpusher.Model
 
                 if (move.Target.Flags.HasFlag(SpecialMove.Promote))
                 {
-                    activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target.Square).Add(move.Target.PromotionType!.Value, move.Target.Square);
+                    activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target.Square).Add(move.Target.PromotionType, move.Target.Square);
                 }
             }
 

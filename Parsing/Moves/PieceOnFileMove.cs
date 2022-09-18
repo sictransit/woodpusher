@@ -10,12 +10,14 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         private readonly PieceType pieceType;
         private readonly int file;
         private readonly Square square;
+        private readonly PieceType promotionType;
 
-        public PieceOnFileMove(string raw, PieceType pieceType, int file, Square square) : base(raw)
+        public PieceOnFileMove(string raw, PieceType pieceType, int file, Square square, PieceType promotionType) : base(raw)
         {
             this.pieceType = pieceType;
             this.file = file;
             this.square = square;
+            this.promotionType = promotionType;
         }
 
         public override string ToString()
@@ -31,7 +33,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var position in positions)
             {
-                var move = engine.Board.GetValidMovesFromPosition(position).SingleOrDefault(m => m.Target.Square.Equals(square));
+                var move = engine.Board.GetValidMovesFromPosition(position).SingleOrDefault(m => m.Target.Square.Equals(square) && m.Target.PromotionType == promotionType);
 
                 if (move != null)
                 {

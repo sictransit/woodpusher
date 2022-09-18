@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Engine;
+using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
@@ -76,13 +77,11 @@ namespace SicTransit.Woodpusher
         {
             var parts = o.ToString().Split();
 
-            var move = parts.Last();
-
-            if (move.IsAlgebraicMoveNotation())
+            if (AlgebraicMove.TryParse(parts.Last(), out var algebraicMove))
             {
                 lock (engine)
                 {
-                    engine.Play(move);
+                    engine.Play(algebraicMove!);
                 }
             }
         }
@@ -95,7 +94,7 @@ namespace SicTransit.Woodpusher
                 {
                     var move = engine.PlayBestMove();
 
-                    consoleOutput($"bestmove {move.ToAlgebraicMoveNotation()}");
+                    consoleOutput($"bestmove {move.Notation}");
                 }
                 catch (Exception ex)
                 {
