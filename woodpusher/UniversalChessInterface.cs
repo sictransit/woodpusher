@@ -75,13 +75,28 @@ namespace SicTransit.Woodpusher
 
         private void Position(object? o)
         {
-            var parts = o.ToString().Split();
-
-            if (AlgebraicMove.TryParse(parts.Last(), out var algebraicMove))
+            lock (engine)
             {
-                lock (engine)
+                try
                 {
-                    engine.Play(algebraicMove!);
+                    var parts = o.ToString().Split();
+
+                    if (AlgebraicMove.TryParse(parts.Last(), out var algebraicMove))
+                    {
+                        Log.Information($"telling engine to play: {algebraicMove}");
+
+                        engine.Play(algebraicMove!);
+                    }
+                    else
+                    {
+                        Log.Information($"failed to parse position: {o}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Caught exception in Position().", ex);
+                    Log.Error(ex.ToString());
+                    throw;
                 }
             }
         }
@@ -92,6 +107,7 @@ namespace SicTransit.Woodpusher
             {
                 try
                 {
+                    
                     var move = engine.PlayBestMove();
 
                     consoleOutput($"bestmove {move.Notation}");

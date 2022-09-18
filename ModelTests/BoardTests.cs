@@ -140,10 +140,12 @@ namespace SicTransit.Woodpusher.Tests
 
             foreach (PieceType pieceType in Enum.GetValues(typeof(PieceType)))
             {
-                var piece = new Piece(pieceType, PieceColor.Black);
-                pieces.Add(piece);
-
-                board = board.AddPiece(new Square(file, rank++), piece);
+                if (pieceType != PieceType.None)
+                {
+                    var piece = new Piece(pieceType, PieceColor.Black);
+                    pieces.Add(piece);
+                    board = board.AddPiece(new Square(file, rank++), piece);
+                }
             }
 
             foreach (var position in board.GetPositions(PieceColor.Black, file))

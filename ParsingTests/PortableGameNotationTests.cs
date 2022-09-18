@@ -338,21 +338,16 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 [Black ""Woodpusher""]
 [Result ""1-0""]
 [ECO ""B00""]
-[GameDuration ""00:01:09""]
-[GameEndTime ""2022-09-18T10:08:37.811 W. Europe Summer Time""]
-[GameStartTime ""2022-09-18T10:07:27.878 W. Europe Summer Time""]
-[Opening ""Corn stalk defense""]
-[PlyCount ""47""]
+[GameDuration ""00:00:07""]
+[GameEndTime ""2022-09-18T16:43:30.475 W. Europe Summer Time""]
+[GameStartTime ""2022-09-18T16:43:22.803 W. Europe Summer Time""]
+[Opening ""Barnes defense""]
+[PlyCount ""9""]
 [Termination ""abandoned""]
 [TimeControl ""40/300""]
 
-1. e4 a5 2. d4 {2.5s} Nh6 3. Nf3 {1.3s} f5 4. Nc3 {1.3s} g5 5. Nxg5 {5.2s} Nc6
-6. exf5 {4.4s} d6 7. d5 {2.7s} Bd7 8. Bb5 {5.0s} Ng8 9. Bxc6 {3.9s} Bg7
-10. Bxd7+ {2.0s} Kxd7 11. Nf7 {3.4s} b6 12. Nxd8 {1.8s} Bxc3+ 13. Bd2 {3.6s}
-Rxd8 14. Bxc3 {1.6s} Ke8 15. Bxh8 {3.0s} c5 16. Qd3 {6.3s} Kf8 17. O-O-O {2.5s}
-a4 18. a3 {2.1s} Ke8 19. b4 {1.6s} Nf6 20. bxc5 {1.2s} Ng8 21. cxb6 {2.2s} h6
-22. f6 {6.1s} Kf8 23. fxe7+ {1.4s} Ke8 24. exd8=Q+ {2.8s, Black disconnects} 1-0
-
+1. e4 f6 2. e5 {1.5s} b5 3. exf6 {1.1s} d6 4. fxg7 {0.78s} Kd7
+5. gxh8=Q {2.7s, Black disconnects} 1-0
 ";
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
@@ -366,9 +361,49 @@ a4 18. a3 {2.1s} Ke8 19. b4 {1.6s} Nf6 20. bxc5 {1.2s} Ng8 21. cxb6 {2.2s} h6
 
             Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
 
+            var playedMove = engine.PlayBestMove();
+
+            Assert.IsNotNull(playedMove);
+        }
+
+        [TestMethod]
+        public void BlackCastlesThroughOwnQueenTest()
+        {
+            var game = @"
+[Event ""?""]
+[Site ""?""]
+[Date ""2022.09.18""]
+[Round ""?""]
+[White ""Woodpusher""]
+[Black ""Woodpusher""]
+[Result ""1-0""]
+[ECO ""B01""]
+[GameDuration ""00:00:00""]
+[GameEndTime ""2022-09-18T17:19:57.934 W. Europe Summer Time""]
+[GameStartTime ""2022-09-18T17:19:57.846 W. Europe Summer Time""]
+[Opening ""Scandinavian (center counter) defense""]
+[PlyCount ""21""]
+[Termination ""illegal move""]
+[TimeControl ""40/300""]
+
+1. e4 d5 2. Bb5+ Bd7 3. Qg4 g5 4. Bc6 a6 5. Qxd7+ Nxd7 6. Kd1 g4 7. Ke2 h5
+8. Kd1 Ra7 9. g3 Ra8 10. Nf3 Rh6 11. h4 {Black makes an illegal move: e8c8} 1-0
+";
+
+            foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
+            {
+                Trace.WriteLine($"will try to play: {pgnMove}");
+
+                engine.Play(pgnMove.GetMove(engine));
+
+                Trace.WriteLine(engine.Board.PrettyPrint());
+            }
+
+            Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
+
             var validMoves = engine.Board.GetValidMoves().ToArray();
 
-            Assert.IsTrue(validMoves.Any());
+            Assert.IsFalse(validMoves.Any(m => m.Position.Piece.Type == PieceType.King && m.Target.Flags.HasFlag(SpecialMove.CastleQueen)));
         }
     }
 }

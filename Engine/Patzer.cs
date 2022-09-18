@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(AlgebraicMove algebraicMove)
         {
-            var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To));
+            var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
 
             if (move == null)
             {

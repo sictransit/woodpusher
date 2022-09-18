@@ -51,7 +51,7 @@ namespace SicTransit.Woodpusher.Tests.Movement
                 targets.AddRange(vector);
             }
 
-            Assert.AreEqual(9, targets.Count);
+            Assert.AreEqual(12, targets.Count);
             Assert.IsTrue(targets.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
             Assert.IsTrue(targets.Where(m => m.Square.File != b7.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
@@ -68,7 +68,7 @@ namespace SicTransit.Woodpusher.Tests.Movement
                 targets.AddRange(vector);
             }
 
-            Assert.AreEqual(9, targets.Count);
+            Assert.AreEqual(12, targets.Count);
             Assert.IsTrue(targets.All(m => m.Flags.HasFlag(SpecialMove.Promote)));
             Assert.IsTrue(targets.Where(m => m.Square.File != b2.File).All(m => m.Flags.HasFlag(SpecialMove.MustTake)));
         }
