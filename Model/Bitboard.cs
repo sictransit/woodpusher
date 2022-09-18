@@ -10,15 +10,15 @@ namespace SicTransit.Woodpusher.Model
 
         public Bitboard(PieceColor color, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
         {
-            this.Color = color;
-            this.Pawn = pawn;
-            this.Rook = rook;
-            this.Knight = knight;
-            this.Bishop = bishop;
-            this.Queen = queen;
-            this.King = king;
+            Color = color;
+            Pawn = pawn;
+            Rook = rook;
+            Knight = knight;
+            Bishop = bishop;
+            Queen = queen;
+            King = king;
 
-            All = this.Pawn | this.Rook | this.Knight | this.Bishop | this.Queen | this.King;
+            All = Pawn | Rook | Knight | Bishop | Queen | King;
         }
 
         private PieceColor Color { get; }

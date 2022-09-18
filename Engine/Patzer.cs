@@ -56,7 +56,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor == Model.Enums.PieceColor.White ? 1 : -1;
 
-            foreach (var move in Board.GetValidMoves().OrderBy(_=>Guid.NewGuid().ToString()))
+            foreach (var move in Board.GetValidMoves().OrderBy(_ => Guid.NewGuid().ToString()))
             {
                 var testBoard = Board.Play(move);
 
