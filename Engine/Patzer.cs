@@ -56,7 +56,7 @@ namespace SicTransit.Woodpusher.Engine
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var bestScore = int.MinValue;
 
-            foreach (var move in Board.GetValidMoves().ToArray())
+            foreach (var move in Board.GetValidMoves())
             {
                 var score = EvaluateBoard(Board.Play(move), 3) * sign;
 
@@ -94,7 +94,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            bool maximizing = board.ActiveColor == PieceColor.White;
+            var maximizing = board.ActiveColor == PieceColor.White;
 
             if (maximizing)
             {
@@ -102,9 +102,9 @@ namespace SicTransit.Woodpusher.Engine
 
                 foreach (var move in board.GetValidMoves())
                 {
-                    var testBoard = board.Play(move);
-                    maxScore = Math.Max(maxScore, EvaluateBoard(testBoard, depth - 1));
+                    maxScore = Math.Max(maxScore, EvaluateBoard(board.Play(move), depth - 1));
                 }
+
                 return maxScore;
             }
             else
@@ -113,9 +113,9 @@ namespace SicTransit.Woodpusher.Engine
 
                 foreach (var move in board.GetValidMoves())
                 {
-                    var testBoard = board.Play(move);
-                    minScore = Math.Min(minScore, EvaluateBoard(testBoard, depth - 1));
+                    minScore = Math.Min(minScore, EvaluateBoard(board.Play(move), depth - 1));
                 }
+
                 return minScore;
             }
         }
