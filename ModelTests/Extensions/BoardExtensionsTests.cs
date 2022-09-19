@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Tests.Extensions
             Assert.AreEqual(4865609ul, board.Perft(5));
             Assert.AreEqual(119060324ul, board.Perft(6));
             Assert.AreEqual(3195901860ul, board.Perft(7));
-            Assert.AreEqual(84998978956ul, board.Perft(7));            
+            Assert.AreEqual(84998978956ul, board.Perft(7));
         }
     }
 }

@@ -89,8 +89,8 @@ namespace SicTransit.Woodpusher.Model
                 blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.CenterMask) * pawnValue / 2;
 
                 // + 1/4 pawn for each pawn in front of the king
-                //whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 4;
-                //blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 4;
+                whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 4;
+                blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 4;
 
                 if (!GetValidMoves().Any())
                 {
@@ -138,7 +138,7 @@ namespace SicTransit.Woodpusher.Model
             }
             else if (move.Target.Flags.HasFlag(SpecialMove.EnPassant))
             {
-                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White? move.Target.EnPassantTarget.Value.AddFileAndRank(0, -1) : move.Target.EnPassantTarget.Value.AddFileAndRank(0, 1));
+                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.Target.EnPassantTarget.Value.AddFileAndRank(0, -1) : move.Target.EnPassantTarget.Value.AddFileAndRank(0, 1));
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
@@ -323,19 +323,19 @@ namespace SicTransit.Woodpusher.Model
                 return false;
             }
 
-            if (MustTakeButCannot(move))
-            {
-                return false;
-            }
-
             if (move.Position.Piece.Type == PieceType.Pawn)
             {
-                if (EnPassantWithoutTarget(move))
+                if (PawnCannotTakeForward(move))
                 {
                     return false;
                 }
 
-                if (PawnCannotTakeForward(move))
+                if (MustTakeButCannot(move))
+                {
+                    return false;
+                }
+
+                if (EnPassantWithoutTarget(move))
                 {
                     return false;
                 }
