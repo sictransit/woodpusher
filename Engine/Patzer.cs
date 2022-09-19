@@ -51,61 +51,73 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove PlayBestMove()
         {
-            Move bestMove = null;
+            var bestMoves = new List<Move>();
 
-            int bestScore = int.MinValue;
+            var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
+            var bestScore = int.MinValue;
 
-            var sign = Board.ActiveColor == Model.Enums.PieceColor.White ? 1 : -1;
-
-            foreach (var move in Board.GetValidMoves().OrderBy(_ => Guid.NewGuid().ToString()))
+            foreach (var move in Board.GetValidMoves().ToArray())
             {
-                var testBoard = Board.Play(move);
-
-                var score = testBoard.Score * sign;
+                var score = EvaluateBoard(Board.Play(move), 3) * sign;
 
                 if (score > bestScore)
                 {
-                    bestMove = move;
+                    bestMoves = new List<Move> { move };
                     bestScore = score;
+                }
+                else if (score == bestScore)
+                {
+                    bestMoves.Add(move);
                 }
             }
 
-            Play(bestMove);
+            if (bestMoves.Any())
+            {
+                var bestMove = bestMoves[random.Next(bestMoves.Count)];
 
-            return new AlgebraicMove(bestMove);
+                Log.Information($"found: {bestMove} {bestScore * sign}");
+
+                Play(bestMove);
+
+                return new AlgebraicMove(bestMove);
+            }
+
+            Log.Warning("no valid moves found");
+
+            return default;
         }
 
-        private static int EvaluateMove(Board board, Move move, int depth, int alpha, int beta)
+        private int EvaluateBoard(Board board, int depth)
         {
-            var testBoard = board.Play(move);
-
             if (depth == 0)
             {
-                if (testBoard.ActiveColor == PieceColor.White)
+                return board.Score;
+            }
+
+            bool maximizing = board.ActiveColor == PieceColor.White;
+
+            if (maximizing)
+            {
+                var maxScore = int.MinValue;
+
+                foreach (var move in board.GetValidMoves())
                 {
-                    return Math.Max(alpha, testBoard.Score);
+                    var testBoard = board.Play(move);
+                    maxScore = Math.Max(maxScore, EvaluateBoard(testBoard, depth - 1));
                 }
-                else
-                {
-                    return Math.Min(beta, testBoard.Score);
-                }
+                return maxScore;
             }
             else
             {
-                foreach (var moves in testBoard.GetValidMoves())
-                {                    
-                    if (testBoard.ActiveColor == PieceColor.White)
-                    {
-                        return Math.Max(alpha, testBoard.Score);
-                    }
-                    else
-                    {
-                        return Math.Min(beta, testBoard.Score);
-                    }
+                var minScore = int.MaxValue;
 
+                foreach (var move in board.GetValidMoves())
+                {
+                    var testBoard = board.Play(move);
+                    minScore = Math.Min(minScore, EvaluateBoard(testBoard, depth - 1));
                 }
+                return minScore;
             }
-
         }
     }
 }

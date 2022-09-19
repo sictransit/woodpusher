@@ -81,6 +81,16 @@ namespace SicTransit.Woodpusher.Model
                     BitOperations.PopCount(black.Queen) * QUEEN_VALUE +
                     BitOperations.PopCount(black.King) * KING_VALUE;
 
+                if (!GetValidMoves().Any())
+                {
+                    if (IsChecked)
+                    {
+                        return ActiveColor == PieceColor.White ? int.MinValue : int.MaxValue;
+                    }
+
+                    return 0;
+                }
+
                 return whiteEvaluation - blackEvaluation;
             }
         }
@@ -357,6 +367,8 @@ namespace SicTransit.Woodpusher.Model
 
             return testBoard.IsAttacked(testBoard.FindKing(testBoard.ActiveColor.OpponentColour()));
         }
+
+        public bool IsChecked => IsAttacked(FindKing(ActiveColor));
 
         private bool IsAttacked(Square square) => GetAttackers(square).Any();
 
