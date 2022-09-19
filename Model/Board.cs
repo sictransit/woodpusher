@@ -20,6 +20,8 @@ namespace SicTransit.Woodpusher.Model
 
         public PieceColor ActiveColor => Counters.ActiveColor;
 
+        private ulong All => white.All | black.All;
+
         public Board() : this(new Bitboard(PieceColor.White), new Bitboard(PieceColor.Black), Counters.Default)
         {
 
@@ -84,13 +86,38 @@ namespace SicTransit.Woodpusher.Model
                     BitOperations.PopCount(black.Queen) * queenValue +
                     BitOperations.PopCount(black.King) * kingValue;
 
-                // + 1/2 pawn for each pawn holding the center
-                whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.CenterMask) * pawnValue / 2;
-                blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.CenterMask) * pawnValue / 2;
+                // + 1 pawn for each pawn holding the center
+                whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.CenterMask) * pawnValue / 1;
+                blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.CenterMask) * pawnValue / 1;
 
-                // + 1/4 pawn for each pawn in front of the king
-                whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 4;
-                blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 4;
+                // + 1/3 pawn for each pawn in front of the king, if the king is on back rank
+                if (FindKing(PieceColor.White).Rank == 0)
+                {
+                    whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 3;
+                }
+                if (FindKing(PieceColor.Black).Rank == 7)
+                {
+                    blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 3;
+                }
+
+                // 1/ rook if they can see eachother
+                var whiteRooks = white.Rook.ToSquares().ToArray();
+                if (whiteRooks.Length == 2)
+                {
+                    if ((Moves.GetTravelMask(whiteRooks[0], whiteRooks[1]) & All) == 0)
+                    {
+                        whiteEvaluation += rookValue / 1;
+                    }
+                }
+
+                var blackRooks = black.Rook.ToSquares().ToArray();
+                if (blackRooks.Length == 2)
+                {
+                    if ((Moves.GetTravelMask(blackRooks[0], blackRooks[1]) & All) == 0)
+                    {
+                        blackEvaluation += rookValue / 1;
+                    }
+                }
 
                 if (!GetValidMoves().Any())
                 {

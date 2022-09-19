@@ -59,10 +59,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = Board.PieceCount switch
             {
-                <= 4 => 6,
-                <= 8 => 5,
-                <= 16 => 4,
-                _ => 3
+                <= 4 => 8,
+                <= 12 => 6,
+                _ => 4
             };
 
             foreach (var move in Board.GetValidMoves())
@@ -107,11 +106,9 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            var maximizing = board.ActiveColor == PieceColor.White;
+            var validMoves = board.GetValidMoves().OrderByDescending(m => m.Target.Flags.HasFlag(SpecialMove.MustTake) || m.Target.Flags.HasFlag(SpecialMove.Promote) || m.Position.Piece.Type != PieceType.Pawn);
 
-            var validMoves = board.GetValidMoves();
-
-            if (maximizing)
+            if (board.ActiveColor == PieceColor.White)
             {
                 var maxScore = int.MinValue;
 
