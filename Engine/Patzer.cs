@@ -61,7 +61,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 <= 4 => 6,
                 <= 8 => 5,
-                <= 16  => 4,
+                <= 16 => 4,
                 _ => 3
             };
 

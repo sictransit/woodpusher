@@ -32,5 +32,22 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             return sb.ToString();
         }
+
+        public static ulong Perft(this Board board, int depth)
+        {
+            if (depth <= 1)
+            {
+                return (ulong)board.GetValidMoves().Count();
+            }
+
+            ulong count = 0;
+
+            foreach (var move in board.GetValidMoves())
+            {
+                count += Perft(board.Play(move), depth - 1);
+            }
+
+            return count;
+        }
     }
 }

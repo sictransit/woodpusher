@@ -1,6 +1,6 @@
-﻿using System.Numerics;
-using SicTransit.Woodpusher.Model.Enums;
+﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {

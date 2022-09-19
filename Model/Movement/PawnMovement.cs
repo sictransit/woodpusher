@@ -71,7 +71,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         if (Square.TryCreate(file + dFile, rank + dRank, out var enPassantSquare))
                         {
-                            yield return new[] { new Target(enPassantSquare, SpecialMove.EnPassant) };
+                            yield return new[] { new Target(enPassantSquare, SpecialMove.EnPassant, enPassantSquare) };
                         }
                     }
                 }

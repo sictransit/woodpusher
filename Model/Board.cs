@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher.Model
                 {
                     if (IsChecked)
                     {
-                        return ActiveColor == PieceColor.White ? int.MinValue/2 : int.MaxValue/2;
+                        return ActiveColor == PieceColor.White ? int.MinValue / 2 : int.MaxValue / 2;
                     }
 
                     return 0;
@@ -135,6 +135,10 @@ namespace SicTransit.Woodpusher.Model
                 targetPiece = opponentBitboard.Peek(move.Target.Square);
 
                 opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.Target.Square);
+            }
+            else if (move.Target.Flags.HasFlag(SpecialMove.EnPassant))
+            {
+                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White? move.Target.EnPassantTarget.Value.AddFileAndRank(0, -1) : move.Target.EnPassantTarget.Value.AddFileAndRank(0, 1));
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
