@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Engine;
 
 namespace SicTransit.Woodpusher
 {
@@ -16,9 +17,7 @@ namespace SicTransit.Woodpusher
                 Log.Information($"Sent: {s}");
             });
 
-            var uci = new UniversalChessInterface();
-
-            uci.RegisterConsoleCallback(consoleOutput);
+            var uci = new UniversalChessInterface(consoleOutput, new Patzer());
 
             while (!uci.Quit)
             {

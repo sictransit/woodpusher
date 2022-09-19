@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
 using System.Text.RegularExpressions;
 
@@ -10,45 +9,49 @@ namespace SicTransit.Woodpusher
     {
         private volatile Action<string> consoleOutput;
 
-        private static Regex uciCommand = new(@"^uci$", RegexOptions.Compiled);
-        private static Regex isReadyCommand = new(@"^isready$", RegexOptions.Compiled);
-        private static Regex uciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
-        private static Regex quitCommand = new(@"^quit$", RegexOptions.Compiled);
-        private static Regex positionCommand = new(@"^position", RegexOptions.Compiled);
-        private static Regex goCommand = new(@"^go", RegexOptions.Compiled);
+        private static readonly Regex UciCommand = new(@"^uci$", RegexOptions.Compiled);
+        private static readonly Regex IsReadyCommand = new(@"^isready$", RegexOptions.Compiled);
+        private static readonly Regex UciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
+        private static readonly Regex QuitCommand = new(@"^quit$", RegexOptions.Compiled);
+        private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
+        private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
 
         private volatile IEngine engine;
 
-        public void RegisterConsoleCallback(Action<string> consoleOutput)
+        public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {
             this.consoleOutput = consoleOutput;
+            this.engine = engine;
         }
 
         public void ProcessCommand(string command)
         {
             Log.Debug($"Processing command: {command}");
 
-            if (uciCommand.IsMatch(command))
+            if (UciCommand.IsMatch(command))
             {
                 ThreadPool.QueueUserWorkItem(Uci);
             }
-            else if (uciNewGameCommand.IsMatch(command))
+            else if (UciNewGameCommand.IsMatch(command))
             {
-                engine = new Patzer();
+                lock (engine)
+                {
+                    engine.Initialize();
+                }
             }
-            else if (isReadyCommand.IsMatch(command))
+            else if (IsReadyCommand.IsMatch(command))
             {
                 ThreadPool.QueueUserWorkItem(IsReady);
             }
-            else if (positionCommand.IsMatch(command))
+            else if (PositionCommand.IsMatch(command))
             {
                 ThreadPool.QueueUserWorkItem(Position, command);
             }
-            else if (goCommand.IsMatch(command))
+            else if (GoCommand.IsMatch(command))
             {
                 ThreadPool.QueueUserWorkItem(Go, command);
             }
-            else if (quitCommand.IsMatch(command))
+            else if (QuitCommand.IsMatch(command))
             {
                 Quit = true;
             }
@@ -106,7 +109,6 @@ namespace SicTransit.Woodpusher
             {
                 try
                 {
-
                     var move = engine.PlayBestMove();
 
                     consoleOutput($"bestmove {move.Notation}");

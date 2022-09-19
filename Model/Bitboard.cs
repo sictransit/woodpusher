@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Model.Enums;
+﻿using System.Numerics;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
@@ -31,6 +32,8 @@ namespace SicTransit.Woodpusher.Model
         public ulong Bishop { get; }
         public ulong Queen { get; }
         public ulong King { get; }
+
+        public int PieceCount => BitOperations.PopCount(All);
 
         public Square FindKing() => King.ToSquare();
 

@@ -16,6 +16,8 @@ namespace SicTransit.Woodpusher.Model
 
         private Moves Moves { get; }
 
+        private Masks Masks { get; }
+
         public PieceColor ActiveColor => Counters.ActiveColor;
 
         public Board() : this(new Bitboard(PieceColor.White), new Bitboard(PieceColor.Black), Counters.Default)
@@ -30,20 +32,20 @@ namespace SicTransit.Woodpusher.Model
 
         public static Board Copy(Board board)
         {
-            return new Board(board.white, board.black, board.Counters, board.Moves, board.Attacks);
+            return new Board(board.white, board.black, board.Counters, board.Moves, board.Attacks, board.Masks);
         }
 
         private Board NewBoardCopyWhite(Bitboard blackBitboard)
         {
-            return new Board(white, blackBitboard, Counters, Moves, Attacks);
+            return new Board(white, blackBitboard, Counters, Moves, Attacks, Masks);
         }
 
         private Board NewBoardCopyBlack(Bitboard whiteBitboard)
         {
-            return new Board(whiteBitboard, black, Counters, Moves, Attacks);
+            return new Board(whiteBitboard, black, Counters, Moves, Attacks, Masks);
         }
 
-        private Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null)
+        private Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null)
         {
             this.white = white;
             this.black = black;
@@ -52,40 +54,49 @@ namespace SicTransit.Woodpusher.Model
 
             Moves = moves ?? new Moves();
             Attacks = attacks ?? new Attacks();
+            Masks = masks ?? new Masks();
         }
 
         public int Score
         {
             get
             {
-                const int PAWN_VALUE = 1;
-                const int KNIGHT_VALUE = 3;
-                const int BISHOP_VALUE = 3;
-                const int ROOK_VALUE = 5;
-                const int QUEEN_VALUE = 9;
-                const int KING_VALUE = 4711;
+                const int pawnValue = 100;
+                const int knightValue = 300;
+                const int bishopValue = 300;
+                const int rookValue = 500;
+                const int queenValue = 900;
+                const int kingValue = 471100;
 
                 var whiteEvaluation =
-                    BitOperations.PopCount(white.Pawn) * PAWN_VALUE +
-                    BitOperations.PopCount(white.Knight) * KNIGHT_VALUE +
-                    BitOperations.PopCount(white.Bishop) * BISHOP_VALUE +
-                    BitOperations.PopCount(white.Rook) * ROOK_VALUE +
-                    BitOperations.PopCount(white.Queen) * QUEEN_VALUE +
-                    BitOperations.PopCount(white.King) * KING_VALUE;
+                    BitOperations.PopCount(white.Pawn) * pawnValue +
+                    BitOperations.PopCount(white.Knight) * knightValue +
+                    BitOperations.PopCount(white.Bishop) * bishopValue +
+                    BitOperations.PopCount(white.Rook) * rookValue +
+                    BitOperations.PopCount(white.Queen) * queenValue +
+                    BitOperations.PopCount(white.King) * kingValue;
 
                 var blackEvaluation =
-                    BitOperations.PopCount(black.Pawn) * PAWN_VALUE +
-                    BitOperations.PopCount(black.Knight) * KNIGHT_VALUE +
-                    BitOperations.PopCount(black.Bishop) * BISHOP_VALUE +
-                    BitOperations.PopCount(black.Rook) * ROOK_VALUE +
-                    BitOperations.PopCount(black.Queen) * QUEEN_VALUE +
-                    BitOperations.PopCount(black.King) * KING_VALUE;
+                    BitOperations.PopCount(black.Pawn) * pawnValue +
+                    BitOperations.PopCount(black.Knight) * knightValue +
+                    BitOperations.PopCount(black.Bishop) * bishopValue +
+                    BitOperations.PopCount(black.Rook) * rookValue +
+                    BitOperations.PopCount(black.Queen) * queenValue +
+                    BitOperations.PopCount(black.King) * kingValue;
+
+                // + 1/2 pawn for each pawn holding the center
+                whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.CenterMask) * pawnValue / 2;
+                blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.CenterMask) * pawnValue / 2;
+
+                // + 1/4 pawn for each pawn in front of the king
+                //whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 4;
+                //blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 4;
 
                 if (!GetValidMoves().Any())
                 {
                     if (IsChecked)
                     {
-                        return ActiveColor == PieceColor.White ? int.MinValue : int.MaxValue;
+                        return ActiveColor == PieceColor.White ? int.MinValue/2 : int.MaxValue/2;
                     }
 
                     return 0;
@@ -172,9 +183,11 @@ namespace SicTransit.Woodpusher.Model
             var counters = new Counters(activeColour, whiteCastlings, blackCastlings, enPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColor == PieceColor.White
-                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks)
-                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks);
+                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Masks)
+                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Masks);
         }
+
+        public int PieceCount => white.PieceCount + black.PieceCount;
 
         public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);
 

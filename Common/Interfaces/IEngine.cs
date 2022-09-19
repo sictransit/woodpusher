@@ -6,6 +6,8 @@ namespace SicTransit.Woodpusher.Common.Interfaces
     {
         Board Board { get; }
 
+        void Initialize();
+
         void Play(Move move);
 
         void Play(AlgebraicMove algebraicMove);

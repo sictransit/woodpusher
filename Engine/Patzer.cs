@@ -21,11 +21,11 @@ namespace SicTransit.Woodpusher.Engine
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
         }
 
-        public void Initialize(string fen)
+        public void Initialize()
         {
             game.Clear();
 
-            Board = ForsythEdwardsNotation.Parse(fen);
+            Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
         }
 
         public void Play(Move move)
@@ -55,10 +55,21 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var bestScore = int.MinValue;
+            var nodeCount = 0;
+
+            var maxDepth = Board.PieceCount switch
+            {
+                <= 4 => 6,
+                <= 8 => 5,
+                <= 16  => 4,
+                _ => 3
+            };
 
             foreach (var move in Board.GetValidMoves())
             {
-                var score = EvaluateBoard(Board.Play(move), 3) * sign;
+                var progress = new EvaluationProgress();
+
+                var score = EvaluateBoard(Board.Play(move), maxDepth, progress) * sign;
 
                 if (score > bestScore)
                 {
@@ -69,13 +80,15 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     bestMoves.Add(move);
                 }
+
+                nodeCount += progress.NodeCount;
             }
 
             if (bestMoves.Any())
             {
                 var bestMove = bestMoves[random.Next(bestMoves.Count)];
 
-                Log.Information($"found: {bestMove} {bestScore * sign}");
+                Log.Information($"evaluated {nodeCount} nodes, found: {bestMove} {bestScore * sign}");
 
                 Play(bestMove);
 
@@ -87,7 +100,7 @@ namespace SicTransit.Woodpusher.Engine
             return default;
         }
 
-        private int EvaluateBoard(Board board, int depth)
+        private static int EvaluateBoard(Board board, int depth, EvaluationProgress progress, int alpha = int.MinValue, int beta = int.MaxValue)
         {
             if (depth == 0)
             {
@@ -96,13 +109,25 @@ namespace SicTransit.Woodpusher.Engine
 
             var maximizing = board.ActiveColor == PieceColor.White;
 
+            var validMoves = board.GetValidMoves();
+
             if (maximizing)
             {
                 var maxScore = int.MinValue;
 
-                foreach (var move in board.GetValidMoves())
+                foreach (var move in validMoves)
                 {
-                    maxScore = Math.Max(maxScore, EvaluateBoard(board.Play(move), depth - 1));
+                    progress.NodeCount++;
+
+                    var score = EvaluateBoard(board.Play(move), depth - 1, progress, alpha, beta);
+
+                    maxScore = Math.Max(maxScore, score);
+                    alpha = Math.Max(alpha, score);
+
+                    if (beta <= alpha)
+                    {
+                        break;
+                    }
                 }
 
                 return maxScore;
@@ -111,9 +136,19 @@ namespace SicTransit.Woodpusher.Engine
             {
                 var minScore = int.MaxValue;
 
-                foreach (var move in board.GetValidMoves())
+                foreach (var move in validMoves)
                 {
-                    minScore = Math.Min(minScore, EvaluateBoard(board.Play(move), depth - 1));
+                    progress.NodeCount++;
+
+                    var score = EvaluateBoard(board.Play(move), depth - 1, progress, alpha, beta);
+
+                    minScore = Math.Min(minScore, score);
+                    beta = Math.Min(beta, score);
+
+                    if (beta <= alpha)
+                    {
+                        break;
+                    }
                 }
 
                 return minScore;

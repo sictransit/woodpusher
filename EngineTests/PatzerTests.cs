@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model.Enums;
@@ -46,8 +45,6 @@ namespace SicTransit.Woodpusher.Tests
             for (int i = 0; i < 10; i++)
             {
                 var bestMove = patzer.PlayBestMove();
-
-                Log.Information(bestMove.ToString());
 
                 Assert.IsNotNull(bestMove);
             }
