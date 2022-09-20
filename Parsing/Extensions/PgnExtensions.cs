@@ -20,9 +20,9 @@ namespace SicTransit.Woodpusher.Parsing.Extensions
 
         public static string RemoveAnnotations(this string s)
         {
-            char[] separators = new char[] { '?', '!', '+', '#' };
+            char[] separators = { '?', '!', '+', '#' };
 
-            string[] parts = s.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            var parts = s.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 
             return string.Concat(parts);
         }

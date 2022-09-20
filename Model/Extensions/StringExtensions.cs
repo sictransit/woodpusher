@@ -14,16 +14,6 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return Regex.IsMatch(s, "^[a-h]{1}[1-8]{1}$");
         }
 
-        public static bool IsAlgebraicMoveNotation(this string s)
-        {
-            if (string.IsNullOrWhiteSpace(s) || s.Length != 4)
-            {
-                return false;
-            }
-
-            return s[..2].IsAlgebraicNotation() && s[2..].IsAlgebraicNotation();
-        }
-
         public static bool IsNothing(this string s)
         {
             if (string.IsNullOrWhiteSpace(s))

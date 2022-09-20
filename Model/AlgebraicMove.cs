@@ -5,7 +5,7 @@ namespace SicTransit.Woodpusher.Model
 {
     public class AlgebraicMove
     {
-        public AlgebraicMove(Square from, Square to, PieceType promotion)
+        private AlgebraicMove(Square from, Square to, PieceType promotion)
         {
             From = from;
             To = to;
@@ -26,14 +26,14 @@ namespace SicTransit.Woodpusher.Model
         {
             algebraicMove = null;
 
-            if (!string.IsNullOrEmpty(notation) && (notation.Length is > 3 and < 6))
+            if (!string.IsNullOrEmpty(notation) && notation.Length is > 3 and < 6)
             {
                 var from = notation[..2];
                 var to = notation[2..4];
 
                 if (from.IsAlgebraicNotation() && to.IsAlgebraicNotation())
                 {
-                    PieceType pieceType = PieceType.None;
+                    var pieceType = PieceType.None;
 
                     if (notation.Length == 5)
                     {

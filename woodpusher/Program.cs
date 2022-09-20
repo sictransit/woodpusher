@@ -10,14 +10,14 @@ namespace SicTransit.Woodpusher
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug, false);
 
-            Action<string> consoleOutput = new(s =>
+            void ConsoleOutput(string s)
             {
                 Console.WriteLine(s);
 
                 Log.Information($"Sent: {s}");
-            });
+            }
 
-            var uci = new UniversalChessInterface(consoleOutput, new Patzer());
+            var uci = new UniversalChessInterface(ConsoleOutput, new Patzer());
 
             while (!uci.Quit)
             {

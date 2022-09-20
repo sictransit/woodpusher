@@ -65,8 +65,8 @@ namespace SicTransit.Woodpusher
 
         private void Uci(object? o)
         {
-            consoleOutput($"id name Woodpusher v0.0");
-            consoleOutput($"id author Mikael Fredriksson <micke@sictransit.net>");
+            consoleOutput("id name Woodpusher v0.0");
+            consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
             consoleOutput("uciok");
         }
 
@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Caught exception in Position().", ex);
+                    Log.Error("Caught exception in Position().");
                     Log.Error(ex.ToString());
                     throw;
                 }
@@ -115,7 +115,8 @@ namespace SicTransit.Woodpusher
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Caught exception in Go().", ex);
+                    Log.Error("Caught exception in Go().");
+                    Log.Error(ex.ToString());
                     throw;
                 }
             }

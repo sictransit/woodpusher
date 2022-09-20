@@ -8,20 +8,18 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class PatzerTests
     {
-        private Patzer? patzer;
-
         [TestInitialize]
         public void Initialize()
         {
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
-
-            patzer = new Patzer();
         }
 
         [TestMethod]
         public void InitializeTest()
         {
-            Assert.IsNotNull(patzer!.Board);
+            var patzer = new Patzer();
+
+            Assert.IsNotNull(patzer.Board);
 
             Assert.AreEqual(PieceColor.White, patzer.Board.ActiveColor);
 
@@ -32,6 +30,8 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void PlayBestMoveTest()
         {
+            var patzer = new Patzer();
+
             var bestMove = patzer.PlayBestMove();
 
             Assert.IsNotNull(bestMove);
@@ -42,7 +42,9 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void PlayMultipleBestMoveTest()
         {
-            for (int i = 0; i < 10; i++)
+            var patzer = new Patzer();
+
+            for (var i = 0; i < 10; i++)
             {
                 var bestMove = patzer.PlayBestMove();
 

@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -14,14 +13,10 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class PortableGameNotationTests
     {
-        private IEngine engine;
-
         [TestInitialize]
         public void Initialize()
         {
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
-
-            engine = new Patzer();
         }
 
         [TestMethod]
@@ -53,6 +48,8 @@ Nf2 42. g4 Bd3 43. Re6 1/2-1/2
 
             Assert.IsNotNull(pgn.PgnMoves);
             Assert.IsTrue(pgn.PgnMoves.Any());
+
+            var engine = new Patzer();
 
             foreach (var pgnMove in pgn.PgnMoves)
             {
@@ -94,6 +91,8 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
             Assert.IsNotNull(pgn.PgnMoves);
             Assert.IsTrue(pgn.PgnMoves.Any());
 
+            var engine = new Patzer();
+
             foreach (var pgnMove in pgn.PgnMoves)
             {
                 var move = pgnMove.GetMove(engine);
@@ -130,6 +129,8 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
 ";
 
             var pgn = PortableGameNotation.Parse(game);
+
+            var engine = new Patzer();
 
             foreach (var pgnMove in pgn.PgnMoves)
             {
@@ -170,6 +171,8 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
 ";
 
             var pgn = PortableGameNotation.Parse(game);
+
+            var engine = new Patzer();
 
             foreach (var pgnMove in pgn.PgnMoves)
             {
@@ -219,6 +222,8 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
 
             var pgn = PortableGameNotation.Parse(game);
 
+            var engine = new Patzer();
+
             foreach (var pgnMove in pgn.PgnMoves)
             {
                 var move = pgnMove.GetMove(engine);
@@ -267,6 +272,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 36. Nd4 {5.1s, Black makes an illegal move: b6c7} 1-0
 
 ";
+            var engine = new Patzer();
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
             {
@@ -309,6 +315,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 17. exd6 {2.1s, Black makes an illegal move: e8c8} 1-0
 
 ";
+            var engine = new Patzer();
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
             {
@@ -349,6 +356,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 1. e4 f6 2. e5 {1.5s} b5 3. exf6 {1.1s} d6 4. fxg7 {0.78s} Kd7
 5. gxh8=Q {2.7s, Black disconnects} 1-0
 ";
+            var engine = new Patzer();
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
             {
@@ -389,6 +397,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 1. e4 d5 2. Bb5+ Bd7 3. Qg4 g5 4. Bc6 a6 5. Qxd7+ Nxd7 6. Kd1 g4 7. Ke2 h5
 8. Kd1 Ra7 9. g3 Ra8 10. Nf3 Rh6 11. h4 {Black makes an illegal move: e8c8} 1-0
 ";
+            var engine = new Patzer();
 
             foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves)
             {

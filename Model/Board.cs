@@ -228,7 +228,7 @@ namespace SicTransit.Woodpusher.Model
 
         private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 
-        public Square FindKing(PieceColor color) => GetBitboard(color).FindKing();
+        private Square FindKing(PieceColor color) => GetBitboard(color).FindKing();
 
         public IEnumerable<Position> GetPositions(PieceColor color) => GetBitboard(color).GetPieces();
 
@@ -373,7 +373,7 @@ namespace SicTransit.Woodpusher.Model
                 var flags = move.Target.Flags;
                 var castlings = ActiveColor == PieceColor.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
 
-                if ((flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing)))
+                if (flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing))
                 {
                     if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
                     {
@@ -405,20 +405,20 @@ namespace SicTransit.Woodpusher.Model
             return true;
         }
 
-        public bool IsCheck(Move move)
+        private bool IsCheck(Move move)
         {
             var testBoard = Play(move);
 
             return testBoard.IsAttacked(testBoard.FindKing(testBoard.ActiveColor.OpponentColour()));
         }
 
-        public bool IsChecked => IsAttacked(FindKing(ActiveColor));
+        private bool IsChecked => IsAttacked(FindKing(ActiveColor));
 
         private bool IsAttacked(Square square) => GetAttackers(square).Any();
 
         private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Square) || IsAttacked(move.Target.CastlingCheckSquare!.Value) || IsAttacked(move.Target.Square);
 
-        private bool CastlingPathIsBlocked(Move move) => move.Target.CastlingEmptySquares.Any(s => IsOccupied(s)) || IsOccupied(move.Target.CastlingCheckSquare.Value);
+        private bool CastlingPathIsBlocked(Move move) => move.Target.CastlingEmptySquares.Any(IsOccupied) || IsOccupied(move.Target.CastlingCheckSquare.Value);
 
         private bool CastlingRookIsMissing(Move move) => !GetPositions(move.Position.Piece.Color, PieceType.Rook, move.Target.CastlingRookSquare.Value.ToMask()).Any();
 
