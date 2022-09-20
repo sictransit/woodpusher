@@ -8,6 +8,15 @@ namespace SicTransit.Woodpusher.Model.Lookup
         public static readonly ulong CenterMask =
             new[] { new Square("d4"), new Square("d5"), new Square("e4"), new Square("e5") }.ToMask();
 
+        public static readonly Position WhiteKingsideRook =
+            new(new Piece(PieceType.Rook, PieceColor.White), new Square("h1"));
+        public static readonly Position WhiteQueensideRook =
+            new(new Piece(PieceType.Rook, PieceColor.White), new Square("a1"));
+        public static readonly Position BlackKingsideRook =
+            new(new Piece(PieceType.Rook, PieceColor.Black), new Square("h8"));
+        public static readonly Position BlackQueensideRook =
+            new(new Piece(PieceType.Rook, PieceColor.Black), new Square("a8"));
+
         private readonly Dictionary<PieceColor, Dictionary<ulong, ulong>> kingProtectionMasks = new();
 
         public Masks()

@@ -170,6 +170,23 @@ namespace SicTransit.Woodpusher.Model
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square, move.Target.Square);
 
+            if (move.Position.Equals(Masks.WhiteKingsideRook))
+            {
+                whiteCastlings &= ~Castlings.Kingside;
+            }
+            else if (move.Position.Equals(Masks.WhiteQueensideRook))
+            {
+                whiteCastlings &= ~Castlings.Queenside;
+            }
+            else if (move.Position.Equals(Masks.BlackKingsideRook))
+            {
+                blackCastlings &= ~Castlings.Kingside;
+            }
+            else if (move.Position.Equals(Masks.BlackQueensideRook))
+            {
+                blackCastlings &= ~Castlings.Queenside;
+            }
+
             if (move.Position.Piece.Type == PieceType.King)
             {
                 switch (ActiveColor)

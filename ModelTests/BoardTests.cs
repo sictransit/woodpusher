@@ -6,6 +6,10 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Nodes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace SicTransit.Woodpusher.Tests
 {
@@ -336,5 +340,344 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.IsTrue(validMoves.Any(m => m.ToAlgebraicMoveNotation() == "b7b5"));
         }
+
+        [TestMethod]
+        public void PeterJonesTestPositionsTest()
+        {
+            // Credit: https://gist.github.com/peterellisjones (Peter Jones)
+
+            var tests = JsonNode.Parse(File.ReadAllText(Path.Combine("resources", "perft.test.positions.json")));
+
+            var success = true;
+
+            foreach (var test in tests.AsArray())
+            {
+                var nodes = test["nodes"].GetValue<ulong>();
+                var depth = test["depth"].GetValue<int>() +1;
+                var fen = test["fen"].GetValue<string>();
+
+                var board = ForsythEdwardsNotation.Parse(fen);
+
+                var analyzedNodes = board.Perft(depth);
+
+                if (analyzedNodes != nodes)
+                {
+                    Log.Warning($"{fen} (d:{depth} n:{nodes}) -> {analyzedNodes}");
+
+                    success = false;
+                }
+            }
+
+            Assert.IsTrue(success);
+        }
+
+        [TestMethod()]
+        public void TestPositionsDebug1Test()
+        {
+            // The problem was the castling shouldn't be allowed if the rook has moved.
+
+            var stockfish = @"
+h1f1: 18510
+h1g1: 23093
+h1h2: 53464
+h1h3: 56590
+h1h4: 56590
+h1h5: 54262
+h1h6: 42702
+h1h7: 8084
+h1h8: 32290
+e1d1: 40135
+e1f1: 35484
+e1d2: 71189
+e1e2: 71135
+e1f2: 71030
+e1g1: 26514
+";
+
+            var board = ForsythEdwardsNotation.Parse("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 6));
+        }
+
+        [TestMethod()]
+        public void TestPositionsDebug2Test()
+        {
+            
+
+            var stockfish = @"
+b7h1: 21
+b7g2: 22
+b7f3: 23
+b7e4: 24
+b7d5: 21
+b7a6: 21
+b7c6: 24
+b7c8: 24
+g7a1: 24
+g7b2: 24
+g7c3: 4
+g7d4: 18
+g7e5: 21
+g7f6: 24
+g7h6: 23
+g7f8: 24
+a8a1: 17
+a8a2: 21
+a8a3: 24
+a8a4: 24
+a8a5: 24
+a8a6: 24
+a8a7: 24
+a8b8: 24
+a8c8: 24
+a8d8: 23
+h8f8: 21
+h8g8: 24
+h7b1: 16
+h7c2: 21
+h7h2: 14
+h7d3: 15
+h7h3: 22
+h7e4: 3
+h7h4: 4
+h7f5: 21
+h7h5: 23
+h7g6: 23
+h7h6: 23
+h7g8: 24
+e8g8: 21
+e8e7: 24
+e8f7: 24
+e8f8: 24
+";
+
+            var board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
+
+            var a1d1 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("a1")) && m.Target.Square.Equals(new Square("d1")));
+
+            board = board.Play(a1d1);
+
+            Log.Information(Environment.NewLine + board.PrettyPrint());
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
+        }
+
+        [TestMethod()]
+        [Ignore("long running, 6+ minutes")]
+        public void Perft6StartingPositionTest()
+        {
+            var stockfish = @"
+a2a3: 4463267
+b2b3: 5310358
+c2c3: 5417640
+d2d3: 8073082
+e2e3: 9726018
+f2f3: 4404141
+g2g3: 5346260
+h2h3: 4463070
+a2a4: 5363555
+b2b4: 5293555
+c2c4: 5866666
+d2d4: 8879566
+e2e4: 9771632
+f2f4: 4890429
+g2g4: 5239875
+h2h4: 5385554
+b1a3: 4856835
+b1c3: 5708064
+g1f3: 5723523
+g1h3: 4877234
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 6));
+        }
+
+        [TestMethod()]
+        public void Perft5StartingPositionTest()
+        {
+            var stockfish = @"
+a2a3: 181046
+b2b3: 215255
+c2c3: 222861
+d2d3: 328511
+e2e3: 402988
+f2f3: 178889
+g2g3: 217210
+h2h3: 181044
+a2a4: 217832
+b2b4: 216145
+c2c4: 240082
+d2d4: 361790
+e2e4: 405385
+f2f4: 198473
+g2g4: 214048
+h2h4: 218829
+b1a3: 198572
+b1c3: 234656
+g1f3: 233491
+g1h3: 198502
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 5));
+        }
+
+        [TestMethod()]
+        public void Perft4StartingPositionTest()
+        {
+            var stockfish = @"
+a2a3: 8457
+b2b3: 9345
+c2c3: 9272
+d2d3: 11959
+e2e3: 13134
+f2f3: 8457
+g2g3: 9345
+h2h3: 8457
+a2a4: 9329
+b2b4: 9332
+c2c4: 9744
+d2d4: 12435
+e2e4: 13160
+f2f4: 8929
+g2g4: 9328
+h2h4: 9329
+b1a3: 8885
+b1c3: 9755
+g1f3: 9748
+g1h3: 8881
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 4));
+        }
+
+        [TestMethod()]
+        public void Perft3StartingPositionC2C3Test()
+        {
+            var stockfish = @"
+a7a6: 397
+b7b6: 439
+c7c6: 441
+d7d6: 545
+e7e6: 627
+f7f6: 396
+g7g6: 439
+h7h6: 397
+a7a5: 438
+b7b5: 443
+c7c5: 461
+d7d5: 566
+e7e5: 628
+f7f5: 418
+g7g5: 440
+h7h5: 439
+b8a6: 418
+b8c6: 462
+g8f6: 460
+g8h6: 418
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            var move = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+
+            Assert.IsTrue(PerftAndCompare(board.Play(move), stockfish, 3));
+        }
+
+        [TestMethod()]
+        public void Perft2StartingPositionC2C3D7D6Test()
+        {
+            var stockfish = @"
+a2a3: 27
+b2b3: 27
+d2d3: 27
+e2e3: 27
+f2f3: 27
+g2g3: 27
+h2h3: 27
+c3c4: 27
+a2a4: 27
+b2b4: 27
+d2d4: 27
+e2e4: 27
+f2f4: 27
+g2g4: 26
+h2h4: 27
+b1a3: 27
+g1f3: 27
+g1h3: 27
+d1c2: 27
+d1b3: 27
+d1a4: 6
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            var c2c3 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+            board = board.Play(c2c3);
+
+            var d7d6 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
+            board = board.Play(d7d6);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
+        }
+
+        [TestMethod()]
+        public void Perft1StartingPositionC2C3D7D6D1A4Test()
+        {
+            var stockfish = @"
+c7c6: 1
+b7b5: 1
+b8c6: 1
+b8d7: 1
+c8d7: 1
+d8d7: 1
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            var c2c3 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+            board = board.Play(c2c3);
+
+            var d7d6 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
+            board = board.Play(d7d6);
+
+            var d1a4 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("d1")) && m.Target.Square.Equals(new Square("a4")));
+            board = board.Play(d1a4);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
+        }
+
+        private static bool PerftAndCompare(Board board, string expected, int depth)
+        {
+            var expectedMoves = expected.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+
+            var success = true;
+
+            foreach (var move in board.GetValidMoves())
+            {
+                var result = $"{move.ToAlgebraicMoveNotation()}: {(depth > 1 ? board.Play(move).Perft(depth) : 1)}";
+
+                if (!expectedMoves.Remove(result))
+                {
+                    Log.Warning($"not expected: {result}");
+                }
+            }
+
+            foreach (var expectedMove in expectedMoves)
+            {
+                Log.Warning($"expected: {expectedMove}");
+
+                success = false;
+            }
+
+            return success;
+        }
+
     }
 }
