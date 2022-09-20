@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Model.Enums;
-using System.Text;
+﻿using System.Text;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
@@ -9,14 +8,14 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             var sb = new StringBuilder();
 
-            for (int rank = 7; rank >= 0; rank--)
+            for (var rank = 7; rank >= 0; rank--)
             {
                 sb.Append($"{rank + 1} ");
-                for (int file = 0; file < 8; file++)
+                for (var file = 0; file < 8; file++)
                 {
-                    var piece = b.Get(new Square(file, rank));
+                    var square = new Square(file, rank);
 
-                    var c = piece != Piece.None ? piece.ToAlgebraicNotation() : ' ';
+                    var c = b.IsOccupied(square) ? b.Get(square).ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
                 }
@@ -26,12 +25,29 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             sb.Append("  ");
 
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 sb.Append($"{(char)('A' + i)} ");
             }
 
             return sb.ToString();
+        }
+
+        public static ulong Perft(this Board board, int depth)
+        {
+            if (depth <= 1)
+            {
+                return 1;
+            }
+
+            ulong count = 0;
+
+            foreach (var move in board.GetValidMoves())
+            {
+                count += Perft(board.Play(move), depth - 1);
+            }
+
+            return count;
         }
     }
 }

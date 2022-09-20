@@ -8,7 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj" />
+    <ProjectReference Include="..\Parsing\Parsing.csproj" />
   </ItemGroup>
 
 </Project>

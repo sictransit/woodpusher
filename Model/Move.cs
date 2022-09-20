@@ -1,28 +1,20 @@
-﻿using SicTransit.Woodpusher.Model.Enums;
-
-namespace SicTransit.Woodpusher.Model
+﻿namespace SicTransit.Woodpusher.Model
 {
-    public struct Move
+    public class Move
     {
-        public Move(Square square) : this(square, MovementFlags.None)
+        public Move(Position position, Target target)
         {
-
+            Position = position;
+            Target = target;
         }
 
-        public Move(Square square, MovementFlags flags)
-        {
-            Square = square;
-            Flags = flags;
-        }
+        public Position Position { get; }
 
-        public Square Square { get; init; }
-
-        public MovementFlags Flags { get; init; }
+        public Target Target { get; }
 
         public override string ToString()
         {
-            return $"{Square}" + (Flags == MovementFlags.None ? string.Empty : $" ({Flags})");
+            return $"{Position}{Target}";
         }
-
     }
 }
