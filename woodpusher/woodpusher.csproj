@@ -6,7 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SicTransit.Woodpusher</RootNamespace>
-    <Authors>Mikael Fredriksson</Authors>    
+    <Authors>Mikael Fredriksson</Authors>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
