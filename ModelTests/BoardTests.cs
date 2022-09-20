@@ -6,10 +6,7 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace SicTransit.Woodpusher.Tests
 {
@@ -223,7 +220,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
 
-            var attackers = board.GetAttackers(new Square("f7")).ToArray();
+            var attackers = board.GetAttackers(new Square("f7"), PieceColor.Black).ToArray();
 
             Assert.AreEqual(2, attackers.Length);
             Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Queen && a.Piece.Color == PieceColor.White));
@@ -353,7 +350,7 @@ namespace SicTransit.Woodpusher.Tests
             foreach (var test in tests.AsArray())
             {
                 var nodes = test["nodes"].GetValue<ulong>();
-                var depth = test["depth"].GetValue<int>() +1;
+                var depth = test["depth"].GetValue<int>() + 1;
                 var fen = test["fen"].GetValue<string>();
 
                 var board = ForsythEdwardsNotation.Parse(fen);
@@ -402,65 +399,30 @@ e1g1: 26514
         [TestMethod()]
         public void TestPositionsDebug2Test()
         {
-            
+            // Check detection for castling didn't work at all, i.e. empty squares were ignored.
+            // Additionally pieces would run though other pieces to defend their king.
 
             var stockfish = @"
-b7h1: 21
-b7g2: 22
-b7f3: 23
-b7e4: 24
-b7d5: 21
-b7a6: 21
-b7c6: 24
-b7c8: 24
-g7a1: 24
-g7b2: 24
-g7c3: 4
-g7d4: 18
-g7e5: 21
-g7f6: 24
-g7h6: 23
-g7f8: 24
-a8a1: 17
-a8a2: 21
-a8a3: 24
-a8a4: 24
-a8a5: 24
-a8a6: 24
-a8a7: 24
-a8b8: 24
-a8c8: 24
-a8d8: 23
-h8f8: 21
-h8g8: 24
-h7b1: 16
-h7c2: 21
-h7h2: 14
-h7d3: 15
-h7h3: 22
-h7e4: 3
-h7h4: 4
-h7f5: 21
-h7h5: 23
-h7g6: 23
-h7h6: 23
-h7g8: 24
-e8g8: 21
-e8e7: 24
-e8f7: 24
-e8f8: 24
+b7a8: 1
+b7c8: 1
+e8d7: 1
+e8e7: 1
+e8f7: 1
 ";
 
             var board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
 
-            var a1d1 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("a1")) && m.Target.Square.Equals(new Square("d1")));
-
-            board = board.Play(a1d1);
-
+            var h2g3 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("h2")) && m.Target.Square.Equals(new Square("g3")));
+            board = board.Play(h2g3);
+            var h7h2 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("h7")) && m.Target.Square.Equals(new Square("h2")));
+            board = board.Play(h7h2);
+            var a1a8 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("a1")) && m.Target.Square.Equals(new Square("a8")));
+            board = board.Play(a1a8);
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
         }
+
 
         [TestMethod()]
         [Ignore("long running, 6+ minutes")]
@@ -666,6 +628,8 @@ d8d7: 1
                 if (!expectedMoves.Remove(result))
                 {
                     Log.Warning($"not expected: {result}");
+
+                    success = false;
                 }
             }
 

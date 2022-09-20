@@ -59,9 +59,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = Board.PieceCount switch
             {
-                <= 4 => 8,
-                <= 12 => 6,
-                _ => 4
+                <= 4 => 7,
+                <= 12 => 5,
+                _ => 3
             };
 
             foreach (var move in Board.GetValidMoves())
