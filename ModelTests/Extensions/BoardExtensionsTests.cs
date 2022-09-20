@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Parsing;
 
@@ -45,8 +43,8 @@ g1h3: 8881
 ";
 
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-            
-            Assert.IsFalse(PerftAndCompare(board, stockfish,3).ToList().Any());
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 4));
         }
 
         [TestMethod()]
@@ -79,63 +77,99 @@ g8h6: 418
 
             var move = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
 
-            Assert.IsFalse(PerftAndCompare(board.Play(move), stockfish, 2).ToList().Any());
+            Assert.IsTrue(PerftAndCompare(board.Play(move), stockfish, 3));
         }
 
         [TestMethod()]
-        public void PerftStartingPositionC2C3D7D5Test()
+        public void PerftStartingPositionC2C3D7D6Test()
         {
             var stockfish = @"
-a2a3: 1
-b2b3: 1
-d2d3: 1
-e2e3: 1
-f2f3: 1
-g2g3: 1
-h2h3: 1
-c3c4: 1
-a2a4: 1
-b2b4: 1
-d2d4: 1
-e2e4: 1
-f2f4: 1
-g2g4: 1
-h2h4: 1
-b1a3: 1
-g1f3: 1
-g1h3: 1
-d1c2: 1
-d1b3: 1
-d1a4: 1
+a2a3: 27
+b2b3: 27
+d2d3: 27
+e2e3: 27
+f2f3: 27
+g2g3: 27
+h2h3: 27
+c3c4: 27
+a2a4: 27
+b2b4: 27
+d2d4: 27
+e2e4: 27
+f2f4: 27
+g2g4: 26
+h2h4: 27
+b1a3: 27
+g1f3: 27
+g1h3: 27
+d1c2: 27
+d1b3: 27
+d1a4: 6
 ";
 
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
             var c2c3 = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
             board = board.Play(c2c3);
-            
-            var d7d5 = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d5")));
-            board = board.Play(d7d5);
 
-            Assert.IsFalse(PerftAndCompare(board, stockfish, 1).ToList().Any());
+            var d7d6 = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
+            board = board.Play(d7d6);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
+        }
+
+        [TestMethod()]
+        public void PerftStartingPositionC2C3D7D6D1A4Test()
+        {
+            var stockfish = @"
+c7c6: 1
+b7b5: 1
+b8c6: 1
+b8d7: 1
+c8d7: 1
+d8d7: 1
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            var c2c3 = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+            board = board.Play(c2c3);
+
+            var d7d6 = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
+            board = board.Play(d7d6);
+
+            var d1a4 = board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(new Square("d1")) && m.Target.Square.Equals(new Square("a4")));
+            board = board.Play(d1a4);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
         }
 
 
-        private static IEnumerable<string> PerftAndCompare(Board board, string expected, int depth)
+
+        private static bool PerftAndCompare(Board board, string expected, int depth)
         {
+            var expectedMoves = expected.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+
+            bool success = true;
+
             foreach (var move in board.GetValidMoves())
             {
-                var result = $"{move.ToAlgebraicMoveNotation()}: {board.Play(move).Perft(depth)}";
+                var result = $"{move.ToAlgebraicMoveNotation()}: {(depth > 1 ? board.Play(move).Perft(depth) : 1)}";
 
-                if (!expected.Contains(result))
+                if (!expectedMoves.Remove(result))
                 {
-                    Log.Warning($"missing: {result}");
-
-                    yield return result;
+                    Log.Warning($"not expected: {result}");
                 }
             }
-        }
 
-        
+            foreach (var expectedMove in expectedMoves)
+            {
+                Log.Warning($"expected: {expectedMove}");
+
+                success = false;
+            }
+
+            return success;
+        }
     }
 }

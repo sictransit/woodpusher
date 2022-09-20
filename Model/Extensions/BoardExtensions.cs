@@ -37,7 +37,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
         {
             if (depth <= 1)
             {
-                return (ulong)board.GetValidMoves().Count();
+                return 1;
             }
 
             ulong count = 0;

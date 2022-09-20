@@ -330,7 +330,7 @@ namespace SicTransit.Woodpusher.Model
 
                     if (IsCheck(move))
                     {
-                        break;
+                        continue;
                     }
 
                     yield return move;

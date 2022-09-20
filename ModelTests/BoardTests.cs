@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -10,6 +12,12 @@ namespace SicTransit.Woodpusher.Tests
     [TestClass()]
     public class BoardTests
     {
+        [TestInitialize]
+        public void Initialize()
+        {
+            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
+        }
+
         [TestMethod]
         public void BoardTest()
         {
@@ -292,6 +300,41 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(PieceColor.Black, board.ActiveColor);
 
             Assert.IsTrue(!moves.Any(p => p.Position.Piece.Type == PieceType.King && p.Target.Flags.HasFlag(SpecialMove.CastleKing)));
+        }
+
+        [TestMethod]
+        public void BlackCanBlockCheckTest()
+        {
+            //  +---+---+---+---+---+---+---+---+
+            //  | r | n | b | q | k | b | n | r | 8
+            //  +---+---+---+---+---+---+---+---+
+            //  | p | p | p |   | p | p | p | p | 7
+            //  +---+---+---+---+---+---+---+---+
+            //  |   |   |   | p |   |   |   |   | 6
+            //  +---+---+---+---+---+---+---+---+
+            //  |   |   |   |   |   |   |   |   | 5
+            //  +---+---+---+---+---+---+---+---+
+            //  | Q |   |   |   |   |   |   |   | 4
+            //  +---+---+---+---+---+---+---+---+
+            //  |   |   | P |   |   |   |   |   | 3
+            //  +---+---+---+---+---+---+---+---+
+            //  | P | P |   | P | P | P | P | P | 2
+            //  +---+---+---+---+---+---+---+---+
+            //  | R | N | B |   | K | B | N | R | 1
+            //  +---+---+---+---+---+---+---+---+
+            //    a   b   c   d   e   f   g   h
+            // 
+            // Fen: rnbqkbnr/ppp1pppp/3p4/8/Q7/2P5/PP1PPPPP/RNB1KBNR b KQkq - 1 2
+            // Key: 5E2F301470264169
+            // Checkers: a4
+
+            var board = ForsythEdwardsNotation.Parse(@"rnbqkbnr/ppp1pppp/3p4/8/Q7/2P5/PP1PPPPP/RNB1KBNR b KQkq - 1 2");
+
+            Log.Information(Environment.NewLine + board.PrettyPrint());
+
+            var validMoves = board.GetValidMoves().ToArray();
+
+            Assert.IsTrue(validMoves.Any(m => m.ToAlgebraicMoveNotation() == "b7b5"));
         }
     }
 }
