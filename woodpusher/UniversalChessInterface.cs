@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Reflection;
+using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Parsing;
@@ -69,7 +70,7 @@ namespace SicTransit.Woodpusher
         {
             lock (engine)
             {
-                consoleOutput("id name Woodpusher v0.0");
+                consoleOutput("id name Woodpusher v0.1.1");
                 consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                 consoleOutput("uciok");
             }
