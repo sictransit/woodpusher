@@ -4,6 +4,7 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Parsing;
+using static System.Formats.Asn1.AsnWriter;
 using static System.String;
 
 namespace SicTransit.Woodpusher.Engine
@@ -13,6 +14,11 @@ namespace SicTransit.Woodpusher.Engine
         public Board Board { get; private set; }
 
         private readonly Random random = new();
+
+        private const int MATE_SCORE = 1000000;
+        private const int WHITE_MATE_SCORE = -MATE_SCORE;
+        private const int BLACK_MATE_SCORE = MATE_SCORE;
+        private const int DRAW_SCORE = 0;
 
         public Patzer()
         {
@@ -62,19 +68,11 @@ namespace SicTransit.Woodpusher.Engine
                 _ => 3
             };
 
-            void ReportAction(int alpha, int beta, IEnumerable<Move> moves)
-            {
-                if (Log.IsEnabled(LogEventLevel.Debug))
-                {
-                    Log.Debug($"a:{alpha} b:{beta} - {Join(' ', moves)}");
-                }
-            }
-
             foreach (var move in Board.GetValidMoves())
             {
                 var progress = new EvaluationProgress();
 
-                var score = EvaluateBoard(Board.Play(move), maxDepth, progress,new []{move}, ReportAction) * sign;
+                var score = EvaluateBoard(Board.Play(move), maxDepth, progress) * sign;
 
                 if (score > bestScore)
                 {
@@ -103,7 +101,7 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private static int EvaluateBoard(Board board, int depth, EvaluationProgress progress, IEnumerable<Move> line , Action<int, int, IEnumerable<Move>> reportCallback , int alpha = int.MinValue, int beta = int.MaxValue)
+        private static int EvaluateBoard(Board board, int depth, EvaluationProgress progress, int alpha = int.MinValue, int beta = int.MaxValue)
         {
             var validMoves = board.GetValidMoves().ToArray();
             var maximizing = board.ActiveColor == PieceColor.White;
@@ -112,22 +110,15 @@ namespace SicTransit.Woodpusher.Engine
             {
                 if (board.IsChecked)
                 {
-                    return maximizing ? int.MinValue+line.Count() : int.MaxValue-line.Count();
+                    return maximizing ? WHITE_MATE_SCORE-depth : BLACK_MATE_SCORE+depth;
                 }
 
-                return 0;
+                return DRAW_SCORE;
             }
 
             if (depth == 0 )
             {
-                var score = board.Score;
-
-                if (reportCallback != null)
-                {
-                    reportCallback(alpha, beta, line);
-                }
-
-                return score;
+                return board.Score;
             }
 
             var bestScore = maximizing ? int.MinValue : int.MaxValue;
@@ -136,7 +127,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 progress.NodeCount++;
 
-                var score = EvaluateBoard(board.Play(move), depth - 1, progress, line.Concat(new[] { move }), reportCallback, alpha, beta);
+                var score = EvaluateBoard(board.Play(move), depth - 1, progress, alpha, beta);
 
                 if (maximizing)
                 {
