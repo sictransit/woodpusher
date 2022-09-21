@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var patzer = new Patzer();
 
-            var bestMove = patzer.PlayBestMove();
+            var bestMove = patzer.FindBestMove();
 
             Assert.IsNotNull(bestMove);
 
@@ -46,7 +46,7 @@ namespace SicTransit.Woodpusher.Tests
 
             for (var i = 0; i < 10; i++)
             {
-                var bestMove = patzer.PlayBestMove();
+                var bestMove = patzer.FindBestMove();
 
                 Assert.IsNotNull(bestMove);
             }

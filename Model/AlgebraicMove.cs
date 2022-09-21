@@ -22,10 +22,8 @@ namespace SicTransit.Woodpusher.Model
 
         public string Notation => $"{From.ToAlgebraicNotation()}{To.ToAlgebraicNotation()}{(Promotion != PieceType.None ? char.ToLowerInvariant(Promotion.ToChar()) : string.Empty)}";
 
-        public static bool TryParse(string notation, out AlgebraicMove? algebraicMove)
+        public static AlgebraicMove Parse(string notation)
         {
-            algebraicMove = null;
-
             if (!string.IsNullOrEmpty(notation) && notation.Length is > 3 and < 6)
             {
                 var from = notation[..2];
@@ -40,11 +38,11 @@ namespace SicTransit.Woodpusher.Model
                         pieceType = char.ToUpperInvariant(notation[4]).ToPieceType();
                     }
 
-                    algebraicMove = new AlgebraicMove(new Square(from), new Square(to), pieceType);
+                    return new AlgebraicMove(new Square(from), new Square(to), pieceType);
                 }
             }
 
-            return algebraicMove != null;
+            throw new ArgumentException($"unable to parse: {notation}", nameof(notation));
         }
 
         public override string ToString()

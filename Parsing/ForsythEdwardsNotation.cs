@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Parsing
                 throw new ArgumentNullException(nameof(fen));
             }
 
-            var parts = fen.Split(' ');
+            var parts = fen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length != 6)
             {
@@ -26,7 +26,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             var board = ParseBoard(parts[0]);
 
-            var activeColour = ParseActiveColour(parts[1]);
+            var activeColor = ParseActiveColour(parts[1]);
 
             var whiteCastling = ParseCastling(parts[2], PieceColor.White);
             var blackCastling = ParseCastling(parts[2], PieceColor.Black);
@@ -37,7 +37,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            var counters = new Counters(activeColour, whiteCastling, blackCastling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            var counters = new Counters(activeColor, whiteCastling, blackCastling, enPassantTarget, halfmoveClock, fullmoveNumber);
 
             return new Board(board, counters);
         }

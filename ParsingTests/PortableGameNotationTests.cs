@@ -369,7 +369,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 
             Assert.AreEqual(PieceColor.Black, engine.Board.ActiveColor);
 
-            var playedMove = engine.PlayBestMove();
+            var playedMove = engine.FindBestMove();
 
             Assert.IsNotNull(playedMove);
         }

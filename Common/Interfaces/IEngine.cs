@@ -10,8 +10,8 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         void Play(Move move);
 
-        void Play(AlgebraicMove algebraicMove);
+        void Position(string fen, IReadOnlyCollection<AlgebraicMove> algebraicMoves);
 
-        AlgebraicMove PlayBestMove();
+        AlgebraicMove FindBestMove();
     }
 }

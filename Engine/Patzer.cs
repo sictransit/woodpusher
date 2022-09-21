@@ -10,46 +10,43 @@ namespace SicTransit.Woodpusher.Engine
     {
         public Board Board { get; private set; }
 
-        private readonly Stack<Board> game;
-
         private readonly Random random = new();
 
         public Patzer()
         {
-            game = new Stack<Board>();
-
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
         }
 
         public void Initialize()
         {
-            game.Clear();
-
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
         }
 
         public void Play(Move move)
         {
-            game.Push(Board.Copy(Board));
-
             Board = Board.Play(move);
 
-            Log.Information($"played: {move}");
+            Log.Debug($"played: {move}");
         }
 
-        public void Play(AlgebraicMove algebraicMove)
+        public void Position(string fen, IReadOnlyCollection<AlgebraicMove> algebraicMoves)
         {
-            var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
+            Board = ForsythEdwardsNotation.Parse(fen);
 
-            if (move == null)
+            foreach (var algebraicMove in algebraicMoves)
             {
-                throw new ArgumentOutOfRangeException(nameof(algebraicMove), $"unable to play: {algebraicMove}");
-            }
+                var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
 
-            Play(move);
+                if (move == null)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(algebraicMoves), $"unable to play: {algebraicMove}");
+                }
+
+                Play(move);
+            }
         }
 
-        public AlgebraicMove PlayBestMove()
+        public AlgebraicMove FindBestMove()
         {
             var bestMoves = new List<Move>();
 
@@ -89,14 +86,12 @@ namespace SicTransit.Woodpusher.Engine
 
                 Log.Information($"evaluated {nodeCount} nodes, found: {bestMove} {bestScore * sign}");
 
-                Play(bestMove);
-
                 return new AlgebraicMove(bestMove);
             }
 
             Log.Warning("no valid moves found");
 
-            return default;
+            return null;
         }
 
         private static int EvaluateBoard(Board board, int depth, EvaluationProgress progress, int alpha = int.MinValue, int beta = int.MaxValue)
