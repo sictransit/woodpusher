@@ -1,8 +1,10 @@
 ﻿using Serilog;
+using Serilog.Events;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Parsing;
+using static System.String;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -29,7 +31,7 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"played: {move}");
         }
 
-        public void Position(string fen, IReadOnlyCollection<AlgebraicMove> algebraicMoves)
+        public void Position(string fen, IEnumerable<AlgebraicMove> algebraicMoves)
         {
             Board = ForsythEdwardsNotation.Parse(fen);
 
@@ -56,16 +58,23 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = Board.PieceCount switch
             {
-                <= 4 => 7,
-                <= 12 => 5,
+                <= 8 => 5,
                 _ => 3
             };
+
+            void ReportAction(int alpha, int beta, IEnumerable<Move> moves)
+            {
+                if (Log.IsEnabled(LogEventLevel.Debug))
+                {
+                    Log.Debug($"a:{alpha} b:{beta} - {Join(' ', moves)}");
+                }
+            }
 
             foreach (var move in Board.GetValidMoves())
             {
                 var progress = new EvaluationProgress();
 
-                var score = EvaluateBoard(Board.Play(move), maxDepth, progress) * sign;
+                var score = EvaluateBoard(Board.Play(move), maxDepth, progress,new []{move}, ReportAction) * sign;
 
                 if (score > bestScore)
                 {
@@ -94,57 +103,66 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private static int EvaluateBoard(Board board, int depth, EvaluationProgress progress, int alpha = int.MinValue, int beta = int.MaxValue)
+        private static int EvaluateBoard(Board board, int depth, EvaluationProgress progress, IEnumerable<Move> line , Action<int, int, IEnumerable<Move>> reportCallback , int alpha = int.MinValue, int beta = int.MaxValue)
         {
-            if (depth == 0)
+            var validMoves = board.GetValidMoves().ToArray();
+            var maximizing = board.ActiveColor == PieceColor.White;
+
+            if (!validMoves.Any())
             {
-                return board.Score;
+                if (board.IsChecked)
+                {
+                    return maximizing ? int.MinValue+line.Count() : int.MaxValue-line.Count();
+                }
+
+                return 0;
             }
 
-            var validMoves = board.GetValidMoves().OrderByDescending(m => m.Target.Flags.HasFlag(SpecialMove.MustTake) || m.Target.Flags.HasFlag(SpecialMove.Promote) || m.Position.Piece.Type != PieceType.Pawn);
-
-            if (board.ActiveColor == PieceColor.White)
+            if (depth == 0 )
             {
-                var maxScore = int.MinValue;
+                var score = board.Score;
 
-                foreach (var move in validMoves)
+                if (reportCallback != null)
                 {
-                    progress.NodeCount++;
+                    reportCallback(alpha, beta, line);
+                }
 
-                    var score = EvaluateBoard(board.Play(move), depth - 1, progress, alpha, beta);
+                return score;
+            }
 
-                    maxScore = Math.Max(maxScore, score);
-                    alpha = Math.Max(alpha, score);
+            var bestScore = maximizing ? int.MinValue : int.MaxValue;
 
-                    if (beta <= alpha)
+            foreach (var move in validMoves)
+            {
+                progress.NodeCount++;
+
+                var score = EvaluateBoard(board.Play(move), depth - 1, progress, line.Concat(new[] { move }), reportCallback, alpha, beta);
+
+                if (maximizing)
+                {
+                    bestScore = Math.Max(bestScore, score);
+
+                    if (bestScore >= beta)
                     {
                         break;
                     }
+
+                    alpha = Math.Max(alpha, bestScore);
                 }
-
-                return maxScore;
-            }
-            else
-            {
-                var minScore = int.MaxValue;
-
-                foreach (var move in validMoves)
+                else
                 {
-                    progress.NodeCount++;
+                    bestScore = Math.Min(bestScore, score);
 
-                    var score = EvaluateBoard(board.Play(move), depth - 1, progress, alpha, beta);
-
-                    minScore = Math.Min(minScore, score);
-                    beta = Math.Min(beta, score);
-
-                    if (beta <= alpha)
+                    if (bestScore <= alpha)
                     {
                         break;
                     }
-                }
 
-                return minScore;
+                    beta = Math.Min(beta, bestScore);
+                }
             }
+
+            return bestScore;
         }
     }
 }
