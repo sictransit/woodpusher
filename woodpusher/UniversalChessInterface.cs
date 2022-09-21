@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Serilog;
+﻿using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Parsing;
@@ -15,6 +14,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex IsReadyCommand = new(@"^isready$", RegexOptions.Compiled);
         private static readonly Regex UciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
         private static readonly Regex QuitCommand = new(@"^quit$", RegexOptions.Compiled);
+        private static readonly Regex StopCommand = new(@"^stop$", RegexOptions.Compiled);
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
 
@@ -54,6 +54,10 @@ namespace SicTransit.Woodpusher
             {
                 ThreadPool.QueueUserWorkItem(Go, command);
             }
+            else if (StopCommand.IsMatch(command))
+            {
+                ThreadPool.QueueUserWorkItem(Stop);
+            }
             else if (QuitCommand.IsMatch(command))
             {
                 Quit = true;
@@ -90,6 +94,11 @@ namespace SicTransit.Woodpusher
             {
                 consoleOutput("readyok");
             }
+        }
+
+        private void Stop(object? o)
+        {
+            engine.Stop();
         }
 
         private void Position(object? o)
@@ -146,7 +155,9 @@ namespace SicTransit.Woodpusher
             {
                 try
                 {
-                    var move = engine.FindBestMove();
+                    Action<string> infoCallback = new(s => consoleOutput(s));
+
+                    var move = engine.FindBestMove(10000, infoCallback);
 
                     consoleOutput($"bestmove {move.Notation}");
                 }

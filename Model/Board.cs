@@ -90,44 +90,44 @@ namespace SicTransit.Woodpusher.Model
                 whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.CenterMask) * pawnValue / 1;
                 blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.CenterMask) * pawnValue / 1;
 
-                //// + 1/3 pawn for each pawn in front of the king, if the king is on back rank
-                //if (FindKing(PieceColor.White).Rank == 0)
-                //{
-                //    whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 3;
-                //}
-                //if (FindKing(PieceColor.Black).Rank == 7)
-                //{
-                //    blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 3;
-                //}
+                // + 1/3 pawn for each pawn in front of the king, if the king is on back rank
+                if (FindKing(PieceColor.White).Rank == 0)
+                {
+                    whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 3;
+                }
+                if (FindKing(PieceColor.Black).Rank == 7)
+                {
+                    blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 3;
+                }
 
-                //// 1/ rook if they can see eachother
-                //var whiteRooks = white.Rook.ToSquares().ToArray();
-                //if (whiteRooks.Length == 2)
-                //{
-                //    if ((Moves.GetTravelMask(whiteRooks[0], whiteRooks[1]) & All) == 0)
-                //    {
-                //        whiteEvaluation += rookValue / 1;
-                //    }
-                //}
+                // 1/ rook if they can see eachother
+                var whiteRooks = white.Rook.ToSquares().ToArray();
+                if (whiteRooks.Length == 2)
+                {
+                    if ((Moves.GetTravelMask(whiteRooks[0], whiteRooks[1]) & All) == 0)
+                    {
+                        whiteEvaluation += rookValue / 1;
+                    }
+                }
 
-                //var blackRooks = black.Rook.ToSquares().ToArray();
-                //if (blackRooks.Length == 2)
-                //{
-                //    if ((Moves.GetTravelMask(blackRooks[0], blackRooks[1]) & All) == 0)
-                //    {
-                //        blackEvaluation += rookValue / 1;
-                //    }
-                //}
+                var blackRooks = black.Rook.ToSquares().ToArray();
+                if (blackRooks.Length == 2)
+                {
+                    if ((Moves.GetTravelMask(blackRooks[0], blackRooks[1]) & All) == 0)
+                    {
+                        blackEvaluation += rookValue / 1;
+                    }
+                }
 
-                //if (!GetValidMoves().Any())
-                //{
-                //    if (IsChecked)
-                //    {
-                //        return ActiveColor == PieceColor.White ? int.MinValue / 2 : int.MaxValue / 2;
-                //    }
+                if (!GetValidMoves().Any())
+                {
+                    if (IsChecked)
+                    {
+                        return ActiveColor == PieceColor.White ? int.MinValue / 2 : int.MaxValue / 2;
+                    }
 
-                //    return 0;
-                //}
+                    return 0;
+                }
 
                 return whiteEvaluation - blackEvaluation;
             }

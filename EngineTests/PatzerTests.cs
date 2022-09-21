@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Tests
                 var move = patzer.FindBestMove();
 
                 Assert.IsNotNull(move);
-                
+
                 moves.Add(move);
 
                 patzer.Position(ForsythEdwardsNotation.StartingPosition, moves);
@@ -63,24 +63,24 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod()]
         public void TakeTheQueenTest()
         {
- //+---+---+---+---+---+---+---+---+
- //| Q |   |   | K |   |   |   | k | 8
- //+---+---+---+---+---+---+---+---+
- //|   |   |   |   |   |   |   |   | 7
- //+---+---+---+---+---+---+---+---+
- //|   |   | p |   |   |   |   |   | 6
- //+---+---+---+---+---+---+---+---+
- //|   |   |   | b |   |   |   |   | 5
- //+---+---+---+---+---+---+---+---+
- //|   | p |   |   |   |   |   |   | 4
- //+---+---+---+---+---+---+---+---+
- //|   | n | P |   |   |   |   |   | 3
- //+---+---+---+---+---+---+---+---+
- //| q | q |   |   |   |   |   |   | 2
- //+---+---+---+---+---+---+---+---+
- //|   |   |   |   |   | r |   |   | 1
- //+---+---+---+---+---+---+---+---+
- //  a   b   c   d   e   f   g   h
+            //+---+---+---+---+---+---+---+---+
+            //| Q |   |   | K |   |   |   | k | 8
+            //+---+---+---+---+---+---+---+---+
+            //|   |   |   |   |   |   |   |   | 7
+            //+---+---+---+---+---+---+---+---+
+            //|   |   | p |   |   |   |   |   | 6
+            //+---+---+---+---+---+---+---+---+
+            //|   |   |   | b |   |   |   |   | 5
+            //+---+---+---+---+---+---+---+---+
+            //|   | p |   |   |   |   |   |   | 4
+            //+---+---+---+---+---+---+---+---+
+            //|   | n | P |   |   |   |   |   | 3
+            //+---+---+---+---+---+---+---+---+
+            //| q | q |   |   |   |   |   |   | 2
+            //+---+---+---+---+---+---+---+---+
+            //|   |   |   |   |   | r |   |   | 1
+            //+---+---+---+---+---+---+---+---+
+            //  a   b   c   d   e   f   g   h
 
             var patzer = new Patzer();
 
@@ -100,6 +100,18 @@ namespace SicTransit.Woodpusher.Tests
             var bestMove = patzer.FindBestMove();
 
             Assert.AreEqual("b6b7", bestMove.Notation);
+        }
+
+        [TestMethod]
+        public void DoNotPlayQueenD2Test()
+        {
+            var patzer = new Patzer();
+
+            patzer.Position("rnbqkbnr/ppp2ppp/8/4p3/4N3/5N2/PPPP1PPP/R1BQKB1R b KQkq - 0 4", Enumerable.Empty<AlgebraicMove>());
+
+            var bestMove = patzer.FindBestMove();
+
+            Assert.AreNotEqual("d8d2", bestMove.Notation);
         }
     }
 
