@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Parsing;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
@@ -15,6 +16,10 @@ namespace SicTransit.Woodpusher
         private static readonly Regex QuitCommand = new(@"^quit$", RegexOptions.Compiled);
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
+
+        private static readonly Regex PositionRegex =
+            new(@"^(position).+?(fen(.+?))?(moves(.+?))?$", RegexOptions.Compiled);
+        private static readonly Regex MovesRegex = new(@"([a-h][1-8][a-h][1-8][rnbq]?)", RegexOptions.Compiled);
 
         private volatile IEngine engine;
 
@@ -34,10 +39,7 @@ namespace SicTransit.Woodpusher
             }
             else if (UciNewGameCommand.IsMatch(command))
             {
-                lock (engine)
-                {
-                    engine.Initialize();
-                }
+                ThreadPool.QueueUserWorkItem(Initialize);
             }
             else if (IsReadyCommand.IsMatch(command))
             {
@@ -65,14 +67,28 @@ namespace SicTransit.Woodpusher
 
         private void Uci(object? o)
         {
-            consoleOutput("id name Woodpusher v0.0");
-            consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-            consoleOutput("uciok");
+            lock (engine)
+            {
+                consoleOutput("id name Woodpusher v0.0");
+                consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
+                consoleOutput("uciok");
+            }
+        }
+
+        private void Initialize(object? o)
+        {
+            lock (engine)
+            {
+                engine.Initialize();
+            }
         }
 
         private void IsReady(object? o)
         {
-            consoleOutput("readyok");
+            lock (engine)
+            {
+                consoleOutput("readyok");
+            }
         }
 
         private void Position(object? o)
@@ -81,23 +97,43 @@ namespace SicTransit.Woodpusher
             {
                 try
                 {
-                    var parts = o.ToString().Split();
+                    var match = PositionRegex.Match(o.ToString());
 
-                    if (AlgebraicMove.TryParse(parts.Last(), out var algebraicMove))
+                    if (!match.Success)
                     {
-                        Log.Information($"telling engine to play: {algebraicMove}");
+                        Log.Error($"Unable to parse: {o}");
 
-                        engine.Play(algebraicMove!);
+                        return;
                     }
-                    else
+
+                    var fen = match.Groups[3].Value;
+
+                    if (string.IsNullOrWhiteSpace(fen))
                     {
-                        Log.Information($"failed to parse position: {o}");
+                        fen = ForsythEdwardsNotation.StartingPosition;
                     }
+
+                    var moves = new List<AlgebraicMove>();
+
+                    if (!string.IsNullOrWhiteSpace(match.Groups[5].Value))
+                    {
+                        var matches = MovesRegex.Matches(match.Groups[5].Value);
+
+                        if (matches.Count > 0)
+                        {
+                            moves.AddRange(matches.Select(m => AlgebraicMove.Parse(m.Value)));
+                        }
+                        else
+                        {
+                            Log.Information($"failed to parse position: {o}");
+                        }
+                    }
+
+                    engine.Position(fen, moves);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Caught exception in Position().");
-                    Log.Error(ex.ToString());
+                    Log.Error(ex, "Caught exception in Position().");
                     throw;
                 }
             }
@@ -109,14 +145,13 @@ namespace SicTransit.Woodpusher
             {
                 try
                 {
-                    var move = engine.PlayBestMove();
+                    var move = engine.FindBestMove();
 
                     consoleOutput($"bestmove {move.Notation}");
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Caught exception in Go().");
-                    Log.Error(ex.ToString());
+                    Log.Error(ex, "Caught exception in Go().");
                     throw;
                 }
             }

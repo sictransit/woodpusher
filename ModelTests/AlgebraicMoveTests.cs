@@ -11,10 +11,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var notation = "e7e8q";
 
-            if (!AlgebraicMove.TryParse(notation, out var move))
-            {
-                Assert.Fail($"unable to parse: [{notation}]");
-            }
+            var move = AlgebraicMove.Parse(notation);
 
             Assert.IsNotNull(move);
 
@@ -26,10 +23,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var notation = "e7e8";
 
-            if (!AlgebraicMove.TryParse(notation, out var move))
-            {
-                Assert.Fail($"unable to parse: [{notation}]");
-            }
+            var move = AlgebraicMove.Parse(notation);
 
             Assert.IsNotNull(move);
 
