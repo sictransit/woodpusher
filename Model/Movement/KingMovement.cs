@@ -52,6 +52,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 }
             }
 
+            // TODO: There are constants for all those squares!
             if (pieceColor == PieceColor.White)
             {
                 if (square.Equals(WhiteStartPosition))

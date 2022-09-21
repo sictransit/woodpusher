@@ -90,44 +90,44 @@ namespace SicTransit.Woodpusher.Model
                 whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.CenterMask) * pawnValue / 1;
                 blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.CenterMask) * pawnValue / 1;
 
-                // + 1/3 pawn for each pawn in front of the king, if the king is on back rank
-                if (FindKing(PieceColor.White).Rank == 0)
-                {
-                    whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 3;
-                }
-                if (FindKing(PieceColor.Black).Rank == 7)
-                {
-                    blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 3;
-                }
+                //// + 1/3 pawn for each pawn in front of the king, if the king is on back rank
+                //if (FindKing(PieceColor.White).Rank == 0)
+                //{
+                //    whiteEvaluation += BitOperations.PopCount(white.Pawn & Masks.GetKingProtectionMask(PieceColor.White, white.King)) * pawnValue / 3;
+                //}
+                //if (FindKing(PieceColor.Black).Rank == 7)
+                //{
+                //    blackEvaluation += BitOperations.PopCount(black.Pawn & Masks.GetKingProtectionMask(PieceColor.Black, black.King)) * pawnValue / 3;
+                //}
 
-                // 1/ rook if they can see eachother
-                var whiteRooks = white.Rook.ToSquares().ToArray();
-                if (whiteRooks.Length == 2)
-                {
-                    if ((Moves.GetTravelMask(whiteRooks[0], whiteRooks[1]) & All) == 0)
-                    {
-                        whiteEvaluation += rookValue / 1;
-                    }
-                }
+                //// 1/ rook if they can see eachother
+                //var whiteRooks = white.Rook.ToSquares().ToArray();
+                //if (whiteRooks.Length == 2)
+                //{
+                //    if ((Moves.GetTravelMask(whiteRooks[0], whiteRooks[1]) & All) == 0)
+                //    {
+                //        whiteEvaluation += rookValue / 1;
+                //    }
+                //}
 
-                var blackRooks = black.Rook.ToSquares().ToArray();
-                if (blackRooks.Length == 2)
-                {
-                    if ((Moves.GetTravelMask(blackRooks[0], blackRooks[1]) & All) == 0)
-                    {
-                        blackEvaluation += rookValue / 1;
-                    }
-                }
+                //var blackRooks = black.Rook.ToSquares().ToArray();
+                //if (blackRooks.Length == 2)
+                //{
+                //    if ((Moves.GetTravelMask(blackRooks[0], blackRooks[1]) & All) == 0)
+                //    {
+                //        blackEvaluation += rookValue / 1;
+                //    }
+                //}
 
-                if (!GetValidMoves().Any())
-                {
-                    if (IsChecked)
-                    {
-                        return ActiveColor == PieceColor.White ? int.MinValue / 2 : int.MaxValue / 2;
-                    }
+                //if (!GetValidMoves().Any())
+                //{
+                //    if (IsChecked)
+                //    {
+                //        return ActiveColor == PieceColor.White ? int.MinValue / 2 : int.MaxValue / 2;
+                //    }
 
-                    return 0;
-                }
+                //    return 0;
+                //}
 
                 return whiteEvaluation - blackEvaluation;
             }
@@ -181,11 +181,11 @@ namespace SicTransit.Woodpusher.Model
                     whiteCastlings &= ~Castlings.Queenside;
                 }
 
-                if (move.Target.Square.Equals(Masks.BlackKingsideRookSquare))
+                if (move.Target.Square.Equals(Masks.BlackKingsideRookStartingSquare))
                 {
                     blackCastlings &= ~Castlings.Kingside;
                 }
-                else if (move.Target.Square.Equals(Masks.BlackQueensideRookSquare))
+                else if (move.Target.Square.Equals(Masks.BlackQueensideRookStartingSquare))
                 {
                     blackCastlings &= ~Castlings.Queenside;
                 }
@@ -201,11 +201,11 @@ namespace SicTransit.Woodpusher.Model
                     blackCastlings &= ~Castlings.Queenside;
                 }
 
-                if (move.Target.Square.Equals(Masks.WhiteKingsideRookSquare))
+                if (move.Target.Square.Equals(Masks.WhiteKingsideRookStartingSquare))
                 {
                     whiteCastlings &= ~Castlings.Kingside;
                 }
-                else if (move.Target.Square.Equals(Masks.WhiteQueensideRookSquare))
+                else if (move.Target.Square.Equals(Masks.WhiteQueensideRookStartingSquare))
                 {
                     whiteCastlings &= ~Castlings.Queenside;
                 }
@@ -227,31 +227,26 @@ namespace SicTransit.Woodpusher.Model
                 if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen))
                 {
                     activeBitboard = ActiveColor == PieceColor.White ?
-                        activeBitboard.Move(PieceType.Rook, new Square("a1"), new Square("d1")) :
-                        activeBitboard.Move(PieceType.Rook, new Square("a8"), new Square("d8"));
+                        activeBitboard.Move(PieceType.Rook, Masks.WhiteQueensideRookStartingSquare, Masks.WhiteQueensideRookCastlingSquare) :
+                        activeBitboard.Move(PieceType.Rook, Masks.BlackQueensideRookStartingSquare, Masks.BlackQueensideRookCastlingSquare);
                 }
                 else if (move.Target.Flags.HasFlag(SpecialMove.CastleKing))
                 {
                     activeBitboard = ActiveColor == PieceColor.White ?
-                        activeBitboard.Move(PieceType.Rook, new Square("h1"), new Square("f1")) :
-                        activeBitboard.Move(PieceType.Rook, new Square("h8"), new Square("f8"));
+                        activeBitboard.Move(PieceType.Rook, Masks.WhiteKingsideRookStartingSquare, Masks.WhiteKingsideRookCastlingSquare) :
+                        activeBitboard.Move(PieceType.Rook, Masks.BlackKingsideRookStartingSquare, Masks.BlackKingsideRookCastlingSquare);
                 }
             }
 
             var halfmoveClock = move.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue ? 0 : Counters.HalfmoveClock + 1;
-            Square? enPassantTarget = null;
 
-            if (move.Position.Piece.Type == PieceType.Pawn)
+
+            if (move.Target.Flags.HasFlag(SpecialMove.Promote))
             {
-                enPassantTarget = move.Target.EnPassantTarget;
-
-                if (move.Target.Flags.HasFlag(SpecialMove.Promote))
-                {
-                    activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target.Square).Add(move.Target.PromotionType, move.Target.Square);
-                }
+                activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target.Square).Add(move.Target.PromotionType, move.Target.Square);
             }
 
-            var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, enPassantTarget, halfmoveClock, fullmoveCounter);
+            var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, move.Target.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColor == PieceColor.White
                 ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Masks)

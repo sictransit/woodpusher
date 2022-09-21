@@ -66,18 +66,21 @@ namespace SicTransit.Woodpusher.Engine
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0;
 
-            var maxDepth = 4;
-
             var evaluations = Board.GetValidMoves().Select(m => new MoveEvaluation { Move = m }).ToList();
 
-            foreach (var depth in new[] { 1, maxDepth, maxDepth*2 })
+            foreach (var depth in new[] { 1, 3, 5, 8, 13, 21 })
             {
+                if (evaluations.Count() <= 1)
+                {
+                    break;
+                }
+
                 if (evaluations.Any(e => Math.Abs(Math.Abs(e.Score) - MATE_SCORE) < MAX_DEPTH))
                 {
                     break;
                 }
 
-                foreach (var evaluation in evaluations.OrderByDescending(e => e.Score))
+                foreach (var evaluation in evaluations.OrderByDescending(e => e.Score).ToArray())
                 {
                     if (DateTime.UtcNow > deadline)
                     {
@@ -90,7 +93,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     nodeCount += evaluation.NodeCount;
 
-                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {evaluation.Score * sign / 100} pv {evaluation.Move.ToAlgebraicMoveNotation()} nps {nodeCount*1000/sw.ElapsedMilliseconds}");
+                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {evaluation.Score * sign} pv {evaluation.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / sw.ElapsedMilliseconds}");
                 }
             }
 
