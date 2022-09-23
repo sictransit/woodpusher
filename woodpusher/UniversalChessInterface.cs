@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Serilog;
+﻿using Serilog;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Parsing;
@@ -15,6 +14,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex IsReadyCommand = new(@"^isready$", RegexOptions.Compiled);
         private static readonly Regex UciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
         private static readonly Regex QuitCommand = new(@"^quit$", RegexOptions.Compiled);
+        private static readonly Regex StopCommand = new(@"^stop$", RegexOptions.Compiled);
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
 
@@ -34,25 +34,31 @@ namespace SicTransit.Woodpusher
         {
             Log.Debug($"Processing command: {command}");
 
+            Task task = null;
+
             if (UciCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Uci);
+                task = Uci();
             }
             else if (UciNewGameCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Initialize);
+                task = Initialize();
             }
             else if (IsReadyCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(IsReady);
+                task = IsReady();
             }
             else if (PositionCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Position, command);
+                task = Position(command);
             }
             else if (GoCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Go, command);
+                task = Go();
+            }
+            else if (StopCommand.IsMatch(command))
+            {
+                task = Stop();
             }
             else if (QuitCommand.IsMatch(command))
             {
@@ -62,41 +68,71 @@ namespace SicTransit.Woodpusher
             {
                 Log.Warning($"Ignored unknown command: {command}");
             }
+
+            if (task != null)
+            {
+                task.ContinueWith(t =>
+                    {
+                        if (t.IsFaulted && t.Exception != null)
+                        {
+                            Log.Error(t.Exception, "Engine task threw an Exception.");
+                        }
+                    });
+            }
         }
 
         public bool Quit { get; private set; }
 
-        private void Uci(object? o)
+        private Task Uci()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                consoleOutput("id name Woodpusher v0.1.1");
-                consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-                consoleOutput("uciok");
-            }
+                lock (engine)
+                {
+                    consoleOutput("id name Woodpusher v0.1.2");
+                    consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
+                    consoleOutput("uciok");
+
+                    throw new NotImplementedException();
+                }
+            });
         }
 
-        private void Initialize(object? o)
+        private Task Initialize()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                engine.Initialize();
-            }
+                lock (engine)
+                {
+                    engine.Initialize();
+                }
+            });
         }
 
-        private void IsReady(object? o)
+        private Task IsReady()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                consoleOutput("readyok");
-            }
+                lock (engine)
+                {
+                    consoleOutput("readyok");
+                }
+            });
         }
 
-        private void Position(object? o)
+        private Task Stop()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                try
+                engine.Stop();
+            });
+        }
+
+        private Task Position(object? o)
+        {
+            return Task.Run(() =>
+            {
+                lock (engine)
                 {
                     var match = PositionRegex.Match(o.ToString());
 
@@ -132,30 +168,19 @@ namespace SicTransit.Woodpusher
 
                     engine.Position(fen, moves);
                 }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Caught exception in Position().");
-                    throw;
-                }
-            }
+            });
         }
 
-        private void Go(object? o)
+        private Task Go()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                try
-                {
-                    var move = engine.FindBestMove();
+                Action<string> infoCallback = new(s => consoleOutput(s));
 
-                    consoleOutput($"bestmove {move.Notation}");
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Caught exception in Go().");
-                    throw;
-                }
-            }
+                var move = engine.FindBestMove(5000, infoCallback);
+
+                consoleOutput($"bestmove {move.Notation}");
+            });
         }
     }
 }

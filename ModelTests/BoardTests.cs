@@ -232,7 +232,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            var moves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
             Assert.AreEqual(20, moves.Length);
             Assert.AreEqual(16, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
@@ -246,7 +246,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
             Assert.AreEqual(15, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
             Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.King));
@@ -262,7 +262,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
             Assert.AreEqual(11, moves.Count(p => p.Position.Piece.Type == PieceType.Pawn));
             Assert.AreEqual(1, moves.Count(p => p.Position.Piece.Type == PieceType.Queen));
@@ -280,7 +280,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
             var enPassantMove = moves.SingleOrDefault(p => p.Target.Flags.HasFlag(SpecialMove.EnPassant));
 
@@ -296,7 +296,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
             Assert.AreEqual(PieceColor.Black, board.ActiveColor);
 
@@ -333,15 +333,17 @@ namespace SicTransit.Woodpusher.Tests
 
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
-            var validMoves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
-            Assert.IsTrue(validMoves.Any(m => m.ToAlgebraicMoveNotation() == "b7b5"));
+            Assert.IsTrue(moves.Any(m => m.ToAlgebraicMoveNotation() == "b7b5"));
         }
 
         [TestMethod]
         public void PeterJonesTestPositionsTest()
         {
             // Credit: https://gist.github.com/peterellisjones (Peter Jones)
+
+            // 32 secs (release build)
 
             var tests = JsonNode.Parse(File.ReadAllText(Path.Combine("resources", "perft.test.positions.json")));
 
@@ -412,11 +414,11 @@ e8f7: 1
 
             var board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
 
-            var h2g3 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("h2")) && m.Target.Square.Equals(new Square("g3")));
+            var h2g3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("h2")) && m.Target.Square.Equals(new Square("g3")));
             board = board.Play(h2g3);
-            var h7h2 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("h7")) && m.Target.Square.Equals(new Square("h2")));
+            var h7h2 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("h7")) && m.Target.Square.Equals(new Square("h2")));
             board = board.Play(h7h2);
-            var a1a8 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("a1")) && m.Target.Square.Equals(new Square("a8")));
+            var a1a8 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("a1")) && m.Target.Square.Equals(new Square("a8")));
             board = board.Play(a1a8);
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
@@ -546,7 +548,7 @@ g8h6: 418
 
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            var move = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+            var move = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
 
             Assert.IsTrue(PerftAndCompare(board.Play(move), stockfish, 3));
         }
@@ -580,10 +582,10 @@ d1a4: 6
 
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            var c2c3 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+            var c2c3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
             board = board.Play(c2c3);
 
-            var d7d6 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
+            var d7d6 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
             board = board.Play(d7d6);
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
@@ -603,13 +605,13 @@ d8d7: 1
 
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            var c2c3 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
+            var c2c3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Square.Equals(new Square("c3")));
             board = board.Play(c2c3);
 
-            var d7d6 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
+            var d7d6 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("d7")) && m.Target.Square.Equals(new Square("d6")));
             board = board.Play(d7d6);
 
-            var d1a4 = board.GetValidMoves().Single(m => m.Position.Square.Equals(new Square("d1")) && m.Target.Square.Equals(new Square("a4")));
+            var d1a4 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("d1")) && m.Target.Square.Equals(new Square("a4")));
             board = board.Play(d1a4);
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
@@ -621,7 +623,7 @@ d8d7: 1
 
             var success = true;
 
-            foreach (var move in board.GetValidMoves())
+            foreach (var move in board.GetLegalMoves())
             {
                 var result = $"{move.ToAlgebraicMoveNotation()}: {(depth > 1 ? board.Play(move).Perft(depth) : 1)}";
 

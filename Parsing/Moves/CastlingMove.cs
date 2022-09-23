@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             var kingPosition = board.GetPositions(board.ActiveColor, PieceType.King).Single();
 
-            var moves = board.GetValidMovesFromPosition(kingPosition);
+            var moves = board.GetLegalMoves(kingPosition);
 
             foreach (var move in moves)
             {
@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
             }
 
 
-            throw new PgnParsingException(Raw, "unable to find a valid move to match");
+            throw new PgnParsingException(Raw, "unable to find a legal move to match");
         }
     }
 }

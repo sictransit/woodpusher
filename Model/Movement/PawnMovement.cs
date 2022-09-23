@@ -1,11 +1,13 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class PawnMovement
     {
-        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square, PieceColor color)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
         {
+            var square = position.Square;
             var rank = square.Rank;
 
             if (rank is 7 or 0)
@@ -18,7 +20,7 @@ namespace SicTransit.Woodpusher.Model.Movement
             int doubleStepRank;
             int enPassantRank;
 
-            if (color == PieceColor.White)
+            if (position.Piece.Color == PieceColor.White)
             {
                 dRank = 1;
                 promoteRank = 6;
@@ -43,7 +45,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
                         {
-                            yield return new[] { new Target(promoteSquare, SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
+                            yield return new[] { new Target(promoteSquare, SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType).ToMove(position) };
                         }
                     }
                 }
@@ -55,13 +57,13 @@ namespace SicTransit.Woodpusher.Model.Movement
                     rank == doubleStepRank
                     ? new[] { new Target(square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank)) }
                     : Enumerable.Empty<Target>()
-                    );
+                    ).Select(t => t.ToMove(position));
 
                 foreach (var dFile in new[] { -1, 1 })
                 {
                     if (Square.TryCreate(file + dFile, rank + dRank, out var takeSquare))
                     {
-                        yield return new[] { new Target(takeSquare, SpecialMove.MustTake) };
+                        yield return new[] { new Target(takeSquare, SpecialMove.MustTake).ToMove(position) };
                     }
                 }
 
@@ -71,7 +73,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         if (Square.TryCreate(file + dFile, rank + dRank, out var enPassantSquare))
                         {
-                            yield return new[] { new Target(enPassantSquare, SpecialMove.EnPassant, enPassantSquare) };
+                            yield return new[] { new Target(enPassantSquare, SpecialMove.EnPassant, enPassantSquare).ToMove(position) };
                         }
                     }
                 }

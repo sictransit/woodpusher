@@ -8,19 +8,25 @@ namespace SicTransit.Woodpusher.Model.Lookup
         public static readonly ulong CenterMask =
             new[] { new Square("d4"), new Square("d5"), new Square("e4"), new Square("e5") }.ToMask();
 
-        public static readonly Square WhiteKingsideRookSquare = new("h1");
-        public static readonly Square WhiteQueensideRookSquare = new("a1");
-        public static readonly Square BlackKingsideRookSquare = new("h8");
-        public static readonly Square BlackQueensideRookSquare = new("a8");
+        public static readonly Square WhiteKingsideRookStartingSquare = new("h1");
+        public static readonly Square WhiteQueensideRookStartingSquare = new("a1");
+        public static readonly Square BlackKingsideRookStartingSquare = new("h8");
+        public static readonly Square BlackQueensideRookStartingSquare = new("a8");
+
+        public static readonly Square WhiteKingsideRookCastlingSquare = new("f1");
+        public static readonly Square WhiteQueensideRookCastlingSquare = new("d1");
+        public static readonly Square BlackKingsideRookCastlingSquare = new("f8");
+        public static readonly Square BlackQueensideRookCastlingSquare = new("d8");
+
 
         public static readonly Position WhiteKingsideRook =
-            new(new Piece(PieceType.Rook, PieceColor.White), WhiteKingsideRookSquare);
+            new(new Piece(PieceType.Rook, PieceColor.White), WhiteKingsideRookStartingSquare);
         public static readonly Position WhiteQueensideRook =
-            new(new Piece(PieceType.Rook, PieceColor.White), WhiteQueensideRookSquare);
+            new(new Piece(PieceType.Rook, PieceColor.White), WhiteQueensideRookStartingSquare);
         public static readonly Position BlackKingsideRook =
-            new(new Piece(PieceType.Rook, PieceColor.Black), BlackKingsideRookSquare);
+            new(new Piece(PieceType.Rook, PieceColor.Black), BlackKingsideRookStartingSquare);
         public static readonly Position BlackQueensideRook =
-            new(new Piece(PieceType.Rook, PieceColor.Black), BlackQueensideRookSquare);
+            new(new Piece(PieceType.Rook, PieceColor.Black), BlackQueensideRookStartingSquare);
 
         private readonly Dictionary<PieceColor, Dictionary<ulong, ulong>> kingProtectionMasks = new();
 

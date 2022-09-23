@@ -2,9 +2,9 @@
 {
     public static class QueenMovement
     {
-        public static IEnumerable<IEnumerable<Target>> GetTargetVectors(Square square)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
         {
-            return BishopMovement.GetTargetVectors(square).Concat(RookMovement.GetTargetVectors(square));
+            return BishopMovement.GetTargetVectors(position).Concat(RookMovement.GetTargetVectors(position));
         }
     }
 
