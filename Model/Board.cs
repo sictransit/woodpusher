@@ -345,12 +345,10 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Move> GetValidMovesFromPosition(Position position)
         {
-            foreach (IEnumerable<Target> vector in Moves.GetVectors(position))
+            foreach (IEnumerable<Move> vector in Moves.GetVectors(position))
             {
-                foreach (var target in vector)
+                foreach (var move in vector)
                 {
-                    var move = new Move(position, target);
-
                     if (!ValidateMove(move))
                     {
                         break;

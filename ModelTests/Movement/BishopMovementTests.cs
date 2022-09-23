@@ -1,56 +1,29 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Movement;
 
 namespace SicTransit.Woodpusher.Tests.Movement
 {
     [TestClass()]
-    public class BishopMovementTests
+    public class BishopMovementTests : MovementTests
     {
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            var g7 = new Square("g7");
-
-            var targets = new List<Target>();
-
-            foreach (var vector in BishopMovement.GetTargetVectors(g7))
-            {
-                targets.AddRange(vector);
-            }
-
-            Assert.AreEqual(9, targets.Count);
+            AssertAmountOfLegalMoves(PieceType.Bishop, PieceColor.White, "g7", 9);
         }
 
         [TestMethod]
         public void GetVectorsFromF1Test()
         {
-            var f1 = new Square("f1");
-
-            var targets = new List<Target>();
-
-            foreach (var vector in BishopMovement.GetTargetVectors(f1))
-            {
-                targets.AddRange(vector);
-            }
-
-            Assert.AreEqual(7, targets.Count);
+            AssertAmountOfLegalMoves(PieceType.Bishop, PieceColor.White, "f1", 7);
         }
 
         [TestMethod]
         public void GetTargetVectorsCornerCaseTest()
         {
-            var a1 = new Square("a1");
-
-            var targets = new List<Target>();
-
-            foreach (var vector in BishopMovement.GetTargetVectors(a1))
-            {
-                targets.AddRange(vector);
-            }
-
-            Assert.AreEqual(7, targets.Count);
-            Assert.AreEqual(new Square("h8"), targets.Last().Square);
+            AssertAmountOfLegalMoves(PieceType.Bishop, PieceColor.White, "a1", 7);
         }
     }
 }

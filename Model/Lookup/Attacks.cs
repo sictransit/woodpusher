@@ -25,11 +25,11 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
                 foreach (var square in squares)
                 {
-                    var queenMask = QueenMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
-                    var bishopMask = BishopMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
-                    var knightMask = KnightMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
-                    var rookMask = RookMovement.GetTargetVectors(square).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
-                    var kingMask = KingMovement.GetTargetVectors(square, colour.OpponentColour()).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.Square.ToMask());
+                    var queenMask = QueenMovement.GetTargetVectors(new Position(new Piece(PieceType.Queen, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Target.Square.ToMask());
+                    var bishopMask = BishopMovement.GetTargetVectors(new Position(new Piece(PieceType.Bishop, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Target.Square.ToMask());
+                    var knightMask = KnightMovement.GetTargetVectors(new Position(new Piece(PieceType.Knight, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Target.Square.ToMask());
+                    var rookMask = RookMovement.GetTargetVectors(new Position(new Piece(PieceType.Rook, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.Target.Square.ToMask());
+                    var kingMask = KingMovement.GetTargetVectors(new Position(new Piece(PieceType.King, colour.OpponentColour()), square)).SelectMany(v => v).Where(v => !v.Target.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Target.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.Target.Square.ToMask());
 
                     // TODO: There should probably be some en passant handling somewhere, maybe in here?
                     var pawnMask = 0ul;

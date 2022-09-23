@@ -66,7 +66,7 @@ namespace SicTransit.Woodpusher.Engine
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
 
-            var evaluations = Board.GetValidMoves().Select(m => new MoveEvaluation { Move = m }).ToList();
+            var evaluations = Board.GetValidMoves().Select(m => new MoveEvaluation(m)).ToList();
 
             foreach (var depth in new[] { 1, 3, 5, 8, 13, 21 })
             {

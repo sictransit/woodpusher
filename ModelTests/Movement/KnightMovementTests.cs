@@ -1,25 +1,18 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Movement;
+using System.Diagnostics.Metrics;
 
 namespace SicTransit.Woodpusher.Tests.Movement
 {
     [TestClass()]
-    public class KnightMovementTests
+    public class KnightMovementTests : MovementTests
     {
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            var d4 = new Square("d4");
-
-            var targets = new List<Target>();
-
-            foreach (var vector in KnightMovement.GetTargetVectors(d4))
-            {
-                targets.AddRange(vector);
-            }
-
-            Assert.AreEqual(8, targets.Count);
+            AssertAmountOfLegalMoves(PieceType.Knight, PieceColor.White, "d4", 8);
         }
     }
 }

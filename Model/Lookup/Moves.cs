@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 {
     public class Moves
     {
-        private readonly Dictionary<Piece, Dictionary<Square, List<Target[]>>> vectors = new();
+        private readonly Dictionary<Piece, Dictionary<Square, List<Move[]>>> vectors = new();
         private readonly Dictionary<Square, Dictionary<Square, ulong>> travelMasks = new();
 
         public Moves()
@@ -40,7 +40,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
             pieces.ForEach(piece =>
             {
-                vectors.Add(piece, new Dictionary<Square, List<Target[]>>());
+                vectors.Add(piece, new Dictionary<Square, List<Move[]>>());
 
                 squares.ForEach(square =>
                 {
@@ -53,19 +53,19 @@ namespace SicTransit.Woodpusher.Model.Lookup
             });
         }
 
-        public List<Target[]> GetVectors(Position position)
+        public List<Move[]> GetVectors(Position position)
         {
             return vectors[position.Piece][position.Square];
         }
 
-        private static IEnumerable<IEnumerable<Target>> CreateVectors(Position position) => position.Piece.Type switch
+        private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position) => position.Piece.Type switch
         {
-            PieceType.Pawn => PawnMovement.GetTargetVectors(position.Square, position.Piece.Color),
-            PieceType.Rook => RookMovement.GetTargetVectors(position.Square),
-            PieceType.Knight => KnightMovement.GetTargetVectors(position.Square),
-            PieceType.Bishop => BishopMovement.GetTargetVectors(position.Square),
-            PieceType.Queen => QueenMovement.GetTargetVectors(position.Square),
-            PieceType.King => KingMovement.GetTargetVectors(position.Square, position.Piece.Color),
+            PieceType.Pawn => PawnMovement.GetTargetVectors(position),
+            PieceType.Rook => RookMovement.GetTargetVectors(position),
+            PieceType.Knight => KnightMovement.GetTargetVectors(position),
+            PieceType.Bishop => BishopMovement.GetTargetVectors(position),
+            PieceType.Queen => QueenMovement.GetTargetVectors(position),
+            PieceType.King => KingMovement.GetTargetVectors(position),
             _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
     }
