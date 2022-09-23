@@ -42,23 +42,23 @@ namespace SicTransit.Woodpusher
             }
             else if (UciNewGameCommand.IsMatch(command))
             {
-                task = Initialize();                
+                task = Initialize();
             }
             else if (IsReadyCommand.IsMatch(command))
             {
-                task = IsReady();                
+                task = IsReady();
             }
             else if (PositionCommand.IsMatch(command))
             {
-                task = Position(command);                
+                task = Position(command);
             }
             else if (GoCommand.IsMatch(command))
             {
-                task = Go();                
+                task = Go();
             }
             else if (StopCommand.IsMatch(command))
             {
-                task = Stop();                
+                task = Stop();
             }
             else if (QuitCommand.IsMatch(command))
             {
@@ -75,8 +75,8 @@ namespace SicTransit.Woodpusher
                     {
                         if (t.IsFaulted && t.Exception != null)
                         {
-                            Log.Error(t.Exception, "Engine task threw an Exception.");                            
-                        }                        
+                            Log.Error(t.Exception, "Engine task threw an Exception.");
+                        }
                     });
             }
         }
@@ -88,7 +88,7 @@ namespace SicTransit.Woodpusher
             return Task.Run(() =>
             {
                 lock (engine)
-                {                    
+                {
                     consoleOutput("id name Woodpusher v0.1.1");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
@@ -122,7 +122,7 @@ namespace SicTransit.Woodpusher
 
         private Task Stop()
         {
-            return Task.Run (() =>
+            return Task.Run(() =>
             {
                 engine.Stop();
             });

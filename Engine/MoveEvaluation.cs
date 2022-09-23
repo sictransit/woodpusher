@@ -4,7 +4,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     internal class MoveEvaluation
     {
-        public int NodeCount { get; set; }
+        public ulong NodeCount { get; set; }
 
         public Move Move { get; set; }
 
