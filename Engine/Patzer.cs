@@ -123,7 +123,8 @@ namespace SicTransit.Woodpusher.Engine
             {
                 if (board.IsChecked)
                 {
-                    return maximizing ? WHITE_MATE_SCORE + depth : BLACK_MATE_SCORE - depth;
+                    return maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth;
+                    //return maximizing ? WHITE_MATE_SCORE : BLACK_MATE_SCORE ;
                 }
 
                 return DRAW_SCORE;

@@ -113,6 +113,18 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreNotEqual("d8d2", bestMove.Notation);
         }
+
+        [TestMethod]
+        public void FindMateInThreeTest()
+        {
+            var patzer = new Patzer();
+
+            patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38", Enumerable.Empty<AlgebraicMove>());
+
+            var bestMove = patzer.FindBestMove();
+
+            Assert.AreEqual("e1e7", bestMove.Notation);
+        }
     }
 
 

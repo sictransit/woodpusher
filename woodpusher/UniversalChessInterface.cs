@@ -34,29 +34,31 @@ namespace SicTransit.Woodpusher
         {
             Log.Debug($"Processing command: {command}");
 
+            Task task = null;
+
             if (UciCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Uci);
+                task = Uci();
             }
             else if (UciNewGameCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Initialize);
+                task = Initialize();                
             }
             else if (IsReadyCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(IsReady);
+                task = IsReady();                
             }
             else if (PositionCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Position, command);
+                task = Position(command);                
             }
             else if (GoCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Go, command);
+                task = Go();                
             }
             else if (StopCommand.IsMatch(command))
             {
-                ThreadPool.QueueUserWorkItem(Stop);
+                task = Stop();                
             }
             else if (QuitCommand.IsMatch(command))
             {
@@ -66,46 +68,71 @@ namespace SicTransit.Woodpusher
             {
                 Log.Warning($"Ignored unknown command: {command}");
             }
+
+            if (task != null)
+            {
+                task.ContinueWith(t =>
+                    {
+                        if (t.IsFaulted && t.Exception != null)
+                        {
+                            Log.Error(t.Exception, "Engine task threw an Exception.");                            
+                        }                        
+                    });
+            }
         }
 
         public bool Quit { get; private set; }
 
-        private void Uci(object? o)
+        private Task Uci()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                consoleOutput("id name Woodpusher v0.1.1");
-                consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-                consoleOutput("uciok");
-            }
+                lock (engine)
+                {                    
+                    consoleOutput("id name Woodpusher v0.1.1");
+                    consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
+                    consoleOutput("uciok");
+
+                    throw new NotImplementedException();
+                }
+            });
         }
 
-        private void Initialize(object? o)
+        private Task Initialize()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                engine.Initialize();
-            }
+                lock (engine)
+                {
+                    engine.Initialize();
+                }
+            });
         }
 
-        private void IsReady(object? o)
+        private Task IsReady()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                consoleOutput("readyok");
-            }
+                lock (engine)
+                {
+                    consoleOutput("readyok");
+                }
+            });
         }
 
-        private void Stop(object? o)
+        private Task Stop()
         {
-            engine.Stop();
+            return Task.Run (() =>
+            {
+                engine.Stop();
+            });
         }
 
-        private void Position(object? o)
+        private Task Position(object? o)
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                try
+                lock (engine)
                 {
                     var match = PositionRegex.Match(o.ToString());
 
@@ -141,32 +168,19 @@ namespace SicTransit.Woodpusher
 
                     engine.Position(fen, moves);
                 }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Caught exception in Position().");
-                    throw;
-                }
-            }
+            });
         }
 
-        private void Go(object? o)
+        private Task Go()
         {
-            lock (engine)
+            return Task.Run(() =>
             {
-                try
-                {
-                    Action<string> infoCallback = new(s => consoleOutput(s));
+                Action<string> infoCallback = new(s => consoleOutput(s));
 
-                    var move = engine.FindBestMove(5000, infoCallback);
+                var move = engine.FindBestMove(100000, infoCallback);
 
-                    consoleOutput($"bestmove {move.Notation}");
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Caught exception in Go().");
-                    throw;
-                }
-            }
+                consoleOutput($"bestmove {move.Notation}");
+            });
         }
     }
 }
