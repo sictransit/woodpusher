@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Model.Movement
 
             if (topRight < 7)
             {
-                yield return Enumerable.Range(1, 7 - topRight).Select(d => new Target(square.AddFileAndRank(d, d))).Select(t=>t.ToMove(position));
+                yield return Enumerable.Range(1, 7 - topRight).Select(d => new Target(square.AddFileAndRank(d, d))).Select(t => t.ToMove(position));
             }
 
             var bottomRight = Math.Max(square.File, 7 - square.Rank);

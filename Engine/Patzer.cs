@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetValidMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
+                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
 
                 if (move == null)
                 {
@@ -66,9 +66,9 @@ namespace SicTransit.Woodpusher.Engine
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
 
-            var evaluations = Board.GetValidMoves().Select(m => new MoveEvaluation(m)).ToList();
+            var evaluations = Board.GetLegalMoves().Select(m => new MoveEvaluation(m)).ToList();
 
-            foreach (var depth in new[] { 1, 3, 5, 8, 13, 21 })
+            foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
             {
                 if (evaluations.Count() <= 1)
                 {
@@ -112,28 +112,28 @@ namespace SicTransit.Woodpusher.Engine
                 return new AlgebraicMove(evaluation.Move);
             }
 
-            Log.Warning("no valid moves found");
+            Log.Warning("no legal moves found");
 
             return null;
         }
 
         private int EvaluateBoard(Board board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
         {
-            var validMoves = board.GetValidMoves().ToArray();
+            var moves = board.GetLegalMoves().ToArray();
 
-            if (validMoves.Length == 0)
+            if (moves.Length == 0)
             {
                 return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
             }
 
-            if (depth == 0)
+            if (depth == 0 || DateTime.UtcNow > deadline)
             {
                 return board.Score;
             }
 
             var bestScore = maximizing ? int.MinValue : int.MaxValue;
 
-            foreach (var move in validMoves)
+            foreach (var move in moves)
             {
                 evaluation.NodeCount++;
 

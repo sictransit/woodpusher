@@ -57,7 +57,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     rank == doubleStepRank
                     ? new[] { new Target(square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank)) }
                     : Enumerable.Empty<Target>()
-                    ).Select(t=>t.ToMove(position));
+                    ).Select(t => t.ToMove(position));
 
                 foreach (var dFile in new[] { -1, 1 })
                 {

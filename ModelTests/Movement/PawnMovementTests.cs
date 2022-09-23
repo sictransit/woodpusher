@@ -1,8 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Movement;
-using System.Security.Authentication.ExtendedProtection;
 
 namespace SicTransit.Woodpusher.Tests.Movement
 {

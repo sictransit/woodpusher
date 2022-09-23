@@ -42,7 +42,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             ulong count = 0;
 
-            foreach (var move in board.GetValidMoves())
+            foreach (var move in board.GetLegalMoves())
             {
                 count += Perft(board.Play(move), depth - 1);
             }

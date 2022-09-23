@@ -2,11 +2,6 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Movement;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SicTransit.Woodpusher.Tests.Movement
 {
@@ -16,7 +11,7 @@ namespace SicTransit.Woodpusher.Tests.Movement
         {
             var position = new Position(new Piece(pieceType, pieceColor), new Square(square));
 
-            IEnumerable<IEnumerable<Move>> moves;            
+            IEnumerable<IEnumerable<Move>> moves;
 
             switch (pieceType)
             {
@@ -40,10 +35,10 @@ namespace SicTransit.Woodpusher.Tests.Movement
                     break;
                 default:
                     throw new NotImplementedException(pieceType.ToString());
-                    
+
             }
 
-            Assert.AreEqual(count, moves.SelectMany(m=>m).Count());
+            Assert.AreEqual(count, moves.SelectMany(m => m).Count());
         }
     }
 }

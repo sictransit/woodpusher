@@ -332,18 +332,18 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public IEnumerable<Move> GetValidMoves()
+        public IEnumerable<Move> GetLegalMoves()
         {
             foreach (var position in GetPositions(ActiveColor))
             {
-                foreach (var move in GetValidMovesFromPosition(position))
+                foreach (var move in GetLegalMoves(position))
                 {
                     yield return move;
                 }
             }
         }
 
-        public IEnumerable<Move> GetValidMovesFromPosition(Position position)
+        public IEnumerable<Move> GetLegalMoves(Position position)
         {
             foreach (IEnumerable<Move> vector in Moves.GetVectors(position))
             {
