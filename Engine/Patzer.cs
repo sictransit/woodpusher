@@ -89,7 +89,9 @@ namespace SicTransit.Woodpusher.Engine
                         break;
                     }
 
-                    evaluation.Score = EvaluateBoard(Board.Play(evaluation.Move), depth, evaluation) * sign;
+                    var board = Board.Play(evaluation.Move);
+
+                    evaluation.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, evaluation) * sign;
 
                     nodeCount += evaluation.NodeCount;
 
@@ -114,20 +116,13 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(Board board, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(Board board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
         {
-            var validMoves = board.GetValidMoves().ToArray();
-            var maximizing = board.ActiveColor == PieceColor.White;
+            var validMoves = board.GetValidMoves().ToArray();            
 
-            if (!validMoves.Any())
+            if (validMoves.Length == 0)
             {
-                if (board.IsChecked)
-                {
-                    return maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth;
-                    //return maximizing ? WHITE_MATE_SCORE : BLACK_MATE_SCORE ;
-                }
-
-                return DRAW_SCORE;
+                return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
             }
 
             if (depth == 0)
@@ -141,7 +136,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.Play(move), depth - 1, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.Play(move), !maximizing, depth--, evaluation, alpha, beta);
 
                 if (maximizing)
                 {

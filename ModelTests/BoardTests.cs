@@ -343,6 +343,8 @@ namespace SicTransit.Woodpusher.Tests
         {
             // Credit: https://gist.github.com/peterellisjones (Peter Jones)
 
+            // 32 secs (release build)
+
             var tests = JsonNode.Parse(File.ReadAllText(Path.Combine("resources", "perft.test.positions.json")));
 
             var success = true;
