@@ -80,23 +80,23 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                foreach (var evaluation in evaluations.OrderByDescending(e => e.Score).ToArray())
+                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).ToArray(), e =>
                 {
                     if (DateTime.UtcNow > deadline)
                     {
                         Log.Debug("aborting due to lack of time");
 
-                        break;
+                        return;
                     }
 
-                    var board = Board.Play(evaluation.Move);
+                    var board = Board.Play(e.Move);
 
-                    evaluation.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, evaluation) * sign;
+                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e) * sign;
 
-                    nodeCount += evaluation.NodeCount;
+                    nodeCount += e.NodeCount;                    
 
-                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {evaluation.Score * sign} pv {evaluation.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / sw.ElapsedMilliseconds}");
-                }
+                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / sw.ElapsedMilliseconds}");
+                });             
             }
 
             if (evaluations.Any())
@@ -136,7 +136,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.Play(move), !maximizing, depth--, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.Play(move), !maximizing, depth-1, evaluation, alpha, beta);
 
                 if (maximizing)
                 {
