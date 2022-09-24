@@ -427,11 +427,6 @@ namespace SicTransit.Woodpusher.Model
                     {
                         return false;
                     }
-
-                    if (CastlingRookIsMissing(move))
-                    {
-                        return false;
-                    }
                 }
             }
 
@@ -451,9 +446,7 @@ namespace SicTransit.Woodpusher.Model
 
         private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Square, move.Position.Piece.Color) || IsAttacked(move.Target.CastlingCheckSquare!.Value, move.Position.Piece.Color) || IsAttacked(move.Target.Square, move.Position.Piece.Color);
 
-        private bool CastlingPathIsBlocked(Move move) => move.Target.CastlingEmptySquares.Any(IsOccupied) || IsOccupied(move.Target.CastlingCheckSquare.Value);
-
-        private bool CastlingRookIsMissing(Move move) => !GetPositions(move.Position.Piece.Color, PieceType.Rook, move.Target.CastlingRookSquare.Value.ToMask()).Any();
+        private bool CastlingPathIsBlocked(Move move) => move.Target.CastlingEmptySquares.Any(IsOccupied) || IsOccupied(move.Target.CastlingCheckSquare.Value);        
 
         private bool TakingOwnPiece(Move move) => IsOccupied(move.Target.Square, move.Position.Piece.Color);
 
