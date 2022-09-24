@@ -1,7 +1,7 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Parsing.Moves

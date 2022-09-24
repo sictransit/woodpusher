@@ -1,6 +1,6 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing.Exceptions;
 
 namespace SicTransit.Woodpusher.Parsing.Moves
@@ -29,9 +29,9 @@ namespace SicTransit.Woodpusher.Parsing.Moves
         {
             var board = engine.Board;
 
-            var positions = board.GetPositions(board.ActiveColor, pieceType, file);
+            var positions = board.GetPositions(board.ActiveColor, pieceType);
 
-            foreach (var position in positions)
+            foreach (var position in positions.Where(p => p.Square.File == file))
             {
                 var move = engine.Board.GetLegalMoves(position).SingleOrDefault(m => m.Target.Square.Equals(square) && m.Target.PromotionType == promotionType);
 

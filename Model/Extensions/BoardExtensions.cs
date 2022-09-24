@@ -1,12 +1,15 @@
-﻿using System.Text;
+﻿using SicTransit.Woodpusher.Model.Interfaces;
+using System.Text;
 
 namespace SicTransit.Woodpusher.Model.Extensions
 {
     public static class BoardExtensions
     {
-        public static string PrettyPrint(this Board b)
+        public static string PrettyPrint(this IBoard b)
         {
             var sb = new StringBuilder();
+
+            var positions = b.GetPositions();
 
             for (var rank = 7; rank >= 0; rank--)
             {
@@ -15,7 +18,9 @@ namespace SicTransit.Woodpusher.Model.Extensions
                 {
                     var square = new Square(file, rank);
 
-                    var c = b.IsOccupied(square) ? b.Get(square).ToAlgebraicNotation() : ' ';
+                    var position = positions.SingleOrDefault(p => p.Square.Equals(square));
+
+                    var c = position.Piece.Type != Enums.PieceType.None ? position.Piece.ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
                 }
@@ -33,7 +38,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return sb.ToString();
         }
 
-        public static ulong Perft(this Board board, int depth)
+        public static ulong Perft(this IBoard board, int depth)
         {
             if (depth <= 1)
             {
@@ -44,7 +49,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             foreach (var move in board.GetLegalMoves())
             {
-                count += Perft(board.Play(move), depth - 1);
+                count += Perft(board.PlayMove(move), depth - 1);
             }
 
             return count;

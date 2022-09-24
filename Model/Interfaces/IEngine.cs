@@ -1,10 +1,8 @@
-﻿using SicTransit.Woodpusher.Model;
-
-namespace SicTransit.Woodpusher.Common.Interfaces
+﻿namespace SicTransit.Woodpusher.Model.Interfaces
 {
     public interface IEngine
     {
-        Board Board { get; }
+        IBoard Board { get; }
 
         void Initialize();
 

@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing.Exceptions;
 using System.Text.RegularExpressions;
 
@@ -10,7 +11,7 @@ namespace SicTransit.Woodpusher.Parsing
     {
         public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        public static Board Parse(string fen)
+        public static IBoard Parse(string fen)
         {
             if (fen is null)
             {

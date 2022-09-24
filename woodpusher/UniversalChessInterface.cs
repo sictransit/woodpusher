@@ -1,6 +1,6 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 using System.Text.RegularExpressions;
 

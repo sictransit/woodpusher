@@ -1,8 +1,8 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
 
@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public Board Board { get; private set; }
+        public IBoard Board { get; private set; }
 
         private readonly Random random = new();
 
@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            Board = Board.Play(move);
+            Board = Board.PlayMove(move);
 
             Log.Debug($"played: {move}");
         }
@@ -90,13 +90,13 @@ namespace SicTransit.Woodpusher.Engine
                         return;
                     }
 
-                    var board = Board.Play(e.Move);
+                    var board = Board.PlayMove(e.Move);
 
                     e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e) * sign;
 
                     nodeCount += e.NodeCount;
 
-                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1+sw.ElapsedMilliseconds)}");
+                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
                 });
             }
 
@@ -117,7 +117,7 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(Board board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
         {
             var moves = board.GetLegalMoves().ToArray();
 
@@ -137,7 +137,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.Play(move), !maximizing, depth - 1, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta);
 
                 if (maximizing)
                 {

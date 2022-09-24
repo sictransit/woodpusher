@@ -23,8 +23,6 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(1, board.Counters.FullmoveNumber);
 
             Trace.WriteLine(board.PrettyPrint());
-
-            Assert.AreEqual(new Piece(PieceType.Rook, PieceColor.White), board.Get(new Square("a1")));
         }
 
         [TestMethod]
@@ -38,8 +36,11 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(Castlings.None, board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.None, board.Counters.BlackCastlings);
             Assert.AreEqual(new Square("a3"), board.Counters.EnPassantTarget);
-            Assert.AreEqual(new Piece(PieceType.Queen, PieceColor.White), board.Get(new Square("c7")));
-            Assert.AreEqual(new Piece(PieceType.Rook, PieceColor.Black), board.Get(new Square("h5")));
+
+            var whiteQueens = board.GetPositions(PieceColor.White, PieceType.Queen);
+            var blackRooks = board.GetPositions(PieceColor.Black, PieceType.Rook);
+            Assert.IsTrue(whiteQueens.Any(p => p.Square.Equals(new Square("c7"))));
+            Assert.IsTrue(blackRooks.Any(p => p.Square.Equals(new Square("h5"))));
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(34, board.Counters.FullmoveNumber);
         }
