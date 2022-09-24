@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     nodeCount += e.NodeCount;
 
-                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)sw.ElapsedMilliseconds}");
+                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1+sw.ElapsedMilliseconds)}");
                 });
             }
 
