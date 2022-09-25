@@ -33,16 +33,6 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        private Board NewBoardCopyWhite(Bitboard blackBitboard)
-        {
-            return new Board(white, blackBitboard, Counters, Moves, Attacks, Masks);
-        }
-
-        private Board NewBoardCopyBlack(Bitboard whiteBitboard)
-        {
-            return new Board(whiteBitboard, black, Counters, Moves, Attacks, Masks);
-        }
-
         public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null)
         {
             this.white = white;
@@ -131,8 +121,8 @@ namespace SicTransit.Woodpusher.Model
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
-            PieceColor.White => NewBoardCopyBlack(white.Add(position.Piece.Type, position.Square)),
-            PieceColor.Black => NewBoardCopyWhite(black.Add(position.Piece.Type, position.Square)),
+            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Square), black, Counters, Moves, Attacks, Masks),
+            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Square), Counters, Moves, Attacks, Masks),
             _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
