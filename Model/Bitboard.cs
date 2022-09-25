@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {
-    internal class Bitboard
+    public class Bitboard
     {
         // 00 .. 63
         // A1 .. H8
@@ -95,7 +95,6 @@ namespace SicTransit.Woodpusher.Model
                 }
             }
         }
-
 
         public IEnumerable<Position> GetPieces(PieceType type)
         {

@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model.Movement
 {

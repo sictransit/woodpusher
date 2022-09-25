@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model.Movement
 {
@@ -45,7 +44,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
                         {
-                            yield return new[] { new Move (position, promoteSquare, SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
+                            yield return new[] { new Move(position, promoteSquare, SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
                         }
                     }
                 }

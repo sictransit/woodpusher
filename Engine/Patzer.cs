@@ -39,8 +39,10 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"played: {move}");
         }
 
-        public void Position(string fen, IEnumerable<AlgebraicMove> algebraicMoves)
+        public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
+            algebraicMoves = algebraicMoves != null ? algebraicMoves : Enumerable.Empty<AlgebraicMove>();
+
             Board = ForsythEdwardsNotation.Parse(fen);
 
             foreach (var algebraicMove in algebraicMoves)

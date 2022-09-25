@@ -33,11 +33,6 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public static Board Copy(Board board)
-        {
-            return new Board(board.white, board.black, board.Counters, board.Moves, board.Attacks, board.Masks);
-        }
-
         private Board NewBoardCopyWhite(Bitboard blackBitboard)
         {
             return new Board(white, blackBitboard, Counters, Moves, Attacks, Masks);
@@ -48,7 +43,7 @@ namespace SicTransit.Woodpusher.Model
             return new Board(whiteBitboard, black, Counters, Moves, Attacks, Masks);
         }
 
-        private Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null)
+        public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null)
         {
             this.white = white;
             this.black = black;
@@ -134,18 +129,11 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public Board AddPiece(Square square, Piece piece) => piece.Color switch
+        public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
-            PieceColor.White => NewBoardCopyBlack(white.Add(piece.Type, square)),
-            PieceColor.Black => NewBoardCopyWhite(black.Add(piece.Type, square)),
-            _ => throw new ArgumentOutOfRangeException(nameof(piece)),
-        };
-
-        public Board RemovePiece(Square square, Piece piece) => piece.Color switch
-        {
-            PieceColor.White => NewBoardCopyBlack(white.Remove(piece.Type, square)),
-            PieceColor.Black => NewBoardCopyWhite(black.Remove(piece.Type, square)),
-            _ => throw new ArgumentOutOfRangeException(nameof(piece)),
+            PieceColor.White => NewBoardCopyBlack(white.Add(position.Piece.Type, position.Square)),
+            PieceColor.Black => NewBoardCopyWhite(black.Add(position.Piece.Type, position.Square)),
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
         public IBoard PlayMove(Move move)

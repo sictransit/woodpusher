@@ -84,7 +84,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var patzer = new Patzer();
 
-            patzer.Position("Q2K3k/8/2p5/3b4/1p6/1nP5/qq6/5r2 b - - 0 93", Enumerable.Empty<AlgebraicMove>());
+            patzer.Position("Q2K3k/8/2p5/3b4/1p6/1nP5/qq6/5r2 b - - 0 93");
 
             var bestMove = patzer.FindBestMove();
 
@@ -95,7 +95,7 @@ namespace SicTransit.Woodpusher.Tests
         public void FindMateInOneTest()
         {
             var patzer = new Patzer();
-            patzer.Position("k7/8/1QP5/8/8/8/8/7K w - - 0 1", Enumerable.Empty<AlgebraicMove>());
+            patzer.Position("k7/8/1QP5/8/8/8/8/7K w - - 0 1");
 
             var bestMove = patzer.FindBestMove();
 
@@ -107,7 +107,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var patzer = new Patzer();
 
-            patzer.Position("rnbqkbnr/ppp2ppp/8/4p3/4N3/5N2/PPPP1PPP/R1BQKB1R b KQkq - 0 4", Enumerable.Empty<AlgebraicMove>());
+            patzer.Position("rnbqkbnr/ppp2ppp/8/4p3/4N3/5N2/PPPP1PPP/R1BQKB1R b KQkq - 0 4");
 
             var bestMove = patzer.FindBestMove();
 
@@ -119,9 +119,9 @@ namespace SicTransit.Woodpusher.Tests
         {
             var patzer = new Patzer();
 
-            patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38", Enumerable.Empty<AlgebraicMove>());
+            patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38");
 
-            var bestMove = patzer.FindBestMove();
+            var bestMove = patzer.FindBestMove(5000);
 
             Assert.AreEqual("e1e7", bestMove.Notation);
         }

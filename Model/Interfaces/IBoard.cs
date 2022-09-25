@@ -18,6 +18,8 @@ namespace SicTransit.Woodpusher.Model.Interfaces
 
         IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType);
 
+        IBoard SetPosition(Position position);
+
         IEnumerable<Position> GetAttackers(Square square, PieceColor color);
 
         int Score { get; }

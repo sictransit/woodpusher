@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Parsing
                 throw new FenParsingException(fen, "parts should be == 6");
             }
 
-            var board = ParseBoard(parts[0]);
+            var (white, black) = ParseBoard(parts[0]);
 
             var activeColor = ParseActiveColour(parts[1]);
 
@@ -40,10 +40,10 @@ namespace SicTransit.Woodpusher.Parsing
 
             var counters = new Counters(activeColor, whiteCastling, blackCastling, enPassantTarget, halfmoveClock, fullmoveNumber);
 
-            return new Board(board, counters);
+            return new Board(white, black, counters);
         }
 
-        private static Board ParseBoard(string s)
+        private static (Bitboard, Bitboard) ParseBoard(string s)
         {
             // TODO: regex for validating FEN board setup
 
@@ -54,9 +54,10 @@ namespace SicTransit.Woodpusher.Parsing
                 throw new FenParsingException(s, "board setup should be eight parts, separated by '/'");
             }
 
-            var board = new Board();
-
             var rank = 7;
+
+            Bitboard white = new(PieceColor.White);
+            Bitboard black = new(PieceColor.Black);
 
             foreach (var part in parts)
             {
@@ -72,14 +73,23 @@ namespace SicTransit.Woodpusher.Parsing
                     {
                         var square = new Square(file++, rank);
 
-                        board = board.AddPiece(square, c.ToPiece());
+                        var piece = c.ToPiece();
+
+                        if (piece.Color == PieceColor.White)
+                        {
+                            white = white.Add(piece.Type, square);
+                        }
+                        else
+                        {
+                            black = black.Add(piece.Type, square);
+                        }
                     }
                 }
 
                 rank--;
             }
 
-            return board;
+            return (white, black);
         }
 
         private static int ParseFullmoveNumber(string s) => int.Parse(s);

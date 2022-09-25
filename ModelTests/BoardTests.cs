@@ -23,57 +23,40 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod]
         public void BoardTest()
         {
-            var board = new Board();
+            IBoard board = new Board();
 
             var whiteKing = new Piece(PieceType.King, PieceColor.White);
             var blackKing = new Piece(PieceType.King, PieceColor.Black);
 
             var e1 = new Square("e1");
 
-            board = board.AddPiece(e1, whiteKing);
+            board = board.SetPosition(new Position(whiteKing, e1));
 
             var e8 = new Square("e8");
 
-            board = board.AddPiece(e8, blackKing);
+            board = board.SetPosition(new Position(blackKing, e8));
 
-            Assert.AreEqual(e1, board.GetPositions(PieceColor.White).Single(p=>p.Piece.Type == PieceType.King).Square);
+            Assert.AreEqual(e1, board.GetPositions(PieceColor.White).Single(p => p.Piece.Type == PieceType.King).Square);
             Assert.AreEqual(e8, board.GetPositions(PieceColor.Black).Single(p => p.Piece.Type == PieceType.King).Square);
-
-            board = board.RemovePiece(e1, whiteKing);
-            board = board.RemovePiece(e8, blackKing);
-
-            Assert.IsFalse(board.IsOccupied(e1));
-            Assert.IsFalse(board.IsOccupied(e8));
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void OccupiedSquareTest()
         {
-            var board = new Board();
+            IBoard board = new Board();
 
             var e1 = new Square("e1");
             var whiteKing = new Piece(PieceType.King, PieceColor.White);
 
-            board = board.AddPiece(e1, whiteKing);
-            board.AddPiece(e1, whiteKing);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void EmptySquareTest()
-        {
-            var board = new Board();
-
-            var e1 = new Square("e1");
-
-            board.RemovePiece(e1, new Piece(PieceType.King, PieceColor.White));
+            board = board.SetPosition(new Position(whiteKing, e1));
+            board.SetPosition(new Position(whiteKing, e1));
         }
 
         [TestMethod]
         public void FillTest()
         {
-            var board = new Board();
+            IBoard board = new Board();
 
             var whitePawn = new Piece(PieceType.Pawn, PieceColor.White);
 
@@ -83,17 +66,17 @@ namespace SicTransit.Woodpusher.Tests
                 {
                     var square = new Square(f, r);
 
-                    board = board.AddPiece(square, whitePawn);                    
+                    board = board.SetPosition(new Position(whitePawn, square));
                 }
             }
 
-            Assert.AreEqual(64, board.GetPositions().Where(p=>p.Piece.Type == PieceType.Pawn).Count());
+            Assert.AreEqual(64, board.GetPositions().Where(p => p.Piece.Type == PieceType.Pawn).Count());
         }
 
         [TestMethod]
         public void GetPositionsTest()
         {
-            var board = new Board();
+            IBoard board = new Board();
 
             var whiteKing = new Piece(PieceType.King, PieceColor.White);
             var e1 = new Square("e1");
@@ -101,7 +84,7 @@ namespace SicTransit.Woodpusher.Tests
             var blackKing = new Piece(PieceType.King, PieceColor.Black);
             var e8 = new Square("e8");
 
-            board = board.AddPiece(e1, whiteKing).AddPiece(e8, blackKing);
+            board = board.SetPosition(new Position(whiteKing, e1)).SetPosition(new Position(blackKing, e8));
 
             var whitePositions = board.GetPositions(PieceColor.White).ToArray();
 
@@ -117,7 +100,7 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod]
         public void GetPositionsOnFileByTypeTest()
         {
-            var board = new Board();
+            IBoard board = new Board();
 
             var blackPawn1 = new Piece(PieceType.Pawn, PieceColor.Black);
             var e2 = new Square("e2");
@@ -128,7 +111,7 @@ namespace SicTransit.Woodpusher.Tests
             var blackPawn3 = new Piece(PieceType.Pawn, PieceColor.Black);
             var e4 = new Square("e4");
 
-            board = board.AddPiece(e2, blackPawn1).AddPiece(e3, blackPawn2).AddPiece(e4, blackPawn3);
+            board = board.SetPosition(new Position(blackPawn1, e2)).SetPosition(new Position(blackPawn2, e3)).SetPosition(new Position(blackPawn3, e4));
 
             var positions = board.GetPositions(PieceColor.Black, PieceType.Pawn).Where(p => p.Square.File == 4).ToArray();
 
@@ -141,7 +124,7 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod]
         public void GetPositionsOnFileTest()
         {
-            Board board = new();
+            IBoard board = new Board();
 
             var pieces = new HashSet<Piece>();
 
@@ -154,7 +137,7 @@ namespace SicTransit.Woodpusher.Tests
                 {
                     var piece = new Piece(pieceType, PieceColor.Black);
                     pieces.Add(piece);
-                    board = board.AddPiece(new Square(file, rank++), piece);
+                    board = board.SetPosition(new Position(piece, new Square(file, rank++)));
                 }
             }
 
@@ -175,7 +158,7 @@ namespace SicTransit.Woodpusher.Tests
             var c1 = new Square("c1");
             var g7 = new Square("g7");
 
-            IBoard board = new Board().AddPiece(c1, whiteBishop).AddPiece(g7, blackPawn);
+            IBoard board = new Board().SetPosition(new Position(whiteBishop, c1)).SetPosition(new Position(blackPawn, g7));
 
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(0, board.Counters.FullmoveNumber);
@@ -415,7 +398,7 @@ e8e7: 1
 e8f7: 1
 ";
 
-            var board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
+            IBoard board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
 
             var h2g3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("h2")) && m.Target.Equals(new Square("g3")));
             board = board.PlayMove(h2g3);
@@ -430,7 +413,7 @@ e8f7: 1
 
 
         [TestMethod()]
-        [Ignore("long running: 4,7 min on release/laptop")]
+        //[Ignore("long running: 4,2 min on release/laptop")]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"
@@ -583,7 +566,7 @@ d1b3: 27
 d1a4: 6
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            IBoard board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
             var c2c3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Equals(new Square("c3")));
             board = board.PlayMove(c2c3);
@@ -606,7 +589,7 @@ c8d7: 1
 d8d7: 1
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            IBoard board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
             var c2c3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.Target.Equals(new Square("c3")));
             board = board.PlayMove(c2c3);
