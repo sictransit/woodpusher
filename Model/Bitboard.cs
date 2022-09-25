@@ -35,13 +35,9 @@ namespace SicTransit.Woodpusher.Model
 
         public int PieceCount => BitOperations.PopCount(All);
 
-        public Square FindKing() => King.ToSquare();
-
-        public bool IsOccupied(Square square) => IsOccupied(square.ToMask());
-
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
-        private Bitboard Add(PieceType pieceType, ulong mask)
+        public Bitboard Add(PieceType pieceType, ulong mask)
         {
             if ((All & mask) != 0)
             {
@@ -51,9 +47,7 @@ namespace SicTransit.Woodpusher.Model
             return Toggle(pieceType, mask);
         }
 
-        public Bitboard Add(PieceType pieceType, Square square) => Add(pieceType, square.ToMask());
-
-        private Bitboard Remove(PieceType pieceType, ulong mask)
+        public Bitboard Remove(PieceType pieceType, ulong mask)
         {
             if ((All & mask) == 0)
             {
@@ -63,14 +57,10 @@ namespace SicTransit.Woodpusher.Model
             return Toggle(pieceType, mask);
         }
 
-        public Bitboard Remove(PieceType pieceType, Square square) => Remove(pieceType, square.ToMask());
-
-        public Bitboard Move(PieceType pieceType, Square fromSquare, Square toSquare)
+        public Bitboard Move(PieceType pieceType, ulong from, ulong to)
         {
-            return Toggle(pieceType, fromSquare.ToMask() | toSquare.ToMask());
+            return Toggle(pieceType, from | to);
         }
-
-        public Piece Peek(Square square) => Peek(square.ToMask());
 
         private ulong GetBitmap(PieceType pieceType) => pieceType switch
         {
@@ -135,7 +125,7 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        private Piece Peek(ulong mask)
+        public Piece Peek(ulong mask)
         {
             PieceType pieceType;
 

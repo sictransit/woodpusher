@@ -121,8 +121,8 @@ namespace SicTransit.Woodpusher.Model
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
-            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Square), black, Counters, Moves, Attacks, Masks),
-            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Square), Counters, Moves, Attacks, Masks),
+            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Square.ToMask()), black, Counters, Moves, Attacks, Masks),
+            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Square.ToMask()), Counters, Moves, Attacks, Masks),
             _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
@@ -141,18 +141,18 @@ namespace SicTransit.Woodpusher.Model
 
             Piece? targetPiece = null;
 
-            if (opponentBitboard.IsOccupied(move.Target))
+            if (opponentBitboard.IsOccupied(move.Target.ToMask()))
             {
-                targetPiece = opponentBitboard.Peek(move.Target);
+                targetPiece = opponentBitboard.Peek(move.Target.ToMask());
 
-                opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.Target);
+                opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.Target.ToMask());
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
-                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.Value.AddFileAndRank(0, -1) : move.EnPassantTarget.Value.AddFileAndRank(0, 1));
+                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.Value.AddFileAndRank(0, -1).ToMask() : move.EnPassantTarget.Value.AddFileAndRank(0, 1).ToMask());
             }
 
-            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square, move.Target);
+            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square.ToMask(), move.Target.ToMask());
 
             if (ActiveColor == PieceColor.White)
             {
@@ -211,14 +211,14 @@ namespace SicTransit.Woodpusher.Model
                 if (move.Flags.HasFlag(SpecialMove.CastleQueen))
                 {
                     activeBitboard = ActiveColor == PieceColor.White ?
-                        activeBitboard.Move(PieceType.Rook, Masks.WhiteQueensideRookStartingSquare, Masks.WhiteQueensideRookCastlingSquare) :
-                        activeBitboard.Move(PieceType.Rook, Masks.BlackQueensideRookStartingSquare, Masks.BlackQueensideRookCastlingSquare);
+                        activeBitboard.Move(PieceType.Rook, Masks.WhiteQueensideRookStartingSquare.ToMask(), Masks.WhiteQueensideRookCastlingSquare.ToMask()) :
+                        activeBitboard.Move(PieceType.Rook, Masks.BlackQueensideRookStartingSquare.ToMask(), Masks.BlackQueensideRookCastlingSquare.ToMask());
                 }
                 else if (move.Flags.HasFlag(SpecialMove.CastleKing))
                 {
                     activeBitboard = ActiveColor == PieceColor.White ?
-                        activeBitboard.Move(PieceType.Rook, Masks.WhiteKingsideRookStartingSquare, Masks.WhiteKingsideRookCastlingSquare) :
-                        activeBitboard.Move(PieceType.Rook, Masks.BlackKingsideRookStartingSquare, Masks.BlackKingsideRookCastlingSquare);
+                        activeBitboard.Move(PieceType.Rook, Masks.WhiteKingsideRookStartingSquare.ToMask(), Masks.WhiteKingsideRookCastlingSquare.ToMask()) :
+                        activeBitboard.Move(PieceType.Rook, Masks.BlackKingsideRookStartingSquare.ToMask(), Masks.BlackKingsideRookCastlingSquare.ToMask());
                 }
             }
 
@@ -227,7 +227,7 @@ namespace SicTransit.Woodpusher.Model
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
-                activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target).Add(move.PromotionType, move.Target);
+                activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target.ToMask()).Add(move.PromotionType, move.Target.ToMask());
             }
 
             var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
@@ -239,15 +239,15 @@ namespace SicTransit.Woodpusher.Model
 
         public int PieceCount => white.PieceCount + black.PieceCount;
 
-        public bool IsOccupied(Square square) => white.IsOccupied(square) || black.IsOccupied(square);
+        public bool IsOccupied(Square square) => white.IsOccupied(square.ToMask()) || black.IsOccupied(square.ToMask());
 
         private bool IsOccupied(ulong mask) => white.IsOccupied(mask) || black.IsOccupied(mask);
 
-        private bool IsOccupied(Square square, PieceColor color) => GetBitboard(color).IsOccupied(square);
+        private bool IsOccupied(Square square, PieceColor color) => GetBitboard(color).IsOccupied(square.ToMask());
 
         private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 
-        private Square FindKing(PieceColor color) => GetBitboard(color).FindKing();
+        private Square FindKing(PieceColor color) => GetBitboard(color).King.ToSquare();
 
         public IEnumerable<Position> GetPositions() => white.GetPieces().Concat(black.GetPieces());
 

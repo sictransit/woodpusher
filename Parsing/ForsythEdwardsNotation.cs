@@ -77,11 +77,11 @@ namespace SicTransit.Woodpusher.Parsing
 
                         if (piece.Color == PieceColor.White)
                         {
-                            white = white.Add(piece.Type, square);
+                            white = white.Add(piece.Type, square.ToMask());
                         }
                         else
                         {
-                            black = black.Add(piece.Type, square);
+                            black = black.Add(piece.Type, square.ToMask());
                         }
                     }
                 }
