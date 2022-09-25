@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
+                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 if (move == null)
                 {

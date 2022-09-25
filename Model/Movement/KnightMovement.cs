@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 {
                     if (Square.TryCreate(square.File + df, square.Rank + dr, out var s))
                     {
-                        yield return new[] { new Target(s).ToMove(position) };
+                        yield return new[] { new Move (position, s) };
                     }
                 }
             }

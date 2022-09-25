@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var position in positions)
             {
-                var move = board.GetLegalMoves(position).SingleOrDefault(m => m.Target.Square.Equals(square));
+                var move = board.GetLegalMoves(position).SingleOrDefault(m => m.Target.Equals(square));
 
                 if (move != null)
                 {

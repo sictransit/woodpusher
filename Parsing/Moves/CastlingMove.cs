@@ -23,12 +23,12 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var move in moves)
             {
-                if (move.Target.Flags.HasFlag(SpecialMove.CastleKing) && this.Castling == Castlings.Kingside)
+                if (move.Flags.HasFlag(SpecialMove.CastleKing) && this.Castling == Castlings.Kingside)
                 {
                     return move;
                 }
 
-                if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen) && this.Castling == Castlings.Queenside)
+                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && this.Castling == Castlings.Queenside)
                 {
                     return move;
                 }
