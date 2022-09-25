@@ -279,8 +279,6 @@ namespace SicTransit.Woodpusher.Model
 
         private IEnumerable<Position> GetPositions(PieceColor color, PieceType type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
 
-        public Piece Get(Square square) => white.IsOccupied(square) ? white.Peek(square) : black.Peek(square);
-
         public IEnumerable<Position> GetAttackers(Square square, PieceColor color)
         {
             var threatMask = Attacks.GetThreatMask(color, square);

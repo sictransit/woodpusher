@@ -96,18 +96,6 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public IEnumerable<Position> GetPieces(int file)
-        {
-            for (var shift = file; shift < 64; shift += 8)
-            {
-                var mask = 1ul << shift;
-
-                if (IsOccupied(mask))
-                {
-                    yield return new Position(Peek(mask), mask.ToSquare());
-                }
-            }
-        }
 
         public IEnumerable<Position> GetPieces(PieceType type)
         {

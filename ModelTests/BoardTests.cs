@@ -36,8 +36,8 @@ namespace SicTransit.Woodpusher.Tests
 
             board = board.AddPiece(e8, blackKing);
 
-            Assert.AreEqual(whiteKing, board.Get(e1));
-            Assert.AreEqual(blackKing, board.Get(e8));
+            Assert.AreEqual(e1, board.GetPositions(PieceColor.White).Single(p=>p.Piece.Type == PieceType.King).Square);
+            Assert.AreEqual(e8, board.GetPositions(PieceColor.Black).Single(p => p.Piece.Type == PieceType.King).Square);
 
             board = board.RemovePiece(e1, whiteKing);
             board = board.RemovePiece(e8, blackKing);
@@ -83,11 +83,11 @@ namespace SicTransit.Woodpusher.Tests
                 {
                     var square = new Square(f, r);
 
-                    board = board.AddPiece(square, whitePawn);
-
-                    Assert.AreEqual(whitePawn, board.Get(square));
+                    board = board.AddPiece(square, whitePawn);                    
                 }
             }
+
+            Assert.AreEqual(64, board.GetPositions().Where(p=>p.Piece.Type == PieceType.Pawn).Count());
         }
 
         [TestMethod]
