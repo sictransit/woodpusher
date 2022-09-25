@@ -33,8 +33,6 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
-        public int PieceCount => BitOperations.PopCount(All);
-
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         public Bitboard Add(PieceType pieceType, ulong mask)

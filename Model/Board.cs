@@ -28,11 +28,6 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public Board(Board board, Counters counters) : this(board.white, board.black, counters)
-        {
-
-        }
-
         public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null)
         {
             this.white = white;
@@ -236,8 +231,6 @@ namespace SicTransit.Woodpusher.Model
                 ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Masks)
                 : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Masks);
         }
-
-        public int PieceCount => white.PieceCount + black.PieceCount;
 
         public bool IsOccupied(Square square) => white.IsOccupied(square.ToMask()) || black.IsOccupied(square.ToMask());
 
