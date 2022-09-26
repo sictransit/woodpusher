@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Model
             EnPassantTarget = enPassantTarget;
 
             CastlingCheckMask= castlingCheckSquare.HasValue ? castlingCheckSquare.Value.ToMask() : 0;
-            CastlingEmptySquaresMask = castlingEmptySquares != null ? Enumerable.Empty<Square>().ToMask() : 0;
+            CastlingEmptySquaresMask = castlingEmptySquares != null ? castlingEmptySquares.ToMask() : 0;
             PromotionType = promotionType;
         }
 

@@ -232,8 +232,6 @@ namespace SicTransit.Woodpusher.Model
                 : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Masks);
         }
 
-        public bool IsOccupied(Square square) => white.IsOccupied(square.ToMask()) || black.IsOccupied(square.ToMask());
-
         private bool IsOccupied(ulong mask) => white.IsOccupied(mask) || black.IsOccupied(mask);
 
         private bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
@@ -256,14 +254,6 @@ namespace SicTransit.Woodpusher.Model
 
             var opponentColor = color.OpponentColour();
 
-            foreach (var pawn in GetPositions(opponentColor, PieceType.Pawn, threatMask.PawnMask))
-            {
-                if (!IsOccupied(Moves.GetTravelMask(pawn.Square, square)))
-                {
-                    yield return pawn;
-                }
-            }
-
             foreach (var queen in GetPositions(opponentColor, PieceType.Queen, threatMask.QueenMask))
             {
                 if (!IsOccupied(Moves.GetTravelMask(queen.Square, square)))
@@ -280,19 +270,27 @@ namespace SicTransit.Woodpusher.Model
                 }
             }
 
-            foreach (var knight in GetPositions(opponentColor, PieceType.Knight, threatMask.KnightMask))
-            {
-                if (!IsOccupied(Moves.GetTravelMask(knight.Square, square)))
-                {
-                    yield return knight;
-                }
-            }
-
             foreach (var bishop in GetPositions(opponentColor, PieceType.Bishop, threatMask.BishopMask))
             {
                 if (!IsOccupied(Moves.GetTravelMask(bishop.Square, square)))
                 {
                     yield return bishop;
+                }
+            }
+
+            foreach (var pawn in GetPositions(opponentColor, PieceType.Pawn, threatMask.PawnMask))
+            {
+                if (!IsOccupied(Moves.GetTravelMask(pawn.Square, square)))
+                {
+                    yield return pawn;
+                }
+            }
+
+            foreach (var knight in GetPositions(opponentColor, PieceType.Knight, threatMask.KnightMask))
+            {
+                if (!IsOccupied(Moves.GetTravelMask(knight.Square, square)))
+                {
+                    yield return knight;
                 }
             }
 

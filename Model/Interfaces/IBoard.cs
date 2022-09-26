@@ -27,7 +27,5 @@ namespace SicTransit.Woodpusher.Model.Interfaces
         bool IsChecked { get; }
 
         Counters Counters { get; }
-
-        bool IsOccupied(Square square);
     }
 }
