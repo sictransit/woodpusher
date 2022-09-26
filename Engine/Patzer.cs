@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
-            algebraicMoves = algebraicMoves != null ? algebraicMoves : Enumerable.Empty<AlgebraicMove>();
+            algebraicMoves ??= Enumerable.Empty<AlgebraicMove>();
 
             Board = ForsythEdwardsNotation.Parse(fen);
 
@@ -58,12 +58,12 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        public AlgebraicMove FindBestMove(int limit = 1000, Action<string>? infoCallback = null)
+        public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
         {
             var sw = new Stopwatch();
             sw.Start();
 
-            deadline = DateTime.UtcNow.AddMilliseconds(limit);
+            deadline = DateTime.UtcNow.AddMilliseconds(timeLimit);
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
@@ -72,12 +72,12 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
             {
-                if (evaluations.Count() <= 1)
+                if (evaluations.Count <= 1)
                 {
                     break;
                 }
 
-                if (evaluations.Any(e => Math.Abs(Math.Abs(e.Score) - MATE_SCORE) < MAX_DEPTH))
+                if (evaluations.Any(e => Math.Abs(e.Score - MATE_SCORE) < MAX_DEPTH))
                 {
                     break;
                 }
@@ -94,7 +94,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     var board = Board.PlayMove(e.Move);
 
-                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e) * sign;
+                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, new[] { e.Move }) * sign;
 
                     nodeCount += e.NodeCount;
 
@@ -119,7 +119,7 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, IEnumerable<Move> line, int alpha = int.MinValue, int beta = int.MaxValue)
         {
             var moves = board.GetLegalMoves().ToArray();
 
@@ -139,7 +139,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, line.Append(move), alpha, beta);
 
                 if (maximizing)
                 {

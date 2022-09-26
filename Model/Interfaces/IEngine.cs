@@ -10,8 +10,8 @@
 
         void Play(Move move);
 
-        void Position(string fen, IEnumerable<AlgebraicMove> algebraicMoves);
+        void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null);
 
-        AlgebraicMove FindBestMove(int timeLimit, Action<string> infoCallback = null);
+        AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null);
     }
 }

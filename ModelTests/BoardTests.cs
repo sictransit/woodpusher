@@ -146,7 +146,7 @@ namespace SicTransit.Woodpusher.Tests
                 Assert.IsTrue(pieces.Contains(position.Piece));
             }
 
-            Assert.AreEqual(0, board.GetPositions(PieceColor.White).Where(p => p.Square.File == file).Count());
+            Assert.AreEqual(0, board.GetPositions(PieceColor.White).Count(p => p.Square.File == file));
         }
 
         [TestMethod]

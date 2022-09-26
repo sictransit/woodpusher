@@ -76,9 +76,11 @@ namespace SicTransit.Woodpusher.Model
             {
                 var mask = 1ul << shift;
 
-                if (IsOccupied(mask))
+                var pieceType = Peek(mask);
+
+                if (pieceType != PieceType.None)
                 {
-                    yield return new Position(Peek(mask), mask.ToSquare());
+                    yield return new Position(new Piece(pieceType, Color), mask.ToSquare());
                 }
             }
         }
@@ -122,40 +124,39 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public Piece Peek(ulong mask)
+        public PieceType Peek(ulong mask)
         {
-            PieceType pieceType;
+            if ((All & mask) == 0)
+            {
+                return PieceType.None;
+            }
 
             if ((Pawn & mask) != 0)
             {
-                pieceType = PieceType.Pawn;
-            }
-            else if ((Rook & mask) != 0)
-            {
-                pieceType = PieceType.Rook;
-            }
-            else if ((Knight & mask) != 0)
-            {
-                pieceType = PieceType.Knight;
-            }
-            else if ((Bishop & mask) != 0)
-            {
-                pieceType = PieceType.Bishop;
-            }
-            else if ((Queen & mask) != 0)
-            {
-                pieceType = PieceType.Queen;
-            }
-            else if ((King & mask) != 0)
-            {
-                pieceType = PieceType.King;
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(mask));
+                return PieceType.Pawn;
             }
 
-            return new Piece(pieceType, Color);
+            if ((Rook & mask) != 0)
+            {
+                return PieceType.Rook;
+            }
+
+            if ((Knight & mask) != 0)
+            {
+                return PieceType.Knight;
+            }
+
+            if ((Bishop & mask) != 0)
+            {
+                return PieceType.Bishop;
+            }
+
+            if ((Queen & mask) != 0)
+            {
+                return PieceType.Queen;
+            }
+
+            return PieceType.King;
         }
 
         private Bitboard Toggle(PieceType pieceType, ulong mask) => pieceType switch

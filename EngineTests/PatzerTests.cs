@@ -115,6 +115,39 @@ namespace SicTransit.Woodpusher.Tests
         }
 
         [TestMethod]
+        public void PlayE8F8OrDieTest()
+        {
+            // e8f8 is a good move; pushing e.g. a B pawn is not 
+
+            //+---+---+---+---+---+---+---+---+
+            //| r | n | b | q | k |   | n | r | 8
+            //+---+---+---+---+---+---+---+---+
+            //| p | p | p |   | b |   |   | p | 7
+            //+---+---+---+---+---+---+---+---+
+            //|   |   |   |   |   |   | P |   | 6
+            //+---+---+---+---+---+---+---+---+
+            //|   |   |   | p |   |   |   | Q | 5
+            //+---+---+---+---+---+---+---+---+
+            //|   |   |   | N | p |   |   |   | 4
+            //+---+---+---+---+---+---+---+---+
+            //|   |   | N |   |   |   |   |   | 3
+            //+---+---+---+---+---+---+---+---+
+            //| P | P | P | P |   | P | P | P | 2
+            //+---+---+---+---+---+---+---+---+
+            //| R |   | B |   | K | B |   | R | 1
+            //+---+---+---+---+---+---+---+---+
+            //  a   b   c   d   e   f   g   h
+
+            var patzer = new Patzer();
+
+            patzer.Position("rnbqk1nr/ppp1b2p/6P1/3p3Q/3Np3/2N5/PPPP1PPP/R1B1KB1R b KQkq - 0 7");
+
+            var bestMove = patzer.FindBestMove(10000);
+
+            Assert.AreEqual("e8f8", bestMove.Notation);
+        }
+
+        [TestMethod]
         public void FindMateInThreeTest()
         {
             var patzer = new Patzer();

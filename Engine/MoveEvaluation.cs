@@ -14,5 +14,10 @@ namespace SicTransit.Woodpusher.Engine
         public Move Move { get; set; }
 
         public int Score { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Move} {Score} / {NodeCount}";
+        }
     }
 }

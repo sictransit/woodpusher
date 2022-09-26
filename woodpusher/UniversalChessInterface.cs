@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher
         {
             Log.Debug($"Processing command: {command}");
 
-            Task task = null;
+            Task? task = null;
 
             if (UciCommand.IsMatch(command))
             {
@@ -69,16 +69,13 @@ namespace SicTransit.Woodpusher
                 Log.Warning($"Ignored unknown command: {command}");
             }
 
-            if (task != null)
+            task?.ContinueWith(t =>
             {
-                task.ContinueWith(t =>
-                    {
-                        if (t.IsFaulted && t.Exception != null)
-                        {
-                            Log.Error(t.Exception, "Engine task threw an Exception.");
-                        }
-                    });
-            }
+                if (t.IsFaulted && t.Exception != null)
+                {
+                    Log.Error(t.Exception, "Engine task threw an Exception.");
+                }
+            });
         }
 
         public bool Quit { get; private set; }

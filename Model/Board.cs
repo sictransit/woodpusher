@@ -134,13 +134,11 @@ namespace SicTransit.Woodpusher.Model
 
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColour());
 
-            Piece? targetPiece = null;
+            PieceType targetPieceType = opponentBitboard.Peek(move.TargetMask);
 
-            if (opponentBitboard.IsOccupied(move.TargetMask))
+            if (targetPieceType != PieceType.None)
             {
-                targetPiece = opponentBitboard.Peek(move.TargetMask);
-
-                opponentBitboard = opponentBitboard.Remove(targetPiece.Value.Type, move.TargetMask);
+                opponentBitboard = opponentBitboard.Remove(targetPieceType, move.TargetMask);
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
@@ -217,8 +215,7 @@ namespace SicTransit.Woodpusher.Model
                 }
             }
 
-            var halfmoveClock = move.Position.Piece.Type == PieceType.Pawn || targetPiece.HasValue ? 0 : Counters.HalfmoveClock + 1;
-
+            var halfmoveClock = move.Position.Piece.Type == PieceType.Pawn || targetPieceType != PieceType.None ? 0 : Counters.HalfmoveClock + 1;
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
@@ -242,11 +239,11 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPositions() => white.GetPieces().Concat(black.GetPieces());
 
-        public IEnumerable<Position> GetPositions(PieceColor color) => GetBitboard(color).GetPieces();
+        public IEnumerable<Position> GetPositions(PieceColor pieceColor) => GetBitboard(pieceColor).GetPieces();
 
-        public IEnumerable<Position> GetPositions(PieceColor color, PieceType type) => GetBitboard(color).GetPieces(type);
+        public IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
 
-        private IEnumerable<Position> GetPositions(PieceColor color, PieceType type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
+        private IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
 
         public IEnumerable<Position> GetAttackers(Square square, PieceColor color)
         {
