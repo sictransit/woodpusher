@@ -13,7 +13,7 @@ namespace SicTransit.Woodpusher.Model
             Flags = flags;
             EnPassantTarget = enPassantTarget;
 
-            CastlingCheckMask= castlingCheckSquare.HasValue ? castlingCheckSquare.Value.ToMask() : 0;
+            CastlingCheckMask = castlingCheckSquare.HasValue ? castlingCheckSquare.Value.ToMask() : 0;
             CastlingEmptySquaresMask = castlingEmptySquares != null ? castlingEmptySquares.ToMask() : 0;
             PromotionType = promotionType;
         }
