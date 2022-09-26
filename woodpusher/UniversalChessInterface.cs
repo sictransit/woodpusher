@@ -174,7 +174,7 @@ namespace SicTransit.Woodpusher
             {
                 Action<string> infoCallback = new(s => consoleOutput(s));
 
-                var move = engine.FindBestMove(5000, infoCallback);
+                var move = engine.FindBestMove(1000, infoCallback);
 
                 consoleOutput($"bestmove {move.Notation}");
             });
