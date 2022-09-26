@@ -1,19 +1,20 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
     public class Move
     {
-        public Move(Position position, Square target, SpecialMove flags, Square? enPassantTarget = null, Square? castlingCheckSquare = null, IEnumerable<Square>? castlingEmptySquares = null, Square? castlingRookSquare = null, PieceType promotionType = PieceType.None)
+        public Move(Position position, Square target, SpecialMove flags, Square? enPassantTarget = null, Square? castlingCheckSquare = null, IEnumerable<Square>? castlingEmptySquares = null, PieceType promotionType = PieceType.None)
         {
             Position = position;
             Target = target;
+            TargetMask = target.ToMask();
             Flags = flags;
             EnPassantTarget = enPassantTarget;
 
-            CastlingCheckSquare = castlingCheckSquare;
-            CastlingEmptySquares = castlingEmptySquares ?? Enumerable.Empty<Square>();
-            CastlingRookSquare = castlingRookSquare;
+            CastlingCheckMask= castlingCheckSquare.HasValue ? castlingCheckSquare.Value.ToMask() : 0;
+            CastlingEmptySquaresMask = castlingEmptySquares != null ? Enumerable.Empty<Square>().ToMask() : 0;
             PromotionType = promotionType;
         }
 
@@ -24,13 +25,15 @@ namespace SicTransit.Woodpusher.Model
         public Position Position { get; }
 
         public Square Target { get; }
+
+        public ulong TargetMask { get; }
+
         public SpecialMove Flags { get; }
 
-        public Square? CastlingCheckSquare { get; }
+        public ulong CastlingCheckMask { get; }
 
-        public IEnumerable<Square> CastlingEmptySquares { get; }
+        public ulong CastlingEmptySquaresMask { get; }
 
-        public Square? CastlingRookSquare { get; }
         public PieceType PromotionType { get; }
         public Square? EnPassantTarget { get; }
 
