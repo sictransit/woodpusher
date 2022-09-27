@@ -125,17 +125,17 @@ namespace SicTransit.Woodpusher
             });
         }
 
-        private Task Position(object? o)
+        private Task Position(string command)
         {
             return Task.Run(() =>
             {
                 lock (engine)
                 {
-                    var match = PositionRegex.Match(o.ToString());
+                    var match = PositionRegex.Match(command);
 
                     if (!match.Success)
                     {
-                        Log.Error($"Unable to parse: {o}");
+                        Log.Error($"Unable to parse: {command}");
 
                         return;
                     }
@@ -159,7 +159,7 @@ namespace SicTransit.Woodpusher
                         }
                         else
                         {
-                            Log.Information($"failed to parse position: {o}");
+                            Log.Information($"failed to parse position: {command}");
                         }
                     }
 
@@ -172,11 +172,14 @@ namespace SicTransit.Woodpusher
         {
             return Task.Run(() =>
             {
-                Action<string> infoCallback = new(s => consoleOutput(s));
+                lock (engine)
+                {
+                    void InfoCallback(string s) => consoleOutput(s);
 
-                var move = engine.FindBestMove(1000, infoCallback);
+                    var move = engine.FindBestMove(5000, InfoCallback);
 
-                consoleOutput($"bestmove {move.Notation}");
+                    consoleOutput($"bestmove {move.Notation}");
+                }
             });
         }
     }
