@@ -2,11 +2,12 @@
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Model.Lookup;
+using System.Collections.Concurrent;
 using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public readonly struct Board : IBoard
+    public class Board : IBoard
     {
         private readonly Bitboard white;
         private readonly Bitboard black;
