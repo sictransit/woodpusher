@@ -415,7 +415,7 @@ e8f7: 1
 
 
         [TestMethod()]
-        [Ignore("long running: 4,2 min on release/laptop")]
+        [Ignore("long running: 2,9 min on release/laptop")]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"

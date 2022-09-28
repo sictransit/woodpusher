@@ -21,8 +21,6 @@ namespace SicTransit.Woodpusher.Model
 
         public PieceColor ActiveColor => Counters.ActiveColor;
 
-        private ulong All => white.All | black.All;
-
         public Board() : this(new Bitboard(PieceColor.White), new Bitboard(PieceColor.Black), Counters.Default)
         {
 
@@ -44,8 +42,8 @@ namespace SicTransit.Woodpusher.Model
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
-            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Square.ToMask()), black, Counters, Moves, Attacks, Masks),
-            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Square.ToMask()), Counters, Moves, Attacks, Masks),
+            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Current), black, Counters, Moves, Attacks, Masks),
+            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Current), Counters, Moves, Attacks, Masks),
             _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
@@ -73,7 +71,7 @@ namespace SicTransit.Woodpusher.Model
                 opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.AddFileAndRank(0, -1) : move.EnPassantTarget.AddFileAndRank(0, 1));
             }
 
-            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square.ToMask(), move.TargetMask);
+            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Current, move.TargetMask);
 
             if (ActiveColor == PieceColor.White)
             {

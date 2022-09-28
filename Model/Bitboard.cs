@@ -6,14 +6,14 @@ using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public readonly struct Bitboard
+    public class Bitboard
     {
         // 00 .. 63
         // A1 .. H8
 
         public Bitboard(PieceColor color, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
         {
-            Color = color;
+            this.color = color;
             Pawn = pawn;
             Rook = rook;
             Knight = knight;
@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Model
             All = Pawn | Rook | Knight | Bishop | Queen | King;
         }
 
-        private PieceColor Color { get; }
+        private readonly PieceColor color;
 
         public ulong All { get; }
 
@@ -35,8 +35,8 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
-
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
+
         public int Evaluation
         {
             get
@@ -101,7 +101,7 @@ namespace SicTransit.Woodpusher.Model
 
                 if (pieceType != PieceType.None)
                 {
-                    yield return new Position(new Piece(pieceType, Color), mask.ToSquare());
+                    yield return new Position(new Piece(pieceType, color), mask);
                 }
             }
         }
@@ -116,7 +116,7 @@ namespace SicTransit.Woodpusher.Model
 
                 if ((bitmap & mask) != 0)
                 {
-                    yield return new Position(new Piece(type, Color), mask.ToSquare());
+                    yield return new Position(new Piece(type, color), mask);
                 }
             }
         }
@@ -125,7 +125,7 @@ namespace SicTransit.Woodpusher.Model
         {
             var bitmap = GetBitmap(type);
 
-            var colour = this.Color;
+            var colour = this.color;
 
             return (bitmap & mask).ToSquares().Select(s => new Position(new Piece(type, colour), s));
         }
@@ -140,7 +140,7 @@ namespace SicTransit.Woodpusher.Model
 
                 if ((bitmap & mask) != 0)
                 {
-                    yield return new Position(new Piece(type, Color), mask.ToSquare());
+                    yield return new Position(new Piece(type, color), mask);
                 }
             }
         }
@@ -182,12 +182,12 @@ namespace SicTransit.Woodpusher.Model
 
         private Bitboard Toggle(PieceType pieceType, ulong mask) => pieceType switch
         {
-            PieceType.Pawn => new Bitboard(Color, Pawn ^ mask, Rook, Knight, Bishop, Queen, King),
-            PieceType.Rook => new Bitboard(Color, Pawn, Rook ^ mask, Knight, Bishop, Queen, King),
-            PieceType.Knight => new Bitboard(Color, Pawn, Rook, Knight ^ mask, Bishop, Queen, King),
-            PieceType.Bishop => new Bitboard(Color, Pawn, Rook, Knight, Bishop ^ mask, Queen, King),
-            PieceType.Queen => new Bitboard(Color, Pawn, Rook, Knight, Bishop, Queen ^ mask, King),
-            PieceType.King => new Bitboard(Color, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
+            PieceType.Pawn => new Bitboard(color, Pawn ^ mask, Rook, Knight, Bishop, Queen, King),
+            PieceType.Rook => new Bitboard(color, Pawn, Rook ^ mask, Knight, Bishop, Queen, King),
+            PieceType.Knight => new Bitboard(color, Pawn, Rook, Knight ^ mask, Bishop, Queen, King),
+            PieceType.Bishop => new Bitboard(color, Pawn, Rook, Knight, Bishop ^ mask, Queen, King),
+            PieceType.Queen => new Bitboard(color, Pawn, Rook, Knight, Bishop, Queen ^ mask, King),
+            PieceType.King => new Bitboard(color, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
     }
