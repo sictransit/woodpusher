@@ -191,7 +191,7 @@ namespace SicTransit.Woodpusher
 
         private Task Display()
         {
-            return Task.Run(() => 
+            return Task.Run(() =>
             {
                 lock (engine)
                 {

@@ -266,7 +266,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            Log.Information(Environment.NewLine+ board.PrettyPrint());
+            Log.Information(Environment.NewLine + board.PrettyPrint());
 
             var moves = board.GetLegalMoves().ToArray();
 
