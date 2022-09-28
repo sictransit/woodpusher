@@ -162,7 +162,7 @@ namespace SicTransit.Woodpusher.Model
 
         private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 
-        private Square FindKing(PieceColor color) => GetBitboard(color).King.ToSquare();
+        private ulong FindKing(PieceColor color) => GetBitboard(color).King;
 
         public IEnumerable<Position> GetPositions() => white.GetPieces().Concat(black.GetPieces());
 
@@ -172,15 +172,15 @@ namespace SicTransit.Woodpusher.Model
 
         private IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
 
-        public IEnumerable<Position> GetAttackers(Square square, PieceColor color)
+        public IEnumerable<Position> GetAttackers(ulong target, PieceColor color)
         {
-            var threatMask = Attacks.GetThreatMask(color, square);
+            var threatMask = Attacks.GetThreatMask(color, target);
 
             var opponentColor = color.OpponentColour();
 
             foreach (var queen in GetPositions(opponentColor, PieceType.Queen, threatMask.QueenMask))
             {
-                if (!IsOccupied(Moves.GetTravelMask(queen.Square, square)))
+                if (!IsOccupied(Moves.GetTravelMask(queen.Current, target)))
                 {
                     yield return queen;
                 }
@@ -188,7 +188,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var rook in GetPositions(opponentColor, PieceType.Rook, threatMask.RookMask))
             {
-                if (!IsOccupied(Moves.GetTravelMask(rook.Square, square)))
+                if (!IsOccupied(Moves.GetTravelMask(rook.Current, target)))
                 {
                     yield return rook;
                 }
@@ -196,7 +196,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var bishop in GetPositions(opponentColor, PieceType.Bishop, threatMask.BishopMask))
             {
-                if (!IsOccupied(Moves.GetTravelMask(bishop.Square, square)))
+                if (!IsOccupied(Moves.GetTravelMask(bishop.Current, target)))
                 {
                     yield return bishop;
                 }
@@ -204,7 +204,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var pawn in GetPositions(opponentColor, PieceType.Pawn, threatMask.PawnMask))
             {
-                if (!IsOccupied(Moves.GetTravelMask(pawn.Square, square)))
+                if (!IsOccupied(Moves.GetTravelMask(pawn.Current, target)))
                 {
                     yield return pawn;
                 }
@@ -212,7 +212,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var knight in GetPositions(opponentColor, PieceType.Knight, threatMask.KnightMask))
             {
-                if (!IsOccupied(Moves.GetTravelMask(knight.Square, square)))
+                if (!IsOccupied(Moves.GetTravelMask(knight.Current, target)))
                 {
                     yield return knight;
                 }
@@ -220,7 +220,7 @@ namespace SicTransit.Woodpusher.Model
 
             foreach (var king in GetPositions(opponentColor, PieceType.King, threatMask.KingMask))
             {
-                if (!IsOccupied(Moves.GetTravelMask(king.Square, square)))
+                if (!IsOccupied(Moves.GetTravelMask(king.Current, target)))
                 {
                     yield return king;
                 }
@@ -337,9 +337,9 @@ namespace SicTransit.Woodpusher.Model
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor), ActiveColor);
 
-        private bool IsAttacked(Square square, PieceColor color) => GetAttackers(square, color).Any();
+        private bool IsAttacked(ulong square, PieceColor color) => GetAttackers(square, color).Any();
 
-        private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Square, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask.ToSquare(), move.Position.Piece.Color) || IsAttacked(move.Target, move.Position.Piece.Color);
+        private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.TargetMask, move.Position.Piece.Color);
 
         private bool CastlingPathIsBlocked(Move move) => IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask);
 

@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Model.Interfaces
 
         IBoard SetPosition(Position position);
 
-        IEnumerable<Position> GetAttackers(Square square, PieceColor color);
+        IEnumerable<Position> GetAttackers(ulong square, PieceColor color);
 
         int Score { get; }
 

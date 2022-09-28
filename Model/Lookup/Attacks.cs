@@ -6,20 +6,20 @@ namespace SicTransit.Woodpusher.Model.Lookup
 {
     public class Attacks
     {
-        private readonly Dictionary<PieceColor, Dictionary<Square, ThreatMask>> threatMasks = new();
+        private readonly Dictionary<PieceColor, Dictionary<ulong, ThreatMask>> threatMasks = new();
 
         public Attacks()
         {
             Initialize();
         }
 
-        public ThreatMask GetThreatMask(PieceColor pieceColor, Square square) => threatMasks[pieceColor][square];
+        public ThreatMask GetThreatMask(PieceColor pieceColor, ulong current) => threatMasks[pieceColor][current];
 
         private void Initialize()
         {
             foreach (var colour in new[] { PieceColor.White, PieceColor.Black })
             {
-                threatMasks.Add(colour, new Dictionary<Square, ThreatMask>());
+                threatMasks.Add(colour, new Dictionary<ulong, ThreatMask>());
 
                 var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
@@ -64,7 +64,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
                             }
                     }
 
-                    threatMasks[colour].Add(square, new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
+                    threatMasks[colour].Add(square.ToMask(), new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
                 }
             }
         }

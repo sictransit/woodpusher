@@ -182,7 +182,7 @@ namespace SicTransit.Woodpusher
                 {
                     void InfoCallback(string s) => consoleOutput(s);
 
-                    var move = engine.FindBestMove(5000, InfoCallback);
+                    var move = engine.FindBestMove(2000, InfoCallback);
 
                     consoleOutput($"bestmove {move.Notation}");
                 }

@@ -206,7 +206,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var board = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
 
-            var attackers = board.GetAttackers(new Square("f7"), PieceColor.Black).ToArray();
+            var attackers = board.GetAttackers(new Square("f7").ToMask(), PieceColor.Black).ToArray();
 
             Assert.AreEqual(2, attackers.Length);
             Assert.IsTrue(attackers.Any(a => a.Piece.Type == PieceType.Queen && a.Piece.Color == PieceColor.White));
@@ -415,7 +415,7 @@ e8f7: 1
 
 
         [TestMethod()]
-        [Ignore("long running: 2,9 min on release/laptop")]
+        [Ignore("long running: 2,4 min on release/laptop")]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"

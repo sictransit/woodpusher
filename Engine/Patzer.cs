@@ -85,7 +85,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
 
                 // 2,1 Mnode/s
-                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).ToArray(), e =>
+                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take(evaluations.Count/depth).ToArray(), e =>
                 {
                     if (DateTime.UtcNow > deadline)
                     {
