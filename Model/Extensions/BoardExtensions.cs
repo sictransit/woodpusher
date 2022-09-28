@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
                     var position = positions.SingleOrDefault(p => p.Square.Equals(square));
 
-                    var c = position.Piece.Type != Enums.PieceType.None ? position.Piece.ToAlgebraicNotation() : ' ';
+                    var c = position != null ? position.Piece.ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
                 }

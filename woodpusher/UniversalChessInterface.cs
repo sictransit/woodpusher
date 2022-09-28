@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 using System.Text.RegularExpressions;
@@ -17,6 +18,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex StopCommand = new(@"^stop$", RegexOptions.Compiled);
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
+        private static readonly Regex DisplayCommand = new(@"^d$", RegexOptions.Compiled);
 
         private static readonly Regex PositionRegex =
             new(@"^(position).+?(fen(.+?))?(moves(.+?))?$", RegexOptions.Compiled);
@@ -59,6 +61,10 @@ namespace SicTransit.Woodpusher
             else if (StopCommand.IsMatch(command))
             {
                 task = Stop();
+            }
+            else if (DisplayCommand.IsMatch(command))
+            {
+                task = Display();
             }
             else if (QuitCommand.IsMatch(command))
             {
@@ -179,6 +185,17 @@ namespace SicTransit.Woodpusher
                     var move = engine.FindBestMove(5000, InfoCallback);
 
                     consoleOutput($"bestmove {move.Notation}");
+                }
+            });
+        }
+
+        private Task Display()
+        {
+            return Task.Run(() => 
+            {
+                lock (engine)
+                {
+                    consoleOutput(engine.Board.PrettyPrint());
                 }
             });
         }

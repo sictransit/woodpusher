@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(PieceColor.White, board.Counters.ActiveColor);
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, board.Counters.BlackCastlings);
-            Assert.IsNull(board.Counters.EnPassantTarget);
+            Assert.AreEqual(0ul, board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(1, board.Counters.FullmoveNumber);
 
@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(PieceColor.Black, board.Counters.ActiveColor);
             Assert.AreEqual(Castlings.None, board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.None, board.Counters.BlackCastlings);
-            Assert.AreEqual(new Square("a3"), board.Counters.EnPassantTarget);
+            Assert.AreEqual(new Square("a3").ToMask(), board.Counters.EnPassantTarget);
 
             var whiteQueens = board.GetPositions(PieceColor.White, PieceType.Queen);
             var blackRooks = board.GetPositions(PieceColor.Black, PieceType.Rook);
