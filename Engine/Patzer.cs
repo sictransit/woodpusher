@@ -85,7 +85,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
 
                 // TODO: Best first, or worse?
-                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take(evaluations.Count / (depth / 2)).ToArray(), e =>
+                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take(evaluations.Count / depth).ToArray(), e =>
                 {
                     if (DateTime.UtcNow > deadline)
                     {
