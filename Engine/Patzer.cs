@@ -72,7 +72,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e => e.Move))}");
 
-            foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
+            foreach (var depth in new[] { 1, 3, 5, 8, 13, 21 })
             {
                 if (evaluations.Count <= 1)
                 {
@@ -84,8 +84,8 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                // 2,1 Mnode/s
-                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take(evaluations.Count/depth).ToArray(), e =>
+                // TODO: Best first, or worse?
+                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take(evaluations.Count / (depth / 2)).ToArray(), e =>
                 {
                     if (DateTime.UtcNow > deadline)
                     {

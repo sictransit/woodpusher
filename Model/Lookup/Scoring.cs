@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SicTransit.Woodpusher.Model.Lookup
+﻿namespace SicTransit.Woodpusher.Model.Lookup
 {
     public static class Scoring
     {

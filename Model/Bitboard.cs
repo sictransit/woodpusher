@@ -1,7 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Lookup;
-using System.ComponentModel;
 using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
@@ -41,7 +40,7 @@ namespace SicTransit.Woodpusher.Model
         {
             get
             {
-                var evaluation = 
+                var evaluation =
                     BitOperations.PopCount(Pawn) * Scoring.PawnValue +
                     BitOperations.PopCount(Knight) * Scoring.KnightValue +
                     BitOperations.PopCount(Bishop) * Scoring.BishopValue +
@@ -50,7 +49,7 @@ namespace SicTransit.Woodpusher.Model
 
                 // + 1 pawn for each pawn holding the center
                 evaluation += BitOperations.PopCount(Pawn & Masks.CenterMask) * Scoring.PawnValue;
-                
+
                 return evaluation;
             }
         }
