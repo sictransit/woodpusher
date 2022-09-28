@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public class Board : IBoard
+    public readonly struct Board : IBoard
     {
         private readonly Bitboard white;
         private readonly Bitboard black;

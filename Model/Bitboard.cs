@@ -3,7 +3,7 @@ using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public class Bitboard
+    public readonly struct Bitboard
     {
         // 00 .. 63
         // A1 .. H8

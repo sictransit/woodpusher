@@ -2,7 +2,7 @@
 
 namespace SicTransit.Woodpusher.Model
 {
-    public struct Counters
+    public readonly struct Counters
     {
         public PieceColor ActiveColor { get; }
 
