@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Parsing
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            var counters = new Counters(activeColor, whiteCastling, blackCastling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            var counters = new Counters(activeColor, whiteCastling, blackCastling, enPassantTarget?.ToMask() ?? 0, halfmoveClock, fullmoveNumber);
 
             return new Board(white, black, counters);
         }

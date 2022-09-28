@@ -142,7 +142,7 @@ namespace SicTransit.Woodpusher.Model
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
-                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.Value.AddFileAndRank(0, -1).ToMask() : move.EnPassantTarget.Value.AddFileAndRank(0, 1).ToMask());
+                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.AddFileAndRank(0, -1) : move.EnPassantTarget.AddFileAndRank(0, 1));
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Square.ToMask(), move.TargetMask);
@@ -422,7 +422,7 @@ namespace SicTransit.Woodpusher.Model
 
         private bool PawnCannotTakeForward(Move move) => move.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.TargetMask);
 
-        private bool EnPassantWithoutTarget(Move move) => move.Flags.HasFlag(SpecialMove.EnPassant) && !move.Target.Equals(Counters.EnPassantTarget);
+        private bool EnPassantWithoutTarget(Move move) => move.Flags.HasFlag(SpecialMove.EnPassant) && move.TargetMask != Counters.EnPassantTarget;
 
         private bool TookPiece(Move move) => IsOccupied(move.TargetMask, move.Position.Piece.Color.OpponentColour());
     }

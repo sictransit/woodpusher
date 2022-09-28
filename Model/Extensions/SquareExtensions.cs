@@ -11,6 +11,13 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return squares.Aggregate(0ul, (a, b) => a | b.ToMask());
         }
 
+        public static ulong AddFileAndRank(this ulong mask, int fileDelta, int rankDelta)
+        {
+            var shift = rankDelta * 8 + fileDelta;
+
+            return shift < 0 ? mask >> -shift : mask << shift;
+        }
+
         public static Square ToSquare(this ulong mask)
         {
             if (mask == 0)

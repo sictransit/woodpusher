@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model.Movement
 {
@@ -54,7 +55,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 yield return new[] {
                 new Move(position, square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
                     rank == doubleStepRank
-                    ? new[] { new Move(position, square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank)) }
+                    ? new[] { new Move(position, square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank).ToMask()) }
                     : Enumerable.Empty<Move>()
                     );
 
@@ -72,7 +73,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         if (Square.TryCreate(file + dFile, rank + dRank, out var enPassantSquare))
                         {
-                            yield return new[] { new Move(position, enPassantSquare, SpecialMove.EnPassant, enPassantSquare) };
+                            yield return new[] { new Move(position, enPassantSquare, SpecialMove.EnPassant, enPassantSquare.ToMask()) };
                         }
                     }
                 }

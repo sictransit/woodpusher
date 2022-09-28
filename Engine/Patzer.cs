@@ -70,7 +70,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var evaluations = Board.GetLegalMoves().Select(m => new MoveEvaluation(m)).ToList();
 
-            Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e=>e.Move))}");
+            Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e => e.Move))}");
 
             foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
             {

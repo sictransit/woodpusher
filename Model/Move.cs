@@ -5,7 +5,7 @@ namespace SicTransit.Woodpusher.Model
 {
     public class Move
     {
-        public Move(Position position, Square target, SpecialMove flags, Square? enPassantTarget = null, Square? castlingCheckSquare = null, IEnumerable<Square>? castlingEmptySquares = null, PieceType promotionType = PieceType.None)
+        public Move(Position position, Square target, SpecialMove flags, ulong enPassantTarget = 0, Square? castlingCheckSquare = null, IEnumerable<Square>? castlingEmptySquares = null, PieceType promotionType = PieceType.None)
         {
             Position = position;
             Target = target;
@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Model
             PromotionType = promotionType;
         }
 
-        public Move(Position position, Square target, SpecialMove flags = SpecialMove.None) : this(position, target, flags, null)
+        public Move(Position position, Square target, SpecialMove flags = SpecialMove.None) : this(position, target, flags, 0)
         {
         }
 
@@ -35,7 +35,8 @@ namespace SicTransit.Woodpusher.Model
         public ulong CastlingEmptySquaresMask { get; }
 
         public PieceType PromotionType { get; }
-        public Square? EnPassantTarget { get; }
+
+        public ulong EnPassantTarget { get; }
 
         public override string ToString()
         {
