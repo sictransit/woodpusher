@@ -33,7 +33,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var position in positions.Where(p => p.Square.File == file))
             {
-                var move = engine.Board.GetLegalMoves(position).SingleOrDefault(m => m.Target.Equals(square) && m.PromotionType == promotionType);
+                var move = engine.Board.GetLegalMoves(position).SingleOrDefault(m => m.GetTarget().Equals(square) && m.PromotionType == promotionType);
 
                 if (move != null)
                 {

@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Model
             Promotion = promotion;
         }
 
-        public AlgebraicMove(Move move) : this(move.Position.Square, move.Target, move.PromotionType)
+        public AlgebraicMove(Move move) : this(move.Position.Square, move.GetTarget(), move.PromotionType)
         {
         }
 

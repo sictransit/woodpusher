@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model.Movement
 {
@@ -58,16 +59,16 @@ namespace SicTransit.Woodpusher.Model.Movement
             {
                 if (square.Equals(WhiteStartPosition))
                 {
-                    yield return new[] { new Move(position, new Square(6, 0), SpecialMove.CastleKing, 0, new Square(5, 0), new[] { new Square(5, 0), new Square(6, 0) }) };
-                    yield return new[] { new Move(position, new Square(2, 0), SpecialMove.CastleQueen, 0, new Square(3, 0), new[] { new Square(2, 0), new Square(1, 0) }) };
+                    yield return new[] { new Move(position, new Square(6, 0).ToMask(), SpecialMove.CastleKing, 0, new Square(5, 0).ToMask(), new[] { new Square(5, 0), new Square(6, 0) }.ToMask()) };
+                    yield return new[] { new Move(position, new Square(2, 0).ToMask(), SpecialMove.CastleQueen, 0, new Square(3, 0).ToMask(), new[] { new Square(2, 0), new Square(1, 0) }.ToMask()) };
                 }
             }
             else
             {
                 if (square.Equals(BlackStartPosition))
                 {
-                    yield return new[] { new Move(position, new Square(6, 7), SpecialMove.CastleKing, 0, new Square(5, 7), new[] { new Square(5, 7), new Square(6, 7) }) };
-                    yield return new[] { new Move(position, new Square(2, 7), SpecialMove.CastleQueen, 0, new Square(3, 7), new[] { new Square(2, 7), new Square(1, 7) }) };
+                    yield return new[] { new Move(position, new Square(6, 7).ToMask(), SpecialMove.CastleKing, 0, new Square(5, 7).ToMask(), new[] { new Square(5, 7), new Square(6, 7) }.ToMask()) };
+                    yield return new[] { new Move(position, new Square(2, 7).ToMask(), SpecialMove.CastleQueen, 0, new Square(3, 7).ToMask(), new[] { new Square(2, 7), new Square(1, 7) }.ToMask()) };
                 }
             }
         }

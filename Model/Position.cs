@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Piece { get; }
 
-        public ulong Current;
+        public ulong Current { get; }
 
         public Square Square => Current.ToSquare();
 

@@ -5,28 +5,26 @@ namespace SicTransit.Woodpusher.Model
 {
     public class Move
     {
-        public Move(Position position, Square target, SpecialMove flags, ulong enPassantTarget = 0, Square? castlingCheckSquare = null, IEnumerable<Square>? castlingEmptySquares = null, PieceType promotionType = PieceType.None)
+        public Move(Position position, ulong target, SpecialMove flags, ulong enPassantTarget = 0, ulong castlingCheckMask = 0, ulong castlingEmptyMask = 0, PieceType promotionType = PieceType.None)
         {
             Position = position;
             Target = target;
-            TargetMask = target.ToMask();
             Flags = flags;
             EnPassantTarget = enPassantTarget;
-
-            CastlingCheckMask = castlingCheckSquare.HasValue ? castlingCheckSquare.Value.ToMask() : 0;
-            CastlingEmptySquaresMask = castlingEmptySquares != null ? castlingEmptySquares.ToMask() : 0;
+            CastlingCheckMask = castlingCheckMask;
+            CastlingEmptySquaresMask = castlingEmptyMask;
             PromotionType = promotionType;
         }
 
-        public Move(Position position, Square target, SpecialMove flags = SpecialMove.None) : this(position, target, flags, 0)
+        public Move(Position position, Square target, SpecialMove flags = SpecialMove.None) : this(position, target.ToMask(), flags)
         {
         }
 
         public Position Position { get; }
 
-        public Square Target { get; }
+        public Square GetTarget() => Target.ToSquare();
 
-        public ulong TargetMask { get; }
+        public ulong Target { get; }
 
         public SpecialMove Flags { get; }
 
@@ -40,7 +38,7 @@ namespace SicTransit.Woodpusher.Model
 
         public override string ToString()
         {
-            return $"{Position}{Target}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty)); ;
+            return $"{Position}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty)); ;
         }
     }
 }

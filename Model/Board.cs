@@ -59,18 +59,18 @@ namespace SicTransit.Woodpusher.Model
 
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColour());
 
-            PieceType targetPieceType = opponentBitboard.Peek(move.TargetMask);
+            PieceType targetPieceType = opponentBitboard.Peek(move.Target);
 
             if (targetPieceType != PieceType.None)
             {
-                opponentBitboard = opponentBitboard.Remove(targetPieceType, move.TargetMask);
+                opponentBitboard = opponentBitboard.Remove(targetPieceType, move.Target);
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
                 opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.AddFileAndRank(0, -1) : move.EnPassantTarget.AddFileAndRank(0, 1));
             }
 
-            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Current, move.TargetMask);
+            var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Current, move.Target);
 
             if (ActiveColor == PieceColor.White)
             {
@@ -83,11 +83,11 @@ namespace SicTransit.Woodpusher.Model
                     whiteCastlings &= ~Castlings.Queenside;
                 }
 
-                if (move.TargetMask == Masks.BlackKingsideRookStartingSquare)
+                if (move.Target == Masks.BlackKingsideRookStartingSquare)
                 {
                     blackCastlings &= ~Castlings.Kingside;
                 }
-                else if (move.TargetMask == Masks.BlackQueensideRookStartingSquare)
+                else if (move.Target == Masks.BlackQueensideRookStartingSquare)
                 {
                     blackCastlings &= ~Castlings.Queenside;
                 }
@@ -103,11 +103,11 @@ namespace SicTransit.Woodpusher.Model
                     blackCastlings &= ~Castlings.Queenside;
                 }
 
-                if (move.TargetMask == Masks.WhiteKingsideRookStartingSquare)
+                if (move.Target == Masks.WhiteKingsideRookStartingSquare)
                 {
                     whiteCastlings &= ~Castlings.Kingside;
                 }
-                else if (move.TargetMask == Masks.WhiteQueensideRookStartingSquare)
+                else if (move.Target == Masks.WhiteQueensideRookStartingSquare)
                 {
                     whiteCastlings &= ~Castlings.Queenside;
                 }
@@ -144,7 +144,7 @@ namespace SicTransit.Woodpusher.Model
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
-                activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.TargetMask).Add(move.PromotionType, move.TargetMask);
+                activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target).Add(move.PromotionType, move.Target);
             }
 
             var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
@@ -337,18 +337,18 @@ namespace SicTransit.Woodpusher.Model
 
         private bool IsAttacked(ulong square, PieceColor color) => GetAttackers(square, color).Any();
 
-        private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.TargetMask, move.Position.Piece.Color);
+        private bool CastlingFromOrIntoCheck(Move move) => IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.Target, move.Position.Piece.Color);
 
         private bool CastlingPathIsBlocked(Move move) => IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask);
 
-        private bool TakingOwnPiece(Move move) => IsOccupied(move.TargetMask, move.Position.Piece.Color);
+        private bool TakingOwnPiece(Move move) => IsOccupied(move.Target, move.Position.Piece.Color);
 
-        private bool MustTakeButCannot(Move move) => move.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.TargetMask, move.Position.Piece.Color.OpponentColour());
+        private bool MustTakeButCannot(Move move) => move.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.Target, move.Position.Piece.Color.OpponentColour());
 
-        private bool PawnCannotTakeForward(Move move) => move.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.TargetMask);
+        private bool PawnCannotTakeForward(Move move) => move.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.Target);
 
-        private bool EnPassantWithoutTarget(Move move) => move.Flags.HasFlag(SpecialMove.EnPassant) && move.TargetMask != Counters.EnPassantTarget;
+        private bool EnPassantWithoutTarget(Move move) => move.Flags.HasFlag(SpecialMove.EnPassant) && move.Target != Counters.EnPassantTarget;
 
-        private bool TookPiece(Move move) => IsOccupied(move.TargetMask, move.Position.Piece.Color.OpponentColour());
+        private bool TookPiece(Move move) => IsOccupied(move.Target, move.Position.Piece.Color.OpponentColour());
     }
 }

@@ -47,7 +47,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 if (move == null)
                 {
@@ -84,8 +84,7 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                // TODO: Best first, or worse?
-                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take(evaluations.Count / depth).ToArray(), e =>
+                Parallel.ForEach(evaluations, e =>
                 {
                     if (DateTime.UtcNow > deadline)
                     {

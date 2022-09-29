@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
                         {
-                            yield return new[] { new Move(position, promoteSquare, SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
+                            yield return new[] { new Move(position, promoteSquare.ToMask(), SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
                         }
                     }
                 }
@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 yield return new[] {
                 new Move(position, square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
                     rank == doubleStepRank
-                    ? new[] { new Move(position, square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank).ToMask()) }
+                    ? new[] { new Move(position, square.NewRank(rank + dRank * 2).ToMask(), SpecialMove.CannotTake, square.NewRank(rank + dRank).ToMask()) }
                     : Enumerable.Empty<Move>()
                     );
 
@@ -73,7 +73,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         if (Square.TryCreate(file + dFile, rank + dRank, out var enPassantSquare))
                         {
-                            yield return new[] { new Move(position, enPassantSquare, SpecialMove.EnPassant, enPassantSquare.ToMask()) };
+                            yield return new[] { new Move(position, enPassantSquare.ToMask(), SpecialMove.EnPassant, enPassantSquare.ToMask()) };
                         }
                     }
                 }
