@@ -136,7 +136,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? int.MinValue : int.MaxValue;
 
-            foreach (var move in moves)
+            foreach (var move in moves.OrderByDescending(m=> board.IsOccupied(m.Target, maximizing ? PieceColor.Black : PieceColor.White)))
             {
                 evaluation.NodeCount++;
 

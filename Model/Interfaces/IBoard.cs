@@ -8,6 +8,8 @@ namespace SicTransit.Woodpusher.Model.Interfaces
 
         IBoard PlayMove(Move move);
 
+        bool IsOccupied(ulong mask, PieceColor color);
+
         IEnumerable<Move> GetLegalMoves();
 
         IEnumerable<Move> GetLegalMoves(Position position);

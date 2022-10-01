@@ -156,7 +156,7 @@ namespace SicTransit.Woodpusher.Model
 
         private bool IsOccupied(ulong mask) => white.IsOccupied(mask) || black.IsOccupied(mask);
 
-        private bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
+        public bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
 
         private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 
