@@ -65,7 +65,10 @@ namespace SicTransit.Woodpusher.Engine
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 Thread.Sleep(timeLimit);
-                cancellationTokenSource.Cancel();
+                if (!Debugger.IsAttached)
+                {
+                    cancellationTokenSource.Cancel();
+                }
             });
 
             var stopWatch = new Stopwatch();

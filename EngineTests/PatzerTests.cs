@@ -182,6 +182,20 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.AreNotEqual("d8g5", bestMove.Notation);
         }
+
+        [TestMethod]
+        public void PromotionIsAGoodIdea()
+        {
+            // The engine was making no-op moves instead of promting.
+
+            var patzer = new Patzer();
+
+            patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
+
+            var bestmove = patzer.FindBestMove();
+
+            Assert.AreEqual("g2g1", bestmove.Notation);
+        }
     }
 
 
