@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 {
     public class Moves
     {
-        private readonly Dictionary<Piece, Dictionary<Square, List<Move[]>>> vectors = new();
+        private readonly Dictionary<Position, IReadOnlyCollection<Move[]>> vectors = new();
         private readonly Dictionary<ulong, Dictionary<ulong, ulong>> travelMasks = new();
 
         public Moves()
@@ -40,22 +40,18 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
             pieces.ForEach(piece =>
             {
-                vectors.Add(piece, new Dictionary<Square, List<Move[]>>());
-
                 squares.ForEach(square =>
                 {
                     var position = new Position(piece, square);
 
-                    vectors[piece].Add(square, CreateVectors(position).Select(v => v.ToArray()).ToList());
-
-                    //Log.Debug($"Calculated vectors: {position}");
+                    vectors.Add(position, CreateVectors(position).Select(v => v.ToArray()).ToArray());
                 });
             });
         }
 
-        public List<Move[]> GetVectors(Position position)
+        public IReadOnlyCollection<Move[]> GetVectors(Position position)
         {
-            return vectors[position.Piece][position.Square];
+            return vectors[position];
         }
 
         private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position) => position.Piece.Type switch

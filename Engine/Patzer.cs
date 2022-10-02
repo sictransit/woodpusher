@@ -60,10 +60,16 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
         {
+            var timeIsUp = new ManualResetEventSlim(false);
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Thread.Sleep(timeLimit);
+                timeIsUp.Set();
+            });
+
             var sw = new Stopwatch();
             sw.Start();
-
-            deadline = DateTime.UtcNow.AddMilliseconds(timeLimit);
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
@@ -72,7 +78,9 @@ namespace SicTransit.Woodpusher.Engine
 
             Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e => e.Move))}");
 
-            foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
+            var depth = 0;
+
+            while (!timeIsUp.IsSet)
             {
                 if (evaluations.Count <= 1)
                 {
@@ -84,23 +92,21 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take((int)( evaluations.Count/Math.Sqrt(depth))), e =>
+                foreach (var chunk in evaluations.OrderByDescending(e => e.Score).Chunk(Environment.ProcessorCount))
                 {
-                    if (DateTime.UtcNow > deadline)
+                    Parallel.ForEach(chunk, e =>
                     {
-                        Log.Debug("aborting due to lack of time");
+                        var board = Board.PlayMove(e.Move);
 
-                        return;
-                    }
+                        e.Score = EvaluateBoard(board, timeIsUp, board.ActiveColor == PieceColor.White, depth, e) * sign;
 
-                    var board = Board.PlayMove(e.Move);
+                        nodeCount += e.NodeCount;
 
-                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e) * sign;
+                        infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
+                    });
+                }
 
-                    nodeCount += e.NodeCount;
-
-                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
-                });
+                depth++;
             }
 
             if (evaluations.Any())
@@ -120,7 +126,7 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(IBoard board, ManualResetEventSlim timeIsUp, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
         {
             var moves = board.GetLegalMoves();
 
@@ -129,7 +135,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
             }
 
-            if (depth == 0 || DateTime.UtcNow > deadline)
+            if (depth == 0 || timeIsUp.IsSet)
             {
                 return board.Score;
             }
@@ -140,7 +146,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.PlayMove(move), timeIsUp, !maximizing, depth - 1, evaluation, alpha, beta);
 
                 if (maximizing)
                 {
