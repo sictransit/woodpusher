@@ -72,7 +72,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e => e.Move))}");
 
-            foreach (var depth in new[] { 1, 3, 5, 8, 13, 21 })
+            foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
             {
                 if (evaluations.Count <= 1)
                 {
@@ -84,7 +84,7 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                Parallel.ForEach(evaluations, e =>
+                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).Take((int)( evaluations.Count/Math.Sqrt(depth))), e =>
                 {
                     if (DateTime.UtcNow > deadline)
                     {
@@ -95,7 +95,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     var board = Board.PlayMove(e.Move);
 
-                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, new[] { e.Move }) * sign;
+                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e) * sign;
 
                     nodeCount += e.NodeCount;
 
@@ -120,11 +120,11 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, IEnumerable<Move> line, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
         {
-            var moves = board.GetLegalMoves().ToArray();
+            var moves = board.GetLegalMoves();
 
-            if (moves.Length == 0)
+            if (!moves.Any())
             {
                 return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
             }
@@ -136,11 +136,11 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? int.MinValue : int.MaxValue;
 
-            foreach (var move in moves.OrderByDescending(m=> board.IsOccupied(m.Target, maximizing ? PieceColor.Black : PieceColor.White)))
+            foreach (var move in moves)
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, line.Append(move), alpha, beta);
+                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta);
 
                 if (maximizing)
                 {
