@@ -92,7 +92,7 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    consoleOutput("id name Woodpusher v0.1.2");
+                    consoleOutput("id name Woodpusher v0.2.0");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
 
