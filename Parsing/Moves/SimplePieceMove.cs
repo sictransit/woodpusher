@@ -1,6 +1,6 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing.Exceptions;
 
 namespace SicTransit.Woodpusher.Parsing.Moves
@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var position in positions)
             {
-                var move = board.GetLegalMoves(position).SingleOrDefault(m => m.Target.Square.Equals(square));
+                var move = board.GetLegalMoves(position).SingleOrDefault(m => m.GetTarget().Equals(square));
 
                 if (move != null)
                 {

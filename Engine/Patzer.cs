@@ -1,8 +1,8 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
 
@@ -10,17 +10,17 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public Board Board { get; private set; }
+        public IBoard Board { get; private set; }
 
         private readonly Random random = new();
+
+        private CancellationTokenSource cancellationTokenSource = new();
 
         private const int MATE_SCORE = 1000000;
         private const int WHITE_MATE_SCORE = -MATE_SCORE;
         private const int BLACK_MATE_SCORE = MATE_SCORE;
         private const int DRAW_SCORE = 0;
         private const int MAX_DEPTH = 32;
-
-        private DateTime deadline;
 
         public Patzer()
         {
@@ -34,18 +34,20 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            Board = Board.Play(move);
+            Log.Information($"{Board.ActiveColor} plays: {move}");
 
-            Log.Debug($"played: {move}");
+            Board = Board.PlayMove(move);
         }
 
-        public void Position(string fen, IEnumerable<AlgebraicMove> algebraicMoves)
+        public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
+            algebraicMoves ??= Enumerable.Empty<AlgebraicMove>();
+
             Board = ForsythEdwardsNotation.Parse(fen);
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.Target.Square.Equals(algebraicMove.To) && m.Target.PromotionType == algebraicMove.Promotion);
+                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 if (move == null)
                 {
@@ -56,48 +58,75 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        public AlgebraicMove FindBestMove(int limit = 1000, Action<string>? infoCallback = null)
+        public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
         {
+            cancellationTokenSource = new CancellationTokenSource();
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Thread.Sleep(timeLimit);
+                cancellationTokenSource.Cancel();
+            });
+
             var sw = new Stopwatch();
             sw.Start();
-
-            deadline = DateTime.UtcNow.AddMilliseconds(limit);
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
 
             var evaluations = Board.GetLegalMoves().Select(m => new MoveEvaluation(m)).ToList();
 
-            foreach (var depth in new[] { 1, 2, 3, 5, 8, 13, 21 })
+            Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e => e.Move))}");
+
+            var cancellationToken = cancellationTokenSource.Token;
+
+            var parallelOptions = new ParallelOptions
             {
-                if (evaluations.Count() <= 1)
+                CancellationToken = cancellationToken,
+                MaxDegreeOfParallelism = -1
+            };
+
+            var depth = 0;
+
+            while (!cancellationTokenSource.IsCancellationRequested)
+            {
+                if (evaluations.Count <= 1)
                 {
                     break;
                 }
 
-                if (evaluations.Any(e => Math.Abs(Math.Abs(e.Score) - MATE_SCORE) < MAX_DEPTH))
+                if (evaluations.Any(e => Math.Abs(e.Score - MATE_SCORE) < MAX_DEPTH))
                 {
                     break;
                 }
 
-                // 2,1 Mnode/s
-                Parallel.ForEach(evaluations.OrderByDescending(e => e.Score).ToArray(), e =>
+                foreach (var chunk in evaluations.OrderByDescending(e => e.Score).Chunk(Environment.ProcessorCount))
                 {
-                    if (DateTime.UtcNow > deadline)
+                    try
                     {
-                        Log.Debug("aborting due to lack of time");
+                        Parallel.ForEach(chunk, parallelOptions, e =>
+                        {
+                            var board = Board.PlayMove(e.Move);
 
-                        return;
+                            var score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign;
+
+                            if (!cancellationToken.IsCancellationRequested)
+                            {
+                                e.Score = score;
+
+                                nodeCount += e.NodeCount;
+
+                                infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
+                            }
+                        });
                     }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
 
-                    var board = Board.Play(e.Move);
-
-                    e.Score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e) * sign;
-
-                    nodeCount += e.NodeCount;
-
-                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)sw.ElapsedMilliseconds}");
-                });
+                depth++;
             }
 
             if (evaluations.Any())
@@ -117,16 +146,16 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(Board board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha, int beta, CancellationToken cancellationToken)
         {
-            var moves = board.GetLegalMoves().ToArray();
+            var moves = board.GetLegalMoves();
 
-            if (moves.Length == 0)
+            if (!moves.Any())
             {
                 return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
             }
 
-            if (depth == 0 || DateTime.UtcNow > deadline)
+            if (depth == 0 || cancellationToken.IsCancellationRequested)
             {
                 return board.Score;
             }
@@ -137,7 +166,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.Play(move), !maximizing, depth - 1, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {
@@ -168,7 +197,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Stop()
         {
-            deadline = DateTime.UtcNow;
+            cancellationTokenSource.Cancel();
         }
     }
 }

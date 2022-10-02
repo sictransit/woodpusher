@@ -1,6 +1,6 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing.Exceptions;
 
 namespace SicTransit.Woodpusher.Parsing.Moves
@@ -23,12 +23,12 @@ namespace SicTransit.Woodpusher.Parsing.Moves
 
             foreach (var move in moves)
             {
-                if (move.Target.Flags.HasFlag(SpecialMove.CastleKing) && this.Castling == Castlings.Kingside)
+                if (move.Flags.HasFlag(SpecialMove.CastleKing) && this.Castling == Castlings.Kingside)
                 {
                     return move;
                 }
 
-                if (move.Target.Flags.HasFlag(SpecialMove.CastleQueen) && this.Castling == Castlings.Queenside)
+                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && this.Castling == Castlings.Queenside)
                 {
                     return move;
                 }

@@ -1,6 +1,4 @@
-﻿using SicTransit.Woodpusher.Model.Extensions;
-
-namespace SicTransit.Woodpusher.Model.Movement
+﻿namespace SicTransit.Woodpusher.Model.Movement
 {
     public static class KnightMovement
     {
@@ -14,7 +12,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                 {
                     if (Square.TryCreate(square.File + df, square.Rank + dr, out var s))
                     {
-                        yield return new[] { new Target(s).ToMove(position) };
+                        yield return new[] { new Move(position, s) };
                     }
                 }
             }

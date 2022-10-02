@@ -6,8 +6,8 @@ namespace SicTransit.Woodpusher.Model.Lookup
 {
     public class Moves
     {
-        private readonly Dictionary<Piece, Dictionary<Square, List<Move[]>>> vectors = new();
-        private readonly Dictionary<Square, Dictionary<Square, ulong>> travelMasks = new();
+        private readonly Dictionary<Position, IReadOnlyCollection<Move[]>> vectors = new();
+        private readonly Dictionary<ulong, Dictionary<ulong, ulong>> travelMasks = new();
 
         public Moves()
         {
@@ -18,20 +18,20 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
         private void InitializeTravelMasks()
         {
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToArray();
+            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r).ToMask())).SelectMany(x => x).ToArray();
 
             foreach (var square in squares)
             {
-                travelMasks.Add(square, new Dictionary<Square, ulong>());
+                travelMasks.Add(square, new Dictionary<ulong, ulong>());
 
                 foreach (var target in squares)
                 {
-                    travelMasks[square].Add(target, square.ToTravelMask(target));
+                    travelMasks[square].Add(target, square.ToSquare().ToTravelMask(target.ToSquare()));
                 }
             }
         }
 
-        public ulong GetTravelMask(Square square, Square target) => travelMasks[square][target];
+        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current][target];
 
         private void InitializeVectors()
         {
@@ -40,22 +40,18 @@ namespace SicTransit.Woodpusher.Model.Lookup
 
             pieces.ForEach(piece =>
             {
-                vectors.Add(piece, new Dictionary<Square, List<Move[]>>());
-
                 squares.ForEach(square =>
                 {
                     var position = new Position(piece, square);
 
-                    vectors[piece].Add(square, CreateVectors(position).Select(v => v.ToArray()).ToList());
-
-                    //Log.Debug($"Calculated vectors: {position}");
+                    vectors.Add(position, CreateVectors(position).Select(v => v.ToArray()).ToArray());
                 });
             });
         }
 
-        public List<Move[]> GetVectors(Position position)
+        public IReadOnlyCollection<Move[]> GetVectors(Position position)
         {
-            return vectors[position.Piece][position.Square];
+            return vectors[position];
         }
 
         private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position) => position.Piece.Type switch

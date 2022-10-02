@@ -1,6 +1,7 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
 using System.Text.RegularExpressions;
 
@@ -17,6 +18,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex StopCommand = new(@"^stop$", RegexOptions.Compiled);
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
+        private static readonly Regex DisplayCommand = new(@"^d$", RegexOptions.Compiled);
 
         private static readonly Regex PositionRegex =
             new(@"^(position).+?(fen(.+?))?(moves(.+?))?$", RegexOptions.Compiled);
@@ -34,7 +36,7 @@ namespace SicTransit.Woodpusher
         {
             Log.Debug($"Processing command: {command}");
 
-            Task task = null;
+            Task? task = null;
 
             if (UciCommand.IsMatch(command))
             {
@@ -60,6 +62,10 @@ namespace SicTransit.Woodpusher
             {
                 task = Stop();
             }
+            else if (DisplayCommand.IsMatch(command))
+            {
+                task = Display();
+            }
             else if (QuitCommand.IsMatch(command))
             {
                 Quit = true;
@@ -69,16 +75,13 @@ namespace SicTransit.Woodpusher
                 Log.Warning($"Ignored unknown command: {command}");
             }
 
-            if (task != null)
+            task?.ContinueWith(t =>
             {
-                task.ContinueWith(t =>
-                    {
-                        if (t.IsFaulted && t.Exception != null)
-                        {
-                            Log.Error(t.Exception, "Engine task threw an Exception.");
-                        }
-                    });
-            }
+                if (t.IsFaulted && t.Exception != null)
+                {
+                    Log.Error(t.Exception, "Engine task threw an Exception.");
+                }
+            });
         }
 
         public bool Quit { get; private set; }
@@ -89,7 +92,7 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    consoleOutput("id name Woodpusher v0.1.2");
+                    consoleOutput("id name Woodpusher v0.2.0");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
 
@@ -128,17 +131,17 @@ namespace SicTransit.Woodpusher
             });
         }
 
-        private Task Position(object? o)
+        private Task Position(string command)
         {
             return Task.Run(() =>
             {
                 lock (engine)
                 {
-                    var match = PositionRegex.Match(o.ToString());
+                    var match = PositionRegex.Match(command);
 
                     if (!match.Success)
                     {
-                        Log.Error($"Unable to parse: {o}");
+                        Log.Error($"Unable to parse: {command}");
 
                         return;
                     }
@@ -162,7 +165,7 @@ namespace SicTransit.Woodpusher
                         }
                         else
                         {
-                            Log.Information($"failed to parse position: {o}");
+                            Log.Information($"failed to parse position: {command}");
                         }
                     }
 
@@ -175,11 +178,25 @@ namespace SicTransit.Woodpusher
         {
             return Task.Run(() =>
             {
-                Action<string> infoCallback = new(s => consoleOutput(s));
+                lock (engine)
+                {
+                    void InfoCallback(string s) => consoleOutput(s);
 
-                var move = engine.FindBestMove(5000, infoCallback);
+                    var move = engine.FindBestMove(5000, InfoCallback);
 
-                consoleOutput($"bestmove {move.Notation}");
+                    consoleOutput($"bestmove {move.Notation}");
+                }
+            });
+        }
+
+        private Task Display()
+        {
+            return Task.Run(() =>
+            {
+                lock (engine)
+                {
+                    consoleOutput(engine.Board.PrettyPrint());
+                }
             });
         }
     }

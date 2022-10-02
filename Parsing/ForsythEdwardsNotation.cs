@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing.Exceptions;
 using System.Text.RegularExpressions;
 
@@ -10,7 +11,7 @@ namespace SicTransit.Woodpusher.Parsing
     {
         public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        public static Board Parse(string fen)
+        public static IBoard Parse(string fen)
         {
             if (fen is null)
             {
@@ -24,7 +25,7 @@ namespace SicTransit.Woodpusher.Parsing
                 throw new FenParsingException(fen, "parts should be == 6");
             }
 
-            var board = ParseBoard(parts[0]);
+            var (white, black) = ParseBoard(parts[0]);
 
             var activeColor = ParseActiveColour(parts[1]);
 
@@ -37,12 +38,12 @@ namespace SicTransit.Woodpusher.Parsing
 
             var fullmoveNumber = ParseFullmoveNumber(parts[5]);
 
-            var counters = new Counters(activeColor, whiteCastling, blackCastling, enPassantTarget, halfmoveClock, fullmoveNumber);
+            var counters = new Counters(activeColor, whiteCastling, blackCastling, enPassantTarget?.ToMask() ?? 0, halfmoveClock, fullmoveNumber);
 
-            return new Board(board, counters);
+            return new Board(white, black, counters);
         }
 
-        private static Board ParseBoard(string s)
+        private static (Bitboard, Bitboard) ParseBoard(string s)
         {
             // TODO: regex for validating FEN board setup
 
@@ -53,9 +54,10 @@ namespace SicTransit.Woodpusher.Parsing
                 throw new FenParsingException(s, "board setup should be eight parts, separated by '/'");
             }
 
-            var board = new Board();
-
             var rank = 7;
+
+            Bitboard white = new(PieceColor.White);
+            Bitboard black = new(PieceColor.Black);
 
             foreach (var part in parts)
             {
@@ -71,14 +73,23 @@ namespace SicTransit.Woodpusher.Parsing
                     {
                         var square = new Square(file++, rank);
 
-                        board = board.AddPiece(square, c.ToPiece());
+                        var piece = c.ToPiece();
+
+                        if (piece.Color == PieceColor.White)
+                        {
+                            white = white.Add(piece.Type, square.ToMask());
+                        }
+                        else
+                        {
+                            black = black.Add(piece.Type, square.ToMask());
+                        }
                     }
                 }
 
                 rank--;
             }
 
-            return board;
+            return (white, black);
         }
 
         private static int ParseFullmoveNumber(string s) => int.Parse(s);

@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
                         {
-                            yield return new[] { new Target(promoteSquare, SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType).ToMove(position) };
+                            yield return new[] { new Move(position, promoteSquare.ToMask(), SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
                         }
                     }
                 }
@@ -53,17 +53,17 @@ namespace SicTransit.Woodpusher.Model.Movement
             else
             {
                 yield return new[] {
-                new Target(square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
+                new Move(position, square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
                     rank == doubleStepRank
-                    ? new[] { new Target(square.NewRank(rank + dRank * 2), SpecialMove.CannotTake, square.NewRank(rank + dRank)) }
-                    : Enumerable.Empty<Target>()
-                    ).Select(t => t.ToMove(position));
+                    ? new[] { new Move(position, square.NewRank(rank + dRank * 2).ToMask(), SpecialMove.CannotTake, square.NewRank(rank + dRank).ToMask()) }
+                    : Enumerable.Empty<Move>()
+                    );
 
                 foreach (var dFile in new[] { -1, 1 })
                 {
                     if (Square.TryCreate(file + dFile, rank + dRank, out var takeSquare))
                     {
-                        yield return new[] { new Target(takeSquare, SpecialMove.MustTake).ToMove(position) };
+                        yield return new[] { new Move(position, takeSquare, SpecialMove.MustTake) };
                     }
                 }
 
@@ -73,7 +73,7 @@ namespace SicTransit.Woodpusher.Model.Movement
                     {
                         if (Square.TryCreate(file + dFile, rank + dRank, out var enPassantSquare))
                         {
-                            yield return new[] { new Target(enPassantSquare, SpecialMove.EnPassant, enPassantSquare).ToMove(position) };
+                            yield return new[] { new Move(position, enPassantSquare.ToMask(), SpecialMove.EnPassant, enPassantSquare.ToMask()) };
                         }
                     }
                 }

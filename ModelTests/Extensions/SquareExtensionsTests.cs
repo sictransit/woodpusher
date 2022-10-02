@@ -91,5 +91,18 @@ namespace SicTransit.Woodpusher.Tests.Extensions
             Assert.AreEqual(0, a1.ToTravelPath(b3).Count()); // knight
             Assert.AreEqual(0, b3.ToTravelPath(a1).Count()); // knight
         }
+
+        [TestMethod()]
+        public void AddFileAndRankToMaskTest()
+        {
+            var c3 = new Square("c3");
+
+            Assert.AreEqual(new Square("d3"), c3.ToMask().AddFileAndRank(1, 0).ToSquare());
+            Assert.AreEqual(new Square("b3"), c3.ToMask().AddFileAndRank(-1, 0).ToSquare());
+            Assert.AreEqual(new Square("c4"), c3.ToMask().AddFileAndRank(0, 1).ToSquare());
+            Assert.AreEqual(new Square("c2"), c3.ToMask().AddFileAndRank(0, -1).ToSquare());
+            Assert.AreEqual(new Square("a1"), c3.ToMask().AddFileAndRank(-2, -2).ToSquare());
+            Assert.AreEqual(new Square("a5"), c3.ToMask().AddFileAndRank(-2, 2).ToSquare());
+        }
     }
 }

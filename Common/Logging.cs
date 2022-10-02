@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Common
             }
 
             Log.Logger = loggerConfiguration
-                .WriteTo.File(logFilename, LogEventLevel.Information)
+                .WriteTo.File(logFilename, LogEventLevel.Information, shared: true)
                 .CreateLogger();
         }
 
