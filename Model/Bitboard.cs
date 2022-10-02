@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Lookup;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -92,15 +93,17 @@ namespace SicTransit.Woodpusher.Model
 
         public IEnumerable<Position> GetPieces()
         {
-            for (var shift = 0; shift < 64; shift++)
+            foreach (var pieceType in new[] { PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King})
             {
-                var mask = 1ul << shift;
+                var bitmap = GetBitmap(pieceType);
 
-                var pieceType = Peek(mask);
+                while (bitmap != 0ul)
+                { 
+                    var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
 
-                if (pieceType != PieceType.None)
-                {
-                    yield return new Position(new Piece(pieceType, color), mask);
+                    bitmap &= ~bit;
+
+                    yield return new Position(new Piece(pieceType, color), bit);
                 }
             }
         }
