@@ -14,13 +14,13 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Random random = new();
 
+        private CancellationTokenSource cancellationTokenSource = new();
+
         private const int MATE_SCORE = 1000000;
         private const int WHITE_MATE_SCORE = -MATE_SCORE;
         private const int BLACK_MATE_SCORE = MATE_SCORE;
         private const int DRAW_SCORE = 0;
         private const int MAX_DEPTH = 32;
-
-        private DateTime deadline;
 
         public Patzer()
         {
@@ -60,12 +60,12 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
         {
-            var timeIsUp = new ManualResetEventSlim(false);
+            cancellationTokenSource = new CancellationTokenSource();
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 Thread.Sleep(timeLimit);
-                timeIsUp.Set();
+                cancellationTokenSource.Cancel();
             });
 
             var sw = new Stopwatch();
@@ -78,9 +78,17 @@ namespace SicTransit.Woodpusher.Engine
 
             Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', evaluations.Select(e => e.Move))}");
 
+            var cancellationToken = cancellationTokenSource.Token;
+
+            var parallelOptions = new ParallelOptions
+            {
+                CancellationToken = cancellationToken,
+                MaxDegreeOfParallelism = -1
+            };
+
             var depth = 0;
 
-            while (!timeIsUp.IsSet)
+            while (!cancellationTokenSource.IsCancellationRequested)
             {
                 if (evaluations.Count <= 1)
                 {
@@ -94,16 +102,28 @@ namespace SicTransit.Woodpusher.Engine
 
                 foreach (var chunk in evaluations.OrderByDescending(e => e.Score).Chunk(Environment.ProcessorCount))
                 {
-                    Parallel.ForEach(chunk, e =>
+                    try
                     {
-                        var board = Board.PlayMove(e.Move);
+                        Parallel.ForEach(chunk, parallelOptions, e =>
+                        {
+                            var board = Board.PlayMove(e.Move);
 
-                        e.Score = EvaluateBoard(board, timeIsUp, board.ActiveColor == PieceColor.White, depth, e) * sign;
+                            var score  = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign;
 
-                        nodeCount += e.NodeCount;
+                            if (!cancellationToken.IsCancellationRequested)
+                            {
+                                e.Score = score;
 
-                        infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
-                    });
+                                nodeCount += e.NodeCount;
+
+                                infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
+                            }
+                        });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;                        
+                    }
                 }
 
                 depth++;
@@ -126,7 +146,7 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(IBoard board, ManualResetEventSlim timeIsUp, bool maximizing, int depth, MoveEvaluation evaluation, int alpha = int.MinValue, int beta = int.MaxValue)
+        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha, int beta , CancellationToken cancellationToken)
         {
             var moves = board.GetLegalMoves();
 
@@ -135,7 +155,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
             }
 
-            if (depth == 0 || timeIsUp.IsSet)
+            if (depth == 0 || cancellationToken.IsCancellationRequested)
             {
                 return board.Score;
             }
@@ -146,7 +166,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.PlayMove(move), timeIsUp, !maximizing, depth - 1, evaluation, alpha, beta);
+                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {
@@ -177,7 +197,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Stop()
         {
-            deadline = DateTime.UtcNow;
+            cancellationTokenSource.Cancel();            
         }
     }
 }

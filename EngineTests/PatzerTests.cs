@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Tests
         {
             var patzer = new Patzer();
 
-            var bestMove = patzer.FindBestMove();
+            var bestMove = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(bestMove);
 
@@ -157,6 +157,30 @@ namespace SicTransit.Woodpusher.Tests
             var bestMove = patzer.FindBestMove(10000);
 
             Assert.AreEqual("e1e7", bestMove.Notation);
+        }
+
+        [TestMethod]        
+        public void QueenG5IsNotAnOption()
+        {
+            // For some reason it preferred Qg5 before any other move?!            
+
+//8 r n b q k b n r
+//7 p p p     p p p
+//6
+//5       p p
+//4         P
+//3       P   N
+//2 P P P     P P P
+//1 R N B Q K B   R
+//  A B C D E F G H
+
+            var patzer = new Patzer();
+
+            patzer.Position("rnbqkbnr/ppp2ppp/8/3pp3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3");
+
+            var bestMove = patzer.FindBestMove(10000);
+
+            Assert.AreNotEqual("d8g5", bestMove.Notation);
         }
     }
 
