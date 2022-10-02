@@ -159,20 +159,20 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual("e1e7", bestMove.Notation);
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void QueenG5IsNotAnOption()
         {
             // For some reason it preferred Qg5 before any other move?!            
 
-//8 r n b q k b n r
-//7 p p p     p p p
-//6
-//5       p p
-//4         P
-//3       P   N
-//2 P P P     P P P
-//1 R N B Q K B   R
-//  A B C D E F G H
+            //8 r n b q k b n r
+            //7 p p p     p p p
+            //6
+            //5       p p
+            //4         P
+            //3       P   N
+            //2 P P P     P P P
+            //1 R N B Q K B   R
+            //  A B C D E F G H
 
             var patzer = new Patzer();
 

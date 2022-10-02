@@ -108,7 +108,7 @@ namespace SicTransit.Woodpusher.Engine
                         {
                             var board = Board.PlayMove(e.Move);
 
-                            var score  = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign;
+                            var score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign;
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -122,7 +122,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                     catch (OperationCanceledException)
                     {
-                        break;                        
+                        break;
                     }
                 }
 
@@ -146,7 +146,7 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha, int beta , CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha, int beta, CancellationToken cancellationToken)
         {
             var moves = board.GetLegalMoves();
 
@@ -197,7 +197,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Stop()
         {
-            cancellationTokenSource.Cancel();            
+            cancellationTokenSource.Cancel();
         }
     }
 }
