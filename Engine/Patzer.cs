@@ -68,8 +68,8 @@ namespace SicTransit.Woodpusher.Engine
                 cancellationTokenSource.Cancel();
             });
 
-            var sw = new Stopwatch();
-            sw.Start();
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
@@ -116,7 +116,7 @@ namespace SicTransit.Woodpusher.Engine
 
                                 nodeCount += e.NodeCount;
 
-                                infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + sw.ElapsedMilliseconds)}");
+                                infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + stopWatch.ElapsedMilliseconds)}");
                             }
                         });
                     }
