@@ -84,7 +84,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
 
-            var nodes = Board.GetLegalMoves().Select(m => new Node(m)).ToList();
+            var nodes = Board.GetLegalMoves().Select(m => new Node(m, 0)).ToList();
 
             if (!nodes.Any())
             {
@@ -124,11 +124,11 @@ namespace SicTransit.Woodpusher.Engine
                             var board = Board.PlayMove(node.Move);
                             node.Hash = board.Hash;
 
-                            var score = EvaluateBoard(board, depth, node, int.MinValue, int.MaxValue, cancellationToken);                            
+                            var score = EvaluateBoard(board, depth, node, int.MinValue, int.MaxValue, cancellationToken);
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
-                                if (score * sign >= node.Score * sign)
+                                if (score > node.Score)
                                 {
                                     node.Score = score;
 
@@ -146,7 +146,7 @@ namespace SicTransit.Woodpusher.Engine
                 depth += 2;
             }
 
-            var bestNodeGroup = nodes.Where(n=>n.Hash != lastBoardHash).GroupBy(e => e.Score).OrderByDescending(g => g.Key * sign).First().ToArray();
+            var bestNodeGroup = nodes.Where(n => n.Hash != lastBoardHash).GroupBy(e => e.Score).OrderByDescending(g => g.Key * sign).First().ToArray();
 
             var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
 
@@ -161,7 +161,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             if (!parentNode.Nodes.Any())
             {
-                parentNode.Nodes.AddRange(board.GetLegalMoves().Select(m => new Node(m)));
+                parentNode.Nodes.AddRange(board.GetLegalMoves().Select(m => new Node(m, parentNode.Level + 1)));
             }
 
             var maximizing = board.ActiveColor == PieceColor.White;

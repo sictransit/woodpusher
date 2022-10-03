@@ -7,10 +7,11 @@ namespace SicTransit.Woodpusher.Engine
 {
     internal class Node
     {
-        public Node(Move move)
+        public Node(Move move, int level)
         {
             Nodes = new List<Node>();
             Move = move;
+            Level = level;
             Score = int.MinValue;
         }
 
@@ -37,7 +38,7 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         public Move Move { get; }
-
+        public int Level { get; }
         public int Hash { get; set; }
 
         public int Score { get; set; }

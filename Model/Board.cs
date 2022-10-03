@@ -79,7 +79,7 @@ namespace SicTransit.Woodpusher.Model
 
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColour());
 
-            PieceType targetPieceType = opponentBitboard.Peek(move.Target);
+            var targetPieceType = opponentBitboard.Peek(move.Target);
 
             if (targetPieceType != PieceType.None)
             {
@@ -92,46 +92,48 @@ namespace SicTransit.Woodpusher.Model
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Current, move.Target);
 
-            if (ActiveColor == PieceColor.White)
+            if (whiteCastlings != Castlings.None && blackCastlings != Castlings.None)
             {
-                if (move.Position.Equals(Masks.WhiteKingsideRook))
+                if (ActiveColor == PieceColor.White)
                 {
-                    whiteCastlings &= ~Castlings.Kingside;
-                }
-                else if (move.Position.Equals(Masks.WhiteQueensideRook))
-                {
-                    whiteCastlings &= ~Castlings.Queenside;
-                }
+                    if (move.Position.Equals(Masks.WhiteKingsideRook))
+                    {
+                        whiteCastlings &= ~Castlings.Kingside;
+                    }
+                    else if (move.Position.Equals(Masks.WhiteQueensideRook))
+                    {
+                        whiteCastlings &= ~Castlings.Queenside;
+                    }
 
-                if (move.Target == Masks.BlackKingsideRookStartingSquare)
-                {
-                    blackCastlings &= ~Castlings.Kingside;
+                    if (move.Target == Masks.BlackKingsideRookStartingSquare)
+                    {
+                        blackCastlings &= ~Castlings.Kingside;
+                    }
+                    else if (move.Target == Masks.BlackQueensideRookStartingSquare)
+                    {
+                        blackCastlings &= ~Castlings.Queenside;
+                    }
                 }
-                else if (move.Target == Masks.BlackQueensideRookStartingSquare)
+                else
                 {
-                    blackCastlings &= ~Castlings.Queenside;
-                }
-            }
-            else
-            {
-                if (move.Position.Equals(Masks.BlackKingsideRook))
-                {
-                    blackCastlings &= ~Castlings.Kingside;
-                }
-                else if (move.Position.Equals(Masks.BlackQueensideRook))
-                {
-                    blackCastlings &= ~Castlings.Queenside;
-                }
+                    if (move.Position.Equals(Masks.BlackKingsideRook))
+                    {
+                        blackCastlings &= ~Castlings.Kingside;
+                    }
+                    else if (move.Position.Equals(Masks.BlackQueensideRook))
+                    {
+                        blackCastlings &= ~Castlings.Queenside;
+                    }
 
-                if (move.Target == Masks.WhiteKingsideRookStartingSquare)
-                {
-                    whiteCastlings &= ~Castlings.Kingside;
+                    if (move.Target == Masks.WhiteKingsideRookStartingSquare)
+                    {
+                        whiteCastlings &= ~Castlings.Kingside;
+                    }
+                    else if (move.Target == Masks.WhiteQueensideRookStartingSquare)
+                    {
+                        whiteCastlings &= ~Castlings.Queenside;
+                    }
                 }
-                else if (move.Target == Masks.WhiteQueensideRookStartingSquare)
-                {
-                    whiteCastlings &= ~Castlings.Queenside;
-                }
-
             }
 
             if (move.Position.Piece.Type == PieceType.King)
