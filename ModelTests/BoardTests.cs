@@ -9,6 +9,7 @@ using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 
+
 namespace SicTransit.Woodpusher.Tests
 {
     [TestClass()]
@@ -604,6 +605,21 @@ d8d7: 1
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
         }
+
+        [TestMethod()]
+        public void IsPassedPawnTest()
+        {
+            IBoard board = ForsythEdwardsNotation.Parse("8/8/7p/1P2Pp1P/2Pp1PP1/8/8/8 w - - 0 1");
+
+            var whitePassedPawns = board.GetPositions(PieceColor.White, PieceType.Pawn).Where(p => board.IsPassedPawn(p)).ToArray();
+
+            Assert.AreEqual(3, whitePassedPawns.Length);
+
+            var blackPassedPawns = board.GetPositions(PieceColor.Black, PieceType.Pawn).Where(p => board.IsPassedPawn(p)).ToArray();
+
+            Assert.AreEqual(1, blackPassedPawns.Length);
+        }
+
 
         private static bool PerftAndCompare(IBoard board, string expected, int depth)
         {

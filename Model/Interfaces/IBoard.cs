@@ -10,6 +10,8 @@ namespace SicTransit.Woodpusher.Model.Interfaces
 
         bool IsOccupied(ulong mask, PieceColor color);
 
+        bool IsPassedPawn(Position position);
+
         IEnumerable<Move> GetLegalMoves();
 
         IEnumerable<Move> GetLegalMoves(Position position);

@@ -8,12 +8,15 @@ namespace SicTransit.Woodpusher.Model.Lookup
     {
         private readonly Dictionary<Position, IReadOnlyCollection<Move[]>> vectors = new();
         private readonly Dictionary<ulong, Dictionary<ulong, ulong>> travelMasks = new();
+        private readonly Dictionary<Position, ulong> passedPawnMasks = new();
 
         public Moves()
         {
             InitializeVectors();
 
             InitializeTravelMasks();
+
+            InitializePassedPawnMasks();
         }
 
         private void InitializeTravelMasks()
@@ -31,7 +34,38 @@ namespace SicTransit.Woodpusher.Model.Lookup
             }
         }
 
+        private void InitializePassedPawnMasks()
+        {
+            var pieces = new[] { PieceColor.White, PieceColor.Black }.Select(c => new Piece(PieceType.Pawn, c));
+            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(1, 6).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
+
+            var positions = pieces.Select(p => squares.Select(s => new Position(p, s))).SelectMany(p => p);
+
+            foreach (var position in positions)
+            {
+                var mask = 0ul;
+                var sign = position.Piece.Color == PieceColor.White ? 1 : -1;
+                var minRank = position.Piece.Color == PieceColor.White ? position.Square.Rank + 1 : 1;
+                var maxRank = position.Piece.Color == PieceColor.White ? 6 : position.Square.Rank - 1;
+
+                foreach (var dFile in new[] { -1, 0, 1 })
+                {
+                    for (int rank = minRank; rank <= maxRank; rank++)
+                    {
+                        if (Square.TryCreate(position.Square.File + dFile, rank, out var square))
+                        {
+                            mask |= square.ToMask();
+                        }
+                    }
+                }
+
+                passedPawnMasks.Add(position, mask);
+            }
+        }
+
         public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current][target];
+
+        public ulong GetPassedPawnMask(Position position) => passedPawnMasks[position];
 
         private void InitializeVectors()
         {

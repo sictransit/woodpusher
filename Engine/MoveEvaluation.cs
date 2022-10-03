@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Enums;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -8,7 +7,7 @@ namespace SicTransit.Woodpusher.Engine
         public MoveEvaluation(Move move)
         {
             Move = move;
-            Score = int.MinValue ;
+            Score = int.MinValue;
         }
 
         public ulong NodeCount { get; set; }

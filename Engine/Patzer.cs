@@ -108,11 +108,11 @@ namespace SicTransit.Woodpusher.Engine
                     try
                     {
                         Parallel.ForEach(chunk, parallelOptions, e =>
-                        {                            
+                        {
                             var board = Board.PlayMove(e.Move);
 
-                            var score = EvaluateBoard(board, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign -depth;    
-                            score-=depth; // better to find a an early good move
+                            var score = EvaluateBoard(board, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign - depth;
+                            score -= depth; // better to find a an early good move
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -133,17 +133,17 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                depth+=2;
+                depth += 2;
             }
 
             if (evaluations.Any())
             {
-                foreach (var e in evaluations.OrderBy(x=>x.Score))
+                foreach (var e in evaluations.OrderBy(x => x.Score))
                 {
-                    Log.Debug($"found: {e.Move} {e.Score * sign}");
+                    Log.Information($"found: {e.Move} {e.Score * sign}");
                 }
 
-                var bestEvaluations = evaluations.GroupBy(e => e.Score).OrderByDescending(g => g.Key).First().ToArray();                
+                var bestEvaluations = evaluations.GroupBy(e => e.Score).OrderByDescending(g => g.Key).First().ToArray();
 
                 var evaluation = bestEvaluations[random.Next(bestEvaluations.Length)];
 

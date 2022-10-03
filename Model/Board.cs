@@ -39,7 +39,21 @@ namespace SicTransit.Woodpusher.Model
             Masks = masks ?? new Masks();
         }
 
-        public int Score => white.Evaluation - black.Evaluation;
+        public int Score
+        {
+            get
+            {
+                var whiteEvaluation = white.Evaluation;
+                var blackEvaluation = black.Evaluation;
+
+                whiteEvaluation += GetPositions(PieceColor.White, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue * 2;
+                blackEvaluation += GetPositions(PieceColor.Black, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue * 2;
+
+                return whiteEvaluation - blackEvaluation;
+            }
+        }
+
+        public bool IsPassedPawn(Position position) => (Moves.GetPassedPawnMask(position) & GetBitboard(position.Piece.Color.OpponentColour()).Pawn) == 0;
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {

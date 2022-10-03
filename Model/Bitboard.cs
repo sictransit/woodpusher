@@ -48,7 +48,7 @@ namespace SicTransit.Woodpusher.Model
                     BitOperations.PopCount(Queen) * Scoring.QueenValue;
 
                 // + 1 pawn for each pawn holding the center
-                evaluation += BitOperations.PopCount(Pawn & Masks.CenterMask) * Scoring.PawnValue;
+                //evaluation += BitOperations.PopCount(Pawn & Masks.CenterMask) * Scoring.PawnValue;
 
                 return evaluation;
             }
