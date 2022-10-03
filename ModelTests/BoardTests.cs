@@ -331,8 +331,7 @@ namespace SicTransit.Woodpusher.Tests
         public void PeterJonesTestPositionsTest()
         {
             // Credit: https://gist.github.com/peterellisjones (Peter Jones)
-
-            // 32 secs (release build)
+            // 16 secs (release build)
 
             var tests = JsonNode.Parse(File.ReadAllText(Path.Combine("resources", "perft.test.positions.json")));
 
@@ -416,7 +415,7 @@ e8f7: 1
 
 
         [TestMethod()]
-        [Ignore("long running: 2,4 min on release/laptop")]
+        [Ignore("long running: 2,3 min on release/laptop")]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"
