@@ -27,5 +27,7 @@ namespace SicTransit.Woodpusher.Model
         }
 
         public static Counters Default => new(PieceColor.White, Castlings.Kingside | Castlings.Queenside, Castlings.Kingside | Castlings.Queenside, 0, 0, 0);
+
+        public int Hash => HashCode.Combine(ActiveColor, WhiteCastlings, BlackCastlings, EnPassantTarget);
     }
 }

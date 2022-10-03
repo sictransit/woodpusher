@@ -33,6 +33,8 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
+        public int Hash => HashCode.Combine(color, Pawn, Rook, Knight, Bishop, Queen, King);
+
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         public Bitboard Add(PieceType pieceType, ulong mask)

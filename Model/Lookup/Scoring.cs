@@ -77,7 +77,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
 -10,  0,  5,  0,  0,  0,  0,-10,
 -20,-10,-10, -5, -5,-10,-10,-20
         };
-        
+
         private static int[] kingMiddleGameModifiers = new[]
         {
 -30,-40,-40,-50,-50,-40,-40,-30,

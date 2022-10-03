@@ -41,6 +41,7 @@ namespace SicTransit.Woodpusher.Model
             Masks = masks ?? new Masks();
             Scoring = scoring ?? new Scoring();
         }
+        public int Hash => HashCode.Combine(Counters.Hash, white.Hash, black.Hash);
 
         public int Score
         {

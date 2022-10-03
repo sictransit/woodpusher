@@ -4,6 +4,7 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Interfaces;
 using SicTransit.Woodpusher.Parsing;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -17,6 +18,8 @@ namespace SicTransit.Woodpusher.Engine
         private CancellationTokenSource cancellationTokenSource = new();
 
         private readonly Stopwatch stopwatch = new();
+
+        private readonly ConcurrentDictionary<int, int> hashTable = new();
 
         private const int MATE_SCORE = 1000000;
         private const int WHITE_MATE_SCORE = -MATE_SCORE;
@@ -67,11 +70,13 @@ namespace SicTransit.Woodpusher.Engine
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 Thread.Sleep(timeLimit);
-                if (!Debugger.IsAttached)
+                if (!cancellationTokenSource.IsCancellationRequested)
                 {
                     cancellationTokenSource.Cancel();
                 }
             });
+
+            hashTable.Clear();
 
             stopwatch.Restart();
 

@@ -29,17 +29,6 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.BlackCastlings);
         }
 
-        [TestMethod()]
-        public void PlayBestMoveTest()
-        {
-            var patzer = new Patzer();
-
-            var bestMove = patzer.FindBestMove(5000);
-
-            Assert.IsNotNull(bestMove);
-
-            Assert.AreEqual(0, bestMove.From.Rank);
-        }
 
         [TestMethod()]
         public void PlayMultipleBestMoveTest()
@@ -186,7 +175,7 @@ namespace SicTransit.Woodpusher.Tests
         [TestMethod]
         public void PromotionIsAGoodIdea()
         {
-            // The engine was making no-op moves instead of promting.
+            // The engine was making no-op moves instead of promoting.
 
             var patzer = new Patzer();
 
