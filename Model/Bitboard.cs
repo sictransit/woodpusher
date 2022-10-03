@@ -1,6 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using SicTransit.Woodpusher.Model.Lookup;
 using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
@@ -35,24 +34,6 @@ namespace SicTransit.Woodpusher.Model
         public ulong King { get; }
 
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
-
-        public int Evaluation
-        {
-            get
-            {
-                var evaluation =
-                    BitOperations.PopCount(Pawn) * Scoring.PawnValue +
-                    BitOperations.PopCount(Knight) * Scoring.KnightValue +
-                    BitOperations.PopCount(Bishop) * Scoring.BishopValue +
-                    BitOperations.PopCount(Rook) * Scoring.RookValue +
-                    BitOperations.PopCount(Queen) * Scoring.QueenValue;
-
-                // + 1 pawn for each pawn holding the center
-                //evaluation += BitOperations.PopCount(Pawn & Masks.CenterMask) * Scoring.PawnValue;
-
-                return evaluation;
-            }
-        }
 
         public Bitboard Add(PieceType pieceType, ulong mask)
         {

@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Tests
 
             Assert.IsNotNull(bestMove);
 
-            Assert.AreEqual(1, bestMove.From.Rank);
+            Assert.AreEqual(0, bestMove.From.Rank);
         }
 
         [TestMethod()]
@@ -192,7 +192,7 @@ namespace SicTransit.Woodpusher.Tests
 
             patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
 
-            var bestmove = patzer.FindBestMove();
+            var bestmove = patzer.FindBestMove(5000);
 
             Assert.AreEqual("g2g1q", bestmove.Notation);
         }

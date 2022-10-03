@@ -19,6 +19,8 @@ namespace SicTransit.Woodpusher.Model
 
         private Masks Masks { get; }
 
+        private Scoring Scoring { get; }
+
         public PieceColor ActiveColor => Counters.ActiveColor;
 
         public Board() : this(new Bitboard(PieceColor.White), new Bitboard(PieceColor.Black), Counters.Default)
@@ -26,7 +28,7 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null)
+        public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null, Scoring? scoring = null)
         {
             this.white = white;
             this.black = black;
@@ -37,17 +39,18 @@ namespace SicTransit.Woodpusher.Model
             Moves = moves ?? new Moves();
             Attacks = attacks ?? new Attacks();
             Masks = masks ?? new Masks();
+            Scoring = scoring ?? new Scoring();
         }
 
         public int Score
         {
             get
             {
-                var whiteEvaluation = white.Evaluation;
-                var blackEvaluation = black.Evaluation;
+                var whiteEvaluation = GetPositions(PieceColor.White).Sum(p => Scoring.EvaluatePosition(p, white.Queen == 0ul));
+                var blackEvaluation = GetPositions(PieceColor.Black).Sum(p => Scoring.EvaluatePosition(p, black.Queen == 0ul));
 
-                whiteEvaluation += GetPositions(PieceColor.White, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue * 2;
-                blackEvaluation += GetPositions(PieceColor.Black, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue * 2;
+                whiteEvaluation += GetPositions(PieceColor.White, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
+                blackEvaluation += GetPositions(PieceColor.Black, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
 
                 return whiteEvaluation - blackEvaluation;
             }
@@ -57,8 +60,8 @@ namespace SicTransit.Woodpusher.Model
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
-            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Current), black, Counters, Moves, Attacks, Masks),
-            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Current), Counters, Moves, Attacks, Masks),
+            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Current), black, Counters, Moves, Attacks, Masks, Scoring),
+            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Current), Counters, Moves, Attacks, Masks, Scoring),
             _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
@@ -166,8 +169,8 @@ namespace SicTransit.Woodpusher.Model
             var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColor == PieceColor.White
-                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Masks)
-                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Masks);
+                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Masks, Scoring)
+                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Masks, Scoring);
         }
 
         private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;

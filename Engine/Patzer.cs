@@ -16,6 +16,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private CancellationTokenSource cancellationTokenSource = new();
 
+        private readonly Stopwatch stopwatch = new();
+
         private const int MATE_SCORE = 1000000;
         private const int WHITE_MATE_SCORE = -MATE_SCORE;
         private const int BLACK_MATE_SCORE = MATE_SCORE;
@@ -71,8 +73,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             });
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            stopwatch.Restart();
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
             var nodeCount = 0ul;
@@ -122,7 +123,7 @@ namespace SicTransit.Woodpusher.Engine
                                 {
                                     e.Score = score;
 
-                                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score} time {stopWatch.ElapsedMilliseconds} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + stopWatch.ElapsedMilliseconds)}");
+                                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score} time {stopwatch.ElapsedMilliseconds} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + stopwatch.ElapsedMilliseconds)}");
                                 }
                             }
                         });
