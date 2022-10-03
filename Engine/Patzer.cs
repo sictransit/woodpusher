@@ -89,7 +89,7 @@ namespace SicTransit.Woodpusher.Engine
                 MaxDegreeOfParallelism = -1
             };
 
-            var depth = 0;
+            var depth = 1;
 
             while (!cancellationTokenSource.IsCancellationRequested)
             {
@@ -108,18 +108,22 @@ namespace SicTransit.Woodpusher.Engine
                     try
                     {
                         Parallel.ForEach(chunk, parallelOptions, e =>
-                        {
+                        {                            
                             var board = Board.PlayMove(e.Move);
 
-                            var score = EvaluateBoard(board, board.ActiveColor == PieceColor.White, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign;
+                            var score = EvaluateBoard(board, depth, e, int.MinValue, int.MaxValue, cancellationToken) * sign -depth;    
+                            score-=depth; // better to find a an early good move
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
-                                e.Score = score;
-
                                 nodeCount += e.NodeCount;
 
-                                infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + stopWatch.ElapsedMilliseconds)}");
+                                if (score >= e.Score)
+                                {
+                                    e.Score = score;
+
+                                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {e.Score * sign} pv {e.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (ulong)(1 + stopWatch.ElapsedMilliseconds)}");
+                                }
                             }
                         });
                     }
@@ -129,13 +133,17 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                depth++;
+                depth+=2;
             }
 
             if (evaluations.Any())
             {
-                var orderedEvaluations = evaluations.GroupBy(e => e.Score).OrderByDescending(g => g.Key).ToArray();
-                var bestEvaluations = orderedEvaluations.First().ToArray();
+                foreach (var e in evaluations.OrderBy(x=>x.Score))
+                {
+                    Log.Debug($"found: {e.Move} {e.Score * sign}");
+                }
+
+                var bestEvaluations = evaluations.GroupBy(e => e.Score).OrderByDescending(g => g.Key).First().ToArray();                
 
                 var evaluation = bestEvaluations[random.Next(bestEvaluations.Length)];
 
@@ -149,9 +157,11 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private int EvaluateBoard(IBoard board, bool maximizing, int depth, MoveEvaluation evaluation, int alpha, int beta, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, int depth, MoveEvaluation evaluation, int alpha, int beta, CancellationToken cancellationToken)
         {
             var moves = board.GetLegalMoves();
+
+            var maximizing = board.ActiveColor == PieceColor.White;
 
             if (!moves.Any())
             {
@@ -169,7 +179,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 evaluation.NodeCount++;
 
-                var score = EvaluateBoard(board.PlayMove(move), !maximizing, depth - 1, evaluation, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.PlayMove(move), depth - 1, evaluation, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {

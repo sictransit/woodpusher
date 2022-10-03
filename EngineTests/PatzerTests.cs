@@ -194,7 +194,7 @@ namespace SicTransit.Woodpusher.Tests
 
             var bestmove = patzer.FindBestMove();
 
-            Assert.AreEqual("g2g1", bestmove.Notation);
+            Assert.AreEqual("g2g1q", bestmove.Notation);
         }
     }
 
