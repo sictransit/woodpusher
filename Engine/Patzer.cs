@@ -1,9 +1,9 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Exceptions;
+using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Interfaces;
-using SicTransit.Woodpusher.Parsing;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 

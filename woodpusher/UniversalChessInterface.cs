@@ -1,8 +1,8 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common.Extensions;
+using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Extensions;
-using SicTransit.Woodpusher.Model.Interfaces;
-using SicTransit.Woodpusher.Parsing;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
