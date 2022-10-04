@@ -19,7 +19,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
         private volatile int nodeCount;
-        private int lastBoardHash;
 
         private readonly ConcurrentDictionary<int, int> hashTable = new();
 
@@ -71,9 +70,11 @@ namespace SicTransit.Woodpusher.Engine
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
+                Log.Information($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
                 if (!cancellationTokenSource.IsCancellationRequested)
                 {
+                    Log.Information($"time is up!");
                     cancellationTokenSource.Cancel();
                 }
             });
@@ -146,11 +147,9 @@ namespace SicTransit.Woodpusher.Engine
                 depth += 2;
             }
 
-            var bestNodeGroup = nodes.Where(n => n.Hash != lastBoardHash).GroupBy(e => e.Score).OrderByDescending(g => g.Key * sign).First().ToArray();
+            var bestNodeGroup = nodes.GroupBy(e => e.Score).OrderByDescending(g => g.Key * sign).First().ToArray();
 
             var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
-
-            lastBoardHash = bestNode.Hash;
 
             Log.Information($"evaluated {nodeCount} nodes, found: {bestNode}");
 
@@ -161,7 +160,8 @@ namespace SicTransit.Woodpusher.Engine
         {
             if (!parentNode.Nodes.Any())
             {
-                parentNode.Nodes.AddRange(board.GetLegalMoves().Select(m => new Node(m, parentNode.Level + 1)));
+                var legalMoves = board.GetLegalMoves();
+                parentNode.Nodes.AddRange(legalMoves.Any() ? legalMoves.Select(m => new Node(m, parentNode.Level + 1)) : Enumerable.Empty<Node>());
             }
 
             var maximizing = board.ActiveColor == PieceColor.White;
@@ -187,6 +187,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 node.Score = EvaluateBoard(newBoard, depth - 1, node, alpha, beta, cancellationToken);
                 node.Hash = newBoard.Hash;
+                node.Cutoff = false;
 
                 if (maximizing)
                 {
@@ -194,6 +195,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (bestScore >= beta)
                     {
+                        node.Cutoff = true;
                         break;
                     }
 
@@ -205,6 +207,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (bestScore <= alpha)
                     {
+                        node.Cutoff = true;
                         break;
                     }
 

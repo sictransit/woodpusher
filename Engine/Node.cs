@@ -40,6 +40,7 @@ namespace SicTransit.Woodpusher.Engine
         public Move Move { get; }
         public int Level { get; }
         public int Hash { get; set; }
+        public bool Cutoff { get; set; }
 
         public int Score { get; set; }
 

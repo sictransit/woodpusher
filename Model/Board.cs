@@ -17,8 +17,6 @@ namespace SicTransit.Woodpusher.Model
 
         private Moves Moves { get; }
 
-        private Masks Masks { get; }
-
         private Scoring Scoring { get; }
 
         public PieceColor ActiveColor => Counters.ActiveColor;
@@ -28,7 +26,7 @@ namespace SicTransit.Woodpusher.Model
 
         }
 
-        public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Masks? masks = null, Scoring? scoring = null)
+        public Board(Bitboard white, Bitboard black, Counters counters, Moves? moves = null, Attacks? attacks = null, Scoring? scoring = null)
         {
             this.white = white;
             this.black = black;
@@ -37,8 +35,7 @@ namespace SicTransit.Woodpusher.Model
             Counters = counters;
 
             Moves = moves ?? new Moves();
-            Attacks = attacks ?? new Attacks();
-            Masks = masks ?? new Masks();
+            Attacks = attacks ?? new Attacks();            
             Scoring = scoring ?? new Scoring();
         }
         public int Hash => HashCode.Combine(Counters.Hash, white.Hash, black.Hash);
@@ -61,8 +58,8 @@ namespace SicTransit.Woodpusher.Model
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
-            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Current), black, Counters, Moves, Attacks, Masks, Scoring),
-            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Current), Counters, Moves, Attacks, Masks, Scoring),
+            PieceColor.White => new Board(white.Add(position.Piece.Type, position.Current), black, Counters, Moves, Attacks, Scoring),
+            PieceColor.Black => new Board(white, black.Add(position.Piece.Type, position.Current), Counters, Moves, Attacks, Scoring),
             _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
@@ -172,8 +169,8 @@ namespace SicTransit.Woodpusher.Model
             var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColor == PieceColor.White
-                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Masks, Scoring)
-                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Masks, Scoring);
+                ? new Board(activeBitboard, opponentBitboard, counters, Moves, Attacks, Scoring)
+                : new Board(opponentBitboard, activeBitboard, counters, Moves, Attacks, Scoring);
         }
 
         private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;

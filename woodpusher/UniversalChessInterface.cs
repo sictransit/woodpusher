@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher
             new(@"^(position).+?(fen(.+?))?(moves(.+?))?$", RegexOptions.Compiled);
         private static readonly Regex MovesRegex = new(@"([a-h][1-8][a-h][1-8][rnbq]?)", RegexOptions.Compiled);
         private static readonly Regex WhiteTimeRegex = new(@"wtime (\d+)", RegexOptions.Compiled);
-        private static readonly Regex BlackTimeRegex = new(@"wtime (\d+)", RegexOptions.Compiled);
+        private static readonly Regex BlackTimeRegex = new(@"btime (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
 
         private volatile IEngine engine;
@@ -195,8 +195,8 @@ namespace SicTransit.Woodpusher
                         var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.PieceColor.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
                         var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
-                        timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
-                    }
+                        timeLimit = Math.Min(timeLimit, timeLeft / (movesToGo+1));
+                    }                    
 
                     var move = engine.FindBestMove(timeLimit, s => consoleOutput(s));
 
