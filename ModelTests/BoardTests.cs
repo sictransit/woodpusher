@@ -9,8 +9,7 @@ using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 
-
-namespace SicTransit.Woodpusher.Tests
+namespace SicTransit.Woodpusher.Model.Tests
 {
     [TestClass()]
     public class BoardTests

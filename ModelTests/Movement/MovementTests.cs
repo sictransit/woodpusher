@@ -3,7 +3,7 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Movement;
 
-namespace SicTransit.Woodpusher.Tests.Movement
+namespace SicTransit.Woodpusher.Model.Tests.Movement
 {
     public abstract class MovementTests
     {

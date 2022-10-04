@@ -4,7 +4,7 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Lookup;
 
-namespace SicTransit.Woodpusher.Tests.Lookup
+namespace SicTransit.Woodpusher.Model.Tests.Lookup
 {
     [TestClass()]
     public class AttacksTests

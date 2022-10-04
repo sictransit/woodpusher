@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Model.Enums;
 
-namespace SicTransit.Woodpusher.Tests.Movement
+namespace SicTransit.Woodpusher.Model.Tests.Movement
 {
     [TestClass()]
     public class KnightMovementTests : MovementTests
