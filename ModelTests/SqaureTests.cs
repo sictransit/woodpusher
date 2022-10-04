@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SicTransit.Woodpusher.Model;
 
-namespace SicTransit.Woodpusher.Tests
+namespace SicTransit.Woodpusher.Model.Tests
 {
     [TestClass()]
     public class SqaureTests

@@ -1,11 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Engine;
+using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Parsing;
 
-namespace SicTransit.Woodpusher.Tests
+namespace SicTransit.Woodpusher.Engine.Tests
 {
     [TestClass()]
     public class PatzerTests
@@ -29,17 +28,6 @@ namespace SicTransit.Woodpusher.Tests
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.BlackCastlings);
         }
 
-        [TestMethod()]
-        public void PlayBestMoveTest()
-        {
-            var patzer = new Patzer();
-
-            var bestMove = patzer.FindBestMove(5000);
-
-            Assert.IsNotNull(bestMove);
-
-            Assert.AreEqual(1, bestMove.From.Rank);
-        }
 
         [TestMethod()]
         public void PlayMultipleBestMoveTest()
@@ -181,6 +169,20 @@ namespace SicTransit.Woodpusher.Tests
             var bestMove = patzer.FindBestMove(10000);
 
             Assert.AreNotEqual("d8g5", bestMove.Notation);
+        }
+
+        [TestMethod]
+        public void PromotionIsAGoodIdea()
+        {
+            // The engine was making no-op moves instead of promoting.
+
+            var patzer = new Patzer();
+
+            patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
+
+            var bestmove = patzer.FindBestMove(5000);
+
+            Assert.AreEqual("g2g1q", bestmove.Notation);
         }
     }
 
