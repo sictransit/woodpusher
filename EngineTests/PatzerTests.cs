@@ -184,6 +184,17 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.AreEqual("g2g1q", bestmove.Notation);
         }
+
+        [TestMethod]
+        public void NodeEvaluationTest()
+        {
+            var patzer = new Patzer();
+            patzer.Position("7k/8/8/8/8/1p6/B7/7K w - - 0 1");
+
+            var bestmove = patzer.FindBestMove();
+
+            Assert.AreEqual("a2b3", bestmove.Notation);
+        }
     }
 
 
