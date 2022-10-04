@@ -120,7 +120,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -MATE_SCORE, MATE_SCORE, cancellationToken) ;
+                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -MATE_SCORE*2, MATE_SCORE*2, cancellationToken) ;
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -157,11 +157,11 @@ namespace SicTransit.Woodpusher.Engine
             var nodesPerSecond = nodes * 1000 / (1 + time);
 
             string score;
-            var mateIn = Math.Abs(node.AbsoluteScore- MATE_SCORE);
-            if (mateIn <= depth)
+            var mateIn = Math.Abs(node.AbsoluteScore - MATE_SCORE);
+            if (mateIn <= MAX_DEPTH)
             {
                 var mateSign = Math.Sign(perspective * node.Score);
-                score = $"mate {mateSign * mateIn / 2}";
+                score = $"mate {mateSign * (mateIn + (node.Sign == -1 ? 1 : 0)) / 2}";
             }
             else
             {
@@ -179,7 +179,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (!legalMoves.Any())
             {
-                return board.IsChecked ? maximizing ? -MATE_SCORE + depth : MATE_SCORE - depth : DRAW_SCORE;
+                return board.IsChecked ? (maximizing ? -MATE_SCORE + depth+1 : MATE_SCORE - (depth+1)) : DRAW_SCORE;
             }
 
             if (depth == maxDepth || cancellationToken.IsCancellationRequested)
@@ -187,7 +187,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            var bestScore = maximizing ? int.MinValue : int.MaxValue;
+            var bestScore = maximizing ? -MATE_SCORE*2 : MATE_SCORE*2;
 
             foreach (var move in legalMoves)
             {
