@@ -5,7 +5,6 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -19,9 +18,8 @@ namespace SicTransit.Woodpusher.Engine
         private CancellationTokenSource cancellationTokenSource = new();
 
         private readonly Stopwatch stopwatch = new();
-        private volatile int nodeCount;
 
-        private readonly ConcurrentDictionary<int, int> hashTable = new();
+        private volatile int nodeCount;
 
         private const int MATE_SCORE = 1000000;
         private const int WHITE_MATE_SCORE = -MATE_SCORE;
@@ -75,12 +73,10 @@ namespace SicTransit.Woodpusher.Engine
                 Thread.Sleep(timeLimit);
                 if (!cancellationTokenSource.IsCancellationRequested)
                 {
-                    Log.Information($"time is up!");
                     cancellationTokenSource.Cancel();
                 }
             });
 
-            hashTable.Clear();
             nodeCount = 0;
             stopwatch.Restart();
 
@@ -105,7 +101,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var depth = 1;
 
-            while (!cancellationTokenSource.IsCancellationRequested)
+            while (!cancellationTokenSource.IsCancellationRequested && depth < MAX_DEPTH)
             {
                 if (nodes.Count <= 1)
                 {
@@ -177,9 +173,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 nodeCount++;
 
-                var newBoard = board.PlayMove(move);
-
-                var score = EvaluateBoard(newBoard, depth - 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.PlayMove(move), depth - 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {
