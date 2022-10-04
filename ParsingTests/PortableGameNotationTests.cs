@@ -6,10 +6,9 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using SicTransit.Woodpusher.Model.Interfaces;
-using SicTransit.Woodpusher.Parsing;
 using System.Diagnostics;
 
-namespace SicTransit.Woodpusher.Tests
+namespace SicTransit.Woodpusher.Parsing.Tests
 {
     [TestClass()]
     public class PortableGameNotationTests

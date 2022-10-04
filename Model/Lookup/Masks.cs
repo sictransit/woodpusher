@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Model.Lookup
         public static readonly Position BlackKingsideRook =
             new(new Piece(PieceType.Rook, PieceColor.Black), BlackKingsideRookStartingSquare.ToSquare());
         public static readonly Position BlackQueensideRook =
-            new(new Piece(PieceType.Rook, PieceColor.Black), BlackQueensideRookStartingSquare.ToSquare());        
-     
+            new(new Piece(PieceType.Rook, PieceColor.Black), BlackQueensideRookStartingSquare.ToSquare());
+
     }
 }

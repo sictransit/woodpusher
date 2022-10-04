@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Model
             Counters = counters;
 
             Moves = moves ?? new Moves();
-            Attacks = attacks ?? new Attacks();            
+            Attacks = attacks ?? new Attacks();
             Scoring = scoring ?? new Scoring();
         }
         public int Hash => HashCode.Combine(Counters.Hash, white.Hash, black.Hash);
