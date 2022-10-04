@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         // pawn
 
-        private static int[] pawnModifiers = new[]
+        private static readonly int[] pawnModifiers = new[]
         {
  0,  0,  0,  0,  0,  0,  0,  0,
 50, 50, 50, 50, 50, 50, 50, 50,
@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
  0,  0,  0,  0,  0,  0,  0,  0
         };
 
-        private static int[] knightModifiers = new[]
+        private static readonly int[] knightModifiers = new[]
         {
 -50,-40,-30,-30,-30,-30,-40,-50,
 -40,-20,  0,  0,  0,  0,-20,-40,
@@ -43,7 +43,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 -50,-40,-30,-30,-30,-30,-40,-50,
         };
 
-        private static int[] bishopModifiers = new[]
+        private static readonly int[] bishopModifiers = new[]
         {
 -20,-10,-10,-10,-10,-10,-10,-20,
 -10,  0,  0,  0,  0,  0,  0,-10,
@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 -20,-10,-10,-10,-10,-10,-10,-20,
         };
 
-        private static int[] rookModifiers = new[]
+        private static readonly int[] rookModifiers = new[]
         {
   0,  0,  0,  0,  0,  0,  0,  0,
   5, 10, 10, 10, 10, 10, 10,  5,
@@ -67,7 +67,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
   0,  0,  0,  5,  5,  0,  0,  0
         };
 
-        private static int[] queenModifiers = new[]
+        private static readonly int[] queenModifiers = new[]
         {
 -20,-10,-10, -5, -5,-10,-10,-20,
 -10,  0,  0,  0,  0,  0,  0,-10,
@@ -79,7 +79,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 -20,-10,-10, -5, -5,-10,-10,-20
         };
 
-        private static int[] kingMiddleGameModifiers = new[]
+        private static readonly int[] kingMiddleGameModifiers = new[]
         {
 -30,-40,-40,-50,-50,-40,-40,-30,
 -30,-40,-40,-50,-50,-40,-40,-30,
@@ -91,7 +91,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
  20, 30, 10,  0,  0, 10, 30, 20
         };
 
-        private static int[] kingEndGameModifiers = new[]
+        private static readonly int[] kingEndGameModifiers = new[]
         {
 -30,-40,-40,-50,-50,-40,-40,-30,
 -30,-40,-40,-50,-50,-40,-40,-30,
@@ -113,7 +113,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             InitializeEvaluations(endGameEvaluations, true);
         }
 
-        private void InitializeEvaluations(Dictionary<Position, int> evaluations, bool endGame)
+        private static void InitializeEvaluations(Dictionary<Position, int> evaluations, bool endGame)
         {
             var pieces = new[] { PieceColor.Black, PieceColor.White }.Select(c => new[] { PieceType.Pawn, PieceType.Rook, PieceType.Knight, PieceType.Bishop, PieceType.Queen, PieceType.King }.Select(t => new Piece(t, c))).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();

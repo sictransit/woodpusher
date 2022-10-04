@@ -1,10 +1,11 @@
-﻿using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Common.Lookup;
+using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
-namespace SicTransit.Woodpusher.Common.Lookup
+namespace SicTransit.Woodpusher.Common
 {
-    public class Masks
+    internal class BoardInternals
     {
         public static readonly ulong WhiteKingsideRookStartingSquare = new Square("h1").ToMask();
         public static readonly ulong WhiteQueensideRookStartingSquare = new Square("a1").ToMask();
@@ -26,5 +27,17 @@ namespace SicTransit.Woodpusher.Common.Lookup
         public static readonly Position BlackQueensideRook =
             new(new Piece(PieceType.Rook, PieceColor.Black), BlackQueensideRookStartingSquare.ToSquare());
 
+        public Attacks Attacks { get; }
+
+        public Scoring Scoring { get; }
+
+        public Moves Moves { get; }
+
+        public BoardInternals()
+        {
+            Attacks = new Attacks();
+            Scoring = new Scoring();
+            Moves = new Moves();
+        }
     }
 }
