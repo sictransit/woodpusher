@@ -2,10 +2,10 @@
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -19,15 +19,13 @@ namespace SicTransit.Woodpusher.Engine
         private CancellationTokenSource cancellationTokenSource = new();
 
         private readonly Stopwatch stopwatch = new();
+
         private volatile int nodeCount;
 
-        private readonly ConcurrentDictionary<int, int> hashTable = new();
+        public const int MATE_SCORE = 1000000;
+        public const int DRAW_SCORE = 0;
 
-        private const int MATE_SCORE = 1000000;
-        private const int WHITE_MATE_SCORE = -MATE_SCORE;
-        private const int BLACK_MATE_SCORE = MATE_SCORE;
-        private const int DRAW_SCORE = 0;
-        private const int MAX_DEPTH = 32;
+        private const int MAX_DEPTH = 16;
 
         public Patzer()
         {
@@ -73,14 +71,12 @@ namespace SicTransit.Woodpusher.Engine
             {
                 Log.Information($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
-                if (!cancellationTokenSource.IsCancellationRequested)
+                if (!cancellationTokenSource.IsCancellationRequested && !Debugger.IsAttached)
                 {
-                    Log.Information($"time is up!");
                     cancellationTokenSource.Cancel();
                 }
             });
 
-            hashTable.Clear();
             nodeCount = 0;
             stopwatch.Restart();
 
@@ -103,35 +99,30 @@ namespace SicTransit.Woodpusher.Engine
                 MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
             };
 
-            var depth = 1;
+            var maxDepth = 1;
 
-            while (!cancellationTokenSource.IsCancellationRequested)
+            while (!cancellationTokenSource.IsCancellationRequested && maxDepth <= MAX_DEPTH)
             {
                 if (nodes.Count <= 1)
                 {
                     break;
                 }
 
-                if (nodes.Any(e => Math.Abs(e.Score - MATE_SCORE) < MAX_DEPTH))
-                {
-                    break;
-                }
-
-                foreach (var chunk in nodes.OrderByDescending(e => e.Score).Chunk(Environment.ProcessorCount))
+                foreach (var chunk in nodes.Where(n => !n.MateIn().HasValue).OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
                 {
                     try
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board.PlayMove(node.Move), depth, int.MinValue, int.MaxValue, cancellationToken) * sign - depth;
+                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -MATE_SCORE * 4, MATE_SCORE * 4, cancellationToken);
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
-                                if (score > node.Score)
-                                {
-                                    node.Score = score;
+                                node.Score = score;
 
-                                    infoCallback?.Invoke($"info depth {depth} nodes {nodeCount} score cp {node.Score} time {stopwatch.ElapsedMilliseconds} pv {node.Move.ToAlgebraicMoveNotation()} nps {nodeCount * 1000 / (1 + stopwatch.ElapsedMilliseconds)}");
+                                if (infoCallback != null)
+                                {
+                                    SendInfo(infoCallback, maxDepth, nodeCount, node, stopwatch.ElapsedMilliseconds, new[] { node.Move });
                                 }
                             }
                         });
@@ -142,44 +133,63 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                depth += 2;
+                maxDepth += 2;
             }
 
-            var bestNodeGroup = nodes.GroupBy(e => e.Score).OrderByDescending(g => g.Key).First().ToArray();
+            var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
 
             var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
 
-            Log.Information($"evaluated {nodeCount} nodes, found: {bestNode}");
+            Log.Debug($"evaluated {nodeCount} nodes, found: {bestNode}");
 
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private int EvaluateBoard(IBoard board, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private static void SendInfo(Action<string> callback, int depth, int nodes, Node node, long time, IEnumerable<Move> line)
         {
+            var preview = string.Join(" ", line.Select(m => m.ToAlgebraicMoveNotation()));
 
+            string score;
+
+            var mateIn = node.MateIn();
+            if (mateIn.HasValue)
+            {
+                score = $"mate {mateIn}";
+            }
+            else
+            {
+                score = $"cp {node.AbsoluteScore}";
+            }
+
+            long nodesPerSecond = time == 0 ? 0 : nodes * 1000 / (1 + time);
+
+            callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
+        }
+
+        private int EvaluateBoard(IBoard board, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        {
             var legalMoves = board.GetLegalMoves();
 
             var maximizing = board.ActiveColor == PieceColor.White;
 
             if (!legalMoves.Any())
             {
-                return board.IsChecked ? maximizing ? WHITE_MATE_SCORE - depth : BLACK_MATE_SCORE + depth : DRAW_SCORE;
+                var mateScore = maximizing ? -MATE_SCORE + depth + 1 : MATE_SCORE - (depth + 1);
+                return board.IsChecked ? mateScore : DRAW_SCORE;
             }
 
-            if (depth == 0 || cancellationToken.IsCancellationRequested)
+            if (depth == maxDepth || cancellationToken.IsCancellationRequested)
             {
                 return board.Score;
             }
 
-            var bestScore = maximizing ? int.MinValue : int.MaxValue;
+            var bestScore = maximizing ? -MATE_SCORE * 2 : MATE_SCORE * 2;
 
             foreach (var move in legalMoves)
             {
                 nodeCount++;
 
-                var newBoard = board.PlayMove(move);
-
-                var score = EvaluateBoard(newBoard, depth - 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.PlayMove(move), maxDepth, depth + 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {

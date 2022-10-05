@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -45,8 +44,8 @@ namespace SicTransit.Woodpusher.Common
                 var whiteEvaluation = GetPositions(PieceColor.White).Sum(p => internals.Scoring.EvaluatePosition(p, white.Queen == 0ul));
                 var blackEvaluation = GetPositions(PieceColor.Black).Sum(p => internals.Scoring.EvaluatePosition(p, black.Queen == 0ul));
 
-                whiteEvaluation += GetPositions(PieceColor.White, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
-                blackEvaluation += GetPositions(PieceColor.Black, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
+                //whiteEvaluation += GetPositions(PieceColor.White, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
+                //blackEvaluation += GetPositions(PieceColor.Black, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
 
                 return whiteEvaluation - blackEvaluation;
             }

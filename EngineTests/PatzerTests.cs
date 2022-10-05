@@ -3,6 +3,7 @@ using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -184,6 +185,56 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.AreEqual("g2g1q", bestmove.Notation);
         }
+
+        [TestMethod]
+        public void NodeEvaluationTest()
+        {
+            var patzer = new Patzer();
+            patzer.Position("7k/8/8/8/8/1p6/B7/7K w - - 0 1");
+
+            var bestmove = patzer.FindBestMove();
+
+            Assert.AreEqual("a2b3", bestmove.Notation);
+        }
+
+        [TestMethod()]
+        public void MateInMovesWinningTest()
+        {
+            var patzer = new Patzer();
+            patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
+
+            var infos = new List<string>();
+
+            Action<string> callback = new(s =>
+            {
+                infos.Add(s);
+                Trace.WriteLine(s);
+            });
+
+            var move = patzer.FindBestMove(5000, callback);
+
+            Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
+        }
+
+        [TestMethod()]
+        public void MateInMovesLosingTest()
+        {
+            var patzer = new Patzer();
+            patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
+
+            var infos = new List<string>();
+
+            Action<string> callback = new(s =>
+            {
+                infos.Add(s);
+                Trace.WriteLine(s);
+            });
+
+            var move = patzer.FindBestMove(5000, callback);
+
+            Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
+        }
+
     }
 
 
