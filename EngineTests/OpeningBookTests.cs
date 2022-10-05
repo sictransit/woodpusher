@@ -1,14 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
-using SicTransit.Woodpusher.Engine;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -18,18 +14,15 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestInitialize]
         public void Initialize()
         {
-            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
-        }
-
-        [TestMethod()]
-        public void OpeningBookTest()
-        {
-            Assert.Fail();
+            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
         }
 
         [TestMethod]
         public void ParseECO()
         {
+            IEngine engine = new Patzer();
+            var openingBook = new OpeningBook();
+
             using var httpClient = new HttpClient();
             foreach (var file in new[] { "a", "b", "c", "d", "e" })
             {
@@ -53,14 +46,36 @@ namespace SicTransit.Woodpusher.Engine.Tests
                         var uci = parts[3];
                         var epd = parts[4];
 
-                        var parsed = PortableGameNotation.Parse(pgn);
+                        var opening = PortableGameNotation.Parse(pgn);
 
-                        Assert.IsTrue(parsed.PgnMoves.Any());
+                        Assert.IsTrue(opening.PgnMoves.Any());
 
-                        Log.Information($"{eco} {name} {pgn} {parsed.PgnMoves.Count}");
+                        Log.Information($"{eco} {name} {pgn} {opening.PgnMoves.Count}");
+
+                        engine.Initialize();
+
+                        foreach (var pgnMove in opening.PgnMoves)
+                        {
+                            var move = pgnMove.GetMove(engine);
+
+                            var hash = engine.Board.GetHash();
+
+                            engine.Play(move);
+
+                            openingBook.AddMove(hash, move);
+                        }
                     }
                 }
             }
+
+            openingBook.SaveToFile("test.json");
+            openingBook.LoadFromFile("test.json");
+
+            var moves = openingBook.GetMoves("AE220C88323102782F94B87DDAD71A60");
+
+            Assert.AreEqual(2, moves.Count());
+            Assert.IsTrue(moves.Any(m => m.Notation.Equals("e7e5")));
+            Assert.IsTrue(moves.Any(m => m.Notation.Equals("d7d5")));
         }
     }
 }

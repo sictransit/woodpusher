@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Numerics;
+using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -33,7 +34,17 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
-        public int Hash => HashCode.Combine(color, Pawn, Rook, Knight, Bishop, Queen, King);
+        public byte[] Hash
+        {
+            get
+            {
+                using var md5 = MD5.Create();
+
+                var bytes = BitConverter.GetBytes(Pawn).Concat(BitConverter.GetBytes(Rook)).Concat(BitConverter.GetBytes(Knight)).Concat(BitConverter.GetBytes(Bishop)).Concat(BitConverter.GetBytes(Queen)).Concat(BitConverter.GetBytes(King)).ToArray();
+
+                return md5.ComputeHash(bytes);
+            }
+        }
 
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
 

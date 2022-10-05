@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Common
 {
@@ -35,7 +36,23 @@ namespace SicTransit.Woodpusher.Common
         {
         }
 
-        public int Hash => HashCode.Combine(Counters.Hash, white.Hash, black.Hash);
+        public string GetHash()
+        {
+            // TODO: This is a really bad idea. We should adapt to e.g. Zobist hashing, but this will have to do for now.
+            return BitConverter.ToString(Hash).Replace("-", "");
+        }
+
+        public byte[] Hash
+        {
+            get
+            {
+                using var md5 = MD5.Create();
+
+                var bytes = white.Hash.Concat(black.Hash).Concat(Counters.Hash).ToArray();
+
+                return md5.ComputeHash(bytes);
+            }
+        }
 
         public int Score
         {
@@ -48,6 +65,23 @@ namespace SicTransit.Woodpusher.Common
                 //blackEvaluation += GetPositions(PieceColor.Black, PieceType.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
 
                 return whiteEvaluation - blackEvaluation;
+            }
+        }
+
+        public IEnumerable<Move> GetOpeningBookMoves()
+        {
+            var moves = internals.OpeningBook.GetMoves(GetHash());
+
+            if (!moves.Any())
+            {
+                yield break;
+            }
+
+            var legalMoves = GetLegalMoves().ToArray();
+
+            foreach (AlgebraicMove algebraicMove in moves)
+            {
+                yield return legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
             }
         }
 

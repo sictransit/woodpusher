@@ -39,7 +39,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            Log.Information($"{Board.ActiveColor} plays: {move}");
+            Log.Debug($"{Board.ActiveColor} plays: {move}");
 
             Board = Board.PlayMove(move);
         }
@@ -82,7 +82,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
 
-            var nodes = Board.GetLegalMoves().Select(m => new Node(m)).ToList();
+            var openingMoves = Board.GetOpeningBookMoves();
+
+            var nodes = (openingMoves.Any() ? openingMoves.OrderBy(_ => Guid.NewGuid().ToString()).Take(1) : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
 
             if (!nodes.Any())
             {
