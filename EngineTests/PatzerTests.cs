@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Engine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
@@ -206,13 +205,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var infos = new List<string>();
 
-            Action<string> callback = new(s => 
+            Action<string> callback = new(s =>
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
             });
 
-            var move = patzer.FindBestMove(10000, callback);
+            var move = patzer.FindBestMove(5000, callback);
 
             Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
         }
@@ -231,7 +230,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 Trace.WriteLine(s);
             });
 
-            var move = patzer.FindBestMove(10000, callback);
+            var move = patzer.FindBestMove(5000, callback);
 
             Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
         }

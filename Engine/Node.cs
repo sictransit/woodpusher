@@ -1,17 +1,15 @@
-﻿using Serilog;
-using SicTransit.Woodpusher.Common.Lookup;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 
 namespace SicTransit.Woodpusher.Engine
 {
-    internal class Node
+    public class Node
     {
         public Node(Move move)
         {
-            Move = move;            
+            Move = move;
             Sign = move.Position.Piece.Color == PieceColor.White ? 1 : -1;
-            Score = -Sign * Patzer.MATE_SCORE*2;
+            Score = -Sign * Patzer.MATE_SCORE * 2;
         }
 
         public Move Move { get; }
@@ -20,20 +18,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public int Sign { get; }
 
-        public void UpdateScoreIfBetter(int score)
-        {
-            if (Sign < 0 && (score < Score))
-            {
-                Score = Math.Min(score, Score);
-
-            }
-            else 
-            {
-                Score = Math.Max(score, Score);
-            }
-        }
-
-        public int AbsoluteScore => Math.Abs(Score);
+        public int AbsoluteScore => Score * Sign;
 
         public override string ToString()
         {
