@@ -62,7 +62,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                             var hash = engine.Board.GetHash();
 
-                            engine.Play(move);                            
+                            engine.Play(move);
 
                             openingBook.AddMove(hash, move);
                         }
@@ -89,7 +89,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             //engine.Initialize();
             var book = new OpeningBook();
 
-            foreach (var notation in "d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5".Split()) 
+            foreach (var notation in "d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5".Split())
             {
                 var algebraicMove = AlgebraicMove.Parse(notation);
 
@@ -97,7 +97,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 var suggestedMoves = book.GetMoves(hash);
 
-                Assert.IsTrue(suggestedMoves.Any(m=>m.Equals(algebraicMove)));
+                Assert.IsTrue(suggestedMoves.Any(m => m.Equals(algebraicMove)));
 
                 var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 

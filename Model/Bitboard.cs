@@ -34,6 +34,14 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
+        public int Phase
+        {
+            get
+            {
+                return BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
+            }
+        }
+
         public byte[] Hash
         {
             get
