@@ -46,10 +46,16 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 return castlingMove!;
             }
 
-            if (TryParseNamedPieceOnFileMove(s, promotionType, out var pieceOnFileMove))
+            if (TryParsePieceOnFileMove(s, promotionType, out var pieceOnFileMove))
             {
                 return pieceOnFileMove!;
             }
+
+            if (TryParsePieceOnRankMove(s, promotionType, out var pieceOnRankMove))
+            {
+                return pieceOnRankMove!;
+            }
+
 
             if (TryParseFileMove(s, promotionType, out var fileMove))
             {
@@ -92,7 +98,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParseNamedPieceOnFileMove(string s, PieceType promotionType, out PieceOnFileMove? move)
+        private static bool TryParsePieceOnFileMove(string s, PieceType promotionType, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -103,6 +109,22 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             if (match.Success)
             {
                 move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), new Square(match.Groups[3].Value), promotionType);
+            }
+
+            return move != default;
+        }
+
+        private static bool TryParsePieceOnRankMove(string s, PieceType promotionType, out PieceOnRankMove? move)
+        {
+            move = default;
+
+            Regex regex = new(@"^([PRNBQK])([1-8])([a-h][1-8])$"); // N1f3
+
+            var match = regex.Match(s);
+
+            if (match.Success)
+            {
+                move = new PieceOnRankMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToRank(), new Square(match.Groups[3].Value), promotionType);
             }
 
             return move != default;

@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
-        private volatile int nodeCount;
+        private long nodeCount;
 
         public const int MATE_SCORE = 1000000;
         public const int DRAW_SCORE = 0;
@@ -39,7 +39,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            Log.Information($"{Board.ActiveColor} plays: {move}");
+            Log.Debug($"{Board.ActiveColor} plays: {move}");
 
             Board = Board.PlayMove(move);
         }
@@ -82,7 +82,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
 
-            var nodes = Board.GetLegalMoves().Select(m => new Node(m)).ToList();
+            var openingMoves = Board.GetOpeningBookMoves();
+
+            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
 
             if (!nodes.Any())
             {
@@ -145,7 +147,7 @@ namespace SicTransit.Woodpusher.Engine
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private static void SendInfo(Action<string> callback, int depth, int nodes, Node node, long time, IEnumerable<Move> line)
+        private static void SendInfo(Action<string> callback, int depth, long nodes, Node node, long time, IEnumerable<Move> line)
         {
             var preview = string.Join(" ", line.Select(m => m.ToAlgebraicMoveNotation()));
 
@@ -161,7 +163,7 @@ namespace SicTransit.Woodpusher.Engine
                 score = $"cp {node.AbsoluteScore}";
             }
 
-            long nodesPerSecond = time == 0 ? 0 : nodes * 1000 / (1 + time);
+            long nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
             callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }

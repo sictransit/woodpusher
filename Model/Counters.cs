@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
+using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -28,6 +29,16 @@ namespace SicTransit.Woodpusher.Model
 
         public static Counters Default => new(PieceColor.White, Castlings.Kingside | Castlings.Queenside, Castlings.Kingside | Castlings.Queenside, 0, 0, 0);
 
-        public int Hash => HashCode.Combine(ActiveColor, WhiteCastlings, BlackCastlings, EnPassantTarget);
+        public byte[] Hash
+        {
+            get
+            {
+                using var md5 = MD5.Create();
+
+                var bytes = BitConverter.GetBytes((int)ActiveColor).Concat(BitConverter.GetBytes((int)WhiteCastlings)).Concat(BitConverter.GetBytes((int)BlackCastlings)).Concat(BitConverter.GetBytes(EnPassantTarget)).ToArray();
+
+                return md5.ComputeHash(bytes);
+            }
+        }
     }
 }
