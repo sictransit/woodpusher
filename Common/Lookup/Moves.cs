@@ -30,7 +30,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
                 foreach (var target in squares)
                 {
-                    travelMasks[square].Add(target, square.ToSquare().ToTravelMask(target.ToSquare()));
+                    
+                    travelMasks[square].Add(target, square.ToSquare().ToTravelPath(target.ToSquare()).ToMask());
                 }
             }
         }

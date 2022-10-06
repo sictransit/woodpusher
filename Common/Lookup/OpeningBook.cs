@@ -11,7 +11,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private Dictionary<string, HashSet<string>> book = new();
 
-        private static string bookFilename = Path.Combine(@"Resources\eco.json");
+        private static readonly string bookFilename = Path.Combine(@"Resources\eco.json");
 
         public OpeningBook()
         {
