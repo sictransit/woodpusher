@@ -84,7 +84,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var openingMoves = Board.GetOpeningBookMoves();
 
-            var nodes = (openingMoves.Any() ? openingMoves.OrderBy(_ => Guid.NewGuid().ToString()).Take(1) : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
+            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
 
             if (!nodes.Any())
             {

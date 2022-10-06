@@ -4,6 +4,7 @@ using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Model;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -17,6 +18,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
         }
 
+        [Ignore("external content")]
         [TestMethod]
         public void ParseECO()
         {
@@ -60,7 +62,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                             var hash = engine.Board.GetHash();
 
-                            engine.Play(move);
+                            engine.Play(move);                            
 
                             openingBook.AddMove(hash, move);
                         }
@@ -76,6 +78,33 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.AreEqual(2, moves.Count());
             Assert.IsTrue(moves.Any(m => m.Notation.Equals("e7e5")));
             Assert.IsTrue(moves.Any(m => m.Notation.Equals("d7d5")));
+        }
+
+        [TestMethod]
+        public void GrünfeldDefenseCounterthrustVariation()
+        {
+            // E60 Grünfeld Defense: Counterthrust Variation d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5
+
+            IEngine engine = new Patzer();
+            //engine.Initialize();
+            var book = new OpeningBook();
+
+            foreach (var notation in "d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5".Split()) 
+            {
+                var algebraicMove = AlgebraicMove.Parse(notation);
+
+                var hash = engine.Board.GetHash();
+
+                var suggestedMoves = book.GetMoves(hash);
+
+                Assert.IsTrue(suggestedMoves.Any(m=>m.Equals(algebraicMove)));
+
+                var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+
+                Assert.IsNotNull(move);
+
+                engine.Play(move);
+            }
         }
     }
 }

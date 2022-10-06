@@ -45,9 +45,24 @@ namespace SicTransit.Woodpusher.Model
             throw new ArgumentException($"unable to parse: {notation}", nameof(notation));
         }
 
+
+
         public override string ToString()
         {
             return Notation;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is AlgebraicMove move &&
+                   EqualityComparer<Square>.Default.Equals(From, move.From) &&
+                   EqualityComparer<Square>.Default.Equals(To, move.To) &&
+                   Promotion == move.Promotion;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(From, To, Promotion);
         }
     }
 }
