@@ -27,6 +27,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex WhiteTimeRegex = new(@"wtime (\d+)", RegexOptions.Compiled);
         private static readonly Regex BlackTimeRegex = new(@"btime (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
+        private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
 
         private volatile IEngine engine;
 
@@ -180,6 +181,7 @@ namespace SicTransit.Woodpusher
 
         private Task Go(string command)
         {
+            const int latency = 100;
             return Task.Run(() =>
             {
                 lock (engine)
@@ -187,18 +189,23 @@ namespace SicTransit.Woodpusher
                     var movesToGoMatch = MovesToGoRegex.Match(command);
                     var whiteTimeMatch = WhiteTimeRegex.Match(command);
                     var blackTimeMatch = BlackTimeRegex.Match(command);
+                    var movetimeMatch = MovetimeRegex.Match(command);
 
-                    var timeLimit = 5000;
+                    var timeLimit = 10000;
 
-                    if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
+                    if (movetimeMatch.Success)
+                    {
+                        timeLimit = int.Parse(movetimeMatch.Groups[1].Value) - latency;
+                    }
+                    else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
                     {
                         var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.PieceColor.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
                         var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
-                        timeLimit = Math.Min(timeLimit, timeLeft / (movesToGo + 1));
+                        timeLimit = Math.Min(timeLimit, (timeLeft / movesToGo) - latency);
                     }
 
-                    var move = engine.FindBestMove(timeLimit, s => consoleOutput(s));
+                    var move = engine.FindBestMove(Math.Max(0, timeLimit), s => consoleOutput(s));
 
                     consoleOutput($"bestmove {move.Notation}");
                 }

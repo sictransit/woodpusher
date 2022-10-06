@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Extensions;
 using System.Numerics;
 using System.Security.Cryptography;
 
@@ -96,55 +95,26 @@ namespace SicTransit.Woodpusher.Model
         {
             foreach (var pieceType in new[] { PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King })
             {
-                var bitmap = GetBitmap(pieceType);
-
-                while (bitmap != 0ul)
+                foreach (var position in GetPieces(pieceType))
                 {
-                    var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
-
-                    bitmap &= ~bit;
-
-                    yield return new Position(new Piece(pieceType, color), bit);
+                    yield return position;
                 }
             }
         }
 
-        public IEnumerable<Position> GetPieces(PieceType type)
-        {
-            var bitmap = GetBitmap(type);
-
-            for (var shift = 0; shift < 64; shift++)
-            {
-                var mask = 1ul << shift;
-
-                if ((bitmap & mask) != 0)
-                {
-                    yield return new Position(new Piece(type, color), mask);
-                }
-            }
-        }
+        public IEnumerable<Position> GetPieces(PieceType type) => GetPieces(type, ulong.MaxValue);
 
         public IEnumerable<Position> GetPieces(PieceType type, ulong mask)
         {
-            var bitmap = GetBitmap(type);
+            var bitmap = GetBitmap(type) & mask;
 
-            var colour = this.color;
-
-            return (bitmap & mask).ToSquares().Select(s => new Position(new Piece(type, colour), s));
-        }
-
-        public IEnumerable<Position> GetPieces(PieceType type, int file)
-        {
-            var bitmap = GetBitmap(type);
-
-            for (var shift = file; shift < 64; shift += 8)
+            while (bitmap != 0ul)
             {
-                var mask = 1ul << shift;
+                var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
 
-                if ((bitmap & mask) != 0)
-                {
-                    yield return new Position(new Piece(type, color), mask);
-                }
+                bitmap &= ~bit;
+
+                yield return new Position(new Piece(type, color), bit);
             }
         }
 
