@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializeTravelMasks()
         {
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r).ToMask())).SelectMany(x => x).ToArray();
+            var squares = Enumerable.Range(0, 64).Select(shift => 1ul << shift);
 
             foreach (var square in squares)
             {

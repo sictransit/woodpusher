@@ -43,6 +43,6 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return p.Color == PieceColor.White ? c : char.ToLowerInvariant(c);
         }
 
-        public static PieceColor OpponentColour(this PieceColor p) => p == PieceColor.White ? PieceColor.Black : PieceColor.White;
+        public static PieceColor OpponentColor(this PieceColor p) => p == PieceColor.White ? PieceColor.Black : PieceColor.White;
     }
 }

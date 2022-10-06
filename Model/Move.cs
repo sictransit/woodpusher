@@ -11,6 +11,7 @@ namespace SicTransit.Woodpusher.Model
             Target = target;
             Flags = flags;
             EnPassantTarget = enPassantTarget;
+            EnPassantMask = enPassantTarget == 0 ? 0 : Position.Piece.Color == PieceColor.White ? enPassantTarget.AddFileAndRank(0, -1) : enPassantTarget.AddFileAndRank(0, 1);
             CastlingCheckMask = castlingCheckMask;
             CastlingEmptySquaresMask = castlingEmptyMask;
             PromotionType = promotionType;
@@ -35,6 +36,8 @@ namespace SicTransit.Woodpusher.Model
         public PieceType PromotionType { get; }
 
         public ulong EnPassantTarget { get; }
+
+        public ulong EnPassantMask { get; }
 
         public override string ToString()
         {
