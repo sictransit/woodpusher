@@ -110,7 +110,12 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                foreach (var chunk in nodes.Where(n => !n.MateIn().HasValue).OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
+                if (nodes.Any(n => n.MateIn().HasValue && n.MateIn() > 0))
+                {
+                    break;
+                }
+
+                foreach (var chunk in nodes.OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
                 {
                     try
                     {
