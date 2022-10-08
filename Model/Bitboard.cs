@@ -12,28 +12,34 @@ namespace SicTransit.Woodpusher.Model
         public Bitboard(PieceColor color, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
         {
             this.color = color;
-            Pawn = pawn;
-            Rook = rook;
-            Knight = knight;
-            Bishop = bishop;
-            Queen = queen;
-            King = king;
+            this.pawn = pawn;
+            this.rook = rook;
+            this.knight = knight;
+            this.bishop = bishop;
+            this.queen = queen;
+            this.king = king;
 
-            All = Pawn | Rook | Knight | Bishop | Queen | King;
+            all = pawn | rook | knight | bishop |queen | king;
         }
 
         private readonly PieceColor color;
 
-        public ulong All { get; }
+        private readonly ulong all;
 
-        public ulong Pawn { get; }
-        public ulong Rook { get; }
-        public ulong Knight { get; }
-        public ulong Bishop { get; }
-        public ulong Queen { get; }
-        public ulong King { get; }
+        private readonly ulong pawn;
+        private readonly ulong rook;
+        private readonly ulong knight;
+        private readonly ulong bishop;
+        private readonly ulong queen;
+        private readonly ulong king;
 
-        public int Phase => BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
+        public int Phase => BitOperations.PopCount(knight) + BitOperations.PopCount(bishop) + 2 * BitOperations.PopCount(rook) + 4 * BitOperations.PopCount(queen);
+
+        public ulong All => all;
+
+        public ulong King => king;
+
+        public ulong Pawn => pawn;
 
         public byte[] Hash
         {
@@ -41,13 +47,13 @@ namespace SicTransit.Woodpusher.Model
             {
                 using var md5 = MD5.Create();
 
-                var bytes = BitConverter.GetBytes(Pawn).Concat(BitConverter.GetBytes(Rook)).Concat(BitConverter.GetBytes(Knight)).Concat(BitConverter.GetBytes(Bishop)).Concat(BitConverter.GetBytes(Queen)).Concat(BitConverter.GetBytes(King)).ToArray();
+                var bytes = BitConverter.GetBytes(pawn).Concat(BitConverter.GetBytes(rook)).Concat(BitConverter.GetBytes(knight)).Concat(BitConverter.GetBytes(bishop)).Concat(BitConverter.GetBytes(queen)).Concat(BitConverter.GetBytes(king)).ToArray();
 
                 return md5.ComputeHash(bytes);
             }
         }
 
-        public bool IsOccupied(ulong mask) => (All & mask) != 0;
+        public bool IsOccupied(ulong mask) => (all & mask) != 0;
 
         public Bitboard Add(PieceType pieceType, ulong mask) => Toggle(pieceType, mask);
 
@@ -57,12 +63,12 @@ namespace SicTransit.Woodpusher.Model
 
         private ulong GetBitmap(PieceType pieceType) => pieceType switch
         {
-            PieceType.Pawn => Pawn,
-            PieceType.Knight => Knight,
-            PieceType.Bishop => Bishop,
-            PieceType.Rook => Rook,
-            PieceType.Queen => Queen,
-            PieceType.King => King,
+            PieceType.Pawn => pawn,
+            PieceType.Knight => knight,
+            PieceType.Bishop => bishop,
+            PieceType.Rook => rook,
+            PieceType.Queen => queen,
+            PieceType.King => king,
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
 
@@ -95,32 +101,32 @@ namespace SicTransit.Woodpusher.Model
 
         public PieceType Peek(ulong mask)
         {
-            if ((All & mask) == 0)
+            if ((all & mask) == 0)
             {
                 return PieceType.None;
             }
 
-            if ((Pawn & mask) != 0)
+            if ((pawn & mask) != 0)
             {
                 return PieceType.Pawn;
             }
 
-            if ((Rook & mask) != 0)
+            if ((rook & mask) != 0)
             {
                 return PieceType.Rook;
             }
 
-            if ((Knight & mask) != 0)
+            if ((knight & mask) != 0)
             {
                 return PieceType.Knight;
             }
 
-            if ((Bishop & mask) != 0)
+            if ((bishop & mask) != 0)
             {
                 return PieceType.Bishop;
             }
 
-            if ((Queen & mask) != 0)
+            if ((queen & mask) != 0)
             {
                 return PieceType.Queen;
             }
@@ -130,12 +136,12 @@ namespace SicTransit.Woodpusher.Model
 
         private Bitboard Toggle(PieceType pieceType, ulong mask) => pieceType switch
         {
-            PieceType.Pawn => new Bitboard(color, Pawn ^ mask, Rook, Knight, Bishop, Queen, King),
-            PieceType.Rook => new Bitboard(color, Pawn, Rook ^ mask, Knight, Bishop, Queen, King),
-            PieceType.Knight => new Bitboard(color, Pawn, Rook, Knight ^ mask, Bishop, Queen, King),
-            PieceType.Bishop => new Bitboard(color, Pawn, Rook, Knight, Bishop ^ mask, Queen, King),
-            PieceType.Queen => new Bitboard(color, Pawn, Rook, Knight, Bishop, Queen ^ mask, King),
-            PieceType.King => new Bitboard(color, Pawn, Rook, Knight, Bishop, Queen, King ^ mask),
+            PieceType.Pawn => new Bitboard(color, pawn ^ mask, rook, knight, bishop, queen, king),
+            PieceType.Rook => new Bitboard(color, pawn, rook ^ mask, knight, bishop, queen, king),
+            PieceType.Knight => new Bitboard(color, pawn, rook, knight ^ mask, bishop, queen, king),
+            PieceType.Bishop => new Bitboard(color, pawn, rook, knight, bishop ^ mask, queen, king),
+            PieceType.Queen => new Bitboard(color, pawn, rook, knight, bishop, queen ^ mask, king),
+            PieceType.King => new Bitboard(color, pawn, rook, knight, bishop, queen, king ^ mask),
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
     }
