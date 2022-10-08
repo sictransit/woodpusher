@@ -9,9 +9,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard PlayMove(Move move);
 
-        string GetHash();
-
-        bool IsOccupied(ulong mask, PieceColor color);
+        string GetHash();        
 
         bool IsPassedPawn(Position position);
 
