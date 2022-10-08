@@ -93,9 +93,9 @@ namespace SicTransit.Woodpusher.Model
             {
                 var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
 
-                bitmap &= ~bit;
-
                 yield return new Position(new Piece(type, color), bit);
+
+                bitmap &= ~bit;
             }
         }
 
