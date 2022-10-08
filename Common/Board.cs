@@ -227,13 +227,13 @@ namespace SicTransit.Woodpusher.Common
 
         private ulong FindKing(PieceColor color) => GetBitboard(color).King;
 
-        public IEnumerable<Position> GetPositions() => white.GetPieces().Concat(black.GetPieces());
+        public IEnumerable<Position> GetPositions() => white.GetPositions().Concat(black.GetPositions());
 
-        public IEnumerable<Position> GetPositions(PieceColor pieceColor) => GetBitboard(pieceColor).GetPieces();
+        public IEnumerable<Position> GetPositions(PieceColor pieceColor) => GetBitboard(pieceColor).GetPositions();
 
-        public IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
+        public IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType) => GetBitboard(pieceColor).GetPositions(pieceType);
 
-        private IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
+        private IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType, ulong mask) => GetBitboard(pieceColor).GetPositions(pieceType, mask);
 
         public IEnumerable<Position> GetAttackers(ulong target, PieceColor color)
         {
@@ -359,8 +359,7 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
             }
-
-            if (move.Position.Piece.Type == PieceType.King)
+            else if (move.Position.Piece.Type == PieceType.King)
             {
                 if (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing))
                 {

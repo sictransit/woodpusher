@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Model
             this.queen = queen;
             this.king = king;
 
-            all = pawn | rook | knight | bishop |queen | king;
+            all = pawn | rook | knight | bishop | queen | king;
         }
 
         private readonly PieceColor color;
@@ -72,20 +72,20 @@ namespace SicTransit.Woodpusher.Model
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
 
-        public IEnumerable<Position> GetPieces()
+        public IEnumerable<Position> GetPositions()
         {
             foreach (var pieceType in new[] { PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King })
             {
-                foreach (var position in GetPieces(pieceType))
+                foreach (var position in GetPositions(pieceType))
                 {
                     yield return position;
                 }
             }
         }
 
-        public IEnumerable<Position> GetPieces(PieceType type) => GetPieces(type, ulong.MaxValue);
+        public IEnumerable<Position> GetPositions(PieceType type) => GetPositions(type, ulong.MaxValue);
 
-        public IEnumerable<Position> GetPieces(PieceType type, ulong mask)
+        public IEnumerable<Position> GetPositions(PieceType type, ulong mask)
         {
             var bitmap = GetBitmap(type) & mask;
 
