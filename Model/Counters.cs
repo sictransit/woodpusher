@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Model
 {
-    public readonly struct Counters
+    public class Counters
     {
         public PieceColor ActiveColor { get; }
 

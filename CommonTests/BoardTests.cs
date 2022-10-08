@@ -41,19 +41,6 @@ namespace SicTransit.Woodpusher.Common.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void OccupiedSquareTest()
-        {
-            IBoard board = new Board();
-
-            var e1 = new Square("e1");
-            var whiteKing = new Piece(PieceType.King, PieceColor.White);
-
-            board = board.SetPosition(new Position(whiteKing, e1));
-            board.SetPosition(new Position(whiteKing, e1));
-        }
-
-        [TestMethod]
         public void FillTest()
         {
             IBoard board = new Board();

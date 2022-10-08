@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard PlayMove(Move move);
 
-        string GetHash();        
+        string GetHash();
 
         bool IsPassedPawn(Position position);
 

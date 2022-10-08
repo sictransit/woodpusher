@@ -33,13 +33,7 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
-        public int Phase
-        {
-            get
-            {
-                return BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
-            }
-        }
+        public int Phase => BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
 
         public byte[] Hash
         {
@@ -55,30 +49,11 @@ namespace SicTransit.Woodpusher.Model
 
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
-        public Bitboard Add(PieceType pieceType, ulong mask)
-        {
-            if ((All & mask) != 0)
-            {
-                throw new InvalidOperationException("That square is already occupied.");
-            }
+        public Bitboard Add(PieceType pieceType, ulong mask) => Toggle(pieceType, mask);
 
-            return Toggle(pieceType, mask);
-        }
+        public Bitboard Remove(PieceType pieceType, ulong mask) => Toggle(pieceType, mask);
 
-        public Bitboard Remove(PieceType pieceType, ulong mask)
-        {
-            if ((All & mask) == 0)
-            {
-                throw new InvalidOperationException("There is no piece on that square.");
-            }
-
-            return Toggle(pieceType, mask);
-        }
-
-        public Bitboard Move(PieceType pieceType, ulong from, ulong to)
-        {
-            return Toggle(pieceType, from | to);
-        }
+        public Bitboard Move(PieceType pieceType, ulong from, ulong to) => Toggle(pieceType, from | to);
 
         private ulong GetBitmap(PieceType pieceType) => pieceType switch
         {

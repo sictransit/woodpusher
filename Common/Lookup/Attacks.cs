@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                     var knightMask = KnightMovement.GetTargetVectors(new Position(new Piece(PieceType.Knight, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
                     var rookMask = RookMovement.GetTargetVectors(new Position(new Piece(PieceType.Rook, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
                     var kingMask = KingMovement.GetTargetVectors(new Position(new Piece(PieceType.King, color.OpponentColor()), square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    
+
                     var pawnMask = 0ul;
 
                     switch (color)
