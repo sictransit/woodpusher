@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
     public class Moves
     {
         private readonly Dictionary<Position, IReadOnlyCollection<Move[]>> vectors = new();
-        private readonly Dictionary<ulong, Dictionary<ulong, ulong>> travelMasks = new();
+        private readonly Dictionary<ulong, ulong> travelMasks = new();
         private readonly Dictionary<Position, ulong> passedPawnMasks = new();
 
         public Moves()
@@ -26,12 +26,13 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
             foreach (var square in squares)
             {
-                travelMasks.Add(square, new Dictionary<ulong, ulong>());
-
                 foreach (var target in squares)
                 {
-
-                    travelMasks[square].Add(target, square.ToSquare().ToTravelPath(target.ToSquare()).ToMask());
+                    var mask = square | target;
+                    if (!travelMasks.ContainsKey(mask))
+                    {
+                        travelMasks.Add(mask, square.ToSquare().ToTravelPath(target.ToSquare()).ToMask());
+                    }
                 }
             }
         }
@@ -65,7 +66,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
         }
 
-        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current][target];
+        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current| target];
 
         public ulong GetPassedPawnMask(Position position) => passedPawnMasks[position];
 
