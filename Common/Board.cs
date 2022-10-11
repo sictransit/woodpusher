@@ -227,8 +227,6 @@ namespace SicTransit.Woodpusher.Common
 
         private ulong FindKing(PieceColor color) => GetBitboard(color).King;
 
-        public IEnumerable<Position> GetPositions() => white.GetPositions().Concat(black.GetPositions());
-
         public IEnumerable<Position> GetPositions(PieceColor pieceColor) => GetBitboard(pieceColor).GetPositions();
 
         public IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType) => GetBitboard(pieceColor).GetPositions(pieceType);

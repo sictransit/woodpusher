@@ -19,8 +19,6 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IEnumerable<Move> GetLegalMoves(Position position);
 
-        IEnumerable<Position> GetPositions();
-
         IEnumerable<Position> GetPositions(PieceColor pieceColor);
 
         IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType);

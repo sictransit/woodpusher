@@ -66,7 +66,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
         }
 
-        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current| target];
+        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current | target];
 
         public ulong GetPassedPawnMask(Position position) => passedPawnMasks[position];
 

@@ -57,7 +57,7 @@ namespace SicTransit.Woodpusher.Common.Tests
                 }
             }
 
-            Assert.AreEqual(64, board.GetPositions().Count(p => p.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(64, board.GetPositions(PieceColor.White).Count(p => p.Piece.Type == PieceType.Pawn));
         }
 
         [TestMethod]
