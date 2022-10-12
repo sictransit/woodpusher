@@ -1,32 +1,32 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Model.Tests.Extensions
 {
-    [TestClass()]
+    [TestClass]
     public class PiecesExtensionsTests
     {
-        [TestMethod()]
-        public void SetMaskTest()
+        [TestMethod]
+        public void SetGetMaskTest()
         {
-            Assert.Fail();
+            var mask = 1ul;
+
+            var piece = (Pieces.White | Pieces.Queen).SetMask(mask);
+
+            Assert.IsTrue(piece.HasFlag(Pieces.White) && piece.HasFlag(Pieces.Queen));
+
+            Assert.AreEqual(mask, piece.GetMask());
         }
 
-        [TestMethod()]
-        public void GetMaskTest()
+        [TestMethod]
+        public void SetGetPieceTest()
         {
-            Assert.Fail();
-        }
+            var mask = 1ul;
 
-        [TestMethod()]
-        public void SetPieceTest()
-        {
-            Assert.Fail();
-        }
+            var piece = Pieces.None.SetMask(mask).SetPiece(Pieces.Queen | Pieces.White);
 
-        [TestMethod()]
-        public void GetPieceTest()
-        {
-            Assert.Fail();
+            Assert.AreEqual(Pieces.White | Pieces.Queen, piece.GetPiece());
         }
     }
 }
