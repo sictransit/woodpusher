@@ -60,11 +60,11 @@ namespace SicTransit.Woodpusher.Common
             {
                 var phase = white.Phase + black.Phase;
 
-                var whiteEvaluation = GetPositions(Pieces.White).Sum(p => internals.Scoring.EvaluatePosition(p, phase));
-                var blackEvaluation = GetPositions(Pieces.None).Sum(p => internals.Scoring.EvaluatePosition(p, phase));
+                var whiteEvaluation = GetPieces(Pieces.White).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
+                var blackEvaluation = GetPieces(Pieces.None).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
 
-                //whiteEvaluation += GetPositions(Pieces.White, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
-                //blackEvaluation += GetPositions(Pieces.Black, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
+                //whiteEvaluation += GetPieces(Pieces.White, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
+                //blackEvaluation += GetPieces(Pieces.Black, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
 
                 return whiteEvaluation - blackEvaluation;
             }
@@ -89,7 +89,7 @@ namespace SicTransit.Woodpusher.Common
 
         public bool IsPassedPawn(Pieces piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
-        public IBoard SetPosition(Pieces piece) => piece.Is(Pieces.White)
+        public IBoard SetPiece(Pieces piece) => piece.Is(Pieces.White)
                 ? new Board(white.Add(piece), black, Counters, internals)
                 : (IBoard)new Board(white, black.Add(piece), Counters, internals);
 
@@ -224,11 +224,11 @@ namespace SicTransit.Woodpusher.Common
 
         private ulong FindKing(Pieces color) => GetBitboard(color).King;
 
-        public IEnumerable<Pieces> GetPositions(Pieces pieceColor) => GetBitboard(pieceColor).GetPositions();
+        public IEnumerable<Pieces> GetPieces(Pieces pieceColor) => GetBitboard(pieceColor).GetPieces();
 
-        public IEnumerable<Pieces> GetPositions(Pieces pieceColor, Pieces pieceType) => GetBitboard(pieceColor).GetPositions(pieceType);
+        public IEnumerable<Pieces> GetPieces(Pieces pieceColor, Pieces pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
 
-        private IEnumerable<Pieces> GetPositions(Pieces pieceColor, Pieces pieceType, ulong mask) => GetBitboard(pieceColor).GetPositions(pieceType, mask);
+        private IEnumerable<Pieces> GetPieces(Pieces pieceColor, Pieces pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
 
         public IEnumerable<Pieces> GetAttackers(ulong target, Pieces color)
         {
@@ -236,7 +236,7 @@ namespace SicTransit.Woodpusher.Common
 
             var opponentColor = color.OpponentColor();
 
-            foreach (var queen in GetPositions(opponentColor, Pieces.Queen, threatMask.QueenMask))
+            foreach (var queen in GetPieces(opponentColor, Pieces.Queen, threatMask.QueenMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
                 {
@@ -244,7 +244,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var rook in GetPositions(opponentColor, Pieces.Rook, threatMask.RookMask))
+            foreach (var rook in GetPieces(opponentColor, Pieces.Rook, threatMask.RookMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
                 {
@@ -252,7 +252,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var bishop in GetPositions(opponentColor, Pieces.Bishop, threatMask.BishopMask))
+            foreach (var bishop in GetPieces(opponentColor, Pieces.Bishop, threatMask.BishopMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
                 {
@@ -260,7 +260,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var pawn in GetPositions(opponentColor, Pieces.Pawn, threatMask.PawnMask))
+            foreach (var pawn in GetPieces(opponentColor, Pieces.Pawn, threatMask.PawnMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(pawn.GetMask(), target)))
                 {
@@ -268,7 +268,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var knight in GetPositions(opponentColor, Pieces.Knight, threatMask.KnightMask))
+            foreach (var knight in GetPieces(opponentColor, Pieces.Knight, threatMask.KnightMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(knight.GetMask(), target)))
                 {
@@ -276,7 +276,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var king in GetPositions(opponentColor, Pieces.King, threatMask.KingMask))
+            foreach (var king in GetPieces(opponentColor, Pieces.King, threatMask.KingMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(king.GetMask(), target)))
                 {
@@ -287,7 +287,7 @@ namespace SicTransit.Woodpusher.Common
 
         public IEnumerable<Move> GetLegalMoves()
         {
-            foreach (var piece in GetPositions(ActiveColor))
+            foreach (var piece in GetPieces(ActiveColor))
             {
                 foreach (var move in GetLegalMoves(piece))
                 {

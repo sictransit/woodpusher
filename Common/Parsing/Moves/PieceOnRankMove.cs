@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
         {
             var board = engine.Board;
 
-            var pieces = board.GetPositions(board.ActiveColor, pieceType);
+            var pieces = board.GetPieces(board.ActiveColor, pieceType);
 
             foreach (var piece in pieces.Where(p => p.GetSquare().Rank == rank))
             {

@@ -19,11 +19,11 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IEnumerable<Move> GetLegalMoves(Pieces piece);
 
-        IEnumerable<Pieces> GetPositions(Pieces pieceColor);
+        IEnumerable<Pieces> GetPieces(Pieces pieceColor);
 
-        IEnumerable<Pieces> GetPositions(Pieces pieceColor, Pieces pieceType);
+        IEnumerable<Pieces> GetPieces(Pieces pieceColor, Pieces pieceType);
 
-        IBoard SetPosition(Pieces piece);
+        IBoard SetPiece(Pieces piece);
 
         IEnumerable<Pieces> GetAttackers(ulong square, Pieces color);
 

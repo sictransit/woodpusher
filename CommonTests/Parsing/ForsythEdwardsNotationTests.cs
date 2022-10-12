@@ -38,8 +38,8 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
             Assert.AreEqual(Castlings.None, board.Counters.BlackCastlings);
             Assert.AreEqual(new Square("a3").ToMask(), board.Counters.EnPassantTarget);
 
-            var whiteQueens = board.GetPositions(Pieces.White, Pieces.Queen);
-            var blackRooks = board.GetPositions(Pieces.None, Pieces.Rook);
+            var whiteQueens = board.GetPieces(Pieces.White, Pieces.Queen);
+            var blackRooks = board.GetPieces(Pieces.None, Pieces.Rook);
             Assert.IsTrue(whiteQueens.Any(p => p.GetSquare().Equals(new Square("c7"))));
             Assert.IsTrue(blackRooks.Any(p => p.GetSquare().Equals(new Square("h5"))));
             Assert.AreEqual(0, board.Counters.HalfmoveClock);

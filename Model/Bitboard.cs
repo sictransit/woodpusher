@@ -75,20 +75,20 @@ namespace SicTransit.Woodpusher.Model
 
         private static readonly Pieces[] PieceTypes = { Pieces.Pawn, Pieces.Knight, Pieces.Bishop, Pieces.Rook, Pieces.Queen, Pieces.King };
 
-        public IEnumerable<Pieces> GetPositions()
+        public IEnumerable<Pieces> GetPieces()
         {
             foreach (var pieceType in PieceTypes)
             {
-                foreach (var piece in GetPositions(pieceType))
+                foreach (var piece in GetPieces(pieceType))
                 {
                     yield return piece;
                 }
             }
         }
 
-        public IEnumerable<Pieces> GetPositions(Pieces type) => GetPositions(type, ulong.MaxValue);
+        public IEnumerable<Pieces> GetPieces(Pieces type) => GetPieces(type, ulong.MaxValue);
 
-        public IEnumerable<Pieces> GetPositions(Pieces type, ulong mask)
+        public IEnumerable<Pieces> GetPieces(Pieces type, ulong mask)
         {
             var bitmap = GetBitmap(type) & mask;
 
