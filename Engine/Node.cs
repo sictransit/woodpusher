@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Engine
         public Node(Move move)
         {
             Move = move;
-            Sign = move.Piece.Is(Pieces.White) ? 1 : -1;
+            Sign = move.Piece.Is(Piece.White) ? 1 : -1;
             Score = -Sign * Scoring.MateScore * 2;
         }
 

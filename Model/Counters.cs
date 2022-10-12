@@ -5,7 +5,7 @@ namespace SicTransit.Woodpusher.Model
 {
     public class Counters
     {
-        public Pieces ActiveColor { get; }
+        public Piece ActiveColor { get; }
 
         public Castlings WhiteCastlings { get; }
 
@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Model
 
         public int FullmoveNumber { get; }
 
-        public Counters(Pieces activeColor, Castlings whiteCastlings, Castlings blackCastlings, ulong enPassantTarget, int halfmoveClock, int fullmoveNumber)
+        public Counters(Piece activeColor, Castlings whiteCastlings, Castlings blackCastlings, ulong enPassantTarget, int halfmoveClock, int fullmoveNumber)
         {
             ActiveColor = activeColor;
             WhiteCastlings = whiteCastlings;
@@ -27,7 +27,7 @@ namespace SicTransit.Woodpusher.Model
             FullmoveNumber = fullmoveNumber;
         }
 
-        public static Counters Default => new(Pieces.White, Castlings.Kingside | Castlings.Queenside, Castlings.Kingside | Castlings.Queenside, 0, 0, 0);
+        public static Counters Default => new(Piece.White, Castlings.Kingside | Castlings.Queenside, Castlings.Kingside | Castlings.Queenside, 0, 0, 0);
 
         public byte[] Hash
         {

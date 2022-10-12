@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class BishopMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces piece)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Piece piece)
         {
             var square = piece.GetSquare();
 

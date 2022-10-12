@@ -29,8 +29,8 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var activeColor = ParseActiveColour(parts[1]);
 
-            var whiteCastling = ParseCastling(parts[2], Pieces.White);
-            var blackCastling = ParseCastling(parts[2], Pieces.None);
+            var whiteCastling = ParseCastling(parts[2], Piece.White);
+            var blackCastling = ParseCastling(parts[2], Piece.None);
 
             var enPassantTarget = ParseEnPassantTarget(parts[3]);
 
@@ -56,8 +56,8 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var rank = 7;
 
-            Bitboard white = new(Pieces.White);
-            Bitboard black = new(Pieces.None);
+            Bitboard white = new(Piece.White);
+            Bitboard black = new(Piece.None);
 
             foreach (var part in parts)
             {
@@ -75,7 +75,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
                         var piece = c.ToPiece();
 
-                        if (piece.Is(Pieces.White))
+                        if (piece.Is(Piece.White))
                         {
                             white = white.Add(piece.SetSquare(square));
                         }
@@ -111,7 +111,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             return new Square(s);
         }
 
-        private static Pieces ParseActiveColour(string s)
+        private static Piece ParseActiveColour(string s)
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
@@ -120,12 +120,12 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             return s.Single() switch
             {
-                'w' => Pieces.White,
-                _ => Pieces.None,
+                'w' => Piece.White,
+                _ => Piece.None,
             };
         }
 
-        private static Castlings ParseCastling(string s, Pieces pieceColor)
+        private static Castlings ParseCastling(string s, Piece pieceColor)
         {
             if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s, "^-$"))
             {
@@ -138,16 +138,16 @@ namespace SicTransit.Woodpusher.Common.Parsing
             {
                 switch (c)
                 {
-                    case 'K' when pieceColor.Is(Pieces.White):
+                    case 'K' when pieceColor.Is(Piece.White):
                         castlings |= Castlings.Kingside;
                         break;
-                    case 'Q' when pieceColor.Is(Pieces.White):
+                    case 'Q' when pieceColor.Is(Piece.White):
                         castlings |= Castlings.Queenside;
                         break;
-                    case 'k' when pieceColor.Is(Pieces.None):
+                    case 'k' when pieceColor.Is(Piece.None):
                         castlings |= Castlings.Kingside;
                         break;
-                    case 'q' when pieceColor.Is(Pieces.None):
+                    case 'q' when pieceColor.Is(Piece.None):
                         castlings |= Castlings.Queenside;
                         break;
                 }

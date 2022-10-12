@@ -18,14 +18,14 @@ namespace SicTransit.Woodpusher.Common
         public static readonly ulong BlackQueensideRookCastlingSquare = new Square("d8").ToMask();
 
 
-        public static readonly Pieces WhiteKingsideRook =
-            (Pieces.Rook | Pieces.White).SetMask(WhiteKingsideRookStartingSquare);
-        public static readonly Pieces WhiteQueensideRook =
-            (Pieces.Rook | Pieces.White).SetMask(WhiteQueensideRookStartingSquare);
-        public static readonly Pieces BlackKingsideRook =
-            (Pieces.Rook | Pieces.None).SetMask(BlackKingsideRookStartingSquare);
-        public static readonly Pieces BlackQueensideRook =
-            (Pieces.Rook | Pieces.None).SetMask(BlackQueensideRookStartingSquare);
+        public static readonly Piece WhiteKingsideRook =
+            (Piece.Rook | Piece.White).SetMask(WhiteKingsideRookStartingSquare);
+        public static readonly Piece WhiteQueensideRook =
+            (Piece.Rook | Piece.White).SetMask(WhiteQueensideRookStartingSquare);
+        public static readonly Piece BlackKingsideRook =
+            (Piece.Rook | Piece.None).SetMask(BlackKingsideRookStartingSquare);
+        public static readonly Piece BlackQueensideRook =
+            (Piece.Rook | Piece.None).SetMask(BlackQueensideRookStartingSquare);
 
         public Attacks Attacks { get; }
 

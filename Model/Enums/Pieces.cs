@@ -1,7 +1,7 @@
 ﻿namespace SicTransit.Woodpusher.Model.Enums;
 
 [Flags]
-public enum Pieces : int
+public enum Piece : int
 {
     None = 0,
     //    Black = 0,

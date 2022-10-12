@@ -12,9 +12,9 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
         {
             var mask = 1ul;
 
-            var piece = (Pieces.White | Pieces.Queen).SetMask(mask);
+            var piece = (Piece.White | Piece.Queen).SetMask(mask);
 
-            Assert.IsTrue(piece.Is(Pieces.White) && piece.Is(Pieces.Queen));
+            Assert.IsTrue(piece.Is(Piece.White) && piece.Is(Piece.Queen));
 
             Assert.AreEqual(mask, piece.GetMask());
         }
@@ -24,16 +24,16 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
         {
             var mask = 1ul;
 
-            var piece = Pieces.None.SetMask(mask).SetPiece(Pieces.Queen | Pieces.White);
+            var piece = Piece.None.SetMask(mask).SetPiece(Piece.Queen | Piece.White);
 
-            Assert.AreEqual(Pieces.White | Pieces.Queen, piece.GetPiece());
+            Assert.AreEqual(Piece.White | Piece.Queen, piece.GetPiece());
         }
 
         [TestMethod()]
         public void ToSquareTest()
         {
             var e4 = new Square("e4");
-            var piece = Pieces.None.SetMask(e4.ToMask());
+            var piece = Piece.None.SetMask(e4.ToMask());
 
             Assert.AreEqual(e4, piece.GetSquare());
         }

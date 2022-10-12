@@ -5,27 +5,27 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 {
     public interface IBoard
     {
-        Pieces ActiveColor { get; }
+        Piece ActiveColor { get; }
 
         IBoard PlayMove(Move move);
 
         string GetHash();
 
-        bool IsPassedPawn(Pieces piece);
+        bool IsPassedPawn(Piece piece);
 
         IEnumerable<Move> GetOpeningBookMoves();
 
         IEnumerable<Move> GetLegalMoves();
 
-        IEnumerable<Move> GetLegalMoves(Pieces piece);
+        IEnumerable<Move> GetLegalMoves(Piece piece);
 
-        IEnumerable<Pieces> GetPieces(Pieces pieceColor);
+        IEnumerable<Piece> GetPieces(Piece pieceColor);
 
-        IEnumerable<Pieces> GetPieces(Pieces pieceColor, Pieces pieceType);
+        IEnumerable<Piece> GetPieces(Piece pieceColor, Piece pieceType);
 
-        IBoard SetPiece(Pieces piece);
+        IBoard SetPiece(Piece piece);
 
-        IEnumerable<Pieces> GetAttackers(ulong square, Pieces color);
+        IEnumerable<Piece> GetAttackers(ulong square, Piece color);
 
         int Score { get; }
 

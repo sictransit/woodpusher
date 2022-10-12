@@ -3,34 +3,34 @@ using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model.Extensions;
 
-public static class PiecesExtensions
+public static class PieceExtensions
 {
     private const int SquareMask = 0x00ff;
     private const int PieceMask = 0xff00;
 
-    public static Pieces SetMask(this Pieces p, ulong mask) => (Pieces)(((int)p & PieceMask) | (1 + BitOperations.TrailingZeroCount(mask)));
+    public static Piece SetMask(this Piece p, ulong mask) => (Piece)(((int)p & PieceMask) | (1 + BitOperations.TrailingZeroCount(mask)));
 
-    public static ulong GetMask(this Pieces p) => 1ul << (((int)p & SquareMask) - 1);
+    public static ulong GetMask(this Piece p) => 1ul << (((int)p & SquareMask) - 1);
 
-    public static Pieces SetPiece(this Pieces p, Pieces piece) => (Pieces)((int)p & SquareMask) | piece;
+    public static Piece SetPiece(this Piece p, Piece piece) => (Piece)((int)p & SquareMask) | piece;
 
-    public static Pieces GetPiece(this Pieces p) => (Pieces)((int)p & PieceMask);
+    public static Piece GetPiece(this Piece p) => (Piece)((int)p & PieceMask);
 
-    public static Pieces GetColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.White : Pieces.None;
+    public static Piece GetColor(this Piece p) => p.Is(Piece.White) ? Piece.White : Piece.None;
 
-    public static Pieces GetPieceType(this Pieces p) => p.GetPiece() & ~Pieces.White;
+    public static Piece GetPieceType(this Piece p) => p.GetPiece() & ~Piece.White;
 
-    public static Square GetSquare(this Pieces p) => p.GetMask().ToSquare();
+    public static Square GetSquare(this Piece p) => p.GetMask().ToSquare();
 
-    public static Pieces SetSquare(this Pieces p, Square square) => p.SetMask(square.ToMask());
+    public static Piece SetSquare(this Piece p, Square square) => p.SetMask(square.ToMask());
 
-    public static bool Is(this Pieces p, Pieces pieceType) => p.HasFlag(pieceType);
+    public static bool Is(this Piece p, Piece pieceType) => p.HasFlag(pieceType);
 
-    public static Pieces OpponentColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.None : Pieces.White;
+    public static Piece OpponentColor(this Piece p) => p.Is(Piece.White) ? Piece.None : Piece.White;
 
-    public static char ToChar(this Pieces p)
+    public static char ToChar(this Piece p)
     {
-        var pieceTypes = new[] { (Pieces.Pawn, 'P'), (Pieces.Rook, 'R'), (Pieces.Knight, 'N'), (Pieces.Bishop, 'B'), (Pieces.Queen, 'Q'), (Pieces.King, 'K') };
+        var pieceTypes = new[] { (Piece.Pawn, 'P'), (Piece.Rook, 'R'), (Piece.Knight, 'N'), (Piece.Bishop, 'B'), (Piece.Queen, 'Q'), (Piece.King, 'K') };
 
         foreach (var pieceType in pieceTypes)
         {
@@ -44,25 +44,25 @@ public static class PiecesExtensions
         throw new NotImplementedException(p.ToString());
     }
 
-    public static char ToAlgebraicNotation(this Pieces p) => p.Is(Pieces.White) ? p.ToChar() : char.ToLowerInvariant(p.ToChar());
+    public static char ToAlgebraicNotation(this Piece p) => p.Is(Piece.White) ? p.ToChar() : char.ToLowerInvariant(p.ToChar());
 
-    public static Pieces ToPieceType(this char c) => c switch
+    public static Piece ToPieceType(this char c) => c switch
     {
-        'P' => Pieces.Pawn,
-        'R' => Pieces.Rook,
-        'N' => Pieces.Knight,
-        'B' => Pieces.Bishop,
-        'Q' => Pieces.Queen,
-        'K' => Pieces.King,
+        'P' => Piece.Pawn,
+        'R' => Piece.Rook,
+        'N' => Piece.Knight,
+        'B' => Piece.Bishop,
+        'Q' => Piece.Queen,
+        'K' => Piece.King,
         _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
     };
 
 
-    public static Pieces ToPiece(this char c)
+    public static Piece ToPiece(this char c)
     {
         var type = ToPieceType(char.ToUpperInvariant(c));
 
-        var color = char.IsUpper(c) ? Pieces.White : Pieces.None;
+        var color = char.IsUpper(c) ? Piece.White : Piece.None;
 
         return type | color;
     }

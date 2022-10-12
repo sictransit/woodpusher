@@ -185,12 +185,12 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
                 engine.Play(move);
             }
 
-            Assert.AreEqual(Pieces.None, engine.Board.ActiveColor);
+            Assert.AreEqual(Piece.None, engine.Board.ActiveColor);
 
             var moves = engine.Board.GetLegalMoves().ToArray();
 
-            Assert.AreEqual(1, moves.Count(m => m.Piece.Is(Pieces.Knight)));
-            Assert.AreEqual(3, moves.Count(m => m.Piece.Is(Pieces.King)));
+            Assert.AreEqual(1, moves.Count(m => m.Piece.Is(Piece.Knight)));
+            Assert.AreEqual(3, moves.Count(m => m.Piece.Is(Piece.King)));
         }
 
         [TestMethod]
@@ -235,11 +235,11 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0";
                 engine.Play(move);
             }
 
-            Assert.AreEqual(Pieces.None, engine.Board.ActiveColor);
+            Assert.AreEqual(Piece.None, engine.Board.ActiveColor);
 
             var moves = engine.Board.GetLegalMoves().ToArray();
 
-            Assert.IsFalse(moves.Any(m => m.Piece.Is(Pieces.King) && m.GetTarget().Equals(new Square("e7"))));
+            Assert.IsFalse(moves.Any(m => m.Piece.Is(Piece.King) && m.GetTarget().Equals(new Square("e7"))));
         }
 
         [TestMethod]
@@ -283,11 +283,11 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 
             Trace.WriteLine(engine.Board.PrettyPrint());
 
-            Assert.AreEqual(Pieces.None, engine.Board.ActiveColor);
+            Assert.AreEqual(Piece.None, engine.Board.ActiveColor);
 
             var moves = engine.Board.GetLegalMoves().ToArray();
 
-            Assert.IsFalse(moves.Any(m => m.Piece.Is(Pieces.King) && m.GetTarget().Equals(new Square("c7"))));
+            Assert.IsFalse(moves.Any(m => m.Piece.Is(Piece.King) && m.GetTarget().Equals(new Square("c7"))));
         }
 
         [TestMethod]
@@ -328,11 +328,11 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
                 Trace.WriteLine(engine.Board.PrettyPrint());
             }
 
-            Assert.AreEqual(Pieces.None, engine.Board.ActiveColor);
+            Assert.AreEqual(Piece.None, engine.Board.ActiveColor);
 
             var moves = engine.Board.GetLegalMoves().ToArray();
 
-            Assert.IsFalse(moves.Any(m => m.Piece.Is(Pieces.King) && m.GetTarget().Equals(new Square("c8"))));
+            Assert.IsFalse(moves.Any(m => m.Piece.Is(Piece.King) && m.GetTarget().Equals(new Square("c8"))));
         }
 
         [TestMethod]
@@ -369,7 +369,7 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
                 Trace.WriteLine(engine.Board.PrettyPrint());
             }
 
-            Assert.AreEqual(Pieces.None, engine.Board.ActiveColor);
+            Assert.AreEqual(Piece.None, engine.Board.ActiveColor);
 
             var playedMove = engine.FindBestMove();
 
@@ -410,11 +410,11 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
                 Trace.WriteLine(engine.Board.PrettyPrint());
             }
 
-            Assert.AreEqual(Pieces.None, engine.Board.ActiveColor);
+            Assert.AreEqual(Piece.None, engine.Board.ActiveColor);
 
             var moves = engine.Board.GetLegalMoves().ToArray();
 
-            Assert.IsFalse(moves.Any(m => m.Piece.Is(Pieces.King) && m.Flags.HasFlag(SpecialMove.CastleQueen)));
+            Assert.IsFalse(moves.Any(m => m.Piece.Is(Piece.King) && m.Flags.HasFlag(SpecialMove.CastleQueen)));
         }
     }
 }

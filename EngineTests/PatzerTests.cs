@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.IsNotNull(patzer.Board);
 
-            Assert.AreEqual(Pieces.White, patzer.Board.ActiveColor);
+            Assert.AreEqual(Piece.White, patzer.Board.ActiveColor);
 
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.WhiteCastlings);
             Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.BlackCastlings);

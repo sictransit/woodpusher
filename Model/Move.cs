@@ -5,7 +5,7 @@ namespace SicTransit.Woodpusher.Model
 {
     public class Move
     {
-        public Move(Pieces piece, ulong target, SpecialMove flags, ulong enPassantTarget = 0, ulong castlingCheckMask = 0, ulong castlingEmptyMask = 0, Pieces promotionType = Pieces.None)
+        public Move(Piece piece, ulong target, SpecialMove flags, ulong enPassantTarget = 0, ulong castlingCheckMask = 0, ulong castlingEmptyMask = 0, Piece promotionType = Piece.None)
         {
             Piece = piece;
             Target = target;
@@ -17,15 +17,15 @@ namespace SicTransit.Woodpusher.Model
 
             if (enPassantTarget != 0)
             {
-                EnPassantMask = enPassantTarget.AddFileAndRank(0, Piece.Is(Pieces.White) ? -1 : 1);
+                EnPassantMask = enPassantTarget.AddFileAndRank(0, Piece.Is(Piece.White) ? -1 : 1);
             }
         }
 
-        public Move(Pieces piece, Square target, SpecialMove flags = SpecialMove.None) : this(piece, target.ToMask(), flags)
+        public Move(Piece piece, Square target, SpecialMove flags = SpecialMove.None) : this(piece, target.ToMask(), flags)
         {
         }
 
-        public Pieces Piece { get; }
+        public Piece Piece { get; }
 
         public Square GetTarget() => Target.ToSquare();
 
@@ -37,7 +37,7 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong CastlingEmptySquaresMask { get; }
 
-        public Pieces PromotionType { get; }
+        public Piece PromotionType { get; }
 
         public ulong EnPassantTarget { get; }
 

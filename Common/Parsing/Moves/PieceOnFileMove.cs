@@ -8,12 +8,12 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 {
     public class PieceOnFileMove : PgnMove
     {
-        private readonly Pieces pieceType;
+        private readonly Piece pieceType;
         private readonly int file;
         private readonly Square square;
-        private readonly Pieces promotionType;
+        private readonly Piece promotionType;
 
-        public PieceOnFileMove(string raw, Pieces pieceType, int file, Square square, Pieces promotionType) : base(raw)
+        public PieceOnFileMove(string raw, Piece pieceType, int file, Square square, Piece promotionType) : base(raw)
         {
             this.pieceType = pieceType;
             this.file = file;

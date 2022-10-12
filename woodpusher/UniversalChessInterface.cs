@@ -199,7 +199,7 @@ namespace SicTransit.Woodpusher
                     }
                     else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
                     {
-                        var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.Pieces.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
+                        var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.Piece.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
                         var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
                         timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);

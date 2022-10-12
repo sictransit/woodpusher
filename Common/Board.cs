@@ -15,9 +15,9 @@ namespace SicTransit.Woodpusher.Common
 
         public Counters Counters { get; }
 
-        public Pieces ActiveColor => Counters.ActiveColor;
+        public Piece ActiveColor => Counters.ActiveColor;
 
-        public Board() : this(new Bitboard(Pieces.White), new Bitboard(Pieces.None), Counters.Default)
+        public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
         {
 
         }
@@ -60,8 +60,8 @@ namespace SicTransit.Woodpusher.Common
             {
                 var phase = white.Phase + black.Phase;
 
-                var whiteEvaluation = GetPieces(Pieces.White).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
-                var blackEvaluation = GetPieces(Pieces.None).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
+                var whiteEvaluation = GetPieces(Piece.White).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
+                var blackEvaluation = GetPieces(Piece.None).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
 
                 //whiteEvaluation += GetPieces(Pieces.White, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
                 //blackEvaluation += GetPieces(Pieces.Black, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
@@ -87,9 +87,9 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
-        public bool IsPassedPawn(Pieces piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
+        public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
-        public IBoard SetPiece(Pieces piece) => piece.Is(Pieces.White)
+        public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
                 ? new Board(white.Add(piece), black, Counters, internals)
                 : (IBoard)new Board(white, black.Add(piece), Counters, internals);
 
@@ -104,13 +104,13 @@ namespace SicTransit.Woodpusher.Common
 
             var targetPieceType = opponentBitboard.Peek(move.Target);
 
-            if (targetPieceType != Pieces.None)
+            if (targetPieceType != Piece.None)
             {
                 opponentBitboard = opponentBitboard.Remove(targetPieceType);
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
-                opponentBitboard = opponentBitboard.Remove(Pieces.Pawn.SetMask(move.EnPassantMask));
+                opponentBitboard = opponentBitboard.Remove(Piece.Pawn.SetMask(move.EnPassantMask));
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
@@ -120,11 +120,11 @@ namespace SicTransit.Woodpusher.Common
 
             if (whiteCastlings != Castlings.None || blackCastlings != Castlings.None)
             {
-                if (move.Piece.Is(Pieces.King))
+                if (move.Piece.Is(Piece.King))
                 {
                     (ulong from, ulong to) castling = default;
 
-                    if (ActiveColor.Is(Pieces.White))
+                    if (ActiveColor.Is(Piece.White))
                     {
                         whiteCastlings = Castlings.None;
 
@@ -153,12 +153,12 @@ namespace SicTransit.Woodpusher.Common
 
                     if (castling != default)
                     {
-                        activeBitboard = activeBitboard.Move(Pieces.Rook.SetMask(castling.from), castling.to);
+                        activeBitboard = activeBitboard.Move(Piece.Rook.SetMask(castling.from), castling.to);
                     }
                 }
                 else
                 {
-                    if (ActiveColor.Is(Pieces.White))
+                    if (ActiveColor.Is(Piece.White))
                     {
                         if (move.Piece.Equals(BoardInternals.WhiteKingsideRook))
                         {
@@ -201,42 +201,42 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            var halfmoveClock = (move.Piece.Is(Pieces.Pawn) || targetPieceType.GetPieceType() != Pieces.None) ? 0 : Counters.HalfmoveClock + 1;
+            var halfmoveClock = (move.Piece.Is(Piece.Pawn) || targetPieceType.GetPieceType() != Piece.None) ? 0 : Counters.HalfmoveClock + 1;
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
-                activeBitboard = activeBitboard.Remove(Pieces.Pawn.SetMask(move.Target)).Add(move.PromotionType.SetMask(move.Target));
+                activeBitboard = activeBitboard.Remove(Piece.Pawn.SetMask(move.Target)).Add(move.PromotionType.SetMask(move.Target));
             }
 
-            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor.Is(Pieces.White) ? 0 : 1);
+            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor.Is(Piece.White) ? 0 : 1);
             var counters = new Counters(ActiveColor.OpponentColor(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
-            return ActiveColor.Is(Pieces.White)
+            return ActiveColor.Is(Piece.White)
                 ? new Board(activeBitboard, opponentBitboard, counters, internals)
                 : new Board(opponentBitboard, activeBitboard, counters, internals);
         }
 
         private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;
 
-        private bool IsOccupied(ulong mask, Pieces color) => GetBitboard(color).IsOccupied(mask);
+        private bool IsOccupied(ulong mask, Piece color) => GetBitboard(color).IsOccupied(mask);
 
-        private Bitboard GetBitboard(Pieces color) => color.Is(Pieces.White) ? white : black;
+        private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
-        private ulong FindKing(Pieces color) => GetBitboard(color).King;
+        private ulong FindKing(Piece color) => GetBitboard(color).King;
 
-        public IEnumerable<Pieces> GetPieces(Pieces pieceColor) => GetBitboard(pieceColor).GetPieces();
+        public IEnumerable<Piece> GetPieces(Piece pieceColor) => GetBitboard(pieceColor).GetPieces();
 
-        public IEnumerable<Pieces> GetPieces(Pieces pieceColor, Pieces pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
+        public IEnumerable<Piece> GetPieces(Piece pieceColor, Piece pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
 
-        private IEnumerable<Pieces> GetPieces(Pieces pieceColor, Pieces pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
+        private IEnumerable<Piece> GetPieces(Piece pieceColor, Piece pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
 
-        public IEnumerable<Pieces> GetAttackers(ulong target, Pieces color)
+        public IEnumerable<Piece> GetAttackers(ulong target, Piece color)
         {
             var threatMask = internals.Attacks.GetThreatMask(color.SetMask(target));
 
             var opponentColor = color.OpponentColor();
 
-            foreach (var queen in GetPieces(opponentColor, Pieces.Queen, threatMask.QueenMask))
+            foreach (var queen in GetPieces(opponentColor, Piece.Queen, threatMask.QueenMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
                 {
@@ -244,7 +244,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var rook in GetPieces(opponentColor, Pieces.Rook, threatMask.RookMask))
+            foreach (var rook in GetPieces(opponentColor, Piece.Rook, threatMask.RookMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
                 {
@@ -252,7 +252,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var bishop in GetPieces(opponentColor, Pieces.Bishop, threatMask.BishopMask))
+            foreach (var bishop in GetPieces(opponentColor, Piece.Bishop, threatMask.BishopMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
                 {
@@ -260,7 +260,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var pawn in GetPieces(opponentColor, Pieces.Pawn, threatMask.PawnMask))
+            foreach (var pawn in GetPieces(opponentColor, Piece.Pawn, threatMask.PawnMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(pawn.GetMask(), target)))
                 {
@@ -268,7 +268,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var knight in GetPieces(opponentColor, Pieces.Knight, threatMask.KnightMask))
+            foreach (var knight in GetPieces(opponentColor, Piece.Knight, threatMask.KnightMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(knight.GetMask(), target)))
                 {
@@ -276,7 +276,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var king in GetPieces(opponentColor, Pieces.King, threatMask.KingMask))
+            foreach (var king in GetPieces(opponentColor, Piece.King, threatMask.KingMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(king.GetMask(), target)))
                 {
@@ -296,7 +296,7 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
-        public IEnumerable<Move> GetLegalMoves(Pieces piece)
+        public IEnumerable<Move> GetLegalMoves(Piece piece)
         {
             foreach (IReadOnlyCollection<Move> vector in internals.Moves.GetVectors(piece))
             {
@@ -337,7 +337,7 @@ namespace SicTransit.Woodpusher.Common
                 return false;
             }
 
-            if (move.Piece.Is(Pieces.Pawn))
+            if (move.Piece.Is(Piece.Pawn))
             {
                 if (move.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.Target))
                 {
@@ -354,9 +354,9 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
             }
-            else if (move.Piece.Is(Pieces.King) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
+            else if (move.Piece.Is(Piece.King) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
             {
-                var castlings = ActiveColor == Pieces.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
+                var castlings = ActiveColor == Piece.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
 
                 if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
                 {
@@ -395,6 +395,6 @@ namespace SicTransit.Woodpusher.Common
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor), ActiveColor);
 
-        private bool IsAttacked(ulong square, Pieces color) => GetAttackers(square, color).Any();
+        private bool IsAttacked(ulong square, Piece color) => GetAttackers(square, color).Any();
     }
 }
