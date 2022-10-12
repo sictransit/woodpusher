@@ -34,8 +34,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 using var reader = new StreamReader(textStream);
 
-                string? line;
-                while ((line = reader.ReadLine()) != null)
+                while (reader.ReadLine() is { } line)
                 {
                     var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 

@@ -1,7 +1,7 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Common.Parsing.Extensions;
 using SicTransit.Woodpusher.Common.Parsing.Moves;
-using SicTransit.Woodpusher.Model.Enums;
 using System.Text;
 using System.Text.RegularExpressions;
 

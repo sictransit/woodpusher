@@ -115,7 +115,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
-                throw new FenParsingException(s, "active colour should be 'w' or 'b'");
+                throw new FenParsingException(s, "active color should be 'w' or 'b'");
             }
 
             return s.Single() switch

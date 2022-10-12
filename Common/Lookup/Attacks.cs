@@ -18,24 +18,23 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void Initialize()
         {
-            foreach (var colour in new[] { PieceColor.White, PieceColor.Black })
+            foreach (var color in new[] { PieceColor.White, PieceColor.Black })
             {
-                threatMasks.Add(colour, new Dictionary<ulong, ThreatMask>());
+                threatMasks.Add(color, new Dictionary<ulong, ThreatMask>());
 
                 var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
                 foreach (var square in squares)
                 {
-                    var queenMask = QueenMovement.GetTargetVectors(new Position(new Piece(PieceType.Queen, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var bishopMask = BishopMovement.GetTargetVectors(new Position(new Piece(PieceType.Bishop, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var knightMask = KnightMovement.GetTargetVectors(new Position(new Piece(PieceType.Knight, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var rookMask = RookMovement.GetTargetVectors(new Position(new Piece(PieceType.Rook, colour), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var kingMask = KingMovement.GetTargetVectors(new Position(new Piece(PieceType.King, colour.OpponentColour()), square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var queenMask = QueenMovement.GetTargetVectors(new Position(new Piece(PieceType.Queen, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var bishopMask = BishopMovement.GetTargetVectors(new Position(new Piece(PieceType.Bishop, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var knightMask = KnightMovement.GetTargetVectors(new Position(new Piece(PieceType.Knight, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var rookMask = RookMovement.GetTargetVectors(new Position(new Piece(PieceType.Rook, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var kingMask = KingMovement.GetTargetVectors(new Position(new Piece(PieceType.King, color.OpponentColor()), square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
 
-                    // TODO: There should probably be some en passant handling somewhere, maybe in here?
                     var pawnMask = 0ul;
 
-                    switch (colour)
+                    switch (color)
                     {
                         case PieceColor.White when square.Rank < 6:
                             {
@@ -65,7 +64,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                             }
                     }
 
-                    threatMasks[colour].Add(square.ToMask(), new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
+                    threatMasks[color].Add(square.ToMask(), new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
                 }
             }
         }

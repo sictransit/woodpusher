@@ -1,6 +1,6 @@
 ﻿namespace SicTransit.Woodpusher.Common.Lookup
 {
-    public struct ThreatMask
+    public class ThreatMask
     {
         public ulong PawnMask { get; }
         public ulong RookMask { get; }

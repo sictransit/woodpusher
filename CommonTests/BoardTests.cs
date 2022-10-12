@@ -41,19 +41,6 @@ namespace SicTransit.Woodpusher.Common.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void OccupiedSquareTest()
-        {
-            IBoard board = new Board();
-
-            var e1 = new Square("e1");
-            var whiteKing = new Piece(PieceType.King, PieceColor.White);
-
-            board = board.SetPosition(new Position(whiteKing, e1));
-            board.SetPosition(new Position(whiteKing, e1));
-        }
-
-        [TestMethod]
         public void FillTest()
         {
             IBoard board = new Board();
@@ -70,7 +57,7 @@ namespace SicTransit.Woodpusher.Common.Tests
                 }
             }
 
-            Assert.AreEqual(64, board.GetPositions().Count(p => p.Piece.Type == PieceType.Pawn));
+            Assert.AreEqual(64, board.GetPositions(PieceColor.White).Count(p => p.Piece.Type == PieceType.Pawn));
         }
 
         [TestMethod]
@@ -158,7 +145,7 @@ namespace SicTransit.Woodpusher.Common.Tests
             var c1 = new Square("c1");
             var g7 = new Square("g7");
 
-            IBoard board = new Board().SetPosition(new Position(whiteBishop, c1)).SetPosition(new Position(blackPawn, g7));
+            var board = new Board().SetPosition(new Position(whiteBishop, c1)).SetPosition(new Position(blackPawn, g7));
 
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(0, board.Counters.FullmoveNumber);
@@ -399,7 +386,7 @@ e8e7: 1
 e8f7: 1
 ";
 
-            IBoard board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
+            var board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
 
             var h2g3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("h2")) && m.GetTarget().Equals(new Square("g3")));
             board = board.PlayMove(h2g3);
@@ -567,7 +554,7 @@ d1b3: 27
 d1a4: 6
 ";
 
-            IBoard board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
             var c2c3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
             board = board.PlayMove(c2c3);
@@ -590,7 +577,7 @@ c8d7: 1
 d8d7: 1
 ";
 
-            IBoard board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
             var c2c3 = board.GetLegalMoves().Single(m => m.Position.Square.Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
             board = board.PlayMove(c2c3);
@@ -607,7 +594,7 @@ d8d7: 1
         [TestMethod()]
         public void IsPassedPawnTest()
         {
-            IBoard board = ForsythEdwardsNotation.Parse("8/8/7p/1P2Pp1P/2Pp1PP1/8/8/8 w - - 0 1");
+            var board = ForsythEdwardsNotation.Parse("8/8/7p/1P2Pp1P/2Pp1PP1/8/8/8 w - - 0 1");
 
             var whitePassedPawns = board.GetPositions(PieceColor.White, PieceType.Pawn).Where(p => board.IsPassedPawn(p)).ToArray();
 

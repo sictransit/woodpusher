@@ -11,8 +11,6 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         string GetHash();
 
-        bool IsOccupied(ulong mask, PieceColor color);
-
         bool IsPassedPawn(Position position);
 
         IEnumerable<Move> GetOpeningBookMoves();
@@ -20,8 +18,6 @@ namespace SicTransit.Woodpusher.Common.Interfaces
         IEnumerable<Move> GetLegalMoves();
 
         IEnumerable<Move> GetLegalMoves(Position position);
-
-        IEnumerable<Position> GetPositions();
 
         IEnumerable<Position> GetPositions(PieceColor pieceColor);
 

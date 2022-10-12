@@ -1,5 +1,6 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Text;
 
@@ -11,7 +12,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
         {
             var sb = new StringBuilder();
 
-            var positions = b.GetPositions();
+            var positions = b.GetPositions(PieceColor.White).Concat(b.GetPositions(PieceColor.Black)).ToList();
 
             for (var rank = 7; rank >= 0; rank--)
             {
@@ -34,7 +35,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             for (var i = 0; i < 8; i++)
             {
-                sb.Append($"{(char)('A' + i)} ");
+                sb.Append($"{(char)('a' + i)} ");
             }
 
             return sb.ToString();

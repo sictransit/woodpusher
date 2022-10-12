@@ -205,13 +205,15 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var infos = new List<string>();
 
-            Action<string> callback = new(s =>
+            void Callback(string s)
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
-            });
+            }
 
-            var move = patzer.FindBestMove(5000, callback);
+            var move = patzer.FindBestMove(5000, Callback);
+
+            Assert.IsNotNull(move);
 
             Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
         }
@@ -224,13 +226,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var infos = new List<string>();
 
-            Action<string> callback = new(s =>
+            void Callback(string s)
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
-            });
+            }
 
-            var move = patzer.FindBestMove(5000, callback);
+            var move = patzer.FindBestMove(5000, Callback);
 
             Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
         }

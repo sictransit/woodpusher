@@ -1,4 +1,4 @@
-﻿namespace SicTransit.Woodpusher.Model.Enums
+﻿namespace SicTransit.Woodpusher.Common.Parsing.Enum
 {
     public enum Result
     {

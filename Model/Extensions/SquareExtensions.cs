@@ -73,11 +73,6 @@ namespace SicTransit.Woodpusher.Model.Extensions
             }
         }
 
-        public static ulong ToTravelMask(this Square square, Square target)
-        {
-            return square.ToTravelPath(target).ToMask();
-        }
-
         public static string ToAlgebraicNotation(this Square square)
         {
             var f = (char)(square.File + 'a');

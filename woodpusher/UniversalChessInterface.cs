@@ -202,7 +202,7 @@ namespace SicTransit.Woodpusher
                         var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.PieceColor.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
                         var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
-                        timeLimit = Math.Min(timeLimit, (timeLeft / movesToGo) - latency);
+                        timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
                     }
 
                     var move = engine.FindBestMove(Math.Max(0, timeLimit), s => consoleOutput(s));

@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
     public class Moves
     {
         private readonly Dictionary<Position, IReadOnlyCollection<Move[]>> vectors = new();
-        private readonly Dictionary<ulong, Dictionary<ulong, ulong>> travelMasks = new();
+        private readonly Dictionary<ulong, ulong> travelMasks = new();
         private readonly Dictionary<Position, ulong> passedPawnMasks = new();
 
         public Moves()
@@ -22,15 +22,17 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializeTravelMasks()
         {
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r).ToMask())).SelectMany(x => x).ToArray();
+            var squares = Enumerable.Range(0, 64).Select(shift => 1ul << shift);
 
             foreach (var square in squares)
             {
-                travelMasks.Add(square, new Dictionary<ulong, ulong>());
-
                 foreach (var target in squares)
                 {
-                    travelMasks[square].Add(target, square.ToSquare().ToTravelMask(target.ToSquare()));
+                    var mask = square | target;
+                    if (!travelMasks.ContainsKey(mask))
+                    {
+                        travelMasks.Add(mask, square.ToSquare().ToTravelPath(target.ToSquare()).ToMask());
+                    }
                 }
             }
         }
@@ -45,13 +47,12 @@ namespace SicTransit.Woodpusher.Common.Lookup
             foreach (var position in positions)
             {
                 var mask = 0ul;
-                var sign = position.Piece.Color == PieceColor.White ? 1 : -1;
                 var minRank = position.Piece.Color == PieceColor.White ? position.Square.Rank + 1 : 1;
                 var maxRank = position.Piece.Color == PieceColor.White ? 6 : position.Square.Rank - 1;
 
                 foreach (var dFile in new[] { -1, 0, 1 })
                 {
-                    for (int rank = minRank; rank <= maxRank; rank++)
+                    for (var rank = minRank; rank <= maxRank; rank++)
                     {
                         if (Square.TryCreate(position.Square.File + dFile, rank, out var square))
                         {
@@ -64,7 +65,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
         }
 
-        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current][target];
+        public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current | target];
 
         public ulong GetPassedPawnMask(Position position) => passedPawnMasks[position];
 

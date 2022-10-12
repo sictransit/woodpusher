@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
@@ -22,10 +23,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private long nodeCount;
 
-        public const int MATE_SCORE = 1000000;
-        public const int DRAW_SCORE = 0;
-
-        private const int MAX_DEPTH = 16;
+        private const int MaxDepth = 16;
 
         public Patzer()
         {
@@ -80,8 +78,6 @@ namespace SicTransit.Woodpusher.Engine
             nodeCount = 0;
             stopwatch.Restart();
 
-            var sign = Board.ActiveColor == PieceColor.White ? 1 : -1;
-
             var openingMoves = Board.GetOpeningBookMoves();
 
             var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
@@ -103,7 +99,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = 1;
 
-            while (!cancellationTokenSource.IsCancellationRequested && maxDepth <= MAX_DEPTH)
+            while (!cancellationTokenSource.IsCancellationRequested && maxDepth <= MaxDepth)
             {
                 if (nodes.Count <= 1)
                 {
@@ -121,7 +117,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -MATE_SCORE * 4, MATE_SCORE * 4, cancellationToken);
+                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -156,19 +152,10 @@ namespace SicTransit.Woodpusher.Engine
         {
             var preview = string.Join(" ", line.Select(m => m.ToAlgebraicMoveNotation()));
 
-            string score;
-
             var mateIn = node.MateIn();
-            if (mateIn.HasValue)
-            {
-                score = $"mate {mateIn}";
-            }
-            else
-            {
-                score = $"cp {node.AbsoluteScore}";
-            }
+            var score = mateIn.HasValue ? $"mate {mateIn}" : $"cp {node.AbsoluteScore}";
 
-            long nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
+            var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
             callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }
@@ -181,8 +168,8 @@ namespace SicTransit.Woodpusher.Engine
 
             if (!legalMoves.Any())
             {
-                var mateScore = maximizing ? -MATE_SCORE + depth + 1 : MATE_SCORE - (depth + 1);
-                return board.IsChecked ? mateScore : DRAW_SCORE;
+                var mateScore = maximizing ? -Scoring.MateScore + depth + 1 : Scoring.MateScore - (depth + 1);
+                return board.IsChecked ? mateScore : Scoring.DrawScore;
             }
 
             if (depth == maxDepth || cancellationToken.IsCancellationRequested)
@@ -190,7 +177,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            var bestScore = maximizing ? -MATE_SCORE * 2 : MATE_SCORE * 2;
+            var bestScore = maximizing ? -Scoring.MateScore * 2 : Scoring.MateScore * 2;
 
             foreach (var move in legalMoves)
             {

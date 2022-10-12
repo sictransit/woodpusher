@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug, false);
 
-            void ConsoleOutput(string s)
+            static void ConsoleOutput(string s)
             {
                 Console.WriteLine(s);
 

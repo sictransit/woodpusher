@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
 {
     public abstract class MovementTests
     {
-        public static void AssertAmountOfLegalMoves(PieceType pieceType, PieceColor pieceColor, string square, int count)
+        protected static void AssertAmountOfLegalMoves(PieceType pieceType, PieceColor pieceColor, string square, int count)
         {
             var position = new Position(new Piece(pieceType, pieceColor), new Square(square));
 

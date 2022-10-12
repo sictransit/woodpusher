@@ -42,7 +42,7 @@ namespace SicTransit.Woodpusher.Common
             return BitConverter.ToString(Hash).Replace("-", "");
         }
 
-        public byte[] Hash
+        private byte[] Hash
         {
             get
             {
@@ -81,13 +81,13 @@ namespace SicTransit.Woodpusher.Common
 
             var legalMoves = GetLegalMoves().ToArray();
 
-            foreach (AlgebraicMove algebraicMove in moves)
+            foreach (var algebraicMove in moves)
             {
                 yield return legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
             }
         }
 
-        public bool IsPassedPawn(Position position) => (internals.Moves.GetPassedPawnMask(position) & GetBitboard(position.Piece.Color.OpponentColour()).Pawn) == 0;
+        public bool IsPassedPawn(Position position) => (internals.Moves.GetPassedPawnMask(position) & GetBitboard(position.Piece.Color.OpponentColor()).Pawn) == 0;
 
         public IBoard SetPosition(Position position) => position.Piece.Color switch
         {
@@ -103,11 +103,7 @@ namespace SicTransit.Woodpusher.Common
 
         private Board Play(Move move)
         {
-            var whiteCastlings = Counters.WhiteCastlings;
-            var blackCastlings = Counters.BlackCastlings;
-            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor == PieceColor.Black ? 1 : 0);
-
-            var opponentBitboard = GetBitboard(ActiveColor.OpponentColour());
+            var opponentBitboard = GetBitboard(ActiveColor.OpponentColor());
 
             var targetPieceType = opponentBitboard.Peek(move.Target);
 
@@ -117,78 +113,94 @@ namespace SicTransit.Woodpusher.Common
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
-                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, ActiveColor == PieceColor.White ? move.EnPassantTarget.AddFileAndRank(0, -1) : move.EnPassantTarget.AddFileAndRank(0, 1));
+                opponentBitboard = opponentBitboard.Remove(PieceType.Pawn, move.EnPassantMask);
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Position.Piece.Type, move.Position.Current, move.Target);
 
+            var whiteCastlings = Counters.WhiteCastlings;
+            var blackCastlings = Counters.BlackCastlings;
+
             if (whiteCastlings != Castlings.None || blackCastlings != Castlings.None)
             {
-                if (ActiveColor == PieceColor.White)
+                if (move.Position.Piece.Type == PieceType.King)
                 {
-                    if (move.Position.Equals(BoardInternals.WhiteKingsideRook))
+                    (ulong from, ulong to) castling = default;
+
+                    if (ActiveColor == PieceColor.White)
                     {
-                        whiteCastlings &= ~Castlings.Kingside;
+                        whiteCastlings = Castlings.None;
+
+                        if (move.Flags.HasFlag(SpecialMove.CastleQueen))
+                        {
+                            castling = (BoardInternals.WhiteQueensideRookStartingSquare, BoardInternals.WhiteQueensideRookCastlingSquare);
+                        }
+                        else if (move.Flags.HasFlag(SpecialMove.CastleKing))
+                        {
+                            castling = (BoardInternals.WhiteKingsideRookStartingSquare, BoardInternals.WhiteKingsideRookCastlingSquare);
+                        }
                     }
-                    else if (move.Position.Equals(BoardInternals.WhiteQueensideRook))
+                    else
                     {
-                        whiteCastlings &= ~Castlings.Queenside;
+                        blackCastlings = Castlings.None;
+
+                        if (move.Flags.HasFlag(SpecialMove.CastleQueen))
+                        {
+                            castling = (BoardInternals.BlackQueensideRookStartingSquare, BoardInternals.BlackQueensideRookCastlingSquare);
+                        }
+                        else if (move.Flags.HasFlag(SpecialMove.CastleKing))
+                        {
+                            castling = (BoardInternals.BlackKingsideRookStartingSquare, BoardInternals.BlackKingsideRookCastlingSquare);
+                        }
                     }
 
-                    if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
+                    if (castling != default)
                     {
-                        blackCastlings &= ~Castlings.Kingside;
-                    }
-                    else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
-                    {
-                        blackCastlings &= ~Castlings.Queenside;
+                        activeBitboard = activeBitboard.Move(PieceType.Rook, castling.from, castling.to);
                     }
                 }
                 else
                 {
-                    if (move.Position.Equals(BoardInternals.BlackKingsideRook))
+                    if (ActiveColor == PieceColor.White)
                     {
-                        blackCastlings &= ~Castlings.Kingside;
-                    }
-                    else if (move.Position.Equals(BoardInternals.BlackQueensideRook))
-                    {
-                        blackCastlings &= ~Castlings.Queenside;
-                    }
+                        if (move.Position.Equals(BoardInternals.WhiteKingsideRook))
+                        {
+                            whiteCastlings &= ~Castlings.Kingside;
+                        }
+                        else if (move.Position.Equals(BoardInternals.WhiteQueensideRook))
+                        {
+                            whiteCastlings &= ~Castlings.Queenside;
+                        }
 
-                    if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
-                    {
-                        whiteCastlings &= ~Castlings.Kingside;
+                        if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
+                        {
+                            blackCastlings &= ~Castlings.Kingside;
+                        }
+                        else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
+                        {
+                            blackCastlings &= ~Castlings.Queenside;
+                        }
                     }
-                    else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
+                    else
                     {
-                        whiteCastlings &= ~Castlings.Queenside;
+                        if (move.Position.Equals(BoardInternals.BlackKingsideRook))
+                        {
+                            blackCastlings &= ~Castlings.Kingside;
+                        }
+                        else if (move.Position.Equals(BoardInternals.BlackQueensideRook))
+                        {
+                            blackCastlings &= ~Castlings.Queenside;
+                        }
+
+                        if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
+                        {
+                            whiteCastlings &= ~Castlings.Kingside;
+                        }
+                        else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
+                        {
+                            whiteCastlings &= ~Castlings.Queenside;
+                        }
                     }
-                }
-            }
-
-            if (move.Position.Piece.Type == PieceType.King)
-            {
-                switch (ActiveColor)
-                {
-                    case PieceColor.White:
-                        whiteCastlings = Castlings.None;
-                        break;
-                    case PieceColor.Black:
-                        blackCastlings = Castlings.None;
-                        break;
-                }
-
-                if (move.Flags.HasFlag(SpecialMove.CastleQueen))
-                {
-                    activeBitboard = ActiveColor == PieceColor.White ?
-                        activeBitboard.Move(PieceType.Rook, BoardInternals.WhiteQueensideRookStartingSquare, BoardInternals.WhiteQueensideRookCastlingSquare) :
-                        activeBitboard.Move(PieceType.Rook, BoardInternals.BlackQueensideRookStartingSquare, BoardInternals.BlackQueensideRookCastlingSquare);
-                }
-                else if (move.Flags.HasFlag(SpecialMove.CastleKing))
-                {
-                    activeBitboard = ActiveColor == PieceColor.White ?
-                        activeBitboard.Move(PieceType.Rook, BoardInternals.WhiteKingsideRookStartingSquare, BoardInternals.WhiteKingsideRookCastlingSquare) :
-                        activeBitboard.Move(PieceType.Rook, BoardInternals.BlackKingsideRookStartingSquare, BoardInternals.BlackKingsideRookCastlingSquare);
                 }
             }
 
@@ -199,7 +211,8 @@ namespace SicTransit.Woodpusher.Common
                 activeBitboard = activeBitboard.Remove(PieceType.Pawn, move.Target).Add(move.PromotionType, move.Target);
             }
 
-            var counters = new Counters(ActiveColor.OpponentColour(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
+            var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor == PieceColor.Black ? 1 : 0);
+            var counters = new Counters(ActiveColor.OpponentColor(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColor == PieceColor.White
                 ? new Board(activeBitboard, opponentBitboard, counters, internals)
@@ -208,25 +221,23 @@ namespace SicTransit.Woodpusher.Common
 
         private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;
 
-        public bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
+        private bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
 
         private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 
         private ulong FindKing(PieceColor color) => GetBitboard(color).King;
 
-        public IEnumerable<Position> GetPositions() => white.GetPieces().Concat(black.GetPieces());
+        public IEnumerable<Position> GetPositions(PieceColor pieceColor) => GetBitboard(pieceColor).GetPositions();
 
-        public IEnumerable<Position> GetPositions(PieceColor pieceColor) => GetBitboard(pieceColor).GetPieces();
+        public IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType) => GetBitboard(pieceColor).GetPositions(pieceType);
 
-        public IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
-
-        private IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
+        private IEnumerable<Position> GetPositions(PieceColor pieceColor, PieceType pieceType, ulong mask) => GetBitboard(pieceColor).GetPositions(pieceType, mask);
 
         public IEnumerable<Position> GetAttackers(ulong target, PieceColor color)
         {
             var threatMask = internals.Attacks.GetThreatMask(color, target);
 
-            var opponentColor = color.OpponentColour();
+            var opponentColor = color.OpponentColor();
 
             foreach (var queen in GetPositions(opponentColor, PieceType.Queen, threatMask.QueenMask))
             {
@@ -299,9 +310,9 @@ namespace SicTransit.Woodpusher.Common
                         break;
                     }
 
-                    var tookPiece = IsOccupied(move.Target, move.Position.Piece.Color.OpponentColour());
+                    var tookPiece = IsOccupied(move.Target);
 
-                    if (IsCheck(move))
+                    if (IsMovingIntoCheck(move))
                     {
                         if (tookPiece)
                         {
@@ -336,7 +347,7 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
 
-                if (move.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.Target, move.Position.Piece.Color.OpponentColour()))
+                if (move.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.Target))
                 {
                     return false;
                 }
@@ -346,45 +357,43 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
             }
-            else if (move.Position.Piece.Type == PieceType.King)
+            else if (move.Position.Piece.Type == PieceType.King && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
             {
-                var flags = move.Flags;
                 var castlings = ActiveColor == PieceColor.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
 
-                if (flags.HasFlag(SpecialMove.CastleQueen) || flags.HasFlag(SpecialMove.CastleKing))
+                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
                 {
-                    if (flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
-                    {
-                        return false;
-                    }
+                    return false;
+                }
 
-                    if (flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
-                    {
-                        return false;
-                    }
+                if (move.Flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
+                {
+                    return false;
+                }
 
-                    // castling from or into check
-                    if (IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.Target, move.Position.Piece.Color))
-                    {
-                        return false;
-                    }
+                // castling from or into check
+                if (IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.Target, move.Position.Piece.Color))
+                {
+                    return false;
+                }
 
-                    // castling path is blocked
-                    if (IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask))
-                    {
-                        return false;
-                    }
+                // castling path is blocked
+                if (IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask))
+                {
+                    return false;
                 }
             }
 
             return true;
         }
 
-        private bool IsCheck(Move move)
+        private bool IsMovingIntoCheck(Move move)
         {
             var testBoard = Play(move);
 
-            return testBoard.IsAttacked(testBoard.FindKing(testBoard.ActiveColor.OpponentColour()), testBoard.ActiveColor.OpponentColour());
+            var opponentColor = testBoard.ActiveColor.OpponentColor();
+
+            return testBoard.IsAttacked(testBoard.FindKing(opponentColor), opponentColor);
         }
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor), ActiveColor);
