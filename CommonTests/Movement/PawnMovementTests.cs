@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsBlackStartingPositionTest()
         {
-            AssertAmountOfLegalMoves(Pieces.Pawn, Pieces.Black, "a7", 3);
+            AssertAmountOfLegalMoves(Pieces.Pawn, Pieces.None, "a7", 3);
         }
 
         [TestMethod]
@@ -27,7 +27,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsBlackPromotePositionTest()
         {
-            AssertAmountOfLegalMoves(Pieces.Pawn, Pieces.Black, "b2", 12);
+            AssertAmountOfLegalMoves(Pieces.Pawn, Pieces.None, "b2", 12);
         }
 
 
@@ -40,7 +40,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsBlackEnPassantTest()
         {
-            AssertAmountOfLegalMoves(Pieces.Pawn, Pieces.Black, "d4", 5);
+            AssertAmountOfLegalMoves(Pieces.Pawn, Pieces.None, "d4", 5);
         }
     }
 }

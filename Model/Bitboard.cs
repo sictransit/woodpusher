@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher.Model
             {
                 var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
 
-                yield return (type| color).SetMask(bit);
+                yield return (type | color).SetMask(bit);
 
                 bitmap &= ~bit;
             }
@@ -111,30 +111,30 @@ namespace SicTransit.Woodpusher.Model
 
             if ((pawn & mask) != 0)
             {
-                return Pieces.Pawn;
+                return Pieces.Pawn.SetMask(mask);
             }
 
             if ((rook & mask) != 0)
             {
-                return Pieces.Rook;
+                return Pieces.Rook.SetMask(mask);
             }
 
             if ((knight & mask) != 0)
             {
-                return Pieces.Knight;
+                return Pieces.Knight.SetMask(mask);
             }
 
             if ((bishop & mask) != 0)
             {
-                return Pieces.Bishop;
+                return Pieces.Bishop.SetMask(mask);
             }
 
             if ((queen & mask) != 0)
             {
-                return Pieces.Queen;
+                return Pieces.Queen.SetMask(mask);
             }
 
-            return Pieces.King;
+            return Pieces.King.SetMask(mask);
         }
 
         private Bitboard Toggle(Pieces pieceType, ulong to = 0)

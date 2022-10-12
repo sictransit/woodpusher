@@ -174,7 +174,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private static void InitializeEvaluations(Dictionary<Pieces, int> evaluations, bool endGame)
         {
-            var pieces = new[] { Pieces.Black, Pieces.White }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t|c)).SelectMany(x => x).ToList();
+            var pieces = new[] { Pieces.None, Pieces.White }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t | c)).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
             var positions = pieces.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 

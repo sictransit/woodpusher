@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Common
 
         public Pieces ActiveColor => Counters.ActiveColor;
 
-        public Board() : this(new Bitboard(Pieces.White), new Bitboard(Pieces.Black), Counters.Default)
+        public Board() : this(new Bitboard(Pieces.White), new Bitboard(Pieces.None), Counters.Default)
         {
 
         }
@@ -61,7 +61,7 @@ namespace SicTransit.Woodpusher.Common
                 var phase = white.Phase + black.Phase;
 
                 var whiteEvaluation = GetPositions(Pieces.White).Sum(p => internals.Scoring.EvaluatePosition(p, phase));
-                var blackEvaluation = GetPositions(Pieces.Black).Sum(p => internals.Scoring.EvaluatePosition(p, phase));
+                var blackEvaluation = GetPositions(Pieces.None).Sum(p => internals.Scoring.EvaluatePosition(p, phase));
 
                 //whiteEvaluation += GetPositions(Pieces.White, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
                 //blackEvaluation += GetPositions(Pieces.Black, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
@@ -201,7 +201,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            var halfmoveClock = move.Piece.Is(Pieces.Pawn) || targetPieceType == Pieces.None ? 0 : Counters.HalfmoveClock + 1;
+            var halfmoveClock = (move.Piece.Is(Pieces.Pawn) || targetPieceType.GetPieceType() != Pieces.None) ? 0 : Counters.HalfmoveClock + 1;
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
@@ -354,7 +354,7 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
             }
-            else if (move.Piece.Is( Pieces.King ) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
+            else if (move.Piece.Is(Pieces.King) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
             {
                 var castlings = ActiveColor == Pieces.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
 

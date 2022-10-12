@@ -39,7 +39,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializePassedPawnMasks()
         {
-            var pieces = new[] { Pieces.White, Pieces.Black }.Select(c => Pieces.Pawn | c);
+            var pieces = new[] { Pieces.White, Pieces.None }.Select(c => Pieces.Pawn | c);
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(1, 6).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
             var positions = pieces.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
@@ -71,14 +71,14 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializeVectors()
         {
-            var pieces = new[] { Pieces.White, Pieces.Black }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t|c)).SelectMany(x => x).ToList();
+            var pieces = new[] { Pieces.White, Pieces.None }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t | c)).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
             pieces.ForEach(piece =>
             {
                 squares.ForEach(square =>
                 {
-                    var position = piece.SetSquare( square);
+                    var position = piece.SetSquare(square);
 
                     vectors.Add(position, CreateVectors(position).Select(v => v.ToArray()).ToArray());
                 });
@@ -90,7 +90,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             return vectors[position];
         }
 
-        private static IEnumerable<IEnumerable<Move>> CreateVectors(Pieces position) 
+        private static IEnumerable<IEnumerable<Move>> CreateVectors(Pieces position)
         {
             if (position.Is(Pieces.Pawn))
             {

@@ -19,13 +19,13 @@ namespace SicTransit.Woodpusher.Common
 
 
         public static readonly Pieces WhiteKingsideRook =
-            (Pieces.Rook| Pieces.White).SetMask(WhiteKingsideRookStartingSquare);
+            (Pieces.Rook | Pieces.White).SetMask(WhiteKingsideRookStartingSquare);
         public static readonly Pieces WhiteQueensideRook =
-            (Pieces.Rook| Pieces.White).SetMask(WhiteQueensideRookStartingSquare);
+            (Pieces.Rook | Pieces.White).SetMask(WhiteQueensideRookStartingSquare);
         public static readonly Pieces BlackKingsideRook =
-            (Pieces.Rook| Pieces.Black).SetMask(BlackKingsideRookStartingSquare);
+            (Pieces.Rook | Pieces.None).SetMask(BlackKingsideRookStartingSquare);
         public static readonly Pieces BlackQueensideRook =
-            (Pieces.Rook| Pieces.Black).SetMask(BlackQueensideRookStartingSquare);
+            (Pieces.Rook | Pieces.None).SetMask(BlackQueensideRookStartingSquare);
 
         public Attacks Attacks { get; }
 

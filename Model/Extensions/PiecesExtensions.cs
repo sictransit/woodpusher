@@ -8,15 +8,15 @@ public static class PiecesExtensions
     private const int SquareMask = 0x00ff;
     private const int PieceMask = 0xff00;
 
-    public static Pieces SetMask(this Pieces p, ulong mask) => (Pieces)(((int)p & PieceMask) | ( 1+ BitOperations.TrailingZeroCount(mask)));
+    public static Pieces SetMask(this Pieces p, ulong mask) => (Pieces)(((int)p & PieceMask) | (1 + BitOperations.TrailingZeroCount(mask)));
 
-    public static ulong GetMask(this Pieces p) => 1ul << (((int)p & SquareMask) -1);
+    public static ulong GetMask(this Pieces p) => 1ul << (((int)p & SquareMask) - 1);
 
     public static Pieces SetPiece(this Pieces p, Pieces piece) => (Pieces)((int)p & SquareMask) | piece;
 
     public static Pieces GetPiece(this Pieces p) => (Pieces)((int)p & PieceMask);
 
-    public static Pieces GetColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.White : Pieces.Black;
+    public static Pieces GetColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.White : Pieces.None;
 
     public static Pieces GetPieceType(this Pieces p) => p.GetPiece() & ~Pieces.White;
 
@@ -26,9 +26,9 @@ public static class PiecesExtensions
 
     public static bool Is(this Pieces p, Pieces pieceType) => p.HasFlag(pieceType);
 
-    public static Pieces OpponentColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.Black : Pieces.White;
+    public static Pieces OpponentColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.None : Pieces.White;
 
-    public static char ToChar(this Pieces p) 
+    public static char ToChar(this Pieces p)
     {
         var pieceTypes = new[] { (Pieces.Pawn, 'P'), (Pieces.Rook, 'R'), (Pieces.Knight, 'N'), (Pieces.Bishop, 'B'), (Pieces.Queen, 'Q'), (Pieces.King, 'K') };
 
@@ -37,7 +37,8 @@ public static class PiecesExtensions
             if (p.HasFlag(pieceType.Item1))
             {
                 return pieceType.Item2;
-;            }
+                ;
+            }
         }
 
         throw new NotImplementedException(p.ToString());
@@ -61,7 +62,7 @@ public static class PiecesExtensions
     {
         var type = ToPieceType(char.ToUpperInvariant(c));
 
-        var color = char.IsUpper(c) ? Pieces.White : Pieces.Black;
+        var color = char.IsUpper(c) ? Pieces.White : Pieces.None;
 
         return type | color;
     }

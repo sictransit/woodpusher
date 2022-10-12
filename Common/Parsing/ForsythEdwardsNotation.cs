@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             var activeColor = ParseActiveColour(parts[1]);
 
             var whiteCastling = ParseCastling(parts[2], Pieces.White);
-            var blackCastling = ParseCastling(parts[2], Pieces.Black);
+            var blackCastling = ParseCastling(parts[2], Pieces.None);
 
             var enPassantTarget = ParseEnPassantTarget(parts[3]);
 
@@ -57,7 +57,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             var rank = 7;
 
             Bitboard white = new(Pieces.White);
-            Bitboard black = new(Pieces.Black);
+            Bitboard black = new(Pieces.None);
 
             foreach (var part in parts)
             {
@@ -121,7 +121,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             return s.Single() switch
             {
                 'w' => Pieces.White,
-                _ => Pieces.Black,
+                _ => Pieces.None,
             };
         }
 
@@ -144,10 +144,10 @@ namespace SicTransit.Woodpusher.Common.Parsing
                     case 'Q' when pieceColor.Is(Pieces.White):
                         castlings |= Castlings.Queenside;
                         break;
-                    case 'k' when pieceColor.Is(Pieces.Black):
+                    case 'k' when pieceColor.Is(Pieces.None):
                         castlings |= Castlings.Kingside;
                         break;
-                    case 'q' when pieceColor.Is(Pieces.Black):
+                    case 'q' when pieceColor.Is(Pieces.None):
                         castlings |= Castlings.Queenside;
                         break;
                 }

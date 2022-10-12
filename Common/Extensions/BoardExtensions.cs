@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
         {
             var sb = new StringBuilder();
 
-            var positions = b.GetPositions(Pieces.White).Concat(b.GetPositions(Pieces.Black)).ToList();
+            var positions = b.GetPositions(Pieces.White).Concat(b.GetPositions(Pieces.None)).ToList();
 
             for (var rank = 7; rank >= 0; rank--)
             {

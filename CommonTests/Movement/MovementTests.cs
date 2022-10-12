@@ -10,8 +10,8 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
     {
         protected static void AssertAmountOfLegalMoves(Pieces pieceType, Pieces pieceColor, string square, int count)
         {
-            var position = (pieceType| pieceColor).SetSquare(new Square(square));
-            
+            var position = (pieceType | pieceColor).SetSquare(new Square(square));
+
             IEnumerable<IEnumerable<Move>> moves = pieceType switch
             {
                 Pieces.Pawn => PawnMovement.GetTargetVectors(position),
@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
                 Pieces.King => KingMovement.GetTargetVectors(position),
                 _ => throw new NotImplementedException(pieceType.ToString()),
             };
-            
+
             Assert.AreEqual(count, moves.SelectMany(m => m).Count());
         }
     }

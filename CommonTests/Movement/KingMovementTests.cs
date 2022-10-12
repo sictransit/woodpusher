@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            AssertAmountOfLegalMoves(Pieces.King, Pieces.Black, "e2", 8);
+            AssertAmountOfLegalMoves(Pieces.King, Pieces.None, "e2", 8);
         }
 
         [TestMethod]
@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsBlackCastlingTest()
         {
-            AssertAmountOfLegalMoves(Pieces.King, Pieces.Black, "e8", 7);
+            AssertAmountOfLegalMoves(Pieces.King, Pieces.None, "e8", 7);
         }
 
     }
