@@ -39,90 +39,90 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializePassedPawnMasks()
         {
-            var pieces = new[] { Pieces.White, Pieces.None }.Select(c => Pieces.Pawn | c);
+            var pieceTypes = new[] { Pieces.White, Pieces.None }.Select(c => Pieces.Pawn | c);
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(1, 6).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
-            var positions = pieces.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
+            var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 
-            foreach (var position in positions)
+            foreach (var piece in pieces)
             {
                 var mask = 0ul;
-                var minRank = position.Is(Pieces.White) ? position.GetSquare().Rank + 1 : 1;
-                var maxRank = position.Is(Pieces.White) ? 6 : position.GetSquare().Rank - 1;
+                var minRank = piece.Is(Pieces.White) ? piece.GetSquare().Rank + 1 : 1;
+                var maxRank = piece.Is(Pieces.White) ? 6 : piece.GetSquare().Rank - 1;
 
                 foreach (var dFile in new[] { -1, 0, 1 })
                 {
                     for (var rank = minRank; rank <= maxRank; rank++)
                     {
-                        if (Square.TryCreate(position.GetSquare().File + dFile, rank, out var square))
+                        if (Square.TryCreate(piece.GetSquare().File + dFile, rank, out var square))
                         {
                             mask |= square.ToMask();
                         }
                     }
                 }
 
-                passedPawnMasks.Add(position, mask);
+                passedPawnMasks.Add(piece, mask);
             }
         }
 
         public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current | target];
 
-        public ulong GetPassedPawnMask(Pieces position) => passedPawnMasks[position];
+        public ulong GetPassedPawnMask(Pieces piece) => passedPawnMasks[piece];
 
         private void InitializeVectors()
         {
             var pieces = new[] { Pieces.White, Pieces.None }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t | c)).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
-            pieces.ForEach(piece =>
+            pieces.ForEach(p =>
             {
-                squares.ForEach(square =>
+                squares.ForEach(s =>
                 {
-                    var position = piece.SetSquare(square);
+                    var piece = p.SetSquare(s);
 
-                    vectors.Add(position, CreateVectors(position).Select(v => v.ToArray()).ToArray());
+                    vectors.Add(piece, CreateVectors(piece).Select(v => v.ToArray()).ToArray());
                 });
             });
         }
 
-        public IReadOnlyCollection<Move[]> GetVectors(Pieces position)
+        public IReadOnlyCollection<Move[]> GetVectors(Pieces piece)
         {
-            return vectors[position];
+            return vectors[piece];
         }
 
-        private static IEnumerable<IEnumerable<Move>> CreateVectors(Pieces position)
+        private static IEnumerable<IEnumerable<Move>> CreateVectors(Pieces piece)
         {
-            if (position.Is(Pieces.Pawn))
+            if (piece.Is(Pieces.Pawn))
             {
-                return PawnMovement.GetTargetVectors(position);
+                return PawnMovement.GetTargetVectors(piece);
             }
 
-            if (position.Is(Pieces.Rook))
+            if (piece.Is(Pieces.Rook))
             {
-                return RookMovement.GetTargetVectors(position);
+                return RookMovement.GetTargetVectors(piece);
             }
 
-            if (position.Is(Pieces.Knight))
+            if (piece.Is(Pieces.Knight))
             {
-                return KnightMovement.GetTargetVectors(position);
+                return KnightMovement.GetTargetVectors(piece);
             }
 
-            if (position.Is(Pieces.Bishop))
+            if (piece.Is(Pieces.Bishop))
             {
-                return BishopMovement.GetTargetVectors(position);
+                return BishopMovement.GetTargetVectors(piece);
             }
 
-            if (position.Is(Pieces.Queen))
+            if (piece.Is(Pieces.Queen))
             {
-                return QueenMovement.GetTargetVectors(position);
+                return QueenMovement.GetTargetVectors(piece);
             }
 
-            if (position.Is(Pieces.King))
+            if (piece.Is(Pieces.King))
             {
-                return KingMovement.GetTargetVectors(position);
+                return KingMovement.GetTargetVectors(piece);
             }
 
-            throw new ArgumentOutOfRangeException(nameof(position));
+            throw new ArgumentOutOfRangeException(nameof(piece));
         }
     }
 }

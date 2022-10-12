@@ -101,12 +101,12 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             board = board.SetPosition(blackPawn1.SetSquare(e2)).SetPosition(blackPawn2.SetSquare(e3)).SetPosition(blackPawn3.SetSquare(e4));
 
-            var positions = board.GetPositions(Pieces.None, Pieces.Pawn).Where(p => p.GetSquare().File == 4).ToArray();
+            var pieces = board.GetPositions(Pieces.None, Pieces.Pawn).Where(p => p.GetSquare().File == 4).ToArray();
 
-            Assert.AreEqual(3, positions.Length);
+            Assert.AreEqual(3, pieces.Length);
 
-            Assert.IsTrue(positions.All(p => p.Is(Pieces.Pawn)));
-            Assert.IsTrue(positions.All(p => new[] { e2, e3, e4 }.Contains(p.GetSquare())));
+            Assert.IsTrue(pieces.All(p => p.Is(Pieces.Pawn)));
+            Assert.IsTrue(pieces.All(p => new[] { e2, e3, e4 }.Contains(p.GetSquare())));
         }
 
 

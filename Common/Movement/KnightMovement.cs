@@ -6,9 +6,9 @@ namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class KnightMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces piece)
         {
-            var square = position.GetSquare();
+            var square = piece.GetSquare();
 
             foreach (var df in new[] { -2, -1, 1, 2 })
             {
@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Common.Movement
                 {
                     if (Square.TryCreate(square.File + df, square.Rank + dr, out var s))
                     {
-                        yield return new[] { new Move(position, s) };
+                        yield return new[] { new Move(piece, s) };
                     }
                 }
             }

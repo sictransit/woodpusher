@@ -11,19 +11,19 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         string GetHash();
 
-        bool IsPassedPawn(Pieces position);
+        bool IsPassedPawn(Pieces piece);
 
         IEnumerable<Move> GetOpeningBookMoves();
 
         IEnumerable<Move> GetLegalMoves();
 
-        IEnumerable<Move> GetLegalMoves(Pieces position);
+        IEnumerable<Move> GetLegalMoves(Pieces piece);
 
         IEnumerable<Pieces> GetPositions(Pieces pieceColor);
 
         IEnumerable<Pieces> GetPositions(Pieces pieceColor, Pieces pieceType);
 
-        IBoard SetPosition(Pieces position);
+        IBoard SetPosition(Pieces piece);
 
         IEnumerable<Pieces> GetAttackers(ulong square, Pieces color);
 

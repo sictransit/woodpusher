@@ -170,7 +170,7 @@ namespace SicTransit.Woodpusher
                         }
                         else
                         {
-                            Log.Information($"failed to parse position: {command}");
+                            Log.Information($"failed to parse piece: {command}");
                         }
                     }
 

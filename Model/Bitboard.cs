@@ -79,9 +79,9 @@ namespace SicTransit.Woodpusher.Model
         {
             foreach (var pieceType in PieceTypes)
             {
-                foreach (var position in GetPositions(pieceType))
+                foreach (var piece in GetPositions(pieceType))
                 {
-                    yield return position;
+                    yield return piece;
                 }
             }
         }

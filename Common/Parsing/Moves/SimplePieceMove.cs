@@ -20,11 +20,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
         {
             var board = engine.Board;
 
-            var positions = board.GetPositions(board.ActiveColor, pieceType);
+            var pieces = board.GetPositions(board.ActiveColor, pieceType);
 
-            foreach (var position in positions)
+            foreach (var piece in pieces)
             {
-                var move = board.GetLegalMoves(position).SingleOrDefault(m => m.GetTarget().Equals(square));
+                var move = board.GetLegalMoves(piece).SingleOrDefault(m => m.GetTarget().Equals(square));
 
                 if (move != null)
                 {

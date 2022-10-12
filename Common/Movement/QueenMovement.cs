@@ -5,9 +5,9 @@ namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class QueenMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces piece)
         {
-            return BishopMovement.GetTargetVectors(position).Concat(RookMovement.GetTargetVectors(position));
+            return BishopMovement.GetTargetVectors(piece).Concat(RookMovement.GetTargetVectors(piece));
         }
     }
 

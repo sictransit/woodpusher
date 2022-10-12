@@ -162,9 +162,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
     -53, -34, -21, -11, -28, -14, -24, -43
         };
 
-        private static int GetModifierIndex(Pieces position) => position.Is(Pieces.White)
-                ? (position.GetSquare().File + position.GetSquare().Rank * 8) ^ 56
-                : position.GetSquare().File + position.GetSquare().Rank * 8;
+        private static int GetModifierIndex(Pieces piece) => piece.Is(Pieces.White)
+                ? (piece.GetSquare().File + piece.GetSquare().Rank * 8) ^ 56
+                : piece.GetSquare().File + piece.GetSquare().Rank * 8;
 
         public Scoring()
         {
@@ -174,14 +174,14 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private static void InitializeEvaluations(Dictionary<Pieces, int> evaluations, bool endGame)
         {
-            var pieces = new[] { Pieces.None, Pieces.White }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t | c)).SelectMany(x => x).ToList();
+            var pieceTypes = new[] { Pieces.None, Pieces.White }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t | c)).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
-            var positions = pieces.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
+            var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 
-            foreach (var position in positions)
+            foreach (var piece in pieces)
             {
-                var index = GetModifierIndex(position);
-                var evaluation = GetPieceValue(position.GetPieceType(), endGame) + position.GetPieceType() switch
+                var index = GetModifierIndex(piece);
+                var evaluation = GetPieceValue(piece.GetPieceType(), endGame) + piece.GetPieceType() switch
                 {
                     Pieces.Pawn => endGame ? PawnEndGameModifiers[index] : PawnMiddleGameModifiers[index],
                     Pieces.Knight => endGame ? KnightEndGameModifiers[index] : KnightMiddleGameModifiers[index],
@@ -189,9 +189,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
                     Pieces.Rook => endGame ? RookEndGameModifiers[index] : RookMiddleGameModifiers[index],
                     Pieces.Queen => endGame ? QueenEndGameModifiers[index] : QueenMiddleGameModifiers[index],
                     Pieces.King => endGame ? KingEndGameModifiers[index] : KingMiddleGameModifiers[index],
-                    _ => throw new ArgumentException(position.ToString()),
+                    _ => throw new ArgumentException(piece.ToString()),
                 };
-                evaluations.Add(position, evaluation);
+                evaluations.Add(piece, evaluation);
             }
         }
 
@@ -207,13 +207,13 @@ namespace SicTransit.Woodpusher.Common.Lookup
         };
 
 
-        public int EvaluatePosition(Pieces position, int phase)
+        public int EvaluatePosition(Pieces piece, int phase)
         {
             // TODO: This will not handle promotions. 
             phase = Math.Max(0, Math.Min(phase, 24));
 
-            var end = endGameEvaluations[position] * (24 - phase);
-            var middle = middleGameEvaluations[position] * phase;
+            var end = endGameEvaluations[piece] * (24 - phase);
+            var middle = middleGameEvaluations[piece] * phase;
 
             return (middle + end) / 24;
         }

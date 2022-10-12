@@ -87,11 +87,11 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
-        public bool IsPassedPawn(Pieces position) => (internals.Moves.GetPassedPawnMask(position) & GetBitboard(position.OpponentColor()).Pawn) == 0;
+        public bool IsPassedPawn(Pieces piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
-        public IBoard SetPosition(Pieces position) => position.Is(Pieces.White)
-                ? new Board(white.Add(position), black, Counters, internals)
-                : (IBoard)new Board(white, black.Add(position), Counters, internals);
+        public IBoard SetPosition(Pieces piece) => piece.Is(Pieces.White)
+                ? new Board(white.Add(piece), black, Counters, internals)
+                : (IBoard)new Board(white, black.Add(piece), Counters, internals);
 
         public IBoard PlayMove(Move move)
         {
@@ -287,18 +287,18 @@ namespace SicTransit.Woodpusher.Common
 
         public IEnumerable<Move> GetLegalMoves()
         {
-            foreach (var position in GetPositions(ActiveColor))
+            foreach (var piece in GetPositions(ActiveColor))
             {
-                foreach (var move in GetLegalMoves(position))
+                foreach (var move in GetLegalMoves(piece))
                 {
                     yield return move;
                 }
             }
         }
 
-        public IEnumerable<Move> GetLegalMoves(Pieces position)
+        public IEnumerable<Move> GetLegalMoves(Pieces piece)
         {
-            foreach (IReadOnlyCollection<Move> vector in internals.Moves.GetVectors(position))
+            foreach (IReadOnlyCollection<Move> vector in internals.Moves.GetVectors(piece))
             {
                 foreach (var move in vector)
                 {
