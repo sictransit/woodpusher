@@ -85,7 +85,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             // E60 Grünfeld Defense: Counterthrust Variation d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5
 
-            IEngine engine = new Patzer();            
+            IEngine engine = new Patzer();
             var book = new OpeningBook();
 
             foreach (var notation in "d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5".Split())
