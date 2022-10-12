@@ -28,5 +28,15 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
 
             Assert.AreEqual(Pieces.White | Pieces.Queen, piece.GetPiece());
         }
+
+        [TestMethod()]
+        public void ToSquareTest()
+        {
+            var e4 = new Square("e4");
+            var piece = Pieces.None.SetMask(e4.ToMask());
+
+            Assert.AreEqual(e4, piece.ToSquare());
+        }
+
     }
 }
