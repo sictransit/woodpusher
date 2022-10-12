@@ -211,15 +211,10 @@ namespace SicTransit.Woodpusher.Common.Lookup
             // TODO: This will not handle promotions. 
             phase = Math.Max(0, Math.Min(phase, 24));
 
-            var end = endGameEvaluations[position];
-            end *= 24 - phase;
+            var end = endGameEvaluations[position]* (24 - phase);
+            var middle = middleGameEvaluations[position] * phase;
 
-            var middle = middleGameEvaluations[position];
-            middle *= phase;
-
-            var result = (middle + end) / 24;
-
-            return result;
+            return (middle + end) / 24;
         }
     }
 }

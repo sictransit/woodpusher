@@ -72,9 +72,11 @@ namespace SicTransit.Woodpusher.Model
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
 
+        private static readonly PieceType[] PieceTypes = { PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King };
+
         public IEnumerable<Position> GetPositions()
         {
-            foreach (var pieceType in new[] { PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King })
+            foreach (var pieceType in PieceTypes)
             {
                 foreach (var position in GetPositions(pieceType))
                 {

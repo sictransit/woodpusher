@@ -13,7 +13,6 @@ namespace SicTransit.Woodpusher.Model
             Current = current;
         }
 
-
         public Piece Piece { get; }
 
         public ulong Current { get; }
@@ -28,7 +27,7 @@ namespace SicTransit.Woodpusher.Model
         public override bool Equals(object? obj)
         {
             return obj is Position position &&
-                   EqualityComparer<Piece>.Default.Equals(Piece, position.Piece) &&
+                   Piece.Equals(position.Piece) &&
                    Current == position.Current;
         }
 
