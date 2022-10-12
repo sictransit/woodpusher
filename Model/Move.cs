@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Model
 
         public override string ToString()
         {
-            return $"{Position}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty)); 
+            return $"{Position}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty));
         }
     }
 }
