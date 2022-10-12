@@ -357,33 +357,30 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
             }
-            else if (move.Position.Piece.Type == PieceType.King)
+            else if (move.Position.Piece.Type == PieceType.King && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
             {
-                if (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing))
+                var castlings = ActiveColor == PieceColor.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
+
+                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
                 {
-                    var castlings = ActiveColor == PieceColor.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
+                    return false;
+                }
 
-                    if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
-                    {
-                        return false;
-                    }
+                if (move.Flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
+                {
+                    return false;
+                }
 
-                    if (move.Flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
-                    {
-                        return false;
-                    }
+                // castling from or into check
+                if (IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.Target, move.Position.Piece.Color))
+                {
+                    return false;
+                }
 
-                    // castling from or into check
-                    if (IsAttacked(move.Position.Current, move.Position.Piece.Color) || IsAttacked(move.CastlingCheckMask, move.Position.Piece.Color) || IsAttacked(move.Target, move.Position.Piece.Color))
-                    {
-                        return false;
-                    }
-
-                    // castling path is blocked
-                    if (IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask))
-                    {
-                        return false;
-                    }
+                // castling path is blocked
+                if (IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask))
+                {
+                    return false;
                 }
             }
 
