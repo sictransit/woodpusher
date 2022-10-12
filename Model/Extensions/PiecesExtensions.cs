@@ -16,9 +16,17 @@ public static class PiecesExtensions
 
     public static Pieces GetPiece(this Pieces p) => (Pieces)((int)p & PieceMask);
 
-    public static Square ToSquare(this Pieces p) => p.GetMask().ToSquare();
+    public static Pieces GetColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.White : Pieces.Black;
 
-    public static bool IsWhite(this Pieces p) => p.HasFlag(Pieces.White);
+    public static Pieces GetPieceType(this Pieces p) => p.GetPiece() & ~Pieces.White;
+
+    public static Square GetSquare(this Pieces p) => p.GetMask().ToSquare();
+
+    public static Pieces SetSquare(this Pieces p, Square square) => p.SetMask(square.ToMask());
+
+    public static bool Is(this Pieces p, Pieces pieceType) => p.HasFlag(pieceType);
+
+    public static Pieces OpponentColor(this Pieces p) => p.Is(Pieces.White) ? Pieces.Black : Pieces.White;
 
     public static char ToChar(this Pieces p) 
     {
@@ -35,7 +43,7 @@ public static class PiecesExtensions
         throw new NotImplementedException(p.ToString());
     }
 
-    public static char ToAlgebraicNotation(this Pieces p) => p.IsWhite() ? p.ToChar() : char.ToLowerInvariant(p.ToChar());
+    public static char ToAlgebraicNotation(this Pieces p) => p.Is(Pieces.White) ? p.ToChar() : char.ToLowerInvariant(p.ToChar());
 
     public static Pieces ToPieceType(this char c) => c switch
     {

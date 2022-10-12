@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
 
             var piece = (Pieces.White | Pieces.Queen).SetMask(mask);
 
-            Assert.IsTrue(piece.HasFlag(Pieces.White) && piece.HasFlag(Pieces.Queen));
+            Assert.IsTrue(piece.Is(Pieces.White) && piece.Is(Pieces.Queen));
 
             Assert.AreEqual(mask, piece.GetMask());
         }
@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
             var e4 = new Square("e4");
             var piece = Pieces.None.SetMask(e4.ToMask());
 
-            Assert.AreEqual(e4, piece.ToSquare());
+            Assert.AreEqual(e4, piece.GetSquare());
         }
 
     }

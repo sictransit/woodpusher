@@ -9,9 +9,9 @@ namespace SicTransit.Woodpusher.Common.Movement
         private static readonly Square WhiteStartPosition = new("e1");
         private static readonly Square BlackStartPosition = new("e8");
 
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces position)
         {
-            var square = position.Square;
+            var square = position.GetSquare();
             var r = square.Rank;
             var f = square.File;
 
@@ -56,7 +56,7 @@ namespace SicTransit.Woodpusher.Common.Movement
             }
 
             // TODO: There are constants for all those squares!
-            if (position.Piece.Color == PieceColor.White)
+            if (position.Is(Pieces.White))
             {
                 if (square.Equals(WhiteStartPosition))
                 {

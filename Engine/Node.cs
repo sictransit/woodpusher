@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -9,7 +10,7 @@ namespace SicTransit.Woodpusher.Engine
         public Node(Move move)
         {
             Move = move;
-            Sign = move.Position.Piece.Color == PieceColor.White ? 1 : -1;
+            Sign = move.Piece.Is(Pieces.White) ? 1 : -1;
             Score = -Sign * Scoring.MateScore * 2;
         }
 

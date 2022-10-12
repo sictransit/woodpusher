@@ -7,10 +7,10 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 {
     public class SimplePieceMove : PgnMove
     {
-        private readonly PieceType pieceType;
+        private readonly Pieces pieceType;
         private readonly Square square;
 
-        public SimplePieceMove(string raw, PieceType pieceType, Square square) : base(raw)
+        public SimplePieceMove(string raw, Pieces pieceType, Square square) : base(raw)
         {
             this.pieceType = pieceType;
             this.square = square;

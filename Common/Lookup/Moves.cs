@@ -7,9 +7,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
 {
     public class Moves
     {
-        private readonly Dictionary<Position, IReadOnlyCollection<Move[]>> vectors = new();
+        private readonly Dictionary<Pieces, IReadOnlyCollection<Move[]>> vectors = new();
         private readonly Dictionary<ulong, ulong> travelMasks = new();
-        private readonly Dictionary<Position, ulong> passedPawnMasks = new();
+        private readonly Dictionary<Pieces, ulong> passedPawnMasks = new();
 
         public Moves()
         {
@@ -39,22 +39,22 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializePassedPawnMasks()
         {
-            var pieces = new[] { PieceColor.White, PieceColor.Black }.Select(c => new Piece(PieceType.Pawn, c));
+            var pieces = new[] { Pieces.White, Pieces.Black }.Select(c => Pieces.Pawn | c);
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(1, 6).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
-            var positions = pieces.Select(p => squares.Select(s => new Position(p, s))).SelectMany(p => p);
+            var positions = pieces.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 
             foreach (var position in positions)
             {
                 var mask = 0ul;
-                var minRank = position.Piece.Color == PieceColor.White ? position.Square.Rank + 1 : 1;
-                var maxRank = position.Piece.Color == PieceColor.White ? 6 : position.Square.Rank - 1;
+                var minRank = position.Is(Pieces.White) ? position.GetSquare().Rank + 1 : 1;
+                var maxRank = position.Is(Pieces.White) ? 6 : position.GetSquare().Rank - 1;
 
                 foreach (var dFile in new[] { -1, 0, 1 })
                 {
                     for (var rank = minRank; rank <= maxRank; rank++)
                     {
-                        if (Square.TryCreate(position.Square.File + dFile, rank, out var square))
+                        if (Square.TryCreate(position.GetSquare().File + dFile, rank, out var square))
                         {
                             mask |= square.ToMask();
                         }
@@ -67,38 +67,62 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current | target];
 
-        public ulong GetPassedPawnMask(Position position) => passedPawnMasks[position];
+        public ulong GetPassedPawnMask(Pieces position) => passedPawnMasks[position];
 
         private void InitializeVectors()
         {
-            var pieces = new[] { PieceColor.White, PieceColor.Black }.Select(c => new[] { PieceType.Pawn, PieceType.Rook, PieceType.Knight, PieceType.Bishop, PieceType.Queen, PieceType.King }.Select(t => new Piece(t, c))).SelectMany(x => x).ToList();
+            var pieces = new[] { Pieces.White, Pieces.Black }.Select(c => new[] { Pieces.Pawn, Pieces.Rook, Pieces.Knight, Pieces.Bishop, Pieces.Queen, Pieces.King }.Select(t => t|c)).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
             pieces.ForEach(piece =>
             {
                 squares.ForEach(square =>
                 {
-                    var position = new Position(piece, square);
+                    var position = piece.SetSquare( square);
 
                     vectors.Add(position, CreateVectors(position).Select(v => v.ToArray()).ToArray());
                 });
             });
         }
 
-        public IReadOnlyCollection<Move[]> GetVectors(Position position)
+        public IReadOnlyCollection<Move[]> GetVectors(Pieces position)
         {
             return vectors[position];
         }
 
-        private static IEnumerable<IEnumerable<Move>> CreateVectors(Position position) => position.Piece.Type switch
+        private static IEnumerable<IEnumerable<Move>> CreateVectors(Pieces position) 
         {
-            PieceType.Pawn => PawnMovement.GetTargetVectors(position),
-            PieceType.Rook => RookMovement.GetTargetVectors(position),
-            PieceType.Knight => KnightMovement.GetTargetVectors(position),
-            PieceType.Bishop => BishopMovement.GetTargetVectors(position),
-            PieceType.Queen => QueenMovement.GetTargetVectors(position),
-            PieceType.King => KingMovement.GetTargetVectors(position),
-            _ => throw new ArgumentOutOfRangeException(nameof(position)),
-        };
+            if (position.Is(Pieces.Pawn))
+            {
+                return PawnMovement.GetTargetVectors(position);
+            }
+
+            if (position.Is(Pieces.Rook))
+            {
+                return RookMovement.GetTargetVectors(position);
+            }
+
+            if (position.Is(Pieces.Knight))
+            {
+                return KnightMovement.GetTargetVectors(position);
+            }
+
+            if (position.Is(Pieces.Bishop))
+            {
+                return BishopMovement.GetTargetVectors(position);
+            }
+
+            if (position.Is(Pieces.Queen))
+            {
+                return QueenMovement.GetTargetVectors(position);
+            }
+
+            if (position.Is(Pieces.King))
+            {
+                return KingMovement.GetTargetVectors(position);
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(position));
+        }
     }
 }

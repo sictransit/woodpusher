@@ -50,7 +50,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 if (move == null)
                 {
@@ -164,7 +164,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             var legalMoves = board.GetLegalMoves();
 
-            var maximizing = board.ActiveColor == PieceColor.White;
+            var maximizing = board.ActiveColor == Pieces.White;
 
             if (!legalMoves.Any())
             {

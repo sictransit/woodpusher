@@ -1,12 +1,14 @@
 ﻿using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class KnightMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces position)
         {
-            var square = position.Square;
+            var square = position.GetSquare();
 
             foreach (var df in new[] { -2, -1, 1, 2 })
             {

@@ -6,9 +6,9 @@ namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class PawnMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Pieces position)
         {
-            var square = position.Square;
+            var square = position.GetSquare();
             var rank = square.Rank;
 
             if (rank is 7 or 0)
@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Common.Movement
             int doubleStepRank;
             int enPassantRank;
 
-            if (position.Piece.Color == PieceColor.White)
+            if (position.Is(Pieces.White))
             {
                 dRank = 1;
                 promoteRank = 6;
@@ -44,7 +44,7 @@ namespace SicTransit.Woodpusher.Common.Movement
                 {
                     if (Square.TryCreate(file + dFile, rank + dRank, out var promoteSquare))
                     {
-                        foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
+                        foreach (var promotionType in new[] { Pieces.Queen, Pieces.Rook, Pieces.Bishop, Pieces.Knight })
                         {
                             yield return new[] { new Move(position, promoteSquare.ToMask(), SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
                         }

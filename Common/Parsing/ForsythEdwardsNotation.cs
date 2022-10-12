@@ -29,8 +29,8 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var activeColor = ParseActiveColour(parts[1]);
 
-            var whiteCastling = ParseCastling(parts[2], PieceColor.White);
-            var blackCastling = ParseCastling(parts[2], PieceColor.Black);
+            var whiteCastling = ParseCastling(parts[2], Pieces.White);
+            var blackCastling = ParseCastling(parts[2], Pieces.Black);
 
             var enPassantTarget = ParseEnPassantTarget(parts[3]);
 
@@ -56,8 +56,8 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var rank = 7;
 
-            Bitboard white = new(PieceColor.White);
-            Bitboard black = new(PieceColor.Black);
+            Bitboard white = new(Pieces.White);
+            Bitboard black = new(Pieces.Black);
 
             foreach (var part in parts)
             {
@@ -75,13 +75,13 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
                         var piece = c.ToPiece();
 
-                        if (piece.Color == PieceColor.White)
+                        if (piece.Is(Pieces.White))
                         {
-                            white = white.Add(piece.Type, square.ToMask());
+                            white = white.Add(piece.SetSquare(square));
                         }
                         else
                         {
-                            black = black.Add(piece.Type, square.ToMask());
+                            black = black.Add(piece.SetSquare(square));
                         }
                     }
                 }
@@ -111,7 +111,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             return new Square(s);
         }
 
-        private static PieceColor ParseActiveColour(string s)
+        private static Pieces ParseActiveColour(string s)
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {
@@ -120,12 +120,12 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             return s.Single() switch
             {
-                'w' => PieceColor.White,
-                _ => PieceColor.Black,
+                'w' => Pieces.White,
+                _ => Pieces.Black,
             };
         }
 
-        private static Castlings ParseCastling(string s, PieceColor pieceColor)
+        private static Castlings ParseCastling(string s, Pieces pieceColor)
         {
             if (!Regex.IsMatch(s, "^K?Q?k?q?$") && !Regex.IsMatch(s, "^-$"))
             {
@@ -138,16 +138,16 @@ namespace SicTransit.Woodpusher.Common.Parsing
             {
                 switch (c)
                 {
-                    case 'K' when pieceColor == PieceColor.White:
+                    case 'K' when pieceColor.Is(Pieces.White):
                         castlings |= Castlings.Kingside;
                         break;
-                    case 'Q' when pieceColor == PieceColor.White:
+                    case 'Q' when pieceColor.Is(Pieces.White):
                         castlings |= Castlings.Queenside;
                         break;
-                    case 'k' when pieceColor == PieceColor.Black:
+                    case 'k' when pieceColor.Is(Pieces.Black):
                         castlings |= Castlings.Kingside;
                         break;
-                    case 'q' when pieceColor == PieceColor.Black:
+                    case 'q' when pieceColor.Is(Pieces.Black):
                         castlings |= Castlings.Queenside;
                         break;
                 }

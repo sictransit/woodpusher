@@ -5,6 +5,7 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -98,7 +99,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Assert.IsTrue(suggestedMoves.Any(m => m.Equals(algebraicMove)));
 
-                var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 Assert.IsNotNull(move);
 

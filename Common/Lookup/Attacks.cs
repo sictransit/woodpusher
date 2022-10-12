@@ -7,36 +7,34 @@ namespace SicTransit.Woodpusher.Common.Lookup
 {
     public class Attacks
     {
-        private readonly Dictionary<PieceColor, Dictionary<ulong, ThreatMask>> threatMasks = new();
+        private readonly Dictionary<Pieces, ThreatMask> threatMasks = new();
 
         public Attacks()
         {
             Initialize();
         }
 
-        public ThreatMask GetThreatMask(PieceColor pieceColor, ulong current) => threatMasks[pieceColor][current];
+        public ThreatMask GetThreatMask(Pieces piece) => threatMasks[piece];
 
         private void Initialize()
         {
-            foreach (var color in new[] { PieceColor.White, PieceColor.Black })
+            foreach (var color in new[] { Pieces.White, Pieces.Black })
             {
-                threatMasks.Add(color, new Dictionary<ulong, ThreatMask>());
-
                 var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
 
                 foreach (var square in squares)
                 {
-                    var queenMask = QueenMovement.GetTargetVectors(new Position(new Piece(PieceType.Queen, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var bishopMask = BishopMovement.GetTargetVectors(new Position(new Piece(PieceType.Bishop, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var knightMask = KnightMovement.GetTargetVectors(new Position(new Piece(PieceType.Knight, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var rookMask = RookMovement.GetTargetVectors(new Position(new Piece(PieceType.Rook, color), square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var kingMask = KingMovement.GetTargetVectors(new Position(new Piece(PieceType.King, color.OpponentColor()), square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var queenMask = QueenMovement.GetTargetVectors((Pieces.Queen| color).SetSquare( square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var bishopMask = BishopMovement.GetTargetVectors((Pieces.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var knightMask = KnightMovement.GetTargetVectors((Pieces.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var rookMask = RookMovement.GetTargetVectors((Pieces.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var kingMask = KingMovement.GetTargetVectors((Pieces.Queen | color.OpponentColor()).SetSquare(square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
 
                     var pawnMask = 0ul;
 
                     switch (color)
                     {
-                        case PieceColor.White when square.Rank < 6:
+                        case Pieces.White when square.Rank < 6:
                             {
                                 if (Square.TryCreate(square.File - 1, square.Rank + 1, out var upLeft))
                                 {
@@ -49,7 +47,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
                                 break;
                             }
-                        case PieceColor.Black when square.Rank > 1:
+                        case Pieces.Black when square.Rank > 1:
                             {
                                 if (Square.TryCreate(square.File - 1, square.Rank - 1, out var downLeft))
                                 {
@@ -64,7 +62,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                             }
                     }
 
-                    threatMasks[color].Add(square.ToMask(), new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
+                    threatMasks.Add(color.SetSquare( square), new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
                 }
             }
         }
