@@ -47,13 +47,12 @@ namespace SicTransit.Woodpusher.Common.Lookup
             foreach (var position in positions)
             {
                 var mask = 0ul;
-                var sign = position.Piece.Color == PieceColor.White ? 1 : -1;
                 var minRank = position.Piece.Color == PieceColor.White ? position.Square.Rank + 1 : 1;
                 var maxRank = position.Piece.Color == PieceColor.White ? 6 : position.Square.Rank - 1;
 
                 foreach (var dFile in new[] { -1, 0, 1 })
                 {
-                    for (int rank = minRank; rank <= maxRank; rank++)
+                    for (var rank = minRank; rank <= maxRank; rank++)
                     {
                         if (Square.TryCreate(position.Square.File + dFile, rank, out var square))
                         {

@@ -42,7 +42,7 @@ namespace SicTransit.Woodpusher.Common
             return BitConverter.ToString(Hash).Replace("-", "");
         }
 
-        public byte[] Hash
+        private byte[] Hash
         {
             get
             {
@@ -81,7 +81,7 @@ namespace SicTransit.Woodpusher.Common
 
             var legalMoves = GetLegalMoves().ToArray();
 
-            foreach (AlgebraicMove algebraicMove in moves)
+            foreach (var algebraicMove in moves)
             {
                 yield return legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
             }
@@ -221,7 +221,7 @@ namespace SicTransit.Woodpusher.Common
 
         private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;
 
-        public bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
+        private bool IsOccupied(ulong mask, PieceColor color) => GetBitboard(color).IsOccupied(mask);
 
         private Bitboard GetBitboard(PieceColor color) => color == PieceColor.White ? white : black;
 

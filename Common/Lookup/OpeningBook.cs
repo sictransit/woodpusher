@@ -11,7 +11,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private Dictionary<string, HashSet<string>> book = new();
 
-        private static readonly string bookFilename = Path.Combine(@"Resources\eco.json");
+        private static readonly string BookFilename = Path.Combine(@"Resources\eco.json");
 
         public OpeningBook()
         {
@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void LoadFromFile(string? filename = null)
         {
-            filename ??= bookFilename;
+            filename ??= BookFilename;
 
             if (!File.Exists(filename))
             {
@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void SaveToFile(string? filename = null)
         {
-            filename ??= bookFilename;
+            filename ??= BookFilename;
 
             var json = JsonConvert.SerializeObject(book, Formatting.Indented);
 
@@ -49,18 +49,13 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                book.Add(hash, new HashSet<string>() { move.ToAlgebraicMoveNotation() });
+                book.Add(hash, new HashSet<string> { move.ToAlgebraicMoveNotation() });
             }
         }
 
         public IEnumerable<AlgebraicMove> GetMoves(string hash)
         {
-            if (book.TryGetValue(hash, out var moves))
-            {
-                return moves.Select(m => AlgebraicMove.Parse(m));
-            }
-
-            return Enumerable.Empty<AlgebraicMove>();
+            return book.TryGetValue(hash, out var moves) ? moves.Select(AlgebraicMove.Parse) : Enumerable.Empty<AlgebraicMove>();
         }
     }
 }

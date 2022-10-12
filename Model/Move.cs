@@ -11,10 +11,14 @@ namespace SicTransit.Woodpusher.Model
             Target = target;
             Flags = flags;
             EnPassantTarget = enPassantTarget;
-            EnPassantMask = enPassantTarget == 0 ? 0 : Position.Piece.Color == PieceColor.White ? enPassantTarget.AddFileAndRank(0, -1) : enPassantTarget.AddFileAndRank(0, 1);
             CastlingCheckMask = castlingCheckMask;
             CastlingEmptySquaresMask = castlingEmptyMask;
             PromotionType = promotionType;
+
+            if (enPassantTarget != 0)
+            {
+                EnPassantMask = enPassantTarget.AddFileAndRank(0, Position.Piece.Color == PieceColor.White ? -1 : 1);
+            }
         }
 
         public Move(Position position, Square target, SpecialMove flags = SpecialMove.None) : this(position, target.ToMask(), flags)
@@ -41,7 +45,7 @@ namespace SicTransit.Woodpusher.Model
 
         public override string ToString()
         {
-            return $"{Position}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty)); ;
+            return $"{Position}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty)); 
         }
     }
 }

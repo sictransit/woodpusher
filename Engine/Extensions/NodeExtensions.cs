@@ -1,10 +1,12 @@
-﻿namespace SicTransit.Woodpusher.Engine.Extensions
+﻿using SicTransit.Woodpusher.Common.Lookup;
+
+namespace SicTransit.Woodpusher.Engine.Extensions
 {
     public static class NodeExtensions
     {
         public static int? MateIn(this Node n)
         {
-            var mateIn = Math.Abs(Math.Abs(n.Score) - Patzer.MATE_SCORE);
+            var mateIn = Math.Abs(Math.Abs(n.Score) - Scoring.MateScore);
 
             if (mateIn < 80)
             {
