@@ -201,7 +201,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            var halfmoveClock = (move.Piece.Is(Piece.Pawn) || targetPieceType.GetPieceType() != Piece.None) ? 0 : Counters.HalfmoveClock + 1;
+            var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPieceType.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
@@ -224,11 +224,11 @@ namespace SicTransit.Woodpusher.Common
 
         private ulong FindKing(Piece color) => GetBitboard(color).King;
 
-        public IEnumerable<Piece> GetPieces(Piece pieceColor) => GetBitboard(pieceColor).GetPieces();
+        public IEnumerable<Piece> GetPieces(Piece color) => GetBitboard(color).GetPieces();
 
-        public IEnumerable<Piece> GetPieces(Piece pieceColor, Piece pieceType) => GetBitboard(pieceColor).GetPieces(pieceType);
+        public IEnumerable<Piece> GetPieces(Piece color, Piece type) => GetPieces(color, type, ulong.MaxValue);
 
-        private IEnumerable<Piece> GetPieces(Piece pieceColor, Piece pieceType, ulong mask) => GetBitboard(pieceColor).GetPieces(pieceType, mask);
+        private IEnumerable<Piece> GetPieces(Piece color, Piece type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
 
         public IEnumerable<Piece> GetAttackers(ulong target, Piece color)
         {
@@ -332,7 +332,7 @@ namespace SicTransit.Woodpusher.Common
         private bool ValidateMove(Move move)
         {
             // taking own piece
-            if (IsOccupied(move.Target, move.Piece.GetColor()))
+            if (IsOccupied(move.Target, move.Piece))
             {
                 return false;
             }

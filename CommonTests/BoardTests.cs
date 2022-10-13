@@ -25,8 +25,8 @@ namespace SicTransit.Woodpusher.Common.Tests
         {
             IBoard board = new Board();
 
-            var whiteKing = (Piece.King | Piece.White);
-            var blackKing = (Piece.King | Piece.None);
+            var whiteKing = Piece.King | Piece.White;
+            var blackKing = Piece.King | Piece.None;
 
             var e1 = new Square("e1");
 
@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         {
             IBoard board = new Board();
 
-            var whitePawn = (Piece.Pawn | Piece.White);
+            var whitePawn = Piece.Pawn | Piece.White;
 
             for (var f = 0; f < 8; f++)
             {
@@ -90,10 +90,10 @@ namespace SicTransit.Woodpusher.Common.Tests
         {
             IBoard board = new Board();
 
-            var blackPawn1 = (Piece.Pawn | Piece.None);
+            var blackPawn1 = Piece.Pawn | Piece.None;
             var e2 = new Square("e2");
 
-            var blackPawn2 = (Piece.Pawn | Piece.None);
+            var blackPawn2 = Piece.Pawn | Piece.None;
             var e3 = new Square("e3");
 
             var blackPawn3 = Piece.Pawn | Piece.None;

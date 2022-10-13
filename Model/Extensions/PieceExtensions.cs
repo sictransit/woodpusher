@@ -37,7 +37,6 @@ public static class PieceExtensions
             if (p.HasFlag(pieceType.Item1))
             {
                 return pieceType.Item2;
-                ;
             }
         }
 
@@ -56,8 +55,7 @@ public static class PieceExtensions
         'K' => Piece.King,
         _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
     };
-
-
+    
     public static Piece ToPiece(this char c)
     {
         var type = ToPieceType(char.ToUpperInvariant(c));

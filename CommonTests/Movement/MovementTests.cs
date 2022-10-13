@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         {
             var piece = (pieceType | pieceColor).SetSquare(new Square(square));
 
-            IEnumerable<IEnumerable<Move>> moves = pieceType switch
+            var moves = pieceType switch
             {
                 Piece.Pawn => PawnMovement.GetTargetVectors(piece),
                 Piece.Knight => KnightMovement.GetTargetVectors(piece),
