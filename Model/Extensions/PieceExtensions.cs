@@ -55,7 +55,7 @@ public static class PieceExtensions
         'K' => Piece.King,
         _ => throw new NotImplementedException($"No idea how to parse this piece: '{c}'"),
     };
-    
+
     public static Piece ToPiece(this char c)
     {
         var type = ToPieceType(char.ToUpperInvariant(c));

@@ -375,9 +375,40 @@ e8f7: 1
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
         }
 
+        [TestMethod()]
+        [Ignore("long running: did not finish in 40 minutes")]
+        public void Perft7StartingPositionTest()
+        {
+            var stockfish = @"
+a2a3: 106743106
+b2b3: 133233975
+c2c3: 144074944
+d2d3: 227598692
+e2e3: 306138410
+f2f3: 102021008
+g2g3: 135987651
+h2h3: 106678423
+a2a4: 137077337
+b2b4: 134087476
+c2c4: 157756443
+d2d4: 269605599
+e2e4: 309478263
+f2f4: 119614841
+g2g4: 130293018
+h2h4: 138495290
+b1a3: 120142144
+b1c3: 148527161
+g1f3: 147678554
+g1h3: 120669525
+";
+
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            Assert.IsTrue(PerftAndCompare(board, stockfish, 7));
+        }
 
         [TestMethod()]
-        [Ignore("long running: 1,1 min on release/laptop")]
+        [Ignore("long running: 54 sec on release/laptop")]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"
