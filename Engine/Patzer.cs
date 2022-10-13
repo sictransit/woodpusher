@@ -117,7 +117,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
+                            var score = EvaluateBoard(Board, node, maxDepth, 1, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -160,13 +160,15 @@ namespace SicTransit.Woodpusher.Engine
             callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }
 
-        private int EvaluateBoard(IBoard board, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            var legalMoves = board.GetLegalMoves();
+            board = board.PlayMove(node.Move);
+
+            var moves = board.GetLegalMoves();
 
             var maximizing = board.ActiveColor == Piece.White;
 
-            if (!legalMoves.Any())
+            if (!moves.Any())
             {
                 var mateScore = maximizing ? -Scoring.MateScore + depth + 1 : Scoring.MateScore - (depth + 1);
                 return board.IsChecked ? mateScore : Scoring.DrawScore;
@@ -179,11 +181,11 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? -Scoring.MateScore * 2 : Scoring.MateScore * 2;
 
-            foreach (var move in legalMoves)
+            foreach (var move in moves)
             {
                 nodeCount++;
 
-                var score = EvaluateBoard(board.PlayMove(move), maxDepth, depth + 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board, new Node(move), maxDepth, depth + 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {
