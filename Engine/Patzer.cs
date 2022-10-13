@@ -166,7 +166,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var moves = board.GetLegalMoves();
 
-            var maximizing = board.ActiveColor == Piece.White;
+            var maximizing = board.ActiveColor.Is(Piece.White);
 
             if (!moves.Any())
             {
