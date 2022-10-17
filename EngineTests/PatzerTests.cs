@@ -173,9 +173,10 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        public void PromotionIsAGoodIdea()
+        public void PromotionIsNotTheBestMoveAfterAll()
         {
             // The engine was making no-op moves instead of promoting.
+            // ... and it turns out that Stockfish agrees.
 
             var patzer = new Patzer();
 
@@ -183,7 +184,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestmove = patzer.FindBestMove(5000);
 
-            Assert.AreEqual("g2g1q", bestmove.Notation);
+            Assert.AreEqual("g4e6", bestmove.Notation);
         }
 
         [TestMethod]
