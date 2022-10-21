@@ -80,7 +80,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var openingMoves = Board.GetOpeningBookMoves();
 
-            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
+            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m, MaxDepth)).ToList();
 
             if (!nodes.Any())
             {
@@ -97,9 +97,9 @@ namespace SicTransit.Woodpusher.Engine
                 MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
             };
 
-            var maxDepth = 1;
+            var depth = 1;
 
-            while (!cancellationTokenSource.IsCancellationRequested && maxDepth <= MaxDepth)
+            while (!cancellationTokenSource.IsCancellationRequested && depth < MaxDepth)
             {
                 if (nodes.Count <= 1)
                 {
@@ -117,7 +117,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board, node, maxDepth, 1, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
+                            var score = EvaluateBoard(Board, node, depth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -125,7 +125,7 @@ namespace SicTransit.Woodpusher.Engine
 
                                 if (infoCallback != null)
                                 {
-                                    SendInfo(infoCallback, maxDepth, nodeCount, node, stopwatch.ElapsedMilliseconds, new[] { node.Move });
+                                    SendInfo(infoCallback, depth + 1, nodeCount, node, stopwatch.ElapsedMilliseconds);
                                 }
                             }
                         });
@@ -136,7 +136,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                maxDepth += 2;
+                depth += 2;
             }
 
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
@@ -148,9 +148,9 @@ namespace SicTransit.Woodpusher.Engine
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private static void SendInfo(Action<string> callback, int depth, long nodes, Node node, long time, IEnumerable<Move> line)
+        private static void SendInfo(Action<string> callback, int depth, long nodes, Node node, long time)
         {
-            var preview = string.Join(" ", line.Select(m => m.ToAlgebraicMoveNotation()));
+            var preview = string.Join(" ", node.GetLine().Select(m => m.ToAlgebraicMoveNotation()));
 
             var mateIn = node.MateIn();
             var score = mateIn.HasValue ? $"mate {mateIn}" : $"cp {node.AbsoluteScore}";
@@ -162,12 +162,13 @@ namespace SicTransit.Woodpusher.Engine
 
         private int EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            board = board.PlayMove(node.Move);
+            board = board.PlayMove(node.Line[depth]);
 
             var moves = board.GetLegalMoves();
 
             var maximizing = board.ActiveColor.Is(Piece.White);
 
+            // ReSharper disable once PossibleMultipleEnumeration
             if (!moves.Any())
             {
                 var mateScore = maximizing ? -Scoring.MateScore + depth + 1 : Scoring.MateScore - (depth + 1);
@@ -181,11 +182,13 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? -Scoring.MateScore * 2 : Scoring.MateScore * 2;
 
+            // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
             {
+                node.Line[depth + 1] = move;
                 nodeCount++;
 
-                var score = EvaluateBoard(board, new Node(move), maxDepth, depth + 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board, node, maxDepth, depth + 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {

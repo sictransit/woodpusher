@@ -7,14 +7,19 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Node
     {
-        public Node(Move move)
+        public Node(Move move, int maxDepth)
         {
-            Move = move;
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
             Score = -Sign * Scoring.MateScore * 2;
+            Line = new Move[maxDepth];
+            Line[0] = move;
         }
 
-        public Move Move { get; }
+        public Move[] Line { get; }
+
+        public IEnumerable<Move> GetLine() => Line.TakeWhile(m => m != null);
+
+        public Move Move => Line[0];
 
         public int Score { get; set; }
 
@@ -26,6 +31,5 @@ namespace SicTransit.Woodpusher.Engine
         {
             return $"{Move} {Score}";
         }
-
     }
 }

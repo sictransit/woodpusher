@@ -216,7 +216,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
+            Assert.IsTrue(infos.Any(i => i.Contains("mate 3")));
         }
 
         [TestMethod()]
