@@ -21,8 +21,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
-        private long nodeCount;
-
         private const int MaxDepth = 16;
 
         public Patzer()
@@ -75,7 +73,6 @@ namespace SicTransit.Woodpusher.Engine
                 }
             });
 
-            nodeCount = 0;
             stopwatch.Restart();
 
             var openingMoves = Board.GetOpeningBookMoves();
@@ -125,7 +122,7 @@ namespace SicTransit.Woodpusher.Engine
 
                                 if (infoCallback != null)
                                 {
-                                    SendInfo(infoCallback, depth + 1, nodeCount, node, stopwatch.ElapsedMilliseconds);
+                                    SendInfo(infoCallback, depth + 1, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
                                 }
                             }
                         });
@@ -143,7 +140,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
 
-            Log.Debug($"evaluated {nodeCount} nodes, found: {bestNode}");
+            Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
             return new AlgebraicMove(bestNode.Move);
         }
@@ -186,7 +183,7 @@ namespace SicTransit.Woodpusher.Engine
             foreach (var move in moves)
             {
                 node.Line[depth + 1] = move;
-                nodeCount++;
+                node.Count++;
 
                 var score = EvaluateBoard(board, node, maxDepth, depth + 1, alpha, beta, cancellationToken);
 
