@@ -94,9 +94,9 @@ namespace SicTransit.Woodpusher.Engine
                 MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
             };
 
-            var depth = 0;
+            var maxDepth = 0;
 
-            while (!cancellationTokenSource.IsCancellationRequested && depth < MaxDepth)
+            while (!cancellationTokenSource.IsCancellationRequested && maxDepth < MaxDepth)
             {
                 if (nodes.Count() <= 1)
                 {
@@ -114,16 +114,36 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board.PlayMove(node.Move), node, depth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
-
-                            if (!cancellationToken.IsCancellationRequested)
+                            try
                             {
-                                node.Score = score;
+                                var score = EvaluateBoard(Board.PlayMove(node.Move), node, maxDepth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
+                                if (score.HasValue)
+                                {
+                                    node.Score = score.Value;
+
+                                    if (infoCallback != null)
+                                    {
+                                        SendInfo(infoCallback, maxDepth + 1, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {maxDepth}");
+                                }
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
                                 if (infoCallback != null)
                                 {
-                                    SendInfo(infoCallback, depth + 1, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
+                                    SendExceptionInfo(infoCallback, ex);
                                 }
+
+                                throw;
                             }
                         });
                     }
@@ -133,7 +153,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                depth += 1;
+                maxDepth++;
             }
 
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
@@ -144,6 +164,12 @@ namespace SicTransit.Woodpusher.Engine
 
             return new AlgebraicMove(bestNode.Move);
         }
+
+        private static void SendExceptionInfo(Action<string> callback, Exception exception)
+        {
+            callback.Invoke($"info string exception {exception.GetType().Name} {exception.Message}");
+        }
+
 
         private static void SendInfo(Action<string> callback, int depth, long nodes, Node node, long time)
         {
@@ -157,8 +183,13 @@ namespace SicTransit.Woodpusher.Engine
             callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }
 
-        private int EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private int? EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return null;
+            }
+
             var moves = board.GetLegalMoves();
 
             var maximizing = board.ActiveColor.Is(Piece.White);
@@ -170,7 +201,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? mateScore : Scoring.DrawScore;
             }
 
-            if (depth == maxDepth || cancellationToken.IsCancellationRequested)
+            if (depth == maxDepth)
             {
                 return board.Score;
             }
@@ -184,12 +215,17 @@ namespace SicTransit.Woodpusher.Engine
 
                 var score = EvaluateBoard(board.PlayMove(move), node, maxDepth, depth + 1, alpha, beta, cancellationToken);
 
+                if (!score.HasValue)
+                {
+                    break;
+                }
+
                 if (maximizing)
                 {
                     if (score > bestScore)
                     {
                         node.Line[depth + 1] = move;
-                        bestScore = score;
+                        bestScore = score.Value;
                     }
 
                     if (bestScore >= beta)
@@ -204,7 +240,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (score < bestScore)
                     {
                         node.Line[depth + 1] = move;
-                        bestScore = score;
+                        bestScore = score.Value;
                     }
 
                     if (bestScore <= alpha)
