@@ -7,6 +7,7 @@ using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -96,13 +97,8 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = 0;
 
-            while (!cancellationTokenSource.IsCancellationRequested && maxDepth < MaxDepth)
+            while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1 && maxDepth < MaxDepth )
             {
-                if (nodes.Count() <= 1)
-                {
-                    break;
-                }
-
                 if (nodes.Any(n => n.MateIn().HasValue && n.MateIn() > 0))
                 {
                     break;
@@ -124,7 +120,7 @@ namespace SicTransit.Woodpusher.Engine
 
                                     if (infoCallback != null)
                                     {
-                                        SendInfo(infoCallback, maxDepth + 1, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
+                                        SendAnalysisInfo(infoCallback, maxDepth + 1, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
                                     }
                                 }
                                 else
@@ -165,13 +161,18 @@ namespace SicTransit.Woodpusher.Engine
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private static void SendExceptionInfo(Action<string> callback, Exception exception)
+        private static void SendInfo(Action<string> callback, string info)
         {
-            callback.Invoke($"info string exception {exception.GetType().Name} {exception.Message}");
+            callback.Invoke($"info {info}");
         }
 
 
-        private static void SendInfo(Action<string> callback, int depth, long nodes, Node node, long time)
+        private static void SendExceptionInfo(Action<string> callback, Exception exception)
+        {
+            SendInfo(callback, $"string exception {exception.GetType().Name} {exception.Message}");
+        }
+
+        private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, long time)
         {
             var preview = string.Join(" ", node.GetLine().Select(m => m.ToAlgebraicMoveNotation()));
 
@@ -180,7 +181,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
+            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }
 
         private int? EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
