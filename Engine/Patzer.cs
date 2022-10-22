@@ -94,11 +94,11 @@ namespace SicTransit.Woodpusher.Engine
                 MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
             };
 
-            var depth = 1;
+            var depth = 0;
 
             while (!cancellationTokenSource.IsCancellationRequested && depth < MaxDepth)
             {
-                if (nodes.Count <= 1)
+                if (nodes.Count() <= 1)
                 {
                     break;
                 }
@@ -114,7 +114,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board, node, depth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
+                            var score = EvaluateBoard(Board.PlayMove(node.Move), node, depth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
                             if (!cancellationToken.IsCancellationRequested)
                             {
@@ -133,7 +133,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                depth += 2;
+                depth += 1;
             }
 
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
@@ -159,8 +159,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private int EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            board = board.PlayMove(node.Line[depth]);
-
             var moves = board.GetLegalMoves();
 
             var maximizing = board.ActiveColor.Is(Piece.White);
@@ -181,15 +179,18 @@ namespace SicTransit.Woodpusher.Engine
 
             // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
-            {
-                node.Line[depth + 1] = move;
+            {                
                 node.Count++;
 
-                var score = EvaluateBoard(board, node, maxDepth, depth + 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.PlayMove(move), node, maxDepth, depth + 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {
-                    bestScore = Math.Max(bestScore, score);
+                    if (score > bestScore)
+                    {
+                        node.Line[depth + 1] = move;
+                        bestScore = score;
+                    }                    
 
                     if (bestScore >= beta)
                     {
@@ -200,7 +201,11 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    bestScore = Math.Min(bestScore, score);
+                    if (score < bestScore)
+                    {
+                        node.Line[depth + 1] = move;
+                        bestScore = score;
+                    }
 
                     if (bestScore <= alpha)
                     {
