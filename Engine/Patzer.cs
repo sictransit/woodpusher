@@ -179,7 +179,7 @@ namespace SicTransit.Woodpusher.Engine
 
             // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
-            {                
+            {
                 node.Count++;
 
                 var score = EvaluateBoard(board.PlayMove(move), node, maxDepth, depth + 1, alpha, beta, cancellationToken);
@@ -190,7 +190,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         node.Line[depth + 1] = move;
                         bestScore = score;
-                    }                    
+                    }
 
                     if (bestScore >= beta)
                     {
