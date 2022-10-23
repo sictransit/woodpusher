@@ -94,7 +94,7 @@ namespace SicTransit.Woodpusher.Engine
                 MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
             };
 
-            var maxDepth = 0;
+            var maxDepth = 1;
 
             while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1 && maxDepth < MaxDepth)
             {
@@ -148,7 +148,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                maxDepth++;
+                maxDepth+=2;
             }
 
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();

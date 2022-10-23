@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
+﻿using Serilog;
+using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -83,7 +84,11 @@ namespace SicTransit.Woodpusher.Common
 
             foreach (var algebraicMove in moves)
             {
-                yield return legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+                var move =  legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+                
+                Log.Information($"Found opening book move: {move}");
+
+                yield return move;
             }
         }
 
