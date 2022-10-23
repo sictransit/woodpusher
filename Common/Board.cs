@@ -115,10 +115,9 @@ namespace SicTransit.Woodpusher.Common
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
 
-            var whiteCastlings = Counters.WhiteCastlings;
-            var blackCastlings = Counters.BlackCastlings;
+            var castlings = Counters.Castlings;
 
-            if (whiteCastlings != Castlings.None || blackCastlings != Castlings.None)
+            if (castlings != Castlings.None)
             {
                 if (move.Piece.Is(Piece.King))
                 {
@@ -126,7 +125,7 @@ namespace SicTransit.Woodpusher.Common
 
                     if (ActiveColor.Is(Piece.White))
                     {
-                        whiteCastlings = Castlings.None;
+                        castlings &= ~(Castlings.WhiteKingside | Castlings.WhiteQueenside);
 
                         if (move.Flags.HasFlag(SpecialMove.CastleQueen))
                         {
@@ -139,7 +138,7 @@ namespace SicTransit.Woodpusher.Common
                     }
                     else
                     {
-                        blackCastlings = Castlings.None;
+                        castlings &= ~(Castlings.BlackKingside | Castlings.BlackQueenside);
 
                         if (move.Flags.HasFlag(SpecialMove.CastleQueen))
                         {
@@ -160,56 +159,56 @@ namespace SicTransit.Woodpusher.Common
                 {
                     if (ActiveColor.Is(Piece.White))
                     {
-                        if (move.Piece.Equals(BoardInternals.WhiteKingsideRook))
+                        if (move.Piece == BoardInternals.WhiteKingsideRook)
                         {
-                            whiteCastlings &= ~Castlings.Kingside;
+                            castlings &= ~Castlings.WhiteKingside;
                         }
-                        else if (move.Piece.Equals(BoardInternals.WhiteQueensideRook))
+                        else if (move.Piece == BoardInternals.WhiteQueensideRook)
                         {
-                            whiteCastlings &= ~Castlings.Queenside;
+                            castlings &= ~Castlings.WhiteQueenside;
                         }
 
                         if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
                         {
-                            blackCastlings &= ~Castlings.Kingside;
+                            castlings &= ~Castlings.BlackKingside;
                         }
                         else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
                         {
-                            blackCastlings &= ~Castlings.Queenside;
+                            castlings &= ~Castlings.BlackQueenside;
                         }
                     }
                     else
                     {
-                        if (move.Piece.Equals(BoardInternals.BlackKingsideRook))
+                        if (move.Piece == BoardInternals.BlackKingsideRook)
                         {
-                            blackCastlings &= ~Castlings.Kingside;
+                            castlings &= ~Castlings.BlackKingside;
                         }
-                        else if (move.Piece.Equals(BoardInternals.BlackQueensideRook))
+                        else if (move.Piece == BoardInternals.BlackQueensideRook)
                         {
-                            blackCastlings &= ~Castlings.Queenside;
+                            castlings &= ~Castlings.BlackQueenside;
                         }
 
                         if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
                         {
-                            whiteCastlings &= ~Castlings.Kingside;
+                            castlings &= ~Castlings.WhiteKingside;
                         }
                         else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
                         {
-                            whiteCastlings &= ~Castlings.Queenside;
+                            castlings &= ~Castlings.WhiteQueenside;
                         }
                     }
                 }
             }
-
-            var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPieceType.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
                 activeBitboard = activeBitboard.Remove(Piece.Pawn.SetMask(move.Target)).Add(move.PromotionType.SetMask(move.Target));
             }
 
+            var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPieceType.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
+
             var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor.Is(Piece.White) ? 0 : 1);
-            var counters = new Counters(ActiveColor.OpponentColor(), whiteCastlings, blackCastlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
+            var counters = new Counters(ActiveColor.OpponentColor(), castlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
             return ActiveColor.Is(Piece.White)
                 ? new Board(activeBitboard, opponentBitboard, counters, internals)
@@ -356,14 +355,12 @@ namespace SicTransit.Woodpusher.Common
             }
             else if (move.Piece.Is(Piece.King) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
             {
-                var castlings = ActiveColor == Piece.White ? Counters.WhiteCastlings : Counters.BlackCastlings;
-
-                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !castlings.HasFlag(Castlings.Queenside))
+                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !Counters.Castlings.HasFlag(ActiveColor.Is(Piece.White) ? Castlings.WhiteQueenside : Castlings.BlackQueenside))
                 {
                     return false;
                 }
 
-                if (move.Flags.HasFlag(SpecialMove.CastleKing) && !castlings.HasFlag(Castlings.Kingside))
+                if (move.Flags.HasFlag(SpecialMove.CastleKing) && !Counters.Castlings.HasFlag(ActiveColor.Is(Piece.White) ? Castlings.WhiteKingside : Castlings.BlackKingside))
                 {
                     return false;
                 }

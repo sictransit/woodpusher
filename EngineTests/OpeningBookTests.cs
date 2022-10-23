@@ -73,7 +73,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             openingBook.SaveToFile("test.json");
             openingBook.LoadFromFile("test.json");
 
-            var moves = openingBook.GetMoves("AE220C88323102782F94B87DDAD71A60");
+            var moves = openingBook.GetMoves("97BE343BDB6345A90E627E712669D97B");
 
             Assert.AreEqual(2, moves.Count());
             Assert.IsTrue(moves.Any(m => m.Notation.Equals("e7e5")));

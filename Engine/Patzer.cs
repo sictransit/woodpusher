@@ -7,7 +7,6 @@ using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -97,7 +96,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = 0;
 
-            while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1 && maxDepth < MaxDepth )
+            while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1 && maxDepth < MaxDepth)
             {
                 if (nodes.Any(n => n.MateIn().HasValue && n.MateIn() > 0))
                 {

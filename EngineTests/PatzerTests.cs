@@ -25,8 +25,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.AreEqual(Piece.White, patzer.Board.ActiveColor);
 
-            Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.WhiteCastlings);
-            Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, patzer.Board.Counters.BlackCastlings);
+            Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, patzer.Board.Counters.Castlings);
         }
 
 
