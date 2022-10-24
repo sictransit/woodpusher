@@ -84,8 +84,8 @@ namespace SicTransit.Woodpusher.Common
 
             foreach (var algebraicMove in moves)
             {
-                var move =  legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
-                
+                var move = legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+
                 Log.Information($"Found opening book move: {move}");
 
                 yield return move;

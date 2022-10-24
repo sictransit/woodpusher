@@ -98,12 +98,12 @@ namespace SicTransit.Woodpusher.Engine
 
             while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1 && maxDepth < MaxDepth)
             {
-                if (nodes.Any(n => n.MateIn().HasValue && n.MateIn() > 0))
+                if (nodes.Any(n => n.MateIn() > 0))
                 {
                     break;
                 }
 
-                foreach (var chunk in nodes.OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
+                foreach (var chunk in nodes.Where(n => !n.MateIn().HasValue).OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
                 {
                     try
                     {
@@ -113,9 +113,9 @@ namespace SicTransit.Woodpusher.Engine
                             {
                                 var score = EvaluateBoard(Board.PlayMove(node.Move), node, maxDepth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
-                                if (score.HasValue)
+                                if (!cancellationToken.IsCancellationRequested)
                                 {
-                                    node.Score = score.Value;
+                                    node.Score = score;
 
                                     if (infoCallback != null)
                                     {
@@ -124,6 +124,11 @@ namespace SicTransit.Woodpusher.Engine
                                 }
                                 else
                                 {
+                                    if (infoCallback != null)
+                                    {
+                                        SendDebugInfo(infoCallback, $"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {maxDepth + 1}");
+                                    }
+
                                     Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {maxDepth}");
                                 }
                             }
@@ -148,7 +153,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                maxDepth+=2;
+                maxDepth += 2;
             }
 
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
@@ -165,6 +170,10 @@ namespace SicTransit.Woodpusher.Engine
             callback.Invoke($"info {info}");
         }
 
+        private static void SendDebugInfo(Action<string> callback, string info)
+        {
+            SendInfo(callback, $"string debug {info}");
+        }
 
         private static void SendExceptionInfo(Action<string> callback, Exception exception)
         {
@@ -183,13 +192,8 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }
 
-        private int? EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return null;
-            }
-
             var moves = board.GetLegalMoves();
 
             var maximizing = board.ActiveColor.Is(Piece.White);
@@ -201,7 +205,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? mateScore : Scoring.DrawScore;
             }
 
-            if (depth == maxDepth)
+            if (depth == maxDepth || cancellationToken.IsCancellationRequested)
             {
                 return board.Score;
             }
@@ -215,17 +219,12 @@ namespace SicTransit.Woodpusher.Engine
 
                 var score = EvaluateBoard(board.PlayMove(move), node, maxDepth, depth + 1, alpha, beta, cancellationToken);
 
-                if (!score.HasValue)
-                {
-                    break;
-                }
-
                 if (maximizing)
                 {
                     if (score > bestScore)
                     {
                         node.Line[depth + 1] = move;
-                        bestScore = score.Value;
+                        bestScore = score;
                     }
 
                     if (bestScore >= beta)
@@ -240,7 +239,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (score < bestScore)
                     {
                         node.Line[depth + 1] = move;
-                        bestScore = score.Value;
+                        bestScore = score;
                     }
 
                     if (bestScore <= alpha)
