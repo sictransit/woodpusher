@@ -16,9 +16,8 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
         {
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
 
-            Assert.AreEqual(PieceColor.White, board.Counters.ActiveColor);
-            Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, board.Counters.WhiteCastlings);
-            Assert.AreEqual(Castlings.Kingside | Castlings.Queenside, board.Counters.BlackCastlings);
+            Assert.AreEqual(Piece.White, board.Counters.ActiveColor);
+            Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, board.Counters.Castlings);
             Assert.AreEqual(0ul, board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(1, board.Counters.FullmoveNumber);
@@ -33,15 +32,14 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
 
             Trace.WriteLine(board.PrettyPrint());
 
-            Assert.AreEqual(PieceColor.Black, board.Counters.ActiveColor);
-            Assert.AreEqual(Castlings.None, board.Counters.WhiteCastlings);
-            Assert.AreEqual(Castlings.None, board.Counters.BlackCastlings);
+            Assert.AreEqual(Piece.None, board.Counters.ActiveColor);
+            Assert.AreEqual(Castlings.None, board.Counters.Castlings);
             Assert.AreEqual(new Square("a3").ToMask(), board.Counters.EnPassantTarget);
 
-            var whiteQueens = board.GetPositions(PieceColor.White, PieceType.Queen);
-            var blackRooks = board.GetPositions(PieceColor.Black, PieceType.Rook);
-            Assert.IsTrue(whiteQueens.Any(p => p.Square.Equals(new Square("c7"))));
-            Assert.IsTrue(blackRooks.Any(p => p.Square.Equals(new Square("h5"))));
+            var whiteQueens = board.GetPieces(Piece.White, Piece.Queen);
+            var blackRooks = board.GetPieces(Piece.None, Piece.Rook);
+            Assert.IsTrue(whiteQueens.Any(p => p.GetSquare().Equals(new Square("c7"))));
+            Assert.IsTrue(blackRooks.Any(p => p.GetSquare().Equals(new Square("h5"))));
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(34, board.Counters.FullmoveNumber);
         }

@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
         {
         }
 
-        protected override Castlings Castling => Castlings.Queenside;
+        protected override Piece CastlingPiece => Piece.Queen;
 
         public override string ToString()
         {

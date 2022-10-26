@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
         {
             var sb = new StringBuilder();
 
-            var positions = b.GetPositions(PieceColor.White).Concat(b.GetPositions(PieceColor.Black)).ToList();
+            var pieces = b.GetPieces(Piece.White).Concat(b.GetPieces(Piece.None)).ToList();
 
             for (var rank = 7; rank >= 0; rank--)
             {
@@ -21,9 +21,9 @@ namespace SicTransit.Woodpusher.Common.Extensions
                 {
                     var square = new Square(file, rank);
 
-                    var position = positions.SingleOrDefault(p => p.Square.Equals(square));
+                    var piece = pieces.SingleOrDefault(p => p.GetSquare().Equals(square));
 
-                    var c = position != null ? position.Piece.ToAlgebraicNotation() : ' ';
+                    var c = piece != default ? piece.ToAlgebraicNotation() : ' ';
 
                     sb.Append($"{c} ");
                 }

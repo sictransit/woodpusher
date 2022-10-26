@@ -2,41 +2,26 @@
 using SicTransit.Woodpusher.Common.Movement;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Tests.Movement
 {
     public abstract class MovementTests
     {
-        protected static void AssertAmountOfLegalMoves(PieceType pieceType, PieceColor pieceColor, string square, int count)
+        protected static void AssertAmountOfLegalMoves(Piece pieceType, Piece pieceColor, string square, int count)
         {
-            var position = new Position(new Piece(pieceType, pieceColor), new Square(square));
+            var piece = (pieceType | pieceColor).SetSquare(new Square(square));
 
-            IEnumerable<IEnumerable<Move>> moves;
-
-            switch (pieceType)
+            var moves = pieceType switch
             {
-                case PieceType.Pawn:
-                    moves = PawnMovement.GetTargetVectors(position);
-                    break;
-                case PieceType.Knight:
-                    moves = KnightMovement.GetTargetVectors(position);
-                    break;
-                case PieceType.Bishop:
-                    moves = BishopMovement.GetTargetVectors(position);
-                    break;
-                case PieceType.Rook:
-                    moves = RookMovement.GetTargetVectors(position);
-                    break;
-                case PieceType.Queen:
-                    moves = QueenMovement.GetTargetVectors(position);
-                    break;
-                case PieceType.King:
-                    moves = KingMovement.GetTargetVectors(position);
-                    break;
-                default:
-                    throw new NotImplementedException(pieceType.ToString());
-
-            }
+                Piece.Pawn => PawnMovement.GetTargetVectors(piece),
+                Piece.Knight => KnightMovement.GetTargetVectors(piece),
+                Piece.Bishop => BishopMovement.GetTargetVectors(piece),
+                Piece.Rook => RookMovement.GetTargetVectors(piece),
+                Piece.Queen => QueenMovement.GetTargetVectors(piece),
+                Piece.King => KingMovement.GetTargetVectors(piece),
+                _ => throw new NotImplementedException(pieceType.ToString()),
+            };
 
             Assert.AreEqual(count, moves.SelectMany(m => m).Count());
         }

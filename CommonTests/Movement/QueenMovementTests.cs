@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Queen, PieceColor.White, "b2", 23);
+            AssertAmountOfLegalMoves(Piece.Queen, Piece.White, "b2", 23);
         }
     }
 }

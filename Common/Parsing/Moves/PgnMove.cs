@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             var promotionMatch = PromotionRegex.Match(s);
 
-            var promotionType = PieceType.None;
+            var promotionType = Piece.None;
 
             if (promotionMatch.Success)
             {
@@ -98,7 +98,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParsePieceOnFileMove(string s, PieceType promotionType, out PieceOnFileMove? move)
+        private static bool TryParsePieceOnFileMove(string s, Piece promotionType, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -114,7 +114,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParsePieceOnRankMove(string s, PieceType promotionType, out PieceOnRankMove? move)
+        private static bool TryParsePieceOnRankMove(string s, Piece promotionType, out PieceOnRankMove? move)
         {
             move = default;
 
@@ -130,7 +130,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             return move != default;
         }
 
-        private static bool TryParseFileMove(string s, PieceType promotionType, out PieceOnFileMove? move)
+        private static bool TryParseFileMove(string s, Piece promotionType, out PieceOnFileMove? move)
         {
             move = default;
 
@@ -140,7 +140,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(s, PieceType.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value), promotionType);
+                move = new PieceOnFileMove(s, Piece.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value), promotionType);
             }
 
             return move != default;

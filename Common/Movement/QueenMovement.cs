@@ -1,12 +1,13 @@
 ﻿using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 
 namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class QueenMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Piece piece)
         {
-            return BishopMovement.GetTargetVectors(position).Concat(RookMovement.GetTargetVectors(position));
+            return BishopMovement.GetTargetVectors(piece).Concat(RookMovement.GetTargetVectors(piece));
         }
     }
 

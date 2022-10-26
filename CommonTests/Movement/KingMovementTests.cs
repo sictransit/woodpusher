@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            AssertAmountOfLegalMoves(PieceType.King, PieceColor.Black, "e2", 8);
+            AssertAmountOfLegalMoves(Piece.King, Piece.None, "e2", 8);
         }
 
         [TestMethod]
@@ -17,20 +17,20 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         {
             foreach (var corner in new[] { "a1", "a8", "h1", "h8" })
             {
-                AssertAmountOfLegalMoves(PieceType.King, PieceColor.White, corner, 3);
+                AssertAmountOfLegalMoves(Piece.King, Piece.White, corner, 3);
             }
         }
 
         [TestMethod]
         public void GetTargetVectorsWhiteCastlingTest()
         {
-            AssertAmountOfLegalMoves(PieceType.King, PieceColor.White, "e1", 7);
+            AssertAmountOfLegalMoves(Piece.King, Piece.White, "e1", 7);
         }
 
         [TestMethod]
         public void GetTargetVectorsBlackCastlingTest()
         {
-            AssertAmountOfLegalMoves(PieceType.King, PieceColor.Black, "e8", 7);
+            AssertAmountOfLegalMoves(Piece.King, Piece.None, "e8", 7);
         }
 
     }

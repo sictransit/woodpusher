@@ -6,9 +6,9 @@ namespace SicTransit.Woodpusher.Common.Movement
 {
     public static class PawnMovement
     {
-        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Position position)
+        public static IEnumerable<IEnumerable<Move>> GetTargetVectors(Piece piece)
         {
-            var square = position.Square;
+            var square = piece.GetSquare();
             var rank = square.Rank;
 
             if (rank is 7 or 0)
@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Common.Movement
             int doubleStepRank;
             int enPassantRank;
 
-            if (position.Piece.Color == PieceColor.White)
+            if (piece.Is(Piece.White))
             {
                 dRank = 1;
                 promoteRank = 6;
@@ -44,9 +44,9 @@ namespace SicTransit.Woodpusher.Common.Movement
                 {
                     if (Square.TryCreate(file + dFile, rank + dRank, out var promoteSquare))
                     {
-                        foreach (var promotionType in new[] { PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight })
+                        foreach (var promotionType in new[] { Piece.Queen, Piece.Rook, Piece.Bishop, Piece.Knight })
                         {
-                            yield return new[] { new Move(position, promoteSquare.ToMask(), SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
+                            yield return new[] { new Move(piece, promoteSquare.ToMask(), SpecialMove.Promote | (dFile == 0 ? SpecialMove.CannotTake : SpecialMove.MustTake), promotionType: promotionType) };
                         }
                     }
                 }
@@ -54,9 +54,9 @@ namespace SicTransit.Woodpusher.Common.Movement
             else
             {
                 yield return new[] {
-                new Move(position, square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
+                new Move(piece, square.NewRank(rank + dRank), SpecialMove.CannotTake) }.Concat(
                     rank == doubleStepRank
-                    ? new[] { new Move(position, square.NewRank(rank + dRank * 2).ToMask(), SpecialMove.CannotTake, square.NewRank(rank + dRank).ToMask()) }
+                    ? new[] { new Move(piece, square.NewRank(rank + dRank * 2).ToMask(), SpecialMove.CannotTake, square.NewRank(rank + dRank).ToMask()) }
                     : Enumerable.Empty<Move>()
                     );
 
@@ -64,7 +64,7 @@ namespace SicTransit.Woodpusher.Common.Movement
                 {
                     if (Square.TryCreate(file + dFile, rank + dRank, out var takeSquare))
                     {
-                        yield return new[] { new Move(position, takeSquare, SpecialMove.MustTake) };
+                        yield return new[] { new Move(piece, takeSquare, SpecialMove.MustTake) };
                     }
                 }
 
@@ -74,7 +74,7 @@ namespace SicTransit.Woodpusher.Common.Movement
                     {
                         if (Square.TryCreate(file + dFile, rank + dRank, out var enPassantSquare))
                         {
-                            yield return new[] { new Move(position, enPassantSquare.ToMask(), SpecialMove.EnPassant, enPassantSquare.ToMask()) };
+                            yield return new[] { new Move(piece, enPassantSquare.ToMask(), SpecialMove.EnPassant, enPassantSquare.ToMask()) };
                         }
                     }
                 }

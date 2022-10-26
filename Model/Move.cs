@@ -5,9 +5,9 @@ namespace SicTransit.Woodpusher.Model
 {
     public class Move
     {
-        public Move(Position position, ulong target, SpecialMove flags, ulong enPassantTarget = 0, ulong castlingCheckMask = 0, ulong castlingEmptyMask = 0, PieceType promotionType = PieceType.None)
+        public Move(Piece piece, ulong target, SpecialMove flags, ulong enPassantTarget = 0, ulong castlingCheckMask = 0, ulong castlingEmptyMask = 0, Piece promotionType = Piece.None)
         {
-            Position = position;
+            Piece = piece;
             Target = target;
             Flags = flags;
             EnPassantTarget = enPassantTarget;
@@ -17,15 +17,15 @@ namespace SicTransit.Woodpusher.Model
 
             if (enPassantTarget != 0)
             {
-                EnPassantMask = enPassantTarget.AddFileAndRank(0, Position.Piece.Color == PieceColor.White ? -1 : 1);
+                EnPassantMask = enPassantTarget.AddFileAndRank(0, Piece.Is(Piece.White) ? -1 : 1);
             }
         }
 
-        public Move(Position position, Square target, SpecialMove flags = SpecialMove.None) : this(position, target.ToMask(), flags)
+        public Move(Piece piece, Square target, SpecialMove flags = SpecialMove.None) : this(piece, target.ToMask(), flags)
         {
         }
 
-        public Position Position { get; }
+        public Piece Piece { get; }
 
         public Square GetTarget() => Target.ToSquare();
 
@@ -37,7 +37,7 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong CastlingEmptySquaresMask { get; }
 
-        public PieceType PromotionType { get; }
+        public Piece PromotionType { get; }
 
         public ulong EnPassantTarget { get; }
 
@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Model
 
         public override string ToString()
         {
-            return $"{Position}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty));
+            return $"{Piece.ToAlgebraicNotation()}{GetTarget()}" + (Flags == SpecialMove.None ? string.Empty : $" ({Flags})" + (Flags.HasFlag(SpecialMove.Promote) ? $" ={PromotionType}" : string.Empty));
         }
     }
 }

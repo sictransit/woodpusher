@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Lookup
         {
             var attacks = new Attacks();
 
-            var threats = attacks.GetThreatMask(PieceColor.White, new Square("e1").ToMask());
+            var threats = attacks.GetThreatMask(Piece.White.SetSquare(new Square("e1")));
 
             var pawnSquares = threats.PawnMask.ToSquares().ToArray();
             Assert.AreEqual(2, pawnSquares.Length);
@@ -39,7 +39,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Lookup
         {
             var attacks = new Attacks();
 
-            var threats = attacks.GetThreatMask(PieceColor.White, new Square("e8").ToMask());
+            var threats = attacks.GetThreatMask(Piece.White.SetSquare(new Square("e8")));
 
             Assert.AreEqual(0, threats.PawnMask.ToSquares().Count());
             Assert.AreEqual(4, threats.KnightMask.ToSquares().Count());

@@ -4,7 +4,9 @@
     public enum Castlings
     {
         None = 0,
-        Kingside = 1,
-        Queenside = 2,
+        WhiteKingside = 1,
+        WhiteQueenside = 2,
+        BlackKingside = 4,
+        BlackQueenside = 8,
     }
 }

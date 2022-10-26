@@ -1,5 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Lookup
 {
@@ -8,8 +9,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
     public class Scoring
     {
-        private readonly Dictionary<Position, int> middleGameEvaluations = new();
-        private readonly Dictionary<Position, int> endGameEvaluations = new();
+        private readonly Dictionary<Piece, int> middleGameEvaluations = new();
+        private readonly Dictionary<Piece, int> endGameEvaluations = new();
 
         public const int MateScore = 1000000;
         public const int DrawScore = 0;
@@ -161,9 +162,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
     -53, -34, -21, -11, -28, -14, -24, -43
         };
 
-        private static int GetModifierIndex(Position position) => position.Piece.Color == PieceColor.Black
-                ? position.Square.File + position.Square.Rank * 8
-                : (position.Square.File + position.Square.Rank * 8) ^ 56;
+        private static int GetModifierIndex(Piece piece) => piece.Is(Piece.White)
+                ? (piece.GetSquare().File + piece.GetSquare().Rank * 8) ^ 56
+                : piece.GetSquare().File + piece.GetSquare().Rank * 8;
 
         public Scoring()
         {
@@ -171,48 +172,48 @@ namespace SicTransit.Woodpusher.Common.Lookup
             InitializeEvaluations(endGameEvaluations, true);
         }
 
-        private static void InitializeEvaluations(Dictionary<Position, int> evaluations, bool endGame)
+        private static void InitializeEvaluations(Dictionary<Piece, int> evaluations, bool endGame)
         {
-            var pieces = new[] { PieceColor.Black, PieceColor.White }.Select(c => new[] { PieceType.Pawn, PieceType.Rook, PieceType.Knight, PieceType.Bishop, PieceType.Queen, PieceType.King }.Select(t => new Piece(t, c))).SelectMany(x => x).ToList();
+            var pieceTypes = new[] { Piece.None, Piece.White }.Select(c => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King }.Select(t => t | c)).SelectMany(x => x).ToList();
             var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
-            var positions = pieces.Select(p => squares.Select(s => new Position(p, s))).SelectMany(p => p);
+            var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 
-            foreach (var position in positions)
+            foreach (var piece in pieces)
             {
-                var index = GetModifierIndex(position);
-                var evaluation = GetPieceValue(position.Piece.Type, endGame) + position.Piece.Type switch
+                var index = GetModifierIndex(piece);
+                var evaluation = GetPieceValue(piece.GetPieceType(), endGame) + piece.GetPieceType() switch
                 {
-                    PieceType.Pawn => endGame ? PawnEndGameModifiers[index] : PawnMiddleGameModifiers[index],
-                    PieceType.Knight => endGame ? KnightEndGameModifiers[index] : KnightMiddleGameModifiers[index],
-                    PieceType.Bishop => endGame ? BishopEndGameModifiers[index] : BishopMiddleGameModifiers[index],
-                    PieceType.Rook => endGame ? RookEndGameModifiers[index] : RookMiddleGameModifiers[index],
-                    PieceType.Queen => endGame ? QueenEndGameModifiers[index] : QueenMiddleGameModifiers[index],
-                    PieceType.King => endGame ? KingEndGameModifiers[index] : KingMiddleGameModifiers[index],
-                    _ => throw new ArgumentException(position.Piece.Type.ToString()),
+                    Piece.Pawn => endGame ? PawnEndGameModifiers[index] : PawnMiddleGameModifiers[index],
+                    Piece.Knight => endGame ? KnightEndGameModifiers[index] : KnightMiddleGameModifiers[index],
+                    Piece.Bishop => endGame ? BishopEndGameModifiers[index] : BishopMiddleGameModifiers[index],
+                    Piece.Rook => endGame ? RookEndGameModifiers[index] : RookMiddleGameModifiers[index],
+                    Piece.Queen => endGame ? QueenEndGameModifiers[index] : QueenMiddleGameModifiers[index],
+                    Piece.King => endGame ? KingEndGameModifiers[index] : KingMiddleGameModifiers[index],
+                    _ => throw new ArgumentException(piece.ToString()),
                 };
-                evaluations.Add(position, evaluation);
+                evaluations.Add(piece, evaluation);
             }
         }
 
-        private static int GetPieceValue(PieceType pieceType, bool endGame) => pieceType switch
+        private static int GetPieceValue(Piece pieceType, bool endGame) => pieceType switch
         {
-            PieceType.Pawn => endGame ? 94 : 82,
-            PieceType.Knight => endGame ? 281 : 337,
-            PieceType.Bishop => endGame ? 297 : 365,
-            PieceType.Rook => endGame ? 512 : 477,
-            PieceType.Queen => endGame ? 936 : 1025,
-            PieceType.King => 0,
+            Piece.Pawn => endGame ? 94 : 82,
+            Piece.Knight => endGame ? 281 : 337,
+            Piece.Bishop => endGame ? 297 : 365,
+            Piece.Rook => endGame ? 512 : 477,
+            Piece.Queen => endGame ? 936 : 1025,
+            Piece.King => 0,
             _ => throw new ArgumentException(pieceType.ToString()),
         };
 
 
-        public int EvaluatePosition(Position position, int phase)
+        public int EvaluatePiece(Piece piece, int phase)
         {
             // TODO: This will not handle promotions. 
             phase = Math.Max(0, Math.Min(phase, 24));
 
-            var end = endGameEvaluations[position] * (24 - phase);
-            var middle = middleGameEvaluations[position] * phase;
+            var end = endGameEvaluations[piece] * (24 - phase);
+            var middle = middleGameEvaluations[piece] * phase;
 
             return (middle + end) / 24;
         }

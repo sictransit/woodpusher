@@ -7,10 +7,10 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 {
     public class SimplePieceMove : PgnMove
     {
-        private readonly PieceType pieceType;
+        private readonly Piece pieceType;
         private readonly Square square;
 
-        public SimplePieceMove(string raw, PieceType pieceType, Square square) : base(raw)
+        public SimplePieceMove(string raw, Piece pieceType, Square square) : base(raw)
         {
             this.pieceType = pieceType;
             this.square = square;
@@ -20,11 +20,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
         {
             var board = engine.Board;
 
-            var positions = board.GetPositions(board.ActiveColor, pieceType);
+            var pieces = board.GetPieces(board.ActiveColor, pieceType);
 
-            foreach (var position in positions)
+            foreach (var piece in pieces)
             {
-                var move = board.GetLegalMoves(position).SingleOrDefault(m => m.GetTarget().Equals(square));
+                var move = board.GetLegalMoves(piece).SingleOrDefault(m => m.GetTarget().Equals(square));
 
                 if (move != null)
                 {

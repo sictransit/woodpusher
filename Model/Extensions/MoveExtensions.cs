@@ -4,9 +4,9 @@
     {
         public static string ToAlgebraicMoveNotation(this Move move)
         {
-            var promotion = move.PromotionType == Enums.PieceType.None ? string.Empty : char.ToUpperInvariant(move.PromotionType.ToChar()).ToString();
+            var promotion = move.PromotionType == Enums.Piece.None ? string.Empty : char.ToUpperInvariant(move.PromotionType.ToChar()).ToString();
 
-            return $"{move.Position.Square.ToAlgebraicNotation()}{move.GetTarget().ToAlgebraicNotation()}{promotion}";
+            return $"{move.Piece.GetSquare().ToAlgebraicNotation()}{move.GetTarget().ToAlgebraicNotation()}{promotion}";
         }
     }
 }

@@ -9,38 +9,38 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsWhiteStartingPositionTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Pawn, PieceColor.White, "a2", 3);
+            AssertAmountOfLegalMoves(Piece.Pawn, Piece.White, "a2", 3);
         }
 
         [TestMethod]
         public void GetTargetVectorsBlackStartingPositionTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Pawn, PieceColor.Black, "a7", 3);
+            AssertAmountOfLegalMoves(Piece.Pawn, Piece.None, "a7", 3);
         }
 
         [TestMethod]
         public void GetTargetVectorsWhitePromotePositionTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Pawn, PieceColor.White, "b7", 12);
+            AssertAmountOfLegalMoves(Piece.Pawn, Piece.White, "b7", 12);
         }
 
         [TestMethod]
         public void GetTargetVectorsBlackPromotePositionTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Pawn, PieceColor.Black, "b2", 12);
+            AssertAmountOfLegalMoves(Piece.Pawn, Piece.None, "b2", 12);
         }
 
 
         [TestMethod]
         public void GetTargetVectorsWhiteEnPassantTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Pawn, PieceColor.White, "c5", 5);
+            AssertAmountOfLegalMoves(Piece.Pawn, Piece.White, "c5", 5);
         }
 
         [TestMethod]
         public void GetTargetVectorsBlackEnPassantTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Pawn, PieceColor.Black, "d4", 5);
+            AssertAmountOfLegalMoves(Piece.Pawn, Piece.None, "d4", 5);
         }
     }
 }

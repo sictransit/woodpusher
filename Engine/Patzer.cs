@@ -21,9 +21,9 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
-        private long nodeCount;
-
         private const int MaxDepth = 16;
+
+        private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
         public Patzer()
         {
@@ -33,6 +33,7 @@ namespace SicTransit.Woodpusher.Engine
         public void Initialize()
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            repetitions.Clear();
         }
 
         public void Play(Move move)
@@ -50,7 +51,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 if (move == null)
                 {
@@ -75,12 +76,11 @@ namespace SicTransit.Woodpusher.Engine
                 }
             });
 
-            nodeCount = 0;
             stopwatch.Restart();
 
             var openingMoves = Board.GetOpeningBookMoves();
 
-            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
+            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m, MaxDepth)).ToList();
 
             if (!nodes.Any())
             {
@@ -99,34 +99,54 @@ namespace SicTransit.Woodpusher.Engine
 
             var maxDepth = 1;
 
-            while (!cancellationTokenSource.IsCancellationRequested && maxDepth <= MaxDepth)
+            while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1 && maxDepth < MaxDepth)
             {
-                if (nodes.Count <= 1)
+                if (nodes.Any(n => n.MateIn() > 0))
                 {
                     break;
                 }
 
-                if (nodes.Any(n => n.MateIn().HasValue && n.MateIn() > 0))
-                {
-                    break;
-                }
-
-                foreach (var chunk in nodes.OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
+                foreach (var chunk in nodes.Where(n => !n.MateIn().HasValue).OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
                 {
                     try
                     {
                         Parallel.ForEach(chunk, parallelOptions, node =>
                         {
-                            var score = EvaluateBoard(Board.PlayMove(node.Move), maxDepth, 1, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
-
-                            if (!cancellationToken.IsCancellationRequested)
+                            try
                             {
-                                node.Score = score;
+                                var score = EvaluateBoard(Board.PlayMove(node.Move), node, maxDepth, 0, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
 
+                                if (!cancellationToken.IsCancellationRequested)
+                                {
+                                    node.Score = score;
+
+                                    if (infoCallback != null)
+                                    {
+                                        SendAnalysisInfo(infoCallback, maxDepth + 1, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
+                                    }
+                                }
+                                else
+                                {
+                                    if (infoCallback != null)
+                                    {
+                                        SendDebugInfo(infoCallback, $"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {maxDepth + 1}");
+                                    }
+
+                                    Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {maxDepth}");
+                                }
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
                                 if (infoCallback != null)
                                 {
-                                    SendInfo(infoCallback, maxDepth, nodeCount, node, stopwatch.ElapsedMilliseconds, new[] { node.Move });
+                                    SendExceptionInfo(infoCallback, ex);
                                 }
+
+                                throw;
                             }
                         });
                     }
@@ -139,34 +159,78 @@ namespace SicTransit.Woodpusher.Engine
                 maxDepth += 2;
             }
 
+            // Set node score to zero for threefold repetition moves.
+            UpdateForThreefoldRepetition(nodes);
+
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
 
             var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
 
-            Log.Debug($"evaluated {nodeCount} nodes, found: {bestNode}");
+            Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private static void SendInfo(Action<string> callback, int depth, long nodes, Node node, long time, IEnumerable<Move> line)
+        private void UpdateForThreefoldRepetition(List<Node> nodes)
         {
-            var preview = string.Join(" ", line.Select(m => m.ToAlgebraicMoveNotation()));
+            foreach (var node in nodes)
+            {
+                var algebraic = node.Move.ToAlgebraicMoveNotation();
+                var key = $"{Board.GetHash()}_{algebraic}";
+
+                if (repetitions.ContainsKey(key))
+                {
+                    repetitions[key] += 1;
+                }
+                else
+                {
+                    repetitions.Add(key, 1);
+                }
+
+                if (repetitions[key] > 2)
+                {
+                    Log.Information($"Resetting score to zero for threefold repetion of: {algebraic}");
+
+                    node.Score = 0;
+                }
+            }
+        }
+
+        private static void SendInfo(Action<string> callback, string info)
+        {
+            callback.Invoke($"info {info}");
+        }
+
+        private static void SendDebugInfo(Action<string> callback, string info)
+        {
+            SendInfo(callback, $"string debug {info}");
+        }
+
+        private static void SendExceptionInfo(Action<string> callback, Exception exception)
+        {
+            SendInfo(callback, $"string exception {exception.GetType().Name} {exception.Message}");
+        }
+
+        private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, long time)
+        {
+            var preview = string.Join(" ", node.GetLine().Select(m => m.ToAlgebraicMoveNotation()));
 
             var mateIn = node.MateIn();
             var score = mateIn.HasValue ? $"mate {mateIn}" : $"cp {node.AbsoluteScore}";
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            callback.Invoke($"info depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
+            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
         }
 
-        private int EvaluateBoard(IBoard board, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, Node node, int maxDepth, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            var legalMoves = board.GetLegalMoves();
+            var moves = board.GetLegalMoves();
 
-            var maximizing = board.ActiveColor == PieceColor.White;
+            var maximizing = board.ActiveColor.Is(Piece.White);
 
-            if (!legalMoves.Any())
+            // ReSharper disable once PossibleMultipleEnumeration
+            if (!moves.Any())
             {
                 var mateScore = maximizing ? -Scoring.MateScore + depth + 1 : Scoring.MateScore - (depth + 1);
                 return board.IsChecked ? mateScore : Scoring.DrawScore;
@@ -179,15 +243,20 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? -Scoring.MateScore * 2 : Scoring.MateScore * 2;
 
-            foreach (var move in legalMoves)
+            // ReSharper disable once PossibleMultipleEnumeration
+            foreach (var move in moves)
             {
-                nodeCount++;
+                node.Count++;
 
-                var score = EvaluateBoard(board.PlayMove(move), maxDepth, depth + 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.PlayMove(move), node, maxDepth, depth + 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {
-                    bestScore = Math.Max(bestScore, score);
+                    if (score > bestScore)
+                    {
+                        node.Line[depth + 1] = move;
+                        bestScore = score;
+                    }
 
                     if (bestScore >= beta)
                     {
@@ -198,7 +267,11 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    bestScore = Math.Min(bestScore, score);
+                    if (score < bestScore)
+                    {
+                        node.Line[depth + 1] = move;
+                        bestScore = score;
+                    }
 
                     if (bestScore <= alpha)
                     {

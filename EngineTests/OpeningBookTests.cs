@@ -5,6 +5,7 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -72,7 +73,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             openingBook.SaveToFile("test.json");
             openingBook.LoadFromFile("test.json");
 
-            var moves = openingBook.GetMoves("AE220C88323102782F94B87DDAD71A60");
+            var moves = openingBook.GetMoves("97BE343BDB6345A90E627E712669D97B");
 
             Assert.AreEqual(2, moves.Count());
             Assert.IsTrue(moves.Any(m => m.Notation.Equals("e7e5")));
@@ -85,7 +86,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
             // E60 Grünfeld Defense: Counterthrust Variation d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5
 
             IEngine engine = new Patzer();
-            //engine.Initialize();
             var book = new OpeningBook();
 
             foreach (var notation in "d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5".Split())
@@ -98,7 +98,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Assert.IsTrue(suggestedMoves.Any(m => m.Equals(algebraicMove)));
 
-                var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Position.Square.Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 
                 Assert.IsNotNull(move);
 

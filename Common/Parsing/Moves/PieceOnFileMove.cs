@@ -2,17 +2,18 @@
 using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Parsing.Moves
 {
     public class PieceOnFileMove : PgnMove
     {
-        private readonly PieceType pieceType;
+        private readonly Piece pieceType;
         private readonly int file;
         private readonly Square square;
-        private readonly PieceType promotionType;
+        private readonly Piece promotionType;
 
-        public PieceOnFileMove(string raw, PieceType pieceType, int file, Square square, PieceType promotionType) : base(raw)
+        public PieceOnFileMove(string raw, Piece pieceType, int file, Square square, Piece promotionType) : base(raw)
         {
             this.pieceType = pieceType;
             this.file = file;
@@ -29,11 +30,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
         {
             var board = engine.Board;
 
-            var positions = board.GetPositions(board.ActiveColor, pieceType);
+            var pieces = board.GetPieces(board.ActiveColor, pieceType);
 
-            foreach (var position in positions.Where(p => p.Square.File == file))
+            foreach (var piece in pieces.Where(p => p.GetSquare().File == file))
             {
-                var move = engine.Board.GetLegalMoves(position).SingleOrDefault(m => m.GetTarget().Equals(square) && m.PromotionType == promotionType);
+                var move = engine.Board.GetLegalMoves(piece).SingleOrDefault(m => m.GetTarget().Equals(square) && m.PromotionType == promotionType);
 
                 if (move != null)
                 {

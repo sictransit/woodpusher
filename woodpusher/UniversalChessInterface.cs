@@ -97,7 +97,7 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    consoleOutput("id name Woodpusher v0.2.0");
+                    consoleOutput("id name Woodpusher v0.4.0");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
 
@@ -170,7 +170,7 @@ namespace SicTransit.Woodpusher
                         }
                         else
                         {
-                            Log.Information($"failed to parse position: {command}");
+                            Log.Information($"failed to parse piece: {command}");
                         }
                     }
 
@@ -199,7 +199,7 @@ namespace SicTransit.Woodpusher
                     }
                     else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
                     {
-                        var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.PieceColor.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
+                        var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.Piece.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
                         var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
                         timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);

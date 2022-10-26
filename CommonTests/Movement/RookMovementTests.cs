@@ -9,13 +9,13 @@ namespace SicTransit.Woodpusher.Common.Tests.Movement
         [TestMethod]
         public void GetTargetVectorsTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Rook, PieceColor.White, "b2", 14);
+            AssertAmountOfLegalMoves(Piece.Rook, Piece.White, "b2", 14);
         }
 
         [TestMethod]
         public void GetTargetVectorsCornerCaseTest()
         {
-            AssertAmountOfLegalMoves(PieceType.Rook, PieceColor.White, "a1", 14);
+            AssertAmountOfLegalMoves(Piece.Rook, Piece.White, "a1", 14);
         }
     }
 }
