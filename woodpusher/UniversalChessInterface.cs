@@ -29,7 +29,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
 
-        private volatile IEngine engine;
+        private volatile IEngine engine;        
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {
@@ -97,7 +97,7 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    consoleOutput("id name Woodpusher v0.2.0");
+                    consoleOutput("id name Woodpusher v0.4.0");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
 

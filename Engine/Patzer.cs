@@ -7,6 +7,7 @@ using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -23,6 +24,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private const int MaxDepth = 16;
 
+        private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
+
         public Patzer()
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
@@ -31,6 +34,7 @@ namespace SicTransit.Woodpusher.Engine
         public void Initialize()
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            repetitions.Clear();
         }
 
         public void Play(Move move)
@@ -156,6 +160,9 @@ namespace SicTransit.Woodpusher.Engine
                 maxDepth += 2;
             }
 
+            // Set node score to zero for threefold repetition moves.
+            UpdateForThreefoldRepetition(nodes);
+
             var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
 
             var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
@@ -163,6 +170,31 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
             return new AlgebraicMove(bestNode.Move);
+        }
+
+        private void UpdateForThreefoldRepetition(List<Node> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                var algebraic = node.Move.ToAlgebraicMoveNotation();
+                var key = $"{Board.GetHash()}_{algebraic}";
+
+                if (repetitions.ContainsKey(key))
+                {
+                    repetitions[key] += 1;
+                }
+                else
+                { 
+                    repetitions.Add(key, 1);
+                }
+
+                if (repetitions[key] > 2)
+                {
+                    Log.Information($"Resetting score to zero for threefold repetion of: {algebraic}");
+
+                    node.Score = 0;
+                }
+            }
         }
 
         private static void SendInfo(Action<string> callback, string info)
