@@ -29,7 +29,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
 
-        private volatile IEngine engine;        
+        private volatile IEngine engine;
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {

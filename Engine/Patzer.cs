@@ -7,7 +7,6 @@ using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -184,7 +183,7 @@ namespace SicTransit.Woodpusher.Engine
                     repetitions[key] += 1;
                 }
                 else
-                { 
+                {
                     repetitions.Add(key, 1);
                 }
 

@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Common
         private readonly Bitboard white;
         private readonly Bitboard black;
         private readonly BoardInternals internals;
-        private readonly ulong occupiedSquares;        
+        private readonly ulong occupiedSquares;
 
         public Counters Counters { get; }
 
