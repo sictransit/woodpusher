@@ -61,6 +61,44 @@ namespace SicTransit.Woodpusher.Common.Tests
         }
 
         [TestMethod]
+        public void HashTest()
+        {
+            var rnd = new Random();
+            
+            var colors = new[] { Piece.White, Piece.None };
+            var types = new[] { Piece.Pawn, Piece.Knight, Piece.Bishop, Piece.Rook, Piece.King, Piece.Queen };
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var hashes = 0;
+
+            while (sw.ElapsedMilliseconds < 10000)
+            {
+                IBoard board = new Board();
+
+                var color = colors[rnd.Next(colors.Length)];
+                var type = types[rnd.Next(types.Length)];
+
+                for (var f = 0; f < 8; f++)
+                {
+                    for (var r = 0; r < 8; r++)
+                    {
+                        var square = new Square(f, r);
+
+                        board = board.SetPiece((color | type).SetSquare(square));
+
+                        Assert.IsNotNull(board.GetHash());
+
+                        hashes++;
+                    }
+                }
+            }
+
+            Log.Information($"hash/ms: {(double) hashes / sw.ElapsedMilliseconds}");
+        }
+
+        [TestMethod]
         public void GetPiecesTest()
         {
             IBoard board = new Board();
