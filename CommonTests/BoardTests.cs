@@ -77,7 +77,7 @@ namespace SicTransit.Woodpusher.Common.Tests
             while (sw.ElapsedMilliseconds < 10000)
             {
                 var hash = board.GetHash();
-                Assert.IsTrue(hash.Length > 0);
+                Assert.IsTrue(hash > 0);
 
                 hashes++;
             }

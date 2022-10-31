@@ -36,13 +36,10 @@ namespace SicTransit.Woodpusher.Common
         {
         }
 
-        public string GetHash()
+        public ulong GetHash()
         {
-            // TODO: This is a really bad idea. We should adapt to e.g. Zobist hashing, but this will have to do for now.            
-            return BitConverter.ToString(internals.MD5Hasher.ComputeHash(Hash.ToArray()));
+            return internals.Zobrist.GetHash(this);
         }
-
-        private IEnumerable<byte> Hash => white.Hash.Concat(black.Hash).Concat(Counters.Hash);
 
         public int Score
         {
@@ -216,6 +213,8 @@ namespace SicTransit.Woodpusher.Common
         private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
         private ulong FindKing(Piece color) => GetBitboard(color).King;
+
+        public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
 
         public IEnumerable<Piece> GetPieces(Piece color) => GetBitboard(color).GetPieces();
 

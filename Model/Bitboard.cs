@@ -41,8 +41,6 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong Pawn => pawn;
 
-        public IEnumerable<byte> Hash => BitConverter.GetBytes(pawn).Concat(BitConverter.GetBytes(rook)).Concat(BitConverter.GetBytes(knight)).Concat(BitConverter.GetBytes(bishop)).Concat(BitConverter.GetBytes(queen)).Concat(BitConverter.GetBytes(king));
-
         public bool IsOccupied(ulong mask) => (all & mask) != 0;
 
         public Bitboard Add(Piece piece) => Toggle(piece);

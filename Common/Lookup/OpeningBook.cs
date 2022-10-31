@@ -9,13 +9,16 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         // Credit: https://github.com/lichess-org/chess-openings
 
-        private Dictionary<string, HashSet<string>> book = new();
+        private Dictionary<ulong, HashSet<string>> book = new();
 
         private static readonly string BookFilename = Path.Combine(@"Resources\eco.json");
 
-        public OpeningBook()
+        public OpeningBook(bool startEmpty = false)
         {
-            LoadFromFile();
+            if (!startEmpty)
+            {
+                LoadFromFile();
+            }
         }
 
         public void LoadFromFile(string? filename = null)
@@ -28,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                book = JsonConvert.DeserializeObject<Dictionary<string, HashSet<string>>>(File.ReadAllText(filename))!;
+                book = JsonConvert.DeserializeObject<Dictionary<ulong, HashSet<string>>>(File.ReadAllText(filename))!;
             }
         }
 
@@ -41,7 +44,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             File.WriteAllText(filename, json);
         }
 
-        public void AddMove(string hash, Move move)
+        public void AddMove(ulong hash, Move move)
         {
             if (book.TryGetValue(hash, out var moves))
             {
@@ -53,7 +56,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
         }
 
-        public IEnumerable<AlgebraicMove> GetMoves(string hash)
+        public IEnumerable<AlgebraicMove> GetMoves(ulong hash)
         {
             return book.TryGetValue(hash, out var moves) ? moves.Select(AlgebraicMove.Parse) : Enumerable.Empty<AlgebraicMove>();
         }

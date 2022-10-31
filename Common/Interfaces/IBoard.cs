@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard PlayMove(Move move);
 
-        string GetHash();
+        ulong GetHash();
 
         bool IsPassedPawn(Piece piece);
 
@@ -18,6 +18,8 @@ namespace SicTransit.Woodpusher.Common.Interfaces
         IEnumerable<Move> GetLegalMoves();
 
         IEnumerable<Move> GetLegalMoves(Piece piece);
+
+        IEnumerable<Piece> GetPieces();
 
         IEnumerable<Piece> GetPieces(Piece color);
 

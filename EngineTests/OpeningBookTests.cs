@@ -6,6 +6,7 @@ using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -19,12 +20,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
         }
 
-        [Ignore("external content")]
+        //[Ignore("external content")]
         [TestMethod]
         public void ParseECO()
         {
             IEngine engine = new Patzer();
-            var openingBook = new OpeningBook();
+            var openingBook = new OpeningBook(true);
 
             using var httpClient = new HttpClient();
             foreach (var file in new[] { "a", "b", "c", "d", "e" })
@@ -62,6 +63,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                             var hash = engine.Board.GetHash();
 
+                            if (hash == ulong.MaxValue)
+                            {
+                                Debugger.Break();
+                            }
+
                             engine.Play(move);
 
                             openingBook.AddMove(hash, move);
@@ -73,11 +79,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
             openingBook.SaveToFile("test.json");
             openingBook.LoadFromFile("test.json");
 
-            var moves = openingBook.GetMoves("97BE343BDB6345A90E627E712669D97B");
+            Assert.IsFalse(openingBook.GetMoves(ulong.MinValue).Any());
+            Assert.IsFalse(openingBook.GetMoves(ulong.MaxValue).Any());
 
-            Assert.AreEqual(2, moves.Count());
-            Assert.IsTrue(moves.Any(m => m.Notation.Equals("e7e5")));
-            Assert.IsTrue(moves.Any(m => m.Notation.Equals("d7d5")));
+            var moves = openingBook.GetMoves(11121976597367932187); // starting position           
+
+            Assert.AreEqual(20, moves.Count());
+            Assert.IsTrue(moves.Any(m => m.Notation.Equals("g1h3")));
+            Assert.IsTrue(moves.Any(m => m.Notation.Equals("d2d4")));
         }
 
         [TestMethod]

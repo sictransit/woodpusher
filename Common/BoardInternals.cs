@@ -2,7 +2,6 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Common
 {
@@ -36,7 +35,7 @@ namespace SicTransit.Woodpusher.Common
 
         public OpeningBook OpeningBook { get; }
 
-        public readonly MD5 MD5Hasher;
+        public Zobrist Zobrist { get; }
 
         public BoardInternals()
         {
@@ -44,7 +43,7 @@ namespace SicTransit.Woodpusher.Common
             Scoring = new Scoring();
             Moves = new Moves();
             OpeningBook = new OpeningBook();
-            MD5Hasher = MD5.Create();
+            Zobrist = new Zobrist();
         }
     }
 }

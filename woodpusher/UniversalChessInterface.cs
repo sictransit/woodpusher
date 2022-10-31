@@ -219,6 +219,7 @@ namespace SicTransit.Woodpusher
                 lock (engine)
                 {
                     consoleOutput(engine.Board.PrettyPrint());
+                    consoleOutput($"hash: {engine.Board.GetHash()}");
                 }
             });
         }
