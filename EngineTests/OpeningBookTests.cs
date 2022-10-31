@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
         }
 
-        //[Ignore("external content")]
+        [Ignore("external content")]
         [TestMethod]
         public void ParseECO()
         {
