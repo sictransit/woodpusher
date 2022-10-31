@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
     public class Zobrist
     {
         // Credit: https://www.random.org/
-        private static byte[] randomness = new byte[]{
+        private static readonly byte[] randomness = new byte[]{
             0x2c, 0x92, 0x39, 0xb1, 0xba, 0x85, 0x95, 0xe8, 0x76, 0x8f, 0xfa, 0xfa, 0xbb, 0xa8, 0xde, 0x2c,
             0x90, 0x92, 0x00, 0x0a, 0x53, 0xc4, 0xfe, 0x78, 0x5a, 0x74, 0x18, 0x10, 0x2f, 0xde, 0x28, 0x77,
             0x29, 0x38, 0xa6, 0xdf, 0x7e, 0x79, 0x52, 0x05, 0xfc, 0x8c, 0xcb, 0xfb, 0x62, 0x3c, 0xcc, 0x41,
@@ -415,10 +415,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private int randomCounter = 0;
 
-        private readonly Dictionary<Piece, ulong> pieces = new();
-        private readonly Dictionary<Castlings, ulong> castlings = new();
-        private readonly Dictionary<Piece, ulong> activeColors = new();
-        private readonly Dictionary<ulong, ulong> enpassantTargets = new();
+        private readonly Dictionary<Piece, ulong> pieceHashes = new();
+        private readonly Dictionary<Castlings, ulong> castlingsHashes = new();
+        private readonly Dictionary<ulong, ulong> maskHashes = new();
 
         public Zobrist()
         {
@@ -428,13 +427,20 @@ namespace SicTransit.Woodpusher.Common.Lookup
             InitializePieces();
         }
 
+        public ulong GetPieceHash(Piece piece) => pieceHashes[piece];
+
+        public ulong GetCastlingsHash(Castlings castlings) => castlingsHashes[castlings];
+
+        public ulong GetMaskHash(ulong mask) => maskHashes[mask];
+
+
         public ulong GetHash(IBoard board)
         {
-            var hash = board.GetPieces().Aggregate(0ul, (h, p) => h ^ pieces[p]);
+            var hash = board.GetPieces().Aggregate(0ul, (h, p) => h ^ pieceHashes[p]);
 
-            hash ^= castlings[board.Counters.Castlings];
-            hash ^= enpassantTargets[board.Counters.EnPassantTarget];
-            hash ^= activeColors[board.ActiveColor];
+            hash ^= castlingsHashes[board.Counters.Castlings];
+            hash ^= maskHashes[board.Counters.EnPassantTarget];
+            hash ^= pieceHashes[board.ActiveColor];
 
             return hash;
         }
@@ -445,7 +451,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             {
                 foreach (var square in SquareExtensions.AllSquares)
                 {
-                    pieces.Add(piece.SetSquare(square), GenerateRandomNumber());
+                    pieceHashes.Add(piece.SetSquare(square), GenerateRandomNumber());
                 }
             }
         }
@@ -454,7 +460,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
         {
             for (int i = 0; i < 16; i++)
             {
-                castlings.Add((Castlings)i, GenerateRandomNumber());
+                castlingsHashes.Add((Castlings)i, GenerateRandomNumber());
             }
         }
 
@@ -469,7 +475,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
             foreach (var target in targets.Distinct().OrderBy(t => t))
             {
-                enpassantTargets.Add(target, GenerateRandomNumber());
+                maskHashes.Add(target, GenerateRandomNumber());
             }
         }
 
@@ -477,13 +483,13 @@ namespace SicTransit.Woodpusher.Common.Lookup
         {
             foreach (var color in PieceExtensions.Colors)
             {
-                activeColors.Add(color, GenerateRandomNumber());
+                pieceHashes.Add(color, GenerateRandomNumber());
             }
         }
 
         private ulong GenerateRandomNumber()
         {
-            if ((randomCounter) * 8 >= randomness.Length)
+            if (randomCounter * 8 >= randomness.Length)
             {
                 throw new InvalidOperationException("Out of randomness!");
             }

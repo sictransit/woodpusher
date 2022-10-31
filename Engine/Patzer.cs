@@ -176,7 +176,7 @@ namespace SicTransit.Woodpusher.Engine
             foreach (var node in nodes)
             {
                 var algebraic = node.Move.ToAlgebraicMoveNotation();
-                var key = $"{Board.GetHash()}_{algebraic}";
+                var key = $"{Board.Hash}_{algebraic}";
 
                 if (repetitions.ContainsKey(key))
                 {

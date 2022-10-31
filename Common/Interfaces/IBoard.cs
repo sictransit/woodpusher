@@ -9,8 +9,6 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard PlayMove(Move move);
 
-        ulong GetHash();
-
         bool IsPassedPawn(Piece piece);
 
         IEnumerable<Move> GetOpeningBookMoves();
@@ -28,6 +26,8 @@ namespace SicTransit.Woodpusher.Common.Interfaces
         IBoard SetPiece(Piece piece);
 
         IEnumerable<Piece> GetAttackers(ulong square, Piece color);
+
+        ulong Hash { get; }
 
         int Score { get; }
 
