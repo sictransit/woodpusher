@@ -1,7 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Numerics;
-using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -42,18 +41,6 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong Pawn => pawn;
 
-        public byte[] Hash
-        {
-            get
-            {
-                using var md5 = MD5.Create();
-
-                var bytes = BitConverter.GetBytes(pawn).Concat(BitConverter.GetBytes(rook)).Concat(BitConverter.GetBytes(knight)).Concat(BitConverter.GetBytes(bishop)).Concat(BitConverter.GetBytes(queen)).Concat(BitConverter.GetBytes(king)).ToArray();
-
-                return md5.ComputeHash(bytes);
-            }
-        }
-
         public bool IsOccupied(ulong mask) => (all & mask) != 0;
 
         public Bitboard Add(Piece piece) => Toggle(piece);
@@ -73,11 +60,9 @@ namespace SicTransit.Woodpusher.Model
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
 
-        private static readonly Piece[] PieceTypes = { Piece.Pawn, Piece.Knight, Piece.Bishop, Piece.Rook, Piece.Queen, Piece.King };
-
         public IEnumerable<Piece> GetPieces()
         {
-            foreach (var pieceType in PieceTypes)
+            foreach (var pieceType in PieceExtensions.Types)
             {
                 foreach (var piece in GetPieces(pieceType))
                 {

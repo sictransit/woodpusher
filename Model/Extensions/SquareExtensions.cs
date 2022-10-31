@@ -80,5 +80,7 @@ namespace SicTransit.Woodpusher.Model.Extensions
 
             return $"{f}{r}";
         }
+
+        public static IEnumerable<Square> AllSquares => Enumerable.Range(0, 8).Select(file => Enumerable.Range(0, 8).Select(rank => new Square(file, rank))).SelectMany(s => s);
     }
 }

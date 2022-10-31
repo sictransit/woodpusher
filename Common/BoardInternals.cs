@@ -27,6 +27,8 @@ namespace SicTransit.Woodpusher.Common
         public static readonly Piece BlackQueensideRook =
             (Piece.Rook | Piece.None).SetMask(BlackQueensideRookStartingSquare);
 
+        public static readonly ulong InvalidHash = 0;
+
         public Attacks Attacks { get; }
 
         public Scoring Scoring { get; }
@@ -35,12 +37,15 @@ namespace SicTransit.Woodpusher.Common
 
         public OpeningBook OpeningBook { get; }
 
+        public Zobrist Zobrist { get; }
+
         public BoardInternals()
         {
             Attacks = new Attacks();
             Scoring = new Scoring();
             Moves = new Moves();
             OpeningBook = new OpeningBook();
+            Zobrist = new Zobrist();
         }
     }
 }

@@ -47,17 +47,42 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             var whitePawn = Piece.Pawn | Piece.White;
 
-            for (var f = 0; f < 8; f++)
+            foreach (var square in SquareExtensions.AllSquares)
             {
-                for (var r = 0; r < 8; r++)
-                {
-                    var square = new Square(f, r);
-
-                    board = board.SetPiece(whitePawn.SetSquare(square));
-                }
+                board = board.SetPiece(whitePawn.SetSquare(square));
             }
 
             Assert.AreEqual(64, board.GetPieces(Piece.White).Count(p => p.Is(Piece.Pawn)));
+        }
+
+        [TestMethod]
+        public void HashTest()
+        {
+            var rnd = new Random();
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var hashes = 0;
+
+            IBoard board = new Board();
+
+            var pieces = PieceExtensions.AllPieces.ToArray();
+
+            foreach (var square in SquareExtensions.AllSquares)
+            {
+                board = board.SetPiece(pieces[rnd.Next(pieces.Length)].SetSquare(square));
+            }
+
+            while (sw.ElapsedMilliseconds < 10000)
+            {
+                var hash = board.Hash;
+                Assert.IsTrue(hash > 0);
+
+                hashes++;
+            }
+
+            Log.Information($"hash/ms: {(double)hashes / sw.ElapsedMilliseconds}");
         }
 
         [TestMethod]

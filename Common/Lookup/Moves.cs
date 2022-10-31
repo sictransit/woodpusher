@@ -39,8 +39,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializePassedPawnMasks()
         {
-            var pieceTypes = new[] { Piece.White, Piece.None }.Select(c => Piece.Pawn | c);
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(1, 6).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
+            var pieceTypes = PieceExtensions.Colors.Select(c => Piece.Pawn | c);
+            var squares = SquareExtensions.AllSquares.Where(s => s.Rank is > 0 and < 7);
 
             var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 
@@ -71,12 +71,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializeVectors()
         {
-            var pieces = new[] { Piece.White, Piece.None }.Select(c => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King }.Select(t => t | c)).SelectMany(x => x).ToList();
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
-
-            pieces.ForEach(p =>
+            PieceExtensions.AllPieces.ToList().ForEach(p =>
             {
-                squares.ForEach(s =>
+                SquareExtensions.AllSquares.ToList().ForEach(s =>
                 {
                     var piece = p.SetSquare(s);
 

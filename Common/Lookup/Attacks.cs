@@ -18,11 +18,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void Initialize()
         {
-            foreach (var color in new[] { Piece.White, Piece.None })
+            foreach (var color in PieceExtensions.Colors)
             {
-                var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
-
-                foreach (var square in squares)
+                foreach (var square in SquareExtensions.AllSquares)
                 {
                     var queenMask = QueenMovement.GetTargetVectors((Piece.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
                     var bishopMask = BishopMovement.GetTargetVectors((Piece.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());

@@ -20,9 +20,9 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var parts = fen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length != 6)
+            if (parts.Length < 4)
             {
-                throw new FenParsingException(fen, "parts should be == 6");
+                throw new FenParsingException(fen, "parts should be >= 4");
             }
 
             var (white, black) = ParseBoard(parts[0]);
@@ -33,9 +33,9 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var enPassantTarget = ParseEnPassantTarget(parts[3]);
 
-            var halfmoveClock = ParseHalfmoveClock(parts[4]);
+            var halfmoveClock = parts.Length > 4 ? ParseHalfmoveClock(parts[4]) : 0;
 
-            var fullmoveNumber = ParseFullmoveNumber(parts[5]);
+            var fullmoveNumber = parts.Length > 5 ? ParseFullmoveNumber(parts[5]) : 0;
 
             var counters = new Counters(activeColor, castling, enPassantTarget?.ToMask() ?? 0, halfmoveClock, fullmoveNumber);
 

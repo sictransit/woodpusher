@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
@@ -24,7 +25,10 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void ParseECO()
         {
             IEngine engine = new Patzer();
-            var openingBook = new OpeningBook();
+            var openingBook = new OpeningBook(true);
+
+            var maxLength = 0;
+            string longest = string.Empty;
 
             using var httpClient = new HttpClient();
             foreach (var file in new[] { "a", "b", "c", "d", "e" })
@@ -56,11 +60,17 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         engine.Initialize();
 
+                        if (opening.PgnMoves.Count > maxLength)
+                        {
+                            longest = line;
+                            maxLength = opening.PgnMoves.Count;
+                        }
+
                         foreach (var pgnMove in opening.PgnMoves)
                         {
                             var move = pgnMove.GetMove(engine);
 
-                            var hash = engine.Board.GetHash();
+                            var hash = engine.Board.Hash;
 
                             engine.Play(move);
 
@@ -70,15 +80,60 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 }
             }
 
+            Log.Information($"Longest opening: {longest}");
+
             openingBook.SaveToFile("test.json");
             openingBook.LoadFromFile("test.json");
 
-            var moves = openingBook.GetMoves("97BE343BDB6345A90E627E712669D97B");
+            Assert.IsFalse(openingBook.GetMoves(ulong.MinValue).Any());
+            Assert.IsFalse(openingBook.GetMoves(ulong.MaxValue).Any());
 
-            Assert.AreEqual(2, moves.Count());
-            Assert.IsTrue(moves.Any(m => m.Notation.Equals("e7e5")));
-            Assert.IsTrue(moves.Any(m => m.Notation.Equals("d7d5")));
+            var moves = openingBook.GetMoves(11121976597367932187); // starting position           
+
+            Assert.AreEqual(20, moves.Count());
+            Assert.IsTrue(moves.Any(m => m.Notation.Equals("g1h3")));
+            Assert.IsTrue(moves.Any(m => m.Notation.Equals("d2d4")));
         }
+
+
+
+        [TestMethod]
+        public void C89RuyLopezMarshallAttackMainLineSpasskyVariation()
+        {
+            // C89	Ruy Lopez: Marshall Attack, Main Line, Spassky Variation	
+            // 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. c3 d5 9. exd5 Nxd5 10. Nxe5 Nxe5 11. Rxe5 c6 12. d4 Bd6 13. Re1 Qh4 14. g3 Qh3 15. Be3 Bg4 16. Qd3 Rae8 17. Nd2 Re6 18. a4 Qh5	
+            // e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1g1 f8e7 f1e1 b7b5 a4b3 e8g8 c2c3 d7d5 e4d5 f6d5 f3e5 c6e5 e1e5 c7c6 d2d4 e7d6 e5e1 d8h4 g2g3 h4h3 c1e3 c8g4 d1d3 a8e8 b1d2 e8e6 a2a4 h3h5	
+            // 5rk1/5ppp/p1pbr3/1p1n3q/P2P2b1/1BPQB1P1/1P1N1P1P/R3R1K1 w - -
+
+            IEngine engine = new Patzer();
+            var book = new OpeningBook();
+
+            foreach (var notation in "e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1g1 f8e7 f1e1 b7b5 a4b3 e8g8 c2c3 d7d5 e4d5 f6d5 f3e5 c6e5 e1e5 c7c6 d2d4 e7d6 e5e1 d8h4 g2g3 h4h3 c1e3 c8g4 d1d3 a8e8 b1d2 e8e6 a2a4 h3h5".Split())
+            {
+                var algebraicMove = AlgebraicMove.Parse(notation);
+
+                var suggestedMove = book.GetMoves(engine.Board.Hash).SingleOrDefault(m => m.Equals(algebraicMove));
+
+                Assert.IsNotNull(suggestedMove);
+
+                var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+
+                Assert.IsNotNull(move);
+
+                engine.Play(move);
+            }
+
+            Log.Information("\n" + engine.Board.PrettyPrint());
+
+            var hash = engine.Board.Hash;
+
+            var fenBoard = ForsythEdwardsNotation.Parse("5rk1/5ppp/p1pbr3/1p1n3q/P2P2b1/1BPQB1P1/1P1N1P1P/R3R1K1 w - -");
+
+            Log.Information("\n" + fenBoard.PrettyPrint());
+
+            Assert.AreEqual(hash, fenBoard.Hash);
+        }
+
 
         [TestMethod]
         public void GrünfeldDefenseCounterthrustVariation()
@@ -92,7 +147,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             {
                 var algebraicMove = AlgebraicMove.Parse(notation);
 
-                var hash = engine.Board.GetHash();
+                var hash = engine.Board.Hash;
 
                 var suggestedMoves = book.GetMoves(hash);
 

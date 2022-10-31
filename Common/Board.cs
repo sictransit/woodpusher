@@ -3,7 +3,6 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Common
 {
@@ -23,7 +22,7 @@ namespace SicTransit.Woodpusher.Common
 
         }
 
-        private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals)
+        private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
         {
             this.white = white;
             this.black = black;
@@ -31,29 +30,14 @@ namespace SicTransit.Woodpusher.Common
 
             Counters = counters;
             this.internals = internals;
+            Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
         }
 
-        public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals())
+        public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
         {
         }
 
-        public string GetHash()
-        {
-            // TODO: This is a really bad idea. We should adapt to e.g. Zobist hashing, but this will have to do for now.
-            return BitConverter.ToString(Hash).Replace("-", "");
-        }
-
-        private byte[] Hash
-        {
-            get
-            {
-                using var md5 = MD5.Create();
-
-                var bytes = white.Hash.Concat(black.Hash).Concat(Counters.Hash).ToArray();
-
-                return md5.ComputeHash(bytes);
-            }
-        }
+        public ulong Hash { get; }
 
         public int Score
         {
@@ -73,7 +57,7 @@ namespace SicTransit.Woodpusher.Common
 
         public IEnumerable<Move> GetOpeningBookMoves()
         {
-            var moves = internals.OpeningBook.GetMoves(GetHash());
+            var moves = internals.OpeningBook.GetMoves(Hash);
 
             if (!moves.Any())
             {
@@ -95,8 +79,8 @@ namespace SicTransit.Woodpusher.Common
         public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
         public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
-                ? new Board(white.Add(piece), black, Counters, internals)
-                : (IBoard)new Board(white, black.Add(piece), Counters, internals);
+                ? new Board(white.Add(piece), black, Counters, internals, BoardInternals.InvalidHash)
+                : (IBoard)new Board(white, black.Add(piece), Counters, internals, BoardInternals.InvalidHash);
 
         public IBoard PlayMove(Move move)
         {
@@ -105,20 +89,28 @@ namespace SicTransit.Woodpusher.Common
 
         private Board Play(Move move)
         {
+            var hash = Hash;
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColor());
 
-            var targetPieceType = opponentBitboard.Peek(move.Target);
+            var targetPiece = opponentBitboard.Peek(move.Target);
 
-            if (targetPieceType != Piece.None)
+            if (targetPiece != Piece.None)
             {
-                opponentBitboard = opponentBitboard.Remove(targetPieceType);
+                opponentBitboard = opponentBitboard.Remove(targetPiece);
+
+                hash ^= internals.Zobrist.GetPieceHash(targetPiece | ActiveColor.OpponentColor());
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
-                opponentBitboard = opponentBitboard.Remove(Piece.Pawn.SetMask(move.EnPassantMask));
+                var targetPawn = Piece.Pawn.SetMask(move.EnPassantMask);
+                opponentBitboard = opponentBitboard.Remove(targetPawn);
+
+                hash ^= internals.Zobrist.GetPieceHash(targetPawn | ActiveColor.OpponentColor());
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
+            hash ^= internals.Zobrist.GetPieceHash(move.Piece);
+            hash ^= internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
 
             var castlings = Counters.Castlings;
 
@@ -157,7 +149,11 @@ namespace SicTransit.Woodpusher.Common
 
                     if (castling != default)
                     {
-                        activeBitboard = activeBitboard.Move(Piece.Rook.SetMask(castling.from), castling.to);
+                        var rook = (Piece.Rook | ActiveColor).SetMask(castling.from);
+
+                        activeBitboard = activeBitboard.Move(rook, castling.to);
+
+                        hash ^= internals.Zobrist.GetPieceHash(rook) ^ internals.Zobrist.GetPieceHash(rook.SetMask(castling.to));
                     }
                 }
                 else
@@ -203,21 +199,30 @@ namespace SicTransit.Woodpusher.Common
                         }
                     }
                 }
+
+                hash ^= internals.Zobrist.GetCastlingsHash(Counters.Castlings) ^ internals.Zobrist.GetCastlingsHash(castlings);
             }
 
             if (move.Flags.HasFlag(SpecialMove.Promote))
             {
-                activeBitboard = activeBitboard.Remove(Piece.Pawn.SetMask(move.Target)).Add(move.PromotionType.SetMask(move.Target));
+                var promotedPiece = move.Piece.SetMask(move.Target);
+                var promotionPiece = (ActiveColor | move.PromotionType).SetMask(move.Target);
+                activeBitboard = activeBitboard.Remove(promotedPiece).Add(promotionPiece);
+
+                hash ^= internals.Zobrist.GetPieceHash(promotedPiece) ^ internals.Zobrist.GetPieceHash(promotionPiece);
             }
 
-            var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPieceType.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
+            var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPiece.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
 
             var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor.Is(Piece.White) ? 0 : 1);
             var counters = new Counters(ActiveColor.OpponentColor(), castlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
 
+            hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget) ^ internals.Zobrist.GetMaskHash(counters.EnPassantTarget);
+            hash ^= internals.Zobrist.GetPieceHash(Counters.ActiveColor) ^ internals.Zobrist.GetPieceHash(counters.ActiveColor);
+
             return ActiveColor.Is(Piece.White)
-                ? new Board(activeBitboard, opponentBitboard, counters, internals)
-                : new Board(opponentBitboard, activeBitboard, counters, internals);
+                ? new Board(activeBitboard, opponentBitboard, counters, internals, hash)
+                : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
         }
 
         private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;
@@ -227,6 +232,8 @@ namespace SicTransit.Woodpusher.Common
         private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
         private ulong FindKing(Piece color) => GetBitboard(color).King;
+
+        public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
 
         public IEnumerable<Piece> GetPieces(Piece color) => GetBitboard(color).GetPieces();
 

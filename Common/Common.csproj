@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <None Update="Resources\eco.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
