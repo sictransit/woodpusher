@@ -42,17 +42,7 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong Pawn => pawn;
 
-        public byte[] Hash
-        {
-            get
-            {
-                using var md5 = MD5.Create();
-
-                var bytes = BitConverter.GetBytes(pawn).Concat(BitConverter.GetBytes(rook)).Concat(BitConverter.GetBytes(knight)).Concat(BitConverter.GetBytes(bishop)).Concat(BitConverter.GetBytes(queen)).Concat(BitConverter.GetBytes(king)).ToArray();
-
-                return md5.ComputeHash(bytes);
-            }
-        }
+        public IEnumerable<byte> Hash => BitConverter.GetBytes(pawn).Concat(BitConverter.GetBytes(rook)).Concat(BitConverter.GetBytes(knight)).Concat(BitConverter.GetBytes(bishop)).Concat(BitConverter.GetBytes(queen)).Concat(BitConverter.GetBytes(king));
 
         public bool IsOccupied(ulong mask) => (all & mask) != 0;
 

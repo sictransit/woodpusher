@@ -73,26 +73,26 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             var hashes = 0;
 
+            IBoard board = new Board();
+
+            for (var f = 0; f < 8; f++)
+            {
+                for (var r = 0; r < 8; r++)
+                {
+                    var square = new Square(f, r);
+                    var color = colors[rnd.Next(colors.Length)];
+                    var type = types[rnd.Next(types.Length)];
+
+                    board = board.SetPiece((color | type).SetSquare(square));
+                }
+            }
+
             while (sw.ElapsedMilliseconds < 10000)
             {
-                IBoard board = new Board();
-
-                var color = colors[rnd.Next(colors.Length)];
-                var type = types[rnd.Next(types.Length)];
-
-                for (var f = 0; f < 8; f++)
-                {
-                    for (var r = 0; r < 8; r++)
-                    {
-                        var square = new Square(f, r);
-
-                        board = board.SetPiece((color | type).SetSquare(square));
-
-                        Assert.IsNotNull(board.GetHash());
-
-                        hashes++;
-                    }
-                }
+                var hash = board.GetHash();
+                Assert.IsTrue(hash.Length > 0);                
+                
+                hashes++;
             }
 
             Log.Information($"hash/ms: {(double) hashes / sw.ElapsedMilliseconds}");

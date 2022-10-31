@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Common
 {
@@ -35,12 +36,15 @@ namespace SicTransit.Woodpusher.Common
 
         public OpeningBook OpeningBook { get; }
 
+        public readonly MD5 MD5Hasher;
+
         public BoardInternals()
         {
             Attacks = new Attacks();
             Scoring = new Scoring();
             Moves = new Moves();
             OpeningBook = new OpeningBook();
+            MD5Hasher = MD5.Create();
         }
     }
 }

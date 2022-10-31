@@ -39,21 +39,11 @@ namespace SicTransit.Woodpusher.Common
 
         public string GetHash()
         {
-            // TODO: This is a really bad idea. We should adapt to e.g. Zobist hashing, but this will have to do for now.
-            return BitConverter.ToString(Hash).Replace("-", "");
+            // TODO: This is a really bad idea. We should adapt to e.g. Zobist hashing, but this will have to do for now.            
+            return BitConverter.ToString(internals.MD5Hasher.ComputeHash(Hash.ToArray()));
         }
 
-        private byte[] Hash
-        {
-            get
-            {
-                using var md5 = MD5.Create();
-
-                var bytes = white.Hash.Concat(black.Hash).Concat(Counters.Hash).ToArray();
-
-                return md5.ComputeHash(bytes);
-            }
-        }
+        private IEnumerable<byte> Hash => white.Hash.Concat(black.Hash).Concat(Counters.Hash);
 
         public int Score
         {
