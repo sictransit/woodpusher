@@ -1,7 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Numerics;
-using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -63,11 +62,9 @@ namespace SicTransit.Woodpusher.Model
             _ => throw new ArgumentOutOfRangeException(nameof(pieceType)),
         };
 
-        private static readonly Piece[] PieceTypes = { Piece.King, Piece.Queen, Piece.Rook, Piece.Bishop, Piece.Knight, Piece.Pawn };
-
         public IEnumerable<Piece> GetPieces()
         {
-            foreach (var pieceType in PieceTypes)
+            foreach (var pieceType in PieceExtensions.Types)
             {
                 foreach (var piece in GetPieces(pieceType))
                 {

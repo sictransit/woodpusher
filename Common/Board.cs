@@ -3,7 +3,6 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Common
 {

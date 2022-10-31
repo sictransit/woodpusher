@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Model;
-using SicTransit.Woodpusher.Model.Enums;
+﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Lookup
@@ -174,9 +173,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private static void InitializeEvaluations(Dictionary<Piece, int> evaluations, bool endGame)
         {
-            var pieceTypes = new[] { Piece.None, Piece.White }.Select(c => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King }.Select(t => t | c)).SelectMany(x => x).ToList();
-            var squares = Enumerable.Range(0, 8).Select(f => Enumerable.Range(0, 8).Select(r => new Square(f, r))).SelectMany(x => x).ToList();
-            var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
+            var pieces = PieceExtensions.AllPieces.Select(p => SquareExtensions.AllSquares.Select(s => p.SetSquare(s))).SelectMany(p => p);
 
             foreach (var piece in pieces)
             {

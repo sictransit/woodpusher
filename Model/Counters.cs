@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
-using System.Security.Cryptography;
 
 namespace SicTransit.Woodpusher.Model
 {
