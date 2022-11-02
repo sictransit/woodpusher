@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Common.Lookup;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
@@ -7,19 +6,17 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Node
     {
-        public Node(Move move, int maxDepth)
+        public Node(Move move)
         {
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
-            Score = -Sign * Scoring.MateScore * 2;
-            Line = new Move[maxDepth];
-            Line[0] = move;
+            Score = -Sign * Declarations.MoveMaximumScore;
+            MaxDepth = 2;
+            Move = move;
         }
 
-        public Move[] Line { get; }
+        public int MaxDepth { get; set; }
 
-        public IEnumerable<Move> GetLine() => Line.TakeWhile(m => m != null);
-
-        public Move Move => Line[0];
+        public Move Move { get; }
 
         public int Score { get; set; }
 
@@ -28,6 +25,25 @@ namespace SicTransit.Woodpusher.Engine
         public int Sign { get; }
 
         public int AbsoluteScore => Score * Sign;
+
+        public int? MateIn
+        {
+            get
+            {
+                var mateIn = Math.Abs(Math.Abs(Score) - Declarations.MateScore);
+
+                mateIn += Sign == -1 ? 1 : 0;
+
+                if (mateIn <= Declarations.MaxDepth)
+                {
+                    var mateSign = AbsoluteScore > 0 ? 1 : -1;
+
+                    return mateSign * mateIn / 2;
+                }
+
+                return null;
+            }
+        }
 
         public override string ToString()
         {

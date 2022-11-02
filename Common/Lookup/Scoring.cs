@@ -11,9 +11,6 @@ namespace SicTransit.Woodpusher.Common.Lookup
         private readonly Dictionary<Piece, int> middleGameEvaluations = new();
         private readonly Dictionary<Piece, int> endGameEvaluations = new();
 
-        public const int MateScore = 1000000;
-        public const int DrawScore = 0;
-
         private static readonly int[] PawnMiddleGameModifiers =
         {
       0,   0,   0,   0,   0,   0,  0,   0,
