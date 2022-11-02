@@ -3,6 +3,8 @@ using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
@@ -191,7 +193,7 @@ namespace SicTransit.Woodpusher
                     var blackTimeMatch = BlackTimeRegex.Match(command);
                     var movetimeMatch = MovetimeRegex.Match(command);
 
-                    var timeLimit = 10000;
+                    var timeLimit = 60000;
 
                     if (movetimeMatch.Success)
                     {
@@ -199,7 +201,7 @@ namespace SicTransit.Woodpusher
                     }
                     else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
                     {
-                        var timeLeft = int.Parse(engine.Board.ActiveColor == Model.Enums.Piece.White ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
+                        var timeLeft = int.Parse(engine.Board.ActiveColor.Is(Piece.White) ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
                         var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
                         timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
