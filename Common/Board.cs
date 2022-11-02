@@ -90,6 +90,7 @@ namespace SicTransit.Woodpusher.Common
         private Board Play(Move move)
         {
             var hash = Hash;
+            var quiet = true;
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColor());
 
             var targetPiece = opponentBitboard.Peek(move.Target);
@@ -99,6 +100,8 @@ namespace SicTransit.Woodpusher.Common
                 opponentBitboard = opponentBitboard.Remove(targetPiece);
 
                 hash ^= internals.Zobrist.GetPieceHash(targetPiece | ActiveColor.OpponentColor());
+
+                quiet = false;
             }
             else if (move.Flags.HasFlag(SpecialMove.EnPassant))
             {
@@ -106,6 +109,8 @@ namespace SicTransit.Woodpusher.Common
                 opponentBitboard = opponentBitboard.Remove(targetPawn);
 
                 hash ^= internals.Zobrist.GetPieceHash(targetPawn | ActiveColor.OpponentColor());
+
+                quiet = false;
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
@@ -215,7 +220,7 @@ namespace SicTransit.Woodpusher.Common
             var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPiece.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
 
             var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor.Is(Piece.White) ? 0 : 1);
-            var counters = new Counters(ActiveColor.OpponentColor(), castlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter);
+            var counters = new Counters(ActiveColor.OpponentColor(), castlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter, quiet);
 
             hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget) ^ internals.Zobrist.GetMaskHash(counters.EnPassantTarget);
             hash ^= internals.Zobrist.GetPieceHash(Counters.ActiveColor) ^ internals.Zobrist.GetPieceHash(counters.ActiveColor);
