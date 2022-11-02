@@ -109,7 +109,7 @@ namespace SicTransit.Woodpusher.Engine
                         {
                             try
                             {
-                                var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Scoring.MateScore * 4, Scoring.MateScore * 4, cancellationToken);
+                                var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.BoardMaximumScore, Declarations.BoardMaximumScore, cancellationToken);
 
                                 if (!cancellationToken.IsCancellationRequested)
                                 {
@@ -226,8 +226,8 @@ namespace SicTransit.Woodpusher.Engine
             // ReSharper disable once PossibleMultipleEnumeration
             if (!moves.Any())
             {
-                var mateScore = maximizing ? -Scoring.MateScore + depth + 1 : Scoring.MateScore - (depth + 1);
-                return board.IsChecked ? mateScore : Scoring.DrawScore;
+                var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
+                return board.IsChecked ? mateScore : Declarations.DrawScore;
             }
 
             if (depth == node.MaxDepth || cancellationToken.IsCancellationRequested)
@@ -235,7 +235,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            var bestScore = maximizing ? -Scoring.MateScore * 2 : Scoring.MateScore * 2;
+            var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
             // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)

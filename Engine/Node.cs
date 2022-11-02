@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Engine
         public Node(Move move)
         {
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
-            Score = -Sign * Scoring.MateScore * 2;
+            Score = -Sign * Declarations.MoveMaximumScore;
             MaxDepth = 2;
             Move = move;
         }
@@ -31,11 +31,12 @@ namespace SicTransit.Woodpusher.Engine
         {
             get
             {
-                var mateIn = Math.Abs(Math.Abs(Score) - Scoring.MateScore);
+                var mateIn = Math.Abs(Math.Abs(Score) - Declarations.MateScore);
+
+                mateIn += Sign == -1 ? 1 : 0;
 
                 if (mateIn <= Declarations.MaxDepth)
-                {
-                    mateIn += Sign == -1 ? 1 : 0;
+                {                    
                     var mateSign = AbsoluteScore > 0 ? 1 : -1;
 
                     return mateSign * mateIn / 2;
