@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Common.Lookup;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
@@ -36,7 +35,7 @@ namespace SicTransit.Woodpusher.Engine
                 mateIn += Sign == -1 ? 1 : 0;
 
                 if (mateIn <= Declarations.MaxDepth)
-                {                    
+                {
                     var mateSign = AbsoluteScore > 0 ? 1 : -1;
 
                     return mateSign * mateIn / 2;

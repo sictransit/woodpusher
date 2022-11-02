@@ -181,7 +181,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
 
-            var bestmove = patzer.FindBestMove(20000);
+            var bestmove = patzer.FindBestMove(10000);
 
             Assert.IsTrue(bestmove.Notation.Length == 4);
         }
@@ -215,7 +215,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(infos.Any(i => i.Contains("mate 3")));
+            Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
         }
 
         [TestMethod()]

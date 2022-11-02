@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -101,58 +100,52 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                foreach (var chunk in nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(e => e.AbsoluteScore).Chunk(Environment.ProcessorCount))
+                var tasks = nodes.Where(n => !n.MateIn.HasValue).Select(node => Task.Run(() =>
                 {
                     try
                     {
-                        Parallel.ForEach(chunk, parallelOptions, node =>
+                        var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.BoardMaximumScore, Declarations.BoardMaximumScore, cancellationToken);
+
+                        if (!cancellationToken.IsCancellationRequested)
                         {
-                            try
+                            node.Score = score;
+
+                            if (infoCallback != null)
                             {
-                                var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.BoardMaximumScore, Declarations.BoardMaximumScore, cancellationToken);
-
-                                if (!cancellationToken.IsCancellationRequested)
-                                {
-                                    node.Score = score;
-
-                                    if (infoCallback != null)
-                                    {
-                                        SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
-                                    }
-                                }
-                                else
-                                {
-                                    if (infoCallback != null)
-                                    {
-                                        SendDebugInfo(infoCallback, $"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
-                                    }
-
-                                    Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");
-                                }
+                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
                             }
-                            catch (OperationCanceledException)
+                        }
+                        else
+                        {
+                            if (infoCallback != null)
                             {
-                                throw;
+                                SendDebugInfo(infoCallback, $"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
                             }
-                            catch (Exception ex)
-                            {
-                                if (infoCallback != null)
-                                {
-                                    SendExceptionInfo(infoCallback, ex);
-                                }
 
-                                throw;
-                            }
-                        });
+                            Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");
+                        }
                     }
                     catch (OperationCanceledException)
                     {
-                        break;
+                        throw;
                     }
-                }
+                    catch (Exception ex)
+                    {
+                        if (infoCallback != null)
+                        {
+                            SendExceptionInfo(infoCallback, ex);
+                        }
+
+                        throw;
+                    }
+
+                })).ToArray();
+
+                Task.WaitAll(tasks);
 
                 nodes.ForEach(n => n.MaxDepth += 2);
             }
+
 
             // Set node score to zero for threefold repetition moves.
             UpdateForThreefoldRepetition(nodes);
