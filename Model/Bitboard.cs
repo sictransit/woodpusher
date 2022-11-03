@@ -96,30 +96,30 @@ namespace SicTransit.Woodpusher.Model
 
             if ((pawn & mask) != 0)
             {
-                return Piece.Pawn.SetMask(mask);
+                return color | Piece.Pawn.SetMask(mask);
             }
 
             if ((rook & mask) != 0)
             {
-                return Piece.Rook.SetMask(mask);
+                return color | Piece.Rook.SetMask(mask);
             }
 
             if ((knight & mask) != 0)
             {
-                return Piece.Knight.SetMask(mask);
+                return color | Piece.Knight.SetMask(mask);
             }
 
             if ((bishop & mask) != 0)
             {
-                return Piece.Bishop.SetMask(mask);
+                return color | Piece.Bishop.SetMask(mask);
             }
 
             if ((queen & mask) != 0)
             {
-                return Piece.Queen.SetMask(mask);
+                return color | Piece.Queen.SetMask(mask);
             }
 
-            return Piece.King.SetMask(mask);
+            return color | Piece.King.SetMask(mask);
         }
 
         private Bitboard Toggle(Piece pieceType, ulong to = 0)

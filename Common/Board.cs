@@ -90,6 +90,7 @@ namespace SicTransit.Woodpusher.Common
         private Board Play(Move move)
         {
             var hash = Hash;
+
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColor());
 
             var capture = opponentBitboard.Peek(move.EnPassantTarget == 0 ? move.Target : move.EnPassantMask);
@@ -98,12 +99,12 @@ namespace SicTransit.Woodpusher.Common
             {
                 opponentBitboard = opponentBitboard.Remove(capture);
 
-                hash ^= internals.Zobrist.GetPieceHash(capture | ActiveColor.OpponentColor());
+                hash ^= internals.Zobrist.GetPieceHash(capture);
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
-            hash ^= internals.Zobrist.GetPieceHash(move.Piece);
-            hash ^= internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
+
+            hash ^= internals.Zobrist.GetPieceHash(move.Piece) ^ internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
 
             var castlings = Counters.Castlings;
 

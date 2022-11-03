@@ -107,7 +107,7 @@ namespace SicTransit.Woodpusher.Engine
                 var tasks = nodes.Where(n => !n.MateIn.HasValue).Select(node => Task.Run(() =>
                 {
                     try
-                    {
+                    {                        
                         var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
@@ -116,7 +116,7 @@ namespace SicTransit.Woodpusher.Engine
 
                             if (infoCallback != null)
                             {
-                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
+                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, FindPrincipalVariation(Board, node.Move), stopwatch.ElapsedMilliseconds);
                             }
                         }
                         else
@@ -161,7 +161,24 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
             return new AlgebraicMove(bestNode.Move);
-        }        
+        }
+
+        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Move move)
+        {
+            while (true)
+            {
+                yield return move;
+
+                board = board.PlayMove(move);
+
+                if (!hashTable.TryGetValue(board.Hash, out var pvNode))
+                { 
+                    yield break;
+                }
+
+                move = pvNode.Move;
+            }
+        }
 
         private void UpdateForThreefoldRepetition(List<Node> nodes)
         {
@@ -203,15 +220,15 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo(callback, $"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, long time)
+        private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, IEnumerable<Move> principalVariation, long time)
         {
-            var principalVariation = node.Move.ToAlgebraicMoveNotation();
+            var pv = string.Join(' ',principalVariation.Select(m => m.ToAlgebraicMoveNotation()));
 
             var score = node.MateIn.HasValue ? $"mate {node.MateIn.Value}" : $"cp {node.AbsoluteScore}";
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {principalVariation} nps {nodesPerSecond}");
+            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {pv} nps {nodesPerSecond}");
         }
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
