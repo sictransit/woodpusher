@@ -193,7 +193,7 @@ namespace SicTransit.Woodpusher
                     var blackTimeMatch = BlackTimeRegex.Match(command);
                     var movetimeMatch = MovetimeRegex.Match(command);
 
-                    var timeLimit = 60000;
+                    var timeLimit = 10000;
 
                     if (movetimeMatch.Success)
                     {

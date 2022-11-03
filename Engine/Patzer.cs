@@ -5,6 +5,7 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -21,6 +22,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
+        private readonly IDictionary<ulong, PrincipalVariationNode> hashTable = new Dictionary<ulong, PrincipalVariationNode>();
+
         public Patzer()
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
@@ -30,6 +33,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
             repetitions.Clear();
+            hashTable.Clear();
         }
 
         public void Play(Move move)
@@ -108,7 +112,7 @@ namespace SicTransit.Woodpusher.Engine
 
                         if (!cancellationToken.IsCancellationRequested)
                         {
-                            node.Score = score;
+                            node.Score = score;                            
 
                             if (infoCallback != null)
                             {
@@ -157,7 +161,7 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
             return new AlgebraicMove(bestNode.Move);
-        }
+        }        
 
         private void UpdateForThreefoldRepetition(List<Node> nodes)
         {
@@ -201,20 +205,26 @@ namespace SicTransit.Woodpusher.Engine
 
         private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, long time)
         {
-            var preview = node.Move.ToAlgebraicMoveNotation();
+            var principalVariation = node.Move.ToAlgebraicMoveNotation();
 
             var score = node.MateIn.HasValue ? $"mate {node.MateIn.Value}" : $"cp {node.AbsoluteScore}";
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {preview} nps {nodesPerSecond}");
+            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {principalVariation} nps {nodesPerSecond}");
         }
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            var moves = board.GetLegalMoves();
-
             var maximizing = board.ActiveColor.Is(Piece.White);
+            var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return bestScore;
+            }
+
+            var moves = board.GetLegalMoves();
 
             // ReSharper disable once PossibleMultipleEnumeration
             if (!moves.Any())
@@ -223,12 +233,15 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? mateScore : Declarations.DrawScore;
             }
 
-            if (depth == node.MaxDepth || cancellationToken.IsCancellationRequested)
+            if (depth == node.MaxDepth)
             {
                 return board.Score;
-            }
+            }            
 
-            var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+            if (hashTable.TryGetValue(board.Hash, out var pvNode))
+            {
+                moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
+            }
 
             // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
@@ -243,6 +256,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (bestScore >= beta)
                     {
+                        UpdateHashTable(board.Hash, move, score);
                         break;
                     }
 
@@ -254,6 +268,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (bestScore <= alpha)
                     {
+                        UpdateHashTable(board.Hash, move, -score);
                         break;
                     }
 
@@ -262,6 +277,25 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             return bestScore;
+        }
+
+        private void UpdateHashTable(ulong hash, Move move, int score)
+        {
+            lock (hashTable)
+            {
+                if (hashTable.TryGetValue(hash, out var pvNode))
+                {
+                    if (score > pvNode.Score)
+                    {
+                        pvNode.Move = move;
+                        pvNode.Score = score;   
+                    }
+                }
+                else
+                {
+                    hashTable.Add(hash, new PrincipalVariationNode(move, score));
+                }
+            }
         }
 
         public void Stop()
