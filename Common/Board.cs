@@ -90,27 +90,15 @@ namespace SicTransit.Woodpusher.Common
         private Board Play(Move move)
         {
             var hash = Hash;
-            var quiet = true;
             var opponentBitboard = GetBitboard(ActiveColor.OpponentColor());
 
-            var targetPiece = opponentBitboard.Peek(move.Target);
+            var capture = opponentBitboard.Peek(move.EnPassantTarget == 0 ? move.Target : move.EnPassantMask);
 
-            if (targetPiece != Piece.None)
+            if (capture != Piece.None)
             {
-                opponentBitboard = opponentBitboard.Remove(targetPiece);
+                opponentBitboard = opponentBitboard.Remove(capture);
 
-                hash ^= internals.Zobrist.GetPieceHash(targetPiece | ActiveColor.OpponentColor());
-
-                quiet = false;
-            }
-            else if (move.Flags.HasFlag(SpecialMove.EnPassant))
-            {
-                var targetPawn = Piece.Pawn.SetMask(move.EnPassantMask);
-                opponentBitboard = opponentBitboard.Remove(targetPawn);
-
-                hash ^= internals.Zobrist.GetPieceHash(targetPawn | ActiveColor.OpponentColor());
-
-                quiet = false;
+                hash ^= internals.Zobrist.GetPieceHash(capture | ActiveColor.OpponentColor());
             }
 
             var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
@@ -217,10 +205,10 @@ namespace SicTransit.Woodpusher.Common
                 hash ^= internals.Zobrist.GetPieceHash(promotedPiece) ^ internals.Zobrist.GetPieceHash(promotionPiece);
             }
 
-            var halfmoveClock = move.Piece.Is(Piece.Pawn) || targetPiece.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
+            var halfmoveClock = move.Piece.Is(Piece.Pawn) || capture.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1;
 
             var fullmoveCounter = Counters.FullmoveNumber + (ActiveColor.Is(Piece.White) ? 0 : 1);
-            var counters = new Counters(ActiveColor.OpponentColor(), castlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter, quiet);
+            var counters = new Counters(ActiveColor.OpponentColor(), castlings, move.EnPassantTarget, halfmoveClock, fullmoveCounter, capture);
 
             hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget) ^ internals.Zobrist.GetMaskHash(counters.EnPassantTarget);
             hash ^= internals.Zobrist.GetPieceHash(Counters.ActiveColor) ^ internals.Zobrist.GetPieceHash(counters.ActiveColor);

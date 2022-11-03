@@ -108,7 +108,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     try
                     {
-                        var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.BoardMaximumScore, Declarations.BoardMaximumScore, cancellationToken);
+                        var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
                         {
@@ -216,12 +216,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            var maximizing = board.ActiveColor.Is(Piece.White);
-            var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+            var maximizing = board.ActiveColor.Is(Piece.White);            
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return bestScore;
+                return maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore; 
             }
 
             var moves = board.GetLegalMoves();
@@ -239,7 +238,7 @@ namespace SicTransit.Woodpusher.Engine
             }            
 
             if (hashTable.TryGetValue(board.Hash, out var pvNode))
-            {
+            {                
                 moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
             }
 
@@ -252,31 +251,33 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (maximizing)
                 {
-                    bestScore = Math.Max(score, bestScore);
-
-                    if (bestScore >= beta)
-                    {
-                        UpdateHashTable(board.Hash, move, score);
-                        break;
+                    if (score >= beta)
+                    {                        
+                        return beta;
                     }
 
-                    alpha = Math.Max(alpha, bestScore);
+                    if (score > alpha)
+                    {
+                        UpdateHashTable(board.Hash, move, score);
+                        alpha = score;
+                    }                    
                 }
                 else
                 {
-                    bestScore = Math.Min(score, bestScore);
-
-                    if (bestScore <= alpha)
-                    {
-                        UpdateHashTable(board.Hash, move, -score);
-                        break;
+                    if (score <= alpha)
+                    {                        
+                        return alpha;
                     }
 
-                    beta = Math.Min(beta, bestScore);
+                    if (score < beta)
+                    {
+                        UpdateHashTable(board.Hash, move, -score);
+                        beta = score;
+                    }                    
                 }
             }
 
-            return bestScore;
+            return maximizing ? alpha : beta;
         }
 
         private void UpdateHashTable(ulong hash, Move move, int score)
