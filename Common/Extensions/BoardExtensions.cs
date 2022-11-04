@@ -1,4 +1,5 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -41,11 +42,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
             sb.AppendLine();
 
             sb.AppendLine($"Hash: {b.Hash}");
-            sb.AppendLine($"Castlings: {b.Counters.Castlings}");
-            var target = b.Counters.EnPassantTarget == 0 ? "None" : b.Counters.EnPassantTarget.ToSquare().ToString();
-            sb.AppendLine($"En passant target: {target}");
-            var activeColor = b.ActiveColor == Piece.White ? "White" : "Black";
-            sb.AppendLine($"{activeColor} to play");
+            sb.AppendLine($"FEN: {ForsythEdwardsNotation.Export(b)}");
 
             return sb.ToString();
         }

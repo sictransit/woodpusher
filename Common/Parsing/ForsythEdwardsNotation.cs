@@ -3,6 +3,7 @@ using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Common.Parsing
@@ -90,6 +91,82 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             return (white, black);
         }
+
+        public static string Export(IBoard board)
+        {
+            var parts = new List<string>();
+
+            var boardParts = new List<string>();
+
+            var pieces = board.GetPieces().ToDictionary(p => p.GetSquare(), p => p);
+
+            for (var rank = 7; rank >= 0; rank--)
+            {
+                var emptySquares = 0;
+
+                var fileBuilder = new StringBuilder();
+
+                for (int file = 0; file < 8; file++)
+                {
+                    if (pieces.TryGetValue(new Square(file, rank), out var piece))
+                    {
+                        if (emptySquares != 0)
+                        {
+                            fileBuilder.Append(emptySquares);
+                            emptySquares = 0;
+                        }
+
+                        fileBuilder.Append(piece.ToAlgebraicNotation());
+                    }
+                    else
+                    {
+                        emptySquares++;
+                    }
+                }
+
+                if (emptySquares != 0)
+                {
+                    fileBuilder.Append(emptySquares);
+                }
+
+                boardParts.Add(fileBuilder.ToString());
+            }
+
+            parts.Add(string.Join('/', boardParts));
+
+            parts.Add(board.ActiveColor.Is(Piece.White) ? "w" : "b");
+
+            var castlings = new[] {
+                (Castlings.WhiteKingside, Piece.White | Piece.King),
+                (Castlings.WhiteQueenside, Piece.White | Piece.Queen),
+                (Castlings.BlackKingside, Piece.None | Piece.King),
+                (Castlings.BlackQueenside, Piece.None | Piece.Queen)
+            }.Where(c => board.Counters.Castlings.HasFlag(c.Item1)).Select(c => c.Item2.ToAlgebraicNotation()).ToArray();
+
+            if (castlings.Length == 0)
+            {
+                parts.Add("-");
+            }
+            else
+            {
+                parts.Add(new string(castlings));
+            }
+
+            if (board.Counters.EnPassantTarget == 0)
+            {
+                parts.Add("-");
+            }
+            else
+            {
+                parts.Add(board.Counters.EnPassantTarget.ToSquare().ToAlgebraicNotation());
+            }
+
+            parts.Add(board.Counters.HalfmoveClock.ToString());
+            parts.Add(board.Counters.FullmoveNumber.ToString());
+
+            return string.Join(" ", parts.ToArray());
+        }
+
 
         private static int ParseFullmoveNumber(string s) => int.Parse(s);
 
