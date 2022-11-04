@@ -244,6 +244,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod()]
         public void DoNotBlunderSoMuch()
         {
+            // Lichess (i.e. Stockfish) vs Woodpusher. Both sides made a lot of mistakes, for different reasons. 
+            // Woodpusher had ten seconds per move to think; Stockfish spent less. 
+            // The goal of this test is to have a newer version of our engine rethink the erroneous moves and come up with something better.
 
             var pgnFile = File.ReadAllText("resources/lichess_pgn_2022.11.01_lichess_AI_level_4_vs_woodpusher.KlijXZP3.pgn");
 
@@ -261,7 +264,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     var betterAlterantive = false;
 
-                    foreach (var thinkingTime in new[] { 500, 2500, 10000 })
+                    foreach (var thinkingTime in new[] { 100, 500, 5000 })
                     {
                         var engineMove = engine.FindBestMove(thinkingTime);
 
