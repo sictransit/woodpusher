@@ -1,4 +1,6 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Parsing.Enum;
+using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -9,16 +11,33 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
     public abstract class PgnMove
     {
         private static readonly Regex PromotionRegex = new(@"^(.+)=([QRNB])$", RegexOptions.Compiled);
+        private static readonly Regex AnnotationRegex = new(@"^(.+?)([?!]*)$", RegexOptions.Compiled);
 
-        protected string Raw { get; }
+        protected string Raw { get; private set; }
 
-        protected PgnMove(string raw)
-        {
-            Raw = raw;
-        }
+        public PgnAnnotation Annotation { get; private set; }
 
         public static PgnMove Parse(string s)
         {
+            var raw = s;
+
+            var annotationMatch = AnnotationRegex.Match(s);
+
+            var annotation = PgnAnnotation.None;
+
+            if (annotationMatch.Success && !string.IsNullOrEmpty(annotationMatch.Groups[2].Value))
+            {
+                annotation = annotationMatch.Groups[2].Value switch
+                {
+                    "?" => PgnAnnotation.Mistake,
+                    "?!" => PgnAnnotation.Inaccuracy,
+                    "??" => PgnAnnotation.Blunder,
+                    _ => throw new PgnParsingException(s, $"Unknown annotation: {annotationMatch.Groups[2].Value}"),
+                };
+
+                s = annotationMatch.Groups[1].Value;
+            }
+
             s = s.Replace("x", string.Empty);
 
             var promotionMatch = PromotionRegex.Match(s);
@@ -31,35 +50,39 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 promotionType = promotionMatch.Groups[2].Value[0].ToPieceType();
             }
 
+            PgnMove pgnMove = null;
+
             if (TryParseSimplePawnMove(s, out var simplePawnMove))
             {
-                return simplePawnMove!;
+                pgnMove = simplePawnMove!;
+            }
+            else if (TryParseSimplePieceMove(s, out var simplePieceMove))
+            {
+                pgnMove = simplePieceMove!;
+            }
+            else if (TryParseCastlingMove(s, out var castlingMove))
+            {
+                pgnMove = castlingMove!;
+            }
+            else if (TryParsePieceOnFileMove(s, promotionType, out var pieceOnFileMove))
+            {
+                pgnMove = pieceOnFileMove!;
+            }
+            else if (TryParsePieceOnRankMove(s, promotionType, out var pieceOnRankMove))
+            {
+                pgnMove = pieceOnRankMove!;
+            }
+            else if (TryParseFileMove(s, promotionType, out var fileMove))
+            {
+                pgnMove = fileMove!;
             }
 
-            if (TryParseSimplePieceMove(s, out var simplePieceMove))
+            if (pgnMove != null)
             {
-                return simplePieceMove!;
-            }
+                pgnMove.Annotation = annotation;
+                pgnMove.Raw = raw;
 
-            if (TryParseCastlingMove(s, out var castlingMove))
-            {
-                return castlingMove!;
-            }
-
-            if (TryParsePieceOnFileMove(s, promotionType, out var pieceOnFileMove))
-            {
-                return pieceOnFileMove!;
-            }
-
-            if (TryParsePieceOnRankMove(s, promotionType, out var pieceOnRankMove))
-            {
-                return pieceOnRankMove!;
-            }
-
-
-            if (TryParseFileMove(s, promotionType, out var fileMove))
-            {
-                return fileMove!;
+                return pgnMove;
             }
 
 
@@ -76,7 +99,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePawnMove(s, new Square(match.Captures[0].Value));
+                move = new SimplePawnMove(new Square(match.Captures[0].Value));
             }
 
             return move != default;
@@ -92,7 +115,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePieceMove(s, match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value));
+                move = new SimplePieceMove(match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value));
             }
 
             return move != default;
@@ -108,7 +131,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), new Square(match.Groups[3].Value), promotionType);
+                move = new PieceOnFileMove(match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToFile(), new Square(match.Groups[3].Value), promotionType);
             }
 
             return move != default;
@@ -124,7 +147,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnRankMove(s, match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToRank(), new Square(match.Groups[3].Value), promotionType);
+                move = new PieceOnRankMove(match.Groups[1].Value[0].ToPieceType(), match.Groups[2].Value[0].ToRank(), new Square(match.Groups[3].Value), promotionType);
             }
 
             return move != default;
@@ -140,7 +163,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new PieceOnFileMove(s, Piece.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value), promotionType);
+                move = new PieceOnFileMove(Piece.Pawn, match.Groups[1].Value[0].ToFile(), new Square(match.Groups[2].Value), promotionType);
             }
 
             return move != default;
@@ -159,11 +182,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             {
                 if (string.IsNullOrEmpty(match.Groups[2].Value))
                 {
-                    move = new CastlingKingMove(s);
+                    move = new CastlingKingMove();
                 }
                 else
                 {
-                    move = new CastlingQueenMove(s);
+                    move = new CastlingQueenMove();
                 }
             }
 

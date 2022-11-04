@@ -1,8 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -13,7 +17,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestInitialize]
         public void Initialize()
         {
-            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
+            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
         }
 
         [TestMethod]
@@ -237,7 +241,45 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
         }
 
+        [TestMethod()]
+        public void DoNotBlunderSoMuch()
+        {
+
+            var pgnFile = File.ReadAllText("resources/lichess_pgn_2022.11.01_lichess_AI_level_4_vs_woodpusher.KlijXZP3.pgn");
+
+            var pgn = PortableGameNotation.Parse(pgnFile);
+
+            IEngine engine = new Patzer();
+
+            foreach (var pgnMove in pgn.PgnMoves)
+            {
+                var matchMove = pgnMove.GetMove(engine);
+
+                if (pgnMove.Annotation != PgnAnnotation.None)
+                {
+                    Log.Information($"Finding alterantive to: {pgnMove}");
+
+                    var betterAlterantive = false;
+
+                    foreach (var thinkingTime in new[] { 500, 2500, 10000 })
+                    {
+                        var engineMove = engine.FindBestMove(thinkingTime);
+
+                        Log.Information($"Found (@{thinkingTime} ms): {engineMove}");
+
+                        if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Notation))
+                        {
+                            betterAlterantive = true;
+                            break;
+                        }
+                    }
+
+                    Assert.IsTrue(betterAlterantive);
+                }
+
+                Log.Information($"Playing: {matchMove}");
+                engine.Play(matchMove);
+            }
+        }
     }
-
-
 }

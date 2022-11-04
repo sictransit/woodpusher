@@ -13,7 +13,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
         private readonly Square square;
         private readonly Piece promotionType;
 
-        public PieceOnRankMove(string raw, Piece pieceType, int rank, Square square, Piece promotionType) : base(raw)
+        public PieceOnRankMove(Piece pieceType, int rank, Square square, Piece promotionType)
         {
             this.pieceType = pieceType;
             this.rank = rank;

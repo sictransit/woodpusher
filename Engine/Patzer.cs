@@ -5,7 +5,6 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -107,12 +106,12 @@ namespace SicTransit.Woodpusher.Engine
                 var tasks = nodes.Where(n => !n.MateIn.HasValue).Select(node => Task.Run(() =>
                 {
                     try
-                    {                        
+                    {
                         var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
                         {
-                            node.Score = score;                            
+                            node.Score = score;
 
                             if (infoCallback != null)
                             {
@@ -172,7 +171,7 @@ namespace SicTransit.Woodpusher.Engine
                 board = board.PlayMove(move);
 
                 if (!hashTable.TryGetValue(board.Hash, out var pvNode))
-                { 
+                {
                     yield break;
                 }
 
@@ -222,7 +221,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, IEnumerable<Move> principalVariation, long time)
         {
-            var pv = string.Join(' ',principalVariation.Select(m => m.ToAlgebraicMoveNotation()));
+            var pv = string.Join(' ', principalVariation.Select(m => m.ToAlgebraicMoveNotation()));
 
             var score = node.MateIn.HasValue ? $"mate {node.MateIn.Value}" : $"cp {node.AbsoluteScore}";
 
@@ -233,11 +232,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
         {
-            var maximizing = board.ActiveColor.Is(Piece.White);            
+            var maximizing = board.ActiveColor.Is(Piece.White);
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore; 
+                return maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
             }
 
             var moves = board.GetLegalMoves();
@@ -252,10 +251,10 @@ namespace SicTransit.Woodpusher.Engine
             if (depth == node.MaxDepth)
             {
                 return board.Score;
-            }            
+            }
 
             if (hashTable.TryGetValue(board.Hash, out var pvNode))
-            {                
+            {
                 moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
             }
 
@@ -269,7 +268,7 @@ namespace SicTransit.Woodpusher.Engine
                 if (maximizing)
                 {
                     if (score >= beta)
-                    {                        
+                    {
                         return beta;
                     }
 
@@ -277,12 +276,12 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         UpdateHashTable(board.Hash, move, score);
                         alpha = score;
-                    }                    
+                    }
                 }
                 else
                 {
                     if (score <= alpha)
-                    {                        
+                    {
                         return alpha;
                     }
 
@@ -290,7 +289,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         UpdateHashTable(board.Hash, move, -score);
                         beta = score;
-                    }                    
+                    }
                 }
             }
 
@@ -306,7 +305,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (score > pvNode.Score)
                     {
                         pvNode.Move = move;
-                        pvNode.Score = score;   
+                        pvNode.Score = score;
                     }
                 }
                 else

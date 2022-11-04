@@ -8,10 +8,6 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 {
     public abstract class CastlingMove : PgnMove
     {
-        protected CastlingMove(string raw) : base(raw)
-        {
-        }
-
         protected abstract Piece CastlingPiece { get; }
 
         protected override Move CreateMove(IEngine engine)
