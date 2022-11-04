@@ -416,5 +416,20 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
 
             Assert.IsFalse(moves.Any(m => m.Piece.Is(Piece.King) && m.Flags.HasFlag(SpecialMove.CastleQueen)));
         }
+
+        [TestMethod]
+        public void AnnotationsTest()
+        {
+            var game = @"
+1. e4?! d5? 2. Bb5+?? Bd7 3. Qg4 g5 4. Bc6 a6 5. Qxd7+ Nxd7 6. Kd1 g4 7. Ke2 h5
+8. Kd1 Ra7 9. g3 Ra8 10. Nf3 Rh6 11. h4 {Black makes an illegal move: e8c8} 1-0
+";
+            var pgn = PortableGameNotation.Parse(game);
+
+            Assert.IsTrue(pgn.PgnMoves.Any(m => m.Annotation == PgnAnnotation.None));
+            Assert.IsTrue(pgn.PgnMoves.Any(m => m.Annotation == PgnAnnotation.Inaccuracy));
+            Assert.IsTrue(pgn.PgnMoves.Any(m => m.Annotation == PgnAnnotation.Mistake));
+            Assert.IsTrue(pgn.PgnMoves.Any(m => m.Annotation == PgnAnnotation.Blunder));
+        }
     }
 }
