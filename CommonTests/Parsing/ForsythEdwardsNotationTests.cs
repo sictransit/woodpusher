@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Serilog;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
@@ -11,6 +12,12 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
     [TestClass()]
     public class ForsythEdwardsNotationTests
     {
+        [TestInitialize]
+        public void Initialize()
+        {
+            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
+        }
+
         [TestMethod]
         public void ParseSetupTest()
         {
@@ -42,6 +49,32 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
             Assert.IsTrue(blackRooks.Any(p => p.GetSquare().Equals(new Square("h5"))));
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
             Assert.AreEqual(34, board.Counters.FullmoveNumber);
+        }
+
+        [TestMethod()]
+        public void ExportStartingPositionTest()
+        {
+            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+
+            var export = ForsythEdwardsNotation.Export(board);
+
+            Log.Information(export);
+
+            Assert.AreEqual(ForsythEdwardsNotation.StartingPosition, export);
+        }
+
+        [TestMethod()]
+        public void ExportMagnusCarlsenTest()
+        {
+            var fen = "5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34";
+
+            var board = ForsythEdwardsNotation.Parse(fen);
+
+            var export = ForsythEdwardsNotation.Export(board);
+
+            Log.Information(export);
+
+            Assert.AreEqual(fen, export);
         }
     }
 }
