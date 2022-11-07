@@ -284,5 +284,31 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 engine.Play(matchMove);
             }
         }
+
+        [TestMethod()]
+        public void DoNotStopPlaying()
+        {
+            // Woodpusher vs. Woordpusher in a Cute Chess game. 
+            // Suddenly white stopped playing, without any exceptions caught or logged.
+
+            var pgnFile = File.ReadAllText("resources/woodpusher-vs-woodpusher-freeze.pgn");
+
+            var pgn = PortableGameNotation.Parse(pgnFile);
+
+            IEngine engine = new Patzer();
+
+            foreach (var pgnMove in pgn.PgnMoves)
+            {
+                var matchMove = pgnMove.GetMove(engine);
+
+                engine.Play(matchMove);
+            }
+
+            var bestMove = engine.FindBestMove(3000);
+
+            Assert.IsNotNull(bestMove);
+
+            Log.Information($"Best move found: {bestMove}");
+        }
     }
 }
