@@ -238,6 +238,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var move = patzer.FindBestMove(5000, Callback);
 
+            Assert.IsNotNull(move);
+
             Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
         }
 
@@ -260,9 +262,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 if (pgnMove.Annotation != PgnAnnotation.None)
                 {
-                    Log.Information($"Finding alterantive to: {pgnMove}");
+                    Log.Information($"Finding alternative to: {pgnMove}");
 
-                    var betterAlterantive = false;
+                    var foundAlterantive = false;
 
                     foreach (var thinkingTime in new[] { 100, 500, 5000 })
                     {
@@ -272,12 +274,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Notation))
                         {
-                            betterAlterantive = true;
+                            foundAlterantive = true;
                             break;
                         }
                     }
 
-                    Assert.IsTrue(betterAlterantive);
+                    Assert.IsTrue(foundAlterantive);
                 }
 
                 Log.Information($"Playing: {matchMove}");

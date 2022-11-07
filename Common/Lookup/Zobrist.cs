@@ -8,7 +8,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
     public class Zobrist
     {
         // Credit: https://www.random.org/
-        private static readonly byte[] randomness = new byte[]{
+        private static readonly byte[] Randomness = {
             0x2c, 0x92, 0x39, 0xb1, 0xba, 0x85, 0x95, 0xe8, 0x76, 0x8f, 0xfa, 0xfa, 0xbb, 0xa8, 0xde, 0x2c,
             0x90, 0x92, 0x00, 0x0a, 0x53, 0xc4, 0xfe, 0x78, 0x5a, 0x74, 0x18, 0x10, 0x2f, 0xde, 0x28, 0x77,
             0x29, 0x38, 0xa6, 0xdf, 0x7e, 0x79, 0x52, 0x05, 0xfc, 0x8c, 0xcb, 0xfb, 0x62, 0x3c, 0xcc, 0x41,
@@ -413,7 +413,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             0x90, 0xde, 0xb5, 0x9b, 0x50, 0xc1, 0x6d, 0x81
         };
 
-        private int randomCounter = 0;
+        private int randomCounter;
 
         private readonly Dictionary<Piece, ulong> pieceHashes = new();
         private readonly Dictionary<Castlings, ulong> castlingsHashes = new();
@@ -458,7 +458,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private void InitializeCastlings()
         {
-            for (int i = 0; i < 16; i++)
+            for (var i = 0; i < 16; i++)
             {
                 castlingsHashes.Add((Castlings)i, GenerateRandomNumber());
             }
@@ -489,12 +489,12 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private ulong GenerateRandomNumber()
         {
-            if (randomCounter * 8 >= randomness.Length)
+            if (randomCounter * 8 >= Randomness.Length)
             {
                 throw new InvalidOperationException("Out of randomness!");
             }
 
-            return BitConverter.ToUInt64(randomness, 8 * randomCounter++);
+            return BitConverter.ToUInt64(Randomness, 8 * randomCounter++);
         }
     }
 }

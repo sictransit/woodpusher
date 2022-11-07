@@ -90,12 +90,6 @@ namespace SicTransit.Woodpusher.Engine
 
             var cancellationToken = cancellationTokenSource.Token;
 
-            var parallelOptions = new ParallelOptions
-            {
-                CancellationToken = cancellationToken,
-                MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
-            };
-
             while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1)
             {
                 if (nodes.Any(n => n.MateIn > 0))

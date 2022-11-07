@@ -106,7 +106,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
                 var fileBuilder = new StringBuilder();
 
-                for (int file = 0; file < 8; file++)
+                for (var file = 0; file < 8; file++)
                 {
                     if (pieces.TryGetValue(new Square(file, rank), out var piece))
                     {
@@ -143,23 +143,11 @@ namespace SicTransit.Woodpusher.Common.Parsing
                 (Castlings.BlackQueenside, Piece.None | Piece.Queen)
             }.Where(c => board.Counters.Castlings.HasFlag(c.Item1)).Select(c => c.Item2.ToAlgebraicNotation()).ToArray();
 
-            if (castlings.Length == 0)
-            {
-                parts.Add("-");
-            }
-            else
-            {
-                parts.Add(new string(castlings));
-            }
+            parts.Add(castlings.Length == 0 ? "-" : new string(castlings));
 
-            if (board.Counters.EnPassantTarget == 0)
-            {
-                parts.Add("-");
-            }
-            else
-            {
-                parts.Add(board.Counters.EnPassantTarget.ToSquare().ToAlgebraicNotation());
-            }
+            parts.Add(board.Counters.EnPassantTarget == 0
+                ? "-"
+                : board.Counters.EnPassantTarget.ToSquare().ToAlgebraicNotation());
 
             parts.Add(board.Counters.HalfmoveClock.ToString());
             parts.Add(board.Counters.FullmoveNumber.ToString());

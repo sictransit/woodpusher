@@ -19,12 +19,10 @@ namespace SicTransit.Woodpusher.Model
             this.queen = queen;
             this.king = king;
 
-            all = pawn | rook | knight | bishop | queen | king;
+            All = pawn | rook | knight | bishop | queen | king;
         }
 
         private readonly Piece color;
-
-        private readonly ulong all;
 
         private readonly ulong pawn;
         private readonly ulong rook;
@@ -35,13 +33,13 @@ namespace SicTransit.Woodpusher.Model
 
         public int Phase => BitOperations.PopCount(knight) + BitOperations.PopCount(bishop) + 2 * BitOperations.PopCount(rook) + 4 * BitOperations.PopCount(queen);
 
-        public ulong All => all;
+        public ulong All { get; }
 
         public ulong King => king;
 
         public ulong Pawn => pawn;
 
-        public bool IsOccupied(ulong mask) => (all & mask) != 0;
+        public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         public Bitboard Add(Piece piece) => Toggle(piece);
 
@@ -71,7 +69,7 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public IEnumerable<Piece> GetPieces(Piece type) => GetPieces(type, ulong.MaxValue);
+        private IEnumerable<Piece> GetPieces(Piece type) => GetPieces(type, ulong.MaxValue);
 
         public IEnumerable<Piece> GetPieces(Piece type, ulong mask)
         {
@@ -89,7 +87,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Peek(ulong mask)
         {
-            if ((all & mask) == 0)
+            if ((All & mask) == 0)
             {
                 return Piece.None;
             }
