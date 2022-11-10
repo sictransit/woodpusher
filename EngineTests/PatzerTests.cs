@@ -185,9 +185,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
 
-            var bestmove = patzer.FindBestMove(10000);
+            var bestMove = patzer.FindBestMove(10000);
 
-            Assert.IsTrue(bestmove.Notation.Length == 4);
+            Assert.IsTrue(bestMove.Notation.Length == 4);
         }
 
         [TestMethod]
@@ -196,9 +196,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var patzer = new Patzer();
             patzer.Position("7k/8/8/8/8/1p6/B7/7K w - - 0 1");
 
-            var bestmove = patzer.FindBestMove();
+            var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2b3", bestmove.Notation);
+            Assert.AreEqual("a2b3", bestMove.Notation);
         }
 
         [TestMethod()]

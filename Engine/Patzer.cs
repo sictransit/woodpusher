@@ -191,7 +191,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (repetitions[key] > 1)
                 {
-                    Log.Information($"Resetting score to zero for threefold repetion of: {algebraic}");
+                    Log.Information($"Resetting score to zero for threefold repetition of: {algebraic}");
 
                     node.Score = 0;
                 }

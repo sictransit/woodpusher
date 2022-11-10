@@ -28,7 +28,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var (white, black) = ParseBoard(parts[0]);
 
-            var activeColor = ParseActiveColour(parts[1]);
+            var activeColor = ParseActiveColor(parts[1]);
 
             var castling = ParseCastling(parts[2]);
 
@@ -175,7 +175,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             return new Square(s);
         }
 
-        private static Piece ParseActiveColour(string s)
+        private static Piece ParseActiveColor(string s)
         {
             if (!Regex.IsMatch(s, "^[w|b]$"))
             {

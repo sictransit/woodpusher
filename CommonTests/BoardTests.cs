@@ -56,36 +56,6 @@ namespace SicTransit.Woodpusher.Common.Tests
         }
 
         [TestMethod]
-        public void HashTest()
-        {
-            var rnd = new Random();
-
-            var sw = new Stopwatch();
-            sw.Start();
-
-            var hashes = 0;
-
-            IBoard board = new Board();
-
-            var pieces = PieceExtensions.AllPieces.ToArray();
-
-            foreach (var square in SquareExtensions.AllSquares)
-            {
-                board = board.SetPiece(pieces[rnd.Next(pieces.Length)].SetSquare(square));
-            }
-
-            while (sw.ElapsedMilliseconds < 10000)
-            {
-                var hash = board.Hash;
-                Assert.IsTrue(hash > 0);
-
-                hashes++;
-            }
-
-            Log.Information($"hash/ms: {(double)hashes / sw.ElapsedMilliseconds}");
-        }
-
-        [TestMethod]
         public void GetPiecesTest()
         {
             IBoard board = new Board();
