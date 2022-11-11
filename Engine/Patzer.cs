@@ -109,7 +109,7 @@ namespace SicTransit.Woodpusher.Engine
 
                             if (infoCallback != null)
                             {
-                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, FindPrincipalVariation(Board, node.Move), stopwatch.ElapsedMilliseconds);
+                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, FindPrincipalVariation(Board, node), stopwatch.ElapsedMilliseconds);
                             }
                         }
                         else
@@ -156,9 +156,13 @@ namespace SicTransit.Woodpusher.Engine
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Move move)
+        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Node node)
         {
-            while (true)
+            var move = node.Move;
+
+            var depth = 0;
+
+            while (depth++ < node.MaxDepth)
             {
                 yield return move;
 
