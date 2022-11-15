@@ -5,8 +5,20 @@ using SicTransit.Woodpusher.Model.Extensions;
 namespace SicTransit.Woodpusher.Model.Tests.Extensions
 {
     [TestClass]
-    public class PiecesExtensionsTests
+    public class PieceExtensionsTests
     {
+        [TestMethod]
+        public void ToCharTest()
+        {
+            Assert.AreEqual('P', Piece.Pawn.ToChar());
+            Assert.AreEqual('R', Piece.Rook.ToChar());
+            Assert.AreEqual('N', Piece.Knight.ToChar());
+            Assert.AreEqual('B', Piece.Bishop.ToChar());
+            Assert.AreEqual('Q', Piece.Queen.ToChar());
+            Assert.AreEqual('K', Piece.King.ToChar());
+        }
+
+
         [TestMethod]
         public void SetGetMaskTest()
         {
