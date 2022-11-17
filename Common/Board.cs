@@ -418,11 +418,9 @@ namespace SicTransit.Woodpusher.Common
 
         private bool IsMovingIntoCheck(Move move)
         {
-            var testBoard = Play(move);
+            var testBoard = Play(move);            
 
-            var opponentColor = testBoard.ActiveColor.OpponentColor();
-
-            return testBoard.IsAttacked(testBoard.FindKing(opponentColor), opponentColor);
+            return testBoard.IsAttacked(testBoard.FindKing(ActiveColor), ActiveColor);
         }
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor), ActiveColor);
