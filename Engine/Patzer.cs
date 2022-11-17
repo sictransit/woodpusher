@@ -251,7 +251,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {pv} nps {nodesPerSecond}");
+            SendInfo(callback, $"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
         }
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)

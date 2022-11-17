@@ -45,13 +45,46 @@ namespace SicTransit.Woodpusher.Common
             {
                 var phase = white.Phase + black.Phase;
 
-                var whiteEvaluation = GetPieces(Piece.White).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
-                var blackEvaluation = GetPieces(Piece.None).Sum(p => internals.Scoring.EvaluatePiece(p, phase));
+                var score = 0;
 
-                //whiteEvaluation += GetPieces(Pieces.White, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
-                //blackEvaluation += GetPieces(Pieces.Black, Pieces.Pawn).Count(IsPassedPawn) * Scoring.PawnValue / 2;
+                foreach (var piece in GetPieces())
+                {
+                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                return whiteEvaluation - blackEvaluation;
+                    //var attackers = GetAttackers(piece.GetMask(), piece.GetColor()).Count();
+                    //var defenders = GetAttackers(piece.GetMask(), piece.GetColor().OpponentColor()).Count();
+
+                    //if (attackers > defenders)
+                    //{
+                    //    evaluation /= 2;
+                    //}
+
+                    switch (piece.GetPieceType())
+                    {
+                        case Piece.Pawn:
+                            if (IsPassedPawn(piece))
+                            {
+                                evaluation *= 2;
+                            }
+                            break;
+                        case Piece.Knight:
+                            break;
+                        case Piece.Bishop:
+                            break;
+                        case Piece.Rook:
+                            break;
+                        case Piece.Queen:
+                            break;
+                        case Piece.King:
+                            break;
+                        default:
+                            break;
+                    }
+
+                    score += piece.Is(Piece.White) ? evaluation : -evaluation;
+                }
+
+                return score;
             }
         }
 

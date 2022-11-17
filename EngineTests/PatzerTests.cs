@@ -314,7 +314,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("long running: 9 minutes on dev machine")]
+        [Ignore("long running: 1,7 minutes on dev machine")]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]

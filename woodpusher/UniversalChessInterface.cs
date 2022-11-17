@@ -100,11 +100,9 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    consoleOutput("id name Woodpusher v0.4.0");
+                    consoleOutput("id name Woodpusher");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
-
-                    throw new NotImplementedException();
                 }
             });
         }
