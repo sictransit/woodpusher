@@ -402,16 +402,14 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
 
-                var color = move.Piece.GetColor();
-
-                // castling from or into check
-                if (IsAttacked(move.Piece) || IsAttacked(move.Piece.SetMask(move.CastlingCheckMask)) || IsAttacked(move.Piece.SetMask(move.Target)))
+                // castling path is blocked
+                if (IsOccupied(move.CastlingEmptySquaresMask | move.CastlingCheckMask))
                 {
                     return false;
                 }
 
-                // castling path is blocked
-                if (IsOccupied(move.CastlingEmptySquaresMask | move.CastlingCheckMask))
+                // castling from or into check
+                if (IsAttacked(move.Piece) || IsAttacked(move.Piece.SetMask(move.CastlingCheckMask)) || IsAttacked(move.Piece.SetMask(move.Target)))
                 {
                     return false;
                 }
