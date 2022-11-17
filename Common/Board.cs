@@ -237,26 +237,26 @@ namespace SicTransit.Woodpusher.Common
 
         public IEnumerable<Piece> GetAttackers(ulong target, Piece color)
         {
-            var threatMask = internals.Attacks.GetThreatMask(color.SetMask(target));
+            var threats = internals.Attacks.GetThreatMask(color.SetMask(target));
 
             var opponentColor = color.OpponentColor();
 
-            if (!IsOccupied(threatMask.Mask, opponentColor))
+            if (!IsOccupied(threats.Any, opponentColor))
             {
                 yield break;
             }
 
-            foreach (var pawn in GetPieces(opponentColor, Piece.Pawn, threatMask.PawnMask))
+            foreach (var pawn in GetPieces(opponentColor, Piece.Pawn, threats.Pawn))
             {
                 yield return pawn;
             }
 
-            foreach (var knight in GetPieces(opponentColor, Piece.Knight, threatMask.KnightMask))
+            foreach (var knight in GetPieces(opponentColor, Piece.Knight, threats.Knight))
             {
                 yield return knight;
             }
 
-            foreach (var queen in GetPieces(opponentColor, Piece.Queen, threatMask.QueenMask))
+            foreach (var queen in GetPieces(opponentColor, Piece.Queen, threats.Queen))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
                 {
@@ -264,7 +264,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var rook in GetPieces(opponentColor, Piece.Rook, threatMask.RookMask))
+            foreach (var rook in GetPieces(opponentColor, Piece.Rook, threats.Rook))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
                 {
@@ -272,7 +272,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var bishop in GetPieces(opponentColor, Piece.Bishop, threatMask.BishopMask))
+            foreach (var bishop in GetPieces(opponentColor, Piece.Bishop, threats.Bishop))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
                 {
@@ -280,7 +280,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var king in GetPieces(opponentColor, Piece.King, threatMask.KingMask))
+            foreach (var king in GetPieces(opponentColor, Piece.King, threats.King))
             {
                 yield return king;
             }

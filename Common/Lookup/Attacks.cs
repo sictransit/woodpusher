@@ -7,14 +7,14 @@ namespace SicTransit.Woodpusher.Common.Lookup
 {
     public class Attacks
     {
-        private readonly Dictionary<Piece, ThreatMask> threatMasks = new();
+        private readonly Dictionary<Piece, ThreatMasks> threatMasks = new();
 
         public Attacks()
         {
             Initialize();
         }
 
-        public ThreatMask GetThreatMask(Piece piece) => threatMasks[piece];
+        public ThreatMasks GetThreatMask(Piece piece) => threatMasks[piece];
 
         private void Initialize()
         {
@@ -60,7 +60,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                             }
                     }
 
-                    threatMasks.Add(color.SetSquare(square), new ThreatMask(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
+                    threatMasks.Add(color.SetSquare(square), new ThreatMasks(pawnMask, rookMask, knightMask, bishopMask, queenMask, kingMask));
                 }
             }
         }
