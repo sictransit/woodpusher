@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Exceptions;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
@@ -59,6 +60,31 @@ namespace SicTransit.Woodpusher.Engine
 
                 Play(move);
             }
+        }
+
+        public void Perft(int depth, Action<string> infoCallback)
+        {
+            cancellationTokenSource = new CancellationTokenSource();
+
+            var initialMoves = Board.GetLegalMoves().Select(m => new { move = m, board = Board.PlayMove(m) });
+
+            ulong total = 0;
+
+            var options = new ParallelOptions
+            {
+                CancellationToken = cancellationTokenSource.Token
+            };
+
+            Parallel.ForEach(initialMoves, options, i =>
+            {
+                var nodes = i.board.Perft(depth);
+
+                total += nodes;
+
+                infoCallback($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
+            });
+
+            infoCallback(Environment.NewLine + $"Nodes searched: {total}");
         }
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)

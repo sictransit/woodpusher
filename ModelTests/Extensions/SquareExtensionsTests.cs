@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
             Assert.AreEqual(1ul << 63, new Square("h8").ToMask());
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void EnumerableToMaskTest()
         {
             var a1 = new Square("a1");
@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
             Assert.AreEqual(new Square("h8"), (1ul << 63).ToSquare());
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ToSquaresTest()
         {
             var a1 = new Square("a1");
@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
             Assert.IsTrue(squares.Contains(h8));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ToTravelPathTest()
         {
             var a1 = new Square("a1");
@@ -91,7 +91,7 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
             Assert.AreEqual(0, b3.ToTravelPath(a1).Count()); // knight
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void AddFileAndRankToMaskTest()
         {
             var c3 = new Square("c3");

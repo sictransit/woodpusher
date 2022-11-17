@@ -159,7 +159,7 @@ namespace SicTransit.Woodpusher.Common.Tests
             Trace.WriteLine(board.PrettyPrint());
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void GetAttackersTest()
         {
             var board = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
@@ -315,7 +315,7 @@ namespace SicTransit.Woodpusher.Common.Tests
             Assert.IsTrue(success);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void TestPositionsDebug1Test()
         {
             // The problem was the castling shouldn't be allowed if the rook has moved.
@@ -343,7 +343,7 @@ e1g1: 26514
             Assert.IsTrue(PerftAndCompare(board, stockfish, 6));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void TestPositionsDebug2Test()
         {
             // Check detection for castling didn't work at all, i.e. empty squares were ignored.
@@ -370,7 +370,7 @@ e8f7: 1
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
         }
 
-        [TestMethod()]
+        [TestMethod]
         [Ignore("long running: did not finish in 40 minutes")]
         public void Perft7StartingPositionTest()
         {
@@ -402,7 +402,7 @@ g1h3: 120669525
             Assert.IsTrue(PerftAndCompare(board, stockfish, 7));
         }
 
-        [TestMethod()]
+        [TestMethod]
         [Ignore("long running: 49 sec on release/laptop")]
         public void Perft6StartingPositionTest()
         {
@@ -434,7 +434,7 @@ g1h3: 4877234
             Assert.IsTrue(PerftAndCompare(board, stockfish, 6));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void Perft5StartingPositionTest()
         {
             var stockfish = @"
@@ -465,7 +465,7 @@ g1h3: 198502
             Assert.IsTrue(PerftAndCompare(board, stockfish, 5));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void Perft4StartingPositionTest()
         {
             var stockfish = @"
@@ -496,7 +496,7 @@ g1h3: 8881
             Assert.IsTrue(PerftAndCompare(board, stockfish, 4));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void Perft3StartingPositionC2C3Test()
         {
             var stockfish = @"
@@ -529,7 +529,7 @@ g8h6: 418
             Assert.IsTrue(PerftAndCompare(board.PlayMove(move), stockfish, 3));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void Perft2StartingPositionC2C3D7D6Test()
         {
             var stockfish = @"
@@ -567,7 +567,7 @@ d1a4: 6
             Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void Perft1StartingPositionC2C3D7D6D1A4Test()
         {
             var stockfish = @"
@@ -593,7 +593,7 @@ d8d7: 1
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void IsPassedPawnTest()
         {
             var board = ForsythEdwardsNotation.Parse("8/8/7p/1P2Pp1P/2Pp1PP1/8/8/8 w - - 0 1");

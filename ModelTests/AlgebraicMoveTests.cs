@@ -5,7 +5,7 @@ namespace SicTransit.Woodpusher.Model.Tests
     [TestClass()]
     public class AlgebraicMoveTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void TryParsePromotionTest()
         {
             var notation = "e7e8q";
@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Model.Tests
             Assert.AreEqual(notation, move.Notation);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void TryParseTest()
         {
             var notation = "e7e8";

@@ -30,6 +30,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex BlackTimeRegex = new(@"btime (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
+        private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
 
         private volatile IEngine engine;
 
@@ -192,24 +193,34 @@ namespace SicTransit.Woodpusher
                     var whiteTimeMatch = WhiteTimeRegex.Match(command);
                     var blackTimeMatch = BlackTimeRegex.Match(command);
                     var movetimeMatch = MovetimeRegex.Match(command);
+                    var perftMatch = PerftRegex.Match(command);
 
-                    var timeLimit = 10000;
-
-                    if (movetimeMatch.Success)
+                    if (perftMatch.Success)
                     {
-                        timeLimit = int.Parse(movetimeMatch.Groups[1].Value) - latency;
+                        var depth = int.Parse(perftMatch.Groups[1].Value);
+
+                        engine.Perft(depth, s => consoleOutput(s));
                     }
-                    else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
+                    else
                     {
-                        var timeLeft = int.Parse(engine.Board.ActiveColor.Is(Piece.White) ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
-                        var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
+                        var timeLimit = 10000;
 
-                        timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
+                        if (movetimeMatch.Success)
+                        {
+                            timeLimit = int.Parse(movetimeMatch.Groups[1].Value) - latency;
+                        }
+                        else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
+                        {
+                            var timeLeft = int.Parse(engine.Board.ActiveColor.Is(Piece.White) ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
+                            var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
+
+                            timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
+                        }
+
+                        var move = engine.FindBestMove(Math.Max(0, timeLimit), s => consoleOutput(s));
+
+                        consoleOutput($"bestmove {move.Notation}");
                     }
-
-                    var move = engine.FindBestMove(Math.Max(0, timeLimit), s => consoleOutput(s));
-
-                    consoleOutput($"bestmove {move.Notation}");
                 }
             });
         }

@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Lookup
     [TestClass()]
     public class AttacksTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void WhiteKingAtE1Test()
         {
             var attacks = new Attacks();
@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Lookup
             Assert.AreEqual(5, threats.King.ToSquares().Count());
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void WhiteKingAtE8Test()
         {
             var attacks = new Attacks();
