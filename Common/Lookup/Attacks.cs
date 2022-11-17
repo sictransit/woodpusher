@@ -22,11 +22,11 @@ namespace SicTransit.Woodpusher.Common.Lookup
             {
                 foreach (var square in SquareExtensions.AllSquares)
                 {
-                    var queenMask = QueenMovement.GetTargetVectors((Piece.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var bishopMask = BishopMovement.GetTargetVectors((Piece.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var knightMask = KnightMovement.GetTargetVectors((Piece.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var rookMask = RookMovement.GetTargetVectors((Piece.Queen | color).SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
-                    var kingMask = KingMovement.GetTargetVectors((Piece.Queen | color.OpponentColor()).SetSquare(square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var queenMask = QueenMovement.GetTargetVectors(color.SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var bishopMask = BishopMovement.GetTargetVectors(color.SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var knightMask = KnightMovement.GetTargetVectors(color.SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var rookMask = RookMovement.GetTargetVectors(color.SetSquare(square)).SelectMany(v => v).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
+                    var kingMask = KingMovement.GetTargetVectors(color.OpponentColor().SetSquare(square)).SelectMany(v => v).Where(v => !v.Flags.HasFlag(SpecialMove.CastleQueen) && !v.Flags.HasFlag(SpecialMove.CastleKing)).Aggregate(0ul, (a, b) => a | b.GetTarget().ToMask());
 
                     var pawnMask = 0ul;
 

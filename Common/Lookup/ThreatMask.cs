@@ -8,6 +8,7 @@
         public ulong BishopMask { get; }
         public ulong QueenMask { get; }
         public ulong KingMask { get; }
+        public ulong Mask { get; }
 
         public ThreatMask(ulong pawnMask, ulong rookMask, ulong knightMask, ulong bishopMask, ulong queenMask, ulong kingMask)
         {
@@ -17,6 +18,7 @@
             BishopMask = bishopMask;
             QueenMask = queenMask;
             KingMask = kingMask;
+            Mask = pawnMask | rookMask | knightMask | bishopMask | queenMask | kingMask;
         }
     }
 }

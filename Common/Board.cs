@@ -241,6 +241,21 @@ namespace SicTransit.Woodpusher.Common
 
             var opponentColor = color.OpponentColor();
 
+            if (!IsOccupied(threatMask.Mask, opponentColor))
+            {
+                yield break;
+            }
+
+            foreach (var pawn in GetPieces(opponentColor, Piece.Pawn, threatMask.PawnMask))
+            {
+                yield return pawn;
+            }
+
+            foreach (var knight in GetPieces(opponentColor, Piece.Knight, threatMask.KnightMask))
+            {
+                yield return knight;
+            }
+
             foreach (var queen in GetPieces(opponentColor, Piece.Queen, threatMask.QueenMask))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
@@ -265,28 +280,9 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var pawn in GetPieces(opponentColor, Piece.Pawn, threatMask.PawnMask))
-            {
-                if (!IsOccupied(internals.Moves.GetTravelMask(pawn.GetMask(), target)))
-                {
-                    yield return pawn;
-                }
-            }
-
-            foreach (var knight in GetPieces(opponentColor, Piece.Knight, threatMask.KnightMask))
-            {
-                if (!IsOccupied(internals.Moves.GetTravelMask(knight.GetMask(), target)))
-                {
-                    yield return knight;
-                }
-            }
-
             foreach (var king in GetPieces(opponentColor, Piece.King, threatMask.KingMask))
             {
-                if (!IsOccupied(internals.Moves.GetTravelMask(king.GetMask(), target)))
-                {
-                    yield return king;
-                }
+                yield return king;
             }
         }
 
