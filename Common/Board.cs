@@ -258,7 +258,7 @@ namespace SicTransit.Woodpusher.Common
 
         private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
-        private ulong FindKing(Piece color) => GetBitboard(color).King;
+        private Piece FindKing(Piece color) => Piece.King | color.SetMask(GetBitboard(color).King);
 
         public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
 
@@ -268,11 +268,13 @@ namespace SicTransit.Woodpusher.Common
 
         private IEnumerable<Piece> GetPieces(Piece color, Piece type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
 
-        public IEnumerable<Piece> GetAttackers(ulong target, Piece color)
+        public IEnumerable<Piece> GetAttackers(Piece piece)
         {
-            var threats = internals.Attacks.GetThreatMask(color.SetMask(target));
+            var threats = internals.Attacks.GetThreatMask(piece);
 
-            var opponentColor = color.OpponentColor();
+            var target = piece.GetMask();
+
+            var opponentColor = piece.OpponentColor();
 
             if (!IsOccupied(threats.Any, opponentColor))
             {
@@ -400,14 +402,16 @@ namespace SicTransit.Woodpusher.Common
                     return false;
                 }
 
+                var color = move.Piece.GetColor();
+
                 // castling from or into check
-                if (IsAttacked(move.Piece.GetMask(), move.Piece.GetColor()) || IsAttacked(move.CastlingCheckMask, move.Piece.GetColor()) || IsAttacked(move.Target, move.Piece.GetColor()))
+                if (IsAttacked(move.Piece) || IsAttacked(move.Piece.SetMask(move.CastlingCheckMask)) || IsAttacked(move.Piece.SetMask(move.Target)))
                 {
                     return false;
                 }
 
                 // castling path is blocked
-                if (IsOccupied(move.CastlingEmptySquaresMask) || IsOccupied(move.CastlingCheckMask))
+                if (IsOccupied(move.CastlingEmptySquaresMask | move.CastlingCheckMask))
                 {
                     return false;
                 }
@@ -418,13 +422,13 @@ namespace SicTransit.Woodpusher.Common
 
         private bool IsMovingIntoCheck(Move move)
         {
-            var testBoard = Play(move);            
+            var testBoard = Play(move);
 
-            return testBoard.IsAttacked(testBoard.FindKing(ActiveColor), ActiveColor);
+            return testBoard.IsAttacked(testBoard.FindKing(ActiveColor));
         }
 
-        public bool IsChecked => IsAttacked(FindKing(ActiveColor), ActiveColor);
+        public bool IsChecked => IsAttacked(FindKing(ActiveColor));
 
-        private bool IsAttacked(ulong square, Piece color) => GetAttackers(square, color).Any();
+        private bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
     }
 }
