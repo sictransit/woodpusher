@@ -38,7 +38,9 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            Log.Debug($"{Board.ActiveColor} plays: {move}");
+            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
+
+            Log.Debug($"{color} plays: {move}");
 
             Board = Board.PlayMove(move);
         }
@@ -112,7 +114,8 @@ namespace SicTransit.Woodpusher.Engine
                 throw new PatzerException("No valid moves found for this board.");
             }
 
-            Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', nodes.Select(n => n.Move))}");
+            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
+            Log.Information($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
 
             var cancellationToken = cancellationTokenSource.Token;
 

@@ -52,11 +52,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             PgnMove pgnMove = null;
 
-            if (TryParseSimplePawnMove(s, out var simplePawnMove))
+            if (TryParseSimplePawnMove(s, promotionType, out var simplePawnMove))
             {
                 pgnMove = simplePawnMove!;
             }
-            else if (TryParseSimplePieceMove(s, out var simplePieceMove))
+            else if (TryParseSimplePieceMove(s, promotionType, out var simplePieceMove))
             {
                 pgnMove = simplePieceMove!;
             }
@@ -89,7 +89,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             throw new ArgumentException($"unable to parse: [{s}]");
         }
 
-        private static bool TryParseSimplePawnMove(string s, out SimplePawnMove? move)
+        private static bool TryParseSimplePawnMove(string s, Piece promotionType, out SimplePawnMove? move)
         {
             move = default;
 
@@ -99,13 +99,13 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePawnMove(new Square(match.Captures[0].Value));
+                move = new SimplePawnMove(new Square(match.Captures[0].Value), promotionType);
             }
 
             return move != default;
         }
 
-        private static bool TryParseSimplePieceMove(string s, out SimplePieceMove? move)
+        private static bool TryParseSimplePieceMove(string s, Piece promotionType, out SimplePieceMove? move)
         {
             move = default;
 
@@ -115,7 +115,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             if (match.Success)
             {
-                move = new SimplePieceMove(match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value));
+                move = new SimplePieceMove(match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value), promotionType);
             }
 
             return move != default;
