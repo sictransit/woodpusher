@@ -334,7 +334,7 @@ namespace SicTransit.Woodpusher.Common
 
         public IEnumerable<Move> GetLegalMoves(Piece piece)
         {
-            foreach (IReadOnlyCollection<Move> vector in internals.Moves.GetVectors(piece))
+            foreach (var vector in internals.Moves.GetVectors(piece))
             {
                 foreach (var move in vector)
                 {
