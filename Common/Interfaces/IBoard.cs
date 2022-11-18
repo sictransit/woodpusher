@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard SetPiece(Piece piece);
 
-        IEnumerable<Piece> GetAttackers(ulong square, Piece color);
+        IEnumerable<Piece> GetAttackers(Piece piece);
 
         ulong Hash { get; }
 

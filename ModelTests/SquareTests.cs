@@ -3,7 +3,7 @@
 namespace SicTransit.Woodpusher.Model.Tests
 {
     [TestClass()]
-    public class SqaureTests
+    public class SquareTests
     {
         [TestMethod]
         public void FromAlgebraicNotationA1Test()

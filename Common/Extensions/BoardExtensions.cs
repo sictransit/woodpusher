@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
                     var piece = pieces.SingleOrDefault(p => p.GetSquare().Equals(square));
 
-                    var c = piece != default ? piece.ToAlgebraicNotation() : ' ';
+                    var c = piece != default ? piece.ToAlgebraicNotation() : '·';
 
                     sb.Append($"{c} ");
                 }

@@ -28,20 +28,17 @@ public static class PieceExtensions
 
     public static Piece OpponentColor(this Piece p) => p.Is(Piece.White) ? Piece.None : Piece.White;
 
-    public static char ToChar(this Piece p)
-    {
-        var pieceTypes = new[] { (Piece.Pawn, 'P'), (Piece.Rook, 'R'), (Piece.Knight, 'N'), (Piece.Bishop, 'B'), (Piece.Queen, 'Q'), (Piece.King, 'K') };
-
-        foreach (var pieceType in pieceTypes)
+    public static char ToChar(this Piece p) =>
+        p.GetPieceType() switch
         {
-            if (p.HasFlag(pieceType.Item1))
-            {
-                return pieceType.Item2;
-            }
-        }
-
-        throw new NotImplementedException(p.ToString());
-    }
+            Piece.Pawn => 'P',
+            Piece.Knight => 'N',
+            Piece.Bishop => 'B',
+            Piece.Rook => 'R',
+            Piece.Queen => 'Q',
+            Piece.King => 'K',
+            _ => throw new ArgumentOutOfRangeException(nameof(p))
+        };
 
     public static char ToAlgebraicNotation(this Piece p) => p.Is(Piece.White) ? p.ToChar() : char.ToLowerInvariant(p.ToChar());
 
@@ -65,10 +62,9 @@ public static class PieceExtensions
         return type | color;
     }
 
-    public static Piece[] Colors => new[] { Piece.White, Piece.None };
-    public static Piece[] Types => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King };
+    public static IEnumerable<Piece> Colors => new[] { Piece.White, Piece.None };
 
+    public static IEnumerable<Piece> Types => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King };
 
     public static IEnumerable<Piece> AllPieces => Colors.Select(c => Types.Select(t => c | t)).SelectMany(p => p);
-
 }

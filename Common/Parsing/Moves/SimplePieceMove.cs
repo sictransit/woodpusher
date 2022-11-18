@@ -9,11 +9,13 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
     {
         private readonly Piece pieceType;
         private readonly Square square;
+        private readonly Piece promotionType;
 
-        public SimplePieceMove(Piece pieceType, Square square)
+        public SimplePieceMove(Piece pieceType, Square square, Piece promotionType)
         {
             this.pieceType = pieceType;
             this.square = square;
+            this.promotionType = promotionType;
         }
 
         protected override Move CreateMove(IEngine engine)
@@ -24,7 +26,9 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             foreach (var piece in pieces)
             {
-                var move = board.GetLegalMoves(piece).SingleOrDefault(m => m.GetTarget().Equals(square));
+                var legalMoves = board.GetLegalMoves(piece).ToArray();
+
+                var move = legalMoves.SingleOrDefault(m => m.GetTarget().Equals(square) && m.PromotionType == promotionType);
 
                 if (move != null)
                 {

@@ -51,7 +51,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
             Assert.AreEqual(34, board.Counters.FullmoveNumber);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ExportStartingPositionTest()
         {
             var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
@@ -63,7 +63,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
             Assert.AreEqual(ForsythEdwardsNotation.StartingPosition, export);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ExportMagnusCarlsenTest()
         {
             var fen = "5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34";

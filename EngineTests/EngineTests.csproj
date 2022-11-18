@@ -24,6 +24,9 @@
     <None Update="Resources\lichess_pgn_2022.11.01_lichess_AI_level_4_vs_woodpusher.KlijXZP3.pgn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\woodpusher-vs-woodpusher-freeze.pgn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

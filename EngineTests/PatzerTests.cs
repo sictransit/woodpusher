@@ -33,7 +33,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
 
-        [TestMethod()]
+        [TestMethod]
         public void PlayMultipleBestMoveTest()
         {
             var patzer = new Patzer();
@@ -52,7 +52,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             }
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void TakeTheQueenTest()
         {
             //+---+---+---+---+---+---+---+---+
@@ -185,9 +185,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
 
-            var bestmove = patzer.FindBestMove(10000);
+            var bestMove = patzer.FindBestMove(10000);
 
-            Assert.IsTrue(bestmove.Notation.Length == 4);
+            Assert.IsTrue(bestMove.Notation.Length == 4);
         }
 
         [TestMethod]
@@ -196,12 +196,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var patzer = new Patzer();
             patzer.Position("7k/8/8/8/8/1p6/B7/7K w - - 0 1");
 
-            var bestmove = patzer.FindBestMove();
+            var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2b3", bestmove.Notation);
+            Assert.AreEqual("a2b3", bestMove.Notation);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MateInMovesWinningTest()
         {
             var patzer = new Patzer();
@@ -222,7 +222,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void MateInMovesLosingTest()
         {
             var patzer = new Patzer();
@@ -238,10 +238,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var move = patzer.FindBestMove(5000, Callback);
 
+            Assert.IsNotNull(move);
+
             Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void DoNotBlunderSoMuch()
         {
             // Lichess (i.e. Stockfish) vs Woodpusher. Both sides made a lot of mistakes, for different reasons. 
@@ -260,9 +262,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 if (pgnMove.Annotation != PgnAnnotation.None)
                 {
-                    Log.Information($"Finding alterantive to: {pgnMove}");
+                    Log.Information($"Finding alternative to: {pgnMove}");
 
-                    var betterAlterantive = false;
+                    var foundAlterantive = false;
 
                     foreach (var thinkingTime in new[] { 100, 500, 5000 })
                     {
@@ -272,16 +274,78 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Notation))
                         {
-                            betterAlterantive = true;
+                            foundAlterantive = true;
                             break;
                         }
                     }
 
-                    Assert.IsTrue(betterAlterantive);
+                    Assert.IsTrue(foundAlterantive);
                 }
 
                 Log.Information($"Playing: {matchMove}");
                 engine.Play(matchMove);
+            }
+        }
+
+        [TestMethod]
+        public void DoNotStopPlaying()
+        {
+            // Woodpusher vs. Woordpusher in a Cute Chess game. 
+            // Suddenly white stopped playing, without any exceptions caught or logged.
+
+            var pgnFile = File.ReadAllText("resources/woodpusher-vs-woodpusher-freeze.pgn");
+
+            var pgn = PortableGameNotation.Parse(pgnFile);
+
+            IEngine engine = new Patzer();
+
+            foreach (var pgnMove in pgn.PgnMoves)
+            {
+                var matchMove = pgnMove.GetMove(engine);
+
+                engine.Play(matchMove);
+            }
+
+            var bestMove = engine.FindBestMove(3000);
+
+            Assert.IsNotNull(bestMove);
+
+            Log.Information($"Best move found: {bestMove}");
+        }
+
+        [TestMethod]
+        [Ignore("long running: 1,7 minutes on dev machine")]
+        public void PerftTest()
+        {
+            var tests = new (string fen, int depth, ulong nodes)[]
+            {
+                new(ForsythEdwardsNotation.StartingPosition, 5, 4865609),
+                new("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193690690),
+                new("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 6, 11030083),
+                new("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5, 15833292),
+                new("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", 5, 89941194),
+                new("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5, 164075551),
+            };
+
+            IEngine engine = new Patzer();
+
+            foreach (var test in tests)
+            {
+                engine.Position(test.fen);
+
+                var success = false;
+
+                engine.Perft(test.depth, s =>
+                {
+                    if (s.Contains(test.nodes.ToString()))
+                    {
+                        success = true;
+
+                        Log.Information($"{test.fen}: {test.nodes} nodes @ depth {test.depth}");
+                    }
+                });
+
+                Assert.IsTrue(success);
             }
         }
     }

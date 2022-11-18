@@ -28,7 +28,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var openingBook = new OpeningBook(true);
 
             var maxLength = 0;
-            string longest = string.Empty;
+            var longest = string.Empty;
 
             using var httpClient = new HttpClient();
             foreach (var file in new[] { "a", "b", "c", "d", "e" })
@@ -49,8 +49,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     {
                         var name = parts[1];
                         var pgn = parts[2];
-                        var uci = parts[3];
-                        var epd = parts[4];
+                        //var uci = parts[3];
+                        //var epd = parts[4];
 
                         var opening = PortableGameNotation.Parse(pgn);
 
@@ -88,9 +88,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.IsFalse(openingBook.GetMoves(ulong.MinValue).Any());
             Assert.IsFalse(openingBook.GetMoves(ulong.MaxValue).Any());
 
-            var moves = openingBook.GetMoves(11121976597367932187); // starting position           
+            var moves = openingBook.GetMoves(11121976597367932187).ToArray(); // starting position           
 
-            Assert.AreEqual(20, moves.Count());
+            Assert.AreEqual(20, moves.Length);
             Assert.IsTrue(moves.Any(m => m.Notation.Equals("g1h3")));
             Assert.IsTrue(moves.Any(m => m.Notation.Equals("d2d4")));
         }

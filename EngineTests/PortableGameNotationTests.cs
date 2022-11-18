@@ -418,6 +418,71 @@ Kd7 6. Qxh8 {4.0s} Kc6 7. Qxd8 {1.9s} e6 8. Qe8+ {2.2s} Bd7 9. Qxd7+ {2.7s} Kxd7
         }
 
         [TestMethod]
+        public void ParseWinAgainstStockfishTest()
+        {
+            var game = @"
+[Event ""?""]
+[Site ""?""]
+[Date ""2022.11.17""]
+[Round ""?""]
+[White ""stockfish_15_x64_avx2""]
+[Black ""Woodpusher (release)""]
+[Result ""0-1""]
+[ECO ""B00""]
+[GameDuration ""00:02:58""]
+[GameEndTime ""2022-11-17T20:29:53.126 W. Europe Standard Time""]
+[GameStartTime ""2022-11-17T20:26:54.615 W. Europe Standard Time""]
+[Opening ""KP""]
+[PlyCount ""92""]
+[TimeControl ""40/60+0.6""]
+[Variation ""Nimzovich defense""]
+
+1. e4 {+0.50/27 11s} Nc6 {-1.71/4 1.4s} 2. Bb5 {+0.61/23 3.8s}
+Nd4 {-1.83/6 1.4s} 3. Be2 {+0.72/19 1.1s} Nf6 {-1.95/6 1.5s}
+4. e5 {+0.49/18 0.86s} Nxe2 {-3.36/4 1.5s} 5. Qxe2 {+0.26/27 8.6s}
+Ng8 {-4.31/6 1.5s} 6. Nc3 {+0.07/19 1.5s} d6 {-3.25/4 1.5s}
+7. Nf3 {+0.46/16 0.96s} Bg4 {-4.38/6 1.5s} 8. Qb5+ {+1.24/17 0.79s}
+Qd7 {-2.09/6 1.6s} 9. h3 {+1.77/19 2.6s} Qxb5 {-3.94/4 1.6s}
+10. Nxb5 {-0.47/21 3.0s} Bxf3 {-4.20/6 1.6s} 11. Nxc7+ {-0.64/21 3.4s}
+Kd8 {-1.97/6 1.6s} 12. Nxa8 {-1.19/21 2.8s} Bxg2 {-2.60/6 1.7s}
+13. Rf1 {-1.34/20 3.1s} Bxf1 {-1.97/6 1.7s} 14. e6 {-4.07/18 2.5s}
+Bxh3 {+0.35/6 1.7s} 15. d3 {-8.22/21 6.7s} Bxe6 {+4.49/6 1.7s}
+16. Be3 {-7.48/18 2.0s} a5 {+4.30/6 1.7s} 17. Rb1 {-7.25/16 2.7s}
+Bxa2 {+4.79/6 1.8s} 18. Bb6+ {-5.94/18 2.3s} Kc8 {+5.17/6 1.8s}
+19. Rd1 {-5.39/19 3.5s} Nf6 {+5.07/6 1.8s} 20. Ra1 {-7.04/19 2.3s}
+Be6 {+5.08/6 1.9s} 21. Ba7 {-6.82/19 4.1s} Ng4 {+5.45/6 1.9s}
+22. Rxa5 {-6.14/15 1.8s} Rg8 {+4.81/6 1.9s} 23. c4 {-6.28/14 0.96s}
+Ne5 {+5.48/6 2.0s} 24. Nb6+ {-7.27/15 1.6s} Kd8 {+5.82/6 2.0s}
+25. Na4 {-7.69/15 0.80s} Nxd3+ {+4.85/6 2.1s} 26. Kf1 {-8.52/15 0.64s}
+Bxc4 {+5.70/6 2.1s} 27. Kg1 {-10.08/15 0.61s} Ke8 {+4.91/6 2.2s}
+28. Be3 {-9.58/16 0.60s} f6 {+5.83/6 2.2s} 29. Nb6 {-10.48/15 0.60s}
+Bb3 {+5.06/6 2.3s} 30. Bd4 {-9.28/16 0.60s} e5 {+6.49/6 2.3s}
+31. Be3 {-9.22/17 0.60s} Nxb2 {+6.73/6 2.4s} 32. Bc1 {-7.76/16 0.60s}
+Nd3 {+9.02/6 2.5s} 33. Ra8+ {-10.11/16 0.60s} Kf7 {+8.84/6 2.6s}
+34. Rxf8+ {-10.81/17 0.60s} Rxf8 {+11.24/6 2.7s} 35. Be3 {-14.35/14 0.60s}
+e4 {+13.01/6 2.8s} 36. Bd4 {-14.35/14 0.60s} Rd8 {+13.10/6 2.9s}
+37. Nd5 {-17.10/13 0.60s} Bxd5 {+12.92/6 3.1s} 38. Kf1 {-19.83/13 0.60s}
+Ra8 {+15.93/6 3.3s} 39. Kg2 {-64.00/20 0.60s} e3+ {+16.01/6 3.7s}
+40. Kg1 {-M22/31 0.60s} exf2+ {+14.07/6 4.4s} 41. Kf1 {-M12/55 1.7s}
+Ra2 {+20.99/6 1.4s} 42. Bc5 {-M10/85 2.1s} Ra1+ {0.00/8 1.4s}
+43. Ke2 {-M8/96 0.51s} f1=Q+ {+19.98/6 1.5s} 44. Kd2 {-M6/245 0.15s}
+Qd1+ {+30.75/6 1.3s} 45. Kc3 {-M4/245 0.006s} Nxc5 {+25.84/4 0.022s}
+46. Kb4 {-M2/245 0.003s} Qb3# {+30.51/2 0.001s, Black mates} 0-1
+";
+
+            IEngine engine = new Patzer();
+
+            foreach (var pgnMove in PortableGameNotation.Parse(game).PgnMoves.ToArray())
+            {
+                engine.Play(pgnMove.GetMove(engine));
+
+                Trace.WriteLine(Environment.NewLine + engine.Board.PrettyPrint());
+            }
+
+            Assert.AreEqual(30, -engine.Board.Score / 100d, 0.5);
+        }
+
+        [TestMethod]
         public void AnnotationsTest()
         {
             var game = @"

@@ -9,44 +9,44 @@ namespace SicTransit.Woodpusher.Common.Tests.Lookup
     [TestClass()]
     public class AttacksTests
     {
-        [TestMethod()]
+        [TestMethod]
         public void WhiteKingAtE1Test()
         {
             var attacks = new Attacks();
 
-            var threats = attacks.GetThreatMask(Piece.White.SetSquare(new Square("e1")));
+            var threats = attacks.GetThreatMask(Piece.King | Piece.White.SetSquare(new Square("e1")));
 
-            var pawnSquares = threats.PawnMask.ToSquares().ToArray();
+            var pawnSquares = threats.Pawn.ToSquares().ToArray();
             Assert.AreEqual(2, pawnSquares.Length);
             Assert.IsTrue(pawnSquares.Contains(new Square("d2")));
             Assert.IsTrue(pawnSquares.Contains(new Square("f2")));
 
-            var knightSquares = threats.KnightMask.ToSquares().ToArray();
+            var knightSquares = threats.Knight.ToSquares().ToArray();
             Assert.AreEqual(4, knightSquares.Length);
             Assert.IsTrue(knightSquares.Contains(new Square("c2")));
             Assert.IsTrue(knightSquares.Contains(new Square("d3")));
             Assert.IsTrue(knightSquares.Contains(new Square("f3")));
             Assert.IsTrue(knightSquares.Contains(new Square("g2")));
 
-            Assert.AreEqual(21, threats.QueenMask.ToSquares().Count());
-            Assert.AreEqual(14, threats.RookMask.ToSquares().Count());
-            Assert.AreEqual(7, threats.BishopMask.ToSquares().Count());
-            Assert.AreEqual(5, threats.KingMask.ToSquares().Count());
+            Assert.AreEqual(21, threats.Queen.ToSquares().Count());
+            Assert.AreEqual(14, threats.Rook.ToSquares().Count());
+            Assert.AreEqual(7, threats.Bishop.ToSquares().Count());
+            Assert.AreEqual(5, threats.King.ToSquares().Count());
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void WhiteKingAtE8Test()
         {
             var attacks = new Attacks();
 
-            var threats = attacks.GetThreatMask(Piece.White.SetSquare(new Square("e8")));
+            var threats = attacks.GetThreatMask(Piece.King | Piece.White.SetSquare(new Square("e8")));
 
-            Assert.AreEqual(0, threats.PawnMask.ToSquares().Count());
-            Assert.AreEqual(4, threats.KnightMask.ToSquares().Count());
-            Assert.AreEqual(21, threats.QueenMask.ToSquares().Count());
-            Assert.AreEqual(14, threats.RookMask.ToSquares().Count());
-            Assert.AreEqual(7, threats.BishopMask.ToSquares().Count());
-            Assert.AreEqual(5, threats.KingMask.ToSquares().Count());
+            Assert.AreEqual(0, threats.Pawn.ToSquares().Count());
+            Assert.AreEqual(4, threats.Knight.ToSquares().Count());
+            Assert.AreEqual(21, threats.Queen.ToSquares().Count());
+            Assert.AreEqual(14, threats.Rook.ToSquares().Count());
+            Assert.AreEqual(7, threats.Bishop.ToSquares().Count());
+            Assert.AreEqual(5, threats.King.ToSquares().Count());
         }
 
     }

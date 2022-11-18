@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public int Count { get; set; }
 
-        public int Sign { get; }
+        private int Sign { get; }
 
         public int AbsoluteScore => Score * Sign;
 

@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Exceptions;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
@@ -37,7 +38,9 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            Log.Debug($"{Board.ActiveColor} plays: {move}");
+            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
+
+            Log.Debug($"{color} plays: {move}");
 
             Board = Board.PlayMove(move);
         }
@@ -59,6 +62,31 @@ namespace SicTransit.Woodpusher.Engine
 
                 Play(move);
             }
+        }
+
+        public void Perft(int depth, Action<string> infoCallback)
+        {
+            cancellationTokenSource = new CancellationTokenSource();
+
+            var initialMoves = Board.GetLegalMoves().Select(m => new { move = m, board = Board.PlayMove(m) });
+
+            ulong total = 0;
+
+            var options = new ParallelOptions
+            {
+                CancellationToken = cancellationTokenSource.Token
+            };
+
+            Parallel.ForEach(initialMoves, options, i =>
+            {
+                var nodes = i.board.Perft(depth);
+
+                total += nodes;
+
+                infoCallback($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
+            });
+
+            infoCallback(Environment.NewLine + $"Nodes searched: {total}");
         }
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
@@ -86,15 +114,10 @@ namespace SicTransit.Woodpusher.Engine
                 throw new PatzerException("No valid moves found for this board.");
             }
 
-            Log.Information($"Legal moves for {Board.ActiveColor}: {string.Join(';', nodes.Select(n => n.Move))}");
+            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
+            Log.Information($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
 
             var cancellationToken = cancellationTokenSource.Token;
-
-            var parallelOptions = new ParallelOptions
-            {
-                CancellationToken = cancellationToken,
-                MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1
-            };
 
             while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1)
             {
@@ -115,7 +138,7 @@ namespace SicTransit.Woodpusher.Engine
 
                             if (infoCallback != null)
                             {
-                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, FindPrincipalVariation(Board, node.Move), stopwatch.ElapsedMilliseconds);
+                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, FindPrincipalVariation(Board, node), stopwatch.ElapsedMilliseconds);
                             }
                         }
                         else
@@ -162,9 +185,13 @@ namespace SicTransit.Woodpusher.Engine
             return new AlgebraicMove(bestNode.Move);
         }
 
-        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Move move)
+        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Node node)
         {
-            while (true)
+            var move = node.Move;
+
+            var depth = 0;
+
+            while (depth++ < node.MaxDepth)
             {
                 yield return move;
 
@@ -197,7 +224,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (repetitions[key] > 1)
                 {
-                    Log.Information($"Resetting score to zero for threefold repetion of: {algebraic}");
+                    Log.Information($"Resetting score to zero for threefold repetition of: {algebraic}");
 
                     node.Score = 0;
                 }
@@ -227,7 +254,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            SendInfo(callback, $"depth {depth} nodes {nodes} score {score} time {time} pv {pv} nps {nodesPerSecond}");
+            SendInfo(callback, $"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
         }
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
