@@ -20,6 +20,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
+        private readonly TimeManager timeManager = new();
+
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
         private readonly IDictionary<ulong, PrincipalVariationNode> hashTable = new Dictionary<ulong, PrincipalVariationNode>();
@@ -34,6 +36,7 @@ namespace SicTransit.Woodpusher.Engine
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
             repetitions.Clear();
             hashTable.Clear();
+            timeManager.Clear();
         }
 
         public void Play(Move move)
@@ -121,12 +124,14 @@ namespace SicTransit.Woodpusher.Engine
 
             while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1)
             {
+                timeManager.Reset(timeLimit);
+
                 if (nodes.Any(n => n.MateIn > 0))
                 {
                     break;
                 }
 
-                var tasks = nodes.Where(n => !n.MateIn.HasValue).Select(node => Task.Run(() =>
+                var tasks = nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(n => n.Score).TakeWhile(n => timeManager.HasTime(n)).Select(node => Task.Run(() =>
                 {
                     try
                     {

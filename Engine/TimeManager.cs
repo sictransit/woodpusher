@@ -1,35 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SicTransit.Woodpusher.Engine
+﻿namespace SicTransit.Woodpusher.Engine
 {
     internal class TimeManager
     {
 
         // y = 0.577e3.2472x
 
-        private int timeLimit;
-        private readonly Stopwatch stopwatch = new();
+        private int timeLeft;
+
         private readonly Dictionary<int, List<int>> searches = new();
 
         public TimeManager()
         {
-            
+
         }
 
-        public void Reset(int timeLimit)
+        public void Clear()
         {
-            this.timeLimit = timeLimit;
-            stopwatch.Restart();
+            searches.Clear();
+            timeLeft = 0;
         }
 
-        public void AddNode(Node node)
+        public void Reset(int timeLeft)
         {
+            this.timeLeft = timeLeft;
+        }
 
+        public void AddNode(int timestamp, Node node)
+        {
+            // maybe divide time by number of cores?
+        }
+
+        public bool HasTime(Node node)
+        {
+            // TODO: clever calculation to see if we can fit a node
+            // consider number of CPU's
+            // decrease timeLeft for every TRUE returned
+
+            return true;
         }
 
     }
