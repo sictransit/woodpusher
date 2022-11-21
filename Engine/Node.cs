@@ -16,6 +16,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public int MaxDepth { get; set; }
 
+        public TimeSpan TimeSpan { get; set; }
+
         public Move Move { get; }
 
         public int Score { get; set; }

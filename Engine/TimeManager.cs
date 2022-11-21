@@ -25,7 +25,7 @@
             this.timeLeft = timeLeft;
         }
 
-        public void AddNode(int timestamp, Node node)
+        public void AddNode(Node node)
         {
             // maybe divide time by number of cores?
         }
