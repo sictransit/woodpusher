@@ -45,7 +45,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Log.Debug($"{color} plays: {move}");
 
-            Board = Board.PlayMove(move);
+            Board = Board.Play(move);
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -71,7 +71,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             cancellationTokenSource = new CancellationTokenSource();
 
-            var initialMoves = Board.GetLegalMoves().Select(m => new { move = m, board = Board.PlayMove(m) });
+            var initialMoves = Board.GetLegalMoves().Select(m => new { move = m, board = Board.Play(m) });
 
             ulong total = 0;
 
@@ -137,7 +137,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         var t0 = stopwatch.Elapsed;
                         
-                        var score = EvaluateBoard(Board.PlayMove(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
+                        var score = EvaluateBoard(Board.Play(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
                         {
@@ -204,7 +204,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 yield return move;
 
-                board = board.PlayMove(move);
+                board = board.Play(move);
 
                 if (!hashTable.TryGetValue(board.Hash, out var pvNode))
                 {
@@ -299,7 +299,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 node.Count++;
 
-                var score = EvaluateBoard(board.PlayMove(move), node, depth + 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.Play(move), node, depth + 1, alpha, beta, cancellationToken);
 
                 if (maximizing)
                 {

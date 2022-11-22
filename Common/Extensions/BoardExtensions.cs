@@ -58,7 +58,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             foreach (var move in board.GetLegalMoves())
             {
-                count += Perft(board.PlayMove(move), depth - 1);
+                count += Perft(board.Play(move), depth - 1);
             }
 
             return count;

@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
     {
         Piece ActiveColor { get; }
 
-        IBoard PlayMove(Move move);
+        IBoard Play(Move move);
 
         bool IsPassedPawn(Piece piece);
 
@@ -26,6 +26,10 @@ namespace SicTransit.Woodpusher.Common.Interfaces
         IBoard SetPiece(Piece piece);
 
         IEnumerable<Piece> GetAttackers(Piece piece);
+
+        bool IsAttacked(Piece piece);
+
+        Piece FindKing(Piece color);
 
         ulong Hash { get; }
 

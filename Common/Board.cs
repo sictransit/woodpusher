@@ -3,6 +3,7 @@ using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Drawing;
 
 namespace SicTransit.Woodpusher.Common
 {
@@ -10,12 +11,11 @@ namespace SicTransit.Woodpusher.Common
     {
         private readonly Bitboard white;
         private readonly Bitboard black;
-        private readonly BoardInternals internals;
-        private readonly ulong occupiedSquares;
+        private readonly BoardInternals internals;        
 
         public Counters Counters { get; }
 
-        public Piece ActiveColor => Counters.ActiveColor;
+        public Piece ActiveColor => Counters.ActiveColor;        
 
         public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
         {
@@ -25,12 +25,11 @@ namespace SicTransit.Woodpusher.Common
         private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
         {
             this.white = white;
-            this.black = black;
-            occupiedSquares = white.All | black.All;
+            this.black = black;            
 
             Counters = counters;
             this.internals = internals;
-            Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
+            Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;            
         }
 
         public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
@@ -115,12 +114,7 @@ namespace SicTransit.Woodpusher.Common
                 ? new Board(white.Add(piece), black, Counters, internals, BoardInternals.InvalidHash)
                 : (IBoard)new Board(white, black.Add(piece), Counters, internals, BoardInternals.InvalidHash);
 
-        public IBoard PlayMove(Move move)
-        {
-            return Play(move);
-        }
-
-        private Board Play(Move move)
+        public IBoard Play(Move move)
         {
             var hash = Hash;
 
@@ -230,7 +224,7 @@ namespace SicTransit.Woodpusher.Common
                 hash ^= internals.Zobrist.GetCastlingsHash(Counters.Castlings) ^ internals.Zobrist.GetCastlingsHash(castlings);
             }
 
-            if (move.Flags.HasFlag(SpecialMove.Promote))
+            if (move.Flags.HasFlag(SpecialMove.PawnPromotes))
             {
                 var promotedPiece = move.Piece.SetMask(move.Target);
                 var promotionPiece = (ActiveColor | move.PromotionType).SetMask(move.Target);
@@ -252,13 +246,13 @@ namespace SicTransit.Woodpusher.Common
                 : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
         }
 
-        private bool IsOccupied(ulong mask) => (occupiedSquares & mask) != 0;
+        private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
 
         private bool IsOccupied(ulong mask, Piece color) => GetBitboard(color).IsOccupied(mask);
 
         private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
-        private Piece FindKing(Piece color) => Piece.King | color.SetMask(GetBitboard(color).King);
+        public Piece FindKing(Piece color) => Piece.King | color.SetMask(GetBitboard(color).King);
 
         public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
 
@@ -371,21 +365,26 @@ namespace SicTransit.Woodpusher.Common
             if (IsOccupied(move.Target, move.Piece))
             {
                 return false;
-            }
+            }            
 
             if (move.Piece.Is(Piece.Pawn))
             {
-                if (move.Flags.HasFlag(SpecialMove.CannotTake) && IsOccupied(move.Target))
+                if (IsOccupied(move.Target))
                 {
-                    return false;
+                    if (move.Flags.HasFlag(SpecialMove.PawnMoves))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (move.Flags.HasFlag(SpecialMove.PawnTakes))
+                    {
+                        return false;
+                    }
                 }
 
-                if (move.Flags.HasFlag(SpecialMove.MustTake) && !IsOccupied(move.Target))
-                {
-                    return false;
-                }
-
-                if (move.Flags.HasFlag(SpecialMove.EnPassant) && move.Target != Counters.EnPassantTarget)
+                if (move.Flags.HasFlag(SpecialMove.PawnTakesEnPassant) && move.Target != Counters.EnPassantTarget)
                 {
                     return false;
                 }
@@ -427,6 +426,6 @@ namespace SicTransit.Woodpusher.Common
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor));
 
-        private bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
+        public bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
     }
 }
