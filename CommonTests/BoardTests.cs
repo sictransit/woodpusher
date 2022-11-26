@@ -403,7 +403,7 @@ g1h3: 120669525
         }
 
         [TestMethod]
-        [Ignore("long running: 49 sec on release/laptop")]
+        //[Ignore("long running: 49 sec on release/laptop")]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"

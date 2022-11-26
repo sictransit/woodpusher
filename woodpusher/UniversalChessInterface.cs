@@ -201,7 +201,7 @@ namespace SicTransit.Woodpusher
                     }
                     else
                     {
-                        var timeLimit = 10000;
+                        var timeLimit = 60000;
 
                         if (movetimeMatch.Success)
                         {
