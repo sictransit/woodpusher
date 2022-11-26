@@ -7,6 +7,7 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -92,7 +93,7 @@ namespace SicTransit.Woodpusher.Engine
             infoCallback(Environment.NewLine + $"Nodes searched: {total}");
         }
 
-        public AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
+        public BestMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
         {
             cancellationTokenSource = new CancellationTokenSource();
 
@@ -143,10 +144,12 @@ namespace SicTransit.Woodpusher.Engine
                         {
                             node.Score = score;
                             node.TimeSpan += stopwatch.Elapsed - t0;
+                            var principalVariation = FindPrincipalVariation(Board, node).ToArray();
+                            node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
 
                             if (infoCallback != null)
                             {
-                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, FindPrincipalVariation(Board, node), stopwatch.ElapsedMilliseconds);
+                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
                             }
                         }
                         else
@@ -191,7 +194,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
-            return new AlgebraicMove(bestNode.Move);
+            return new BestMove(new AlgebraicMove(bestNode.Move), bestNode.PonderMove != null ? new AlgebraicMove(bestNode.PonderMove) : null) ;
         }
 
         private IEnumerable<Move> FindPrincipalVariation(IBoard board, Node node)

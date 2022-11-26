@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null);
 
-        AlgebraicMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null);
+        BestMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null);
 
         void Perft(int depth, Action<string> infoCallback);
     }

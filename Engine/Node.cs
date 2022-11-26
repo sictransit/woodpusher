@@ -20,6 +20,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public Move Move { get; }
 
+        public Move? PonderMove { get; set; }
+
         public int Score { get; set; }
 
         public int Count { get; set; }
