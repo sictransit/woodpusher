@@ -21,8 +21,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
-        private readonly TimeManager timeManager = new();
-
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
         private readonly IDictionary<ulong, PrincipalVariationNode> hashTable = new Dictionary<ulong, PrincipalVariationNode>();
@@ -36,8 +34,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
             repetitions.Clear();
-            hashTable.Clear();
-            timeManager.Clear();
+            hashTable.Clear();            
         }
 
         public void Play(Move move)
@@ -125,25 +122,20 @@ namespace SicTransit.Woodpusher.Engine
 
             while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1)
             {
-                timeManager.Reset(timeLimit);
-
                 if (nodes.Any(n => n.MateIn > 0))
                 {
                     break;
                 }
 
-                var tasks = nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(n => n.Score).TakeWhile(n => timeManager.HasTime(n)).Select(node => Task.Run(() =>
+                var tasks = nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(n => n.Score).Select(node => Task.Run(() =>
                 {
                     try
                     {
-                        var t0 = stopwatch.Elapsed;
-
                         var score = EvaluateBoard(Board.Play(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
                         {
                             node.Score = score;
-                            node.TimeSpan += stopwatch.Elapsed - t0;
                             var principalVariation = FindPrincipalVariation(Board, node).ToArray();
                             node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
 
@@ -151,6 +143,8 @@ namespace SicTransit.Woodpusher.Engine
                             {
                                 SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
                             }
+
+                            node.MaxDepth += 2;
                         }
                         else
                         {
@@ -179,9 +173,6 @@ namespace SicTransit.Woodpusher.Engine
                 })).ToArray();
 
                 Task.WaitAll(tasks);
-
-                nodes.ForEach(n => timeManager.AddNode(n));
-                nodes.ForEach(n => n.MaxDepth += 2);
             }
 
 
