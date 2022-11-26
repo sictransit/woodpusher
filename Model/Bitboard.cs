@@ -71,6 +71,20 @@ namespace SicTransit.Woodpusher.Model
 
         private IEnumerable<Piece> GetPieces(Piece type) => GetPieces(type, ulong.MaxValue);
 
+        public IEnumerable<ulong> GetPositions(Piece type, ulong mask)
+        {
+            var bitmap = GetBitmap(type) & mask;
+
+            while (bitmap != 0ul)
+            {
+                var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
+
+                yield return bit;
+
+                bitmap &= ~bit;
+            }
+        }
+
         public IEnumerable<Piece> GetPieces(Piece type, ulong mask)
         {
             var bitmap = GetBitmap(type) & mask;

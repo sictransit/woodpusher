@@ -136,7 +136,7 @@ namespace SicTransit.Woodpusher.Engine
                     try
                     {
                         var t0 = stopwatch.Elapsed;
-                        
+
                         var score = EvaluateBoard(Board.Play(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
@@ -177,8 +177,8 @@ namespace SicTransit.Woodpusher.Engine
 
                 Task.WaitAll(tasks);
 
-                nodes.ForEach(n => timeManager.AddNode(n)); 
-                nodes.ForEach(n => n.MaxDepth += 2);                
+                nodes.ForEach(n => timeManager.AddNode(n));
+                nodes.ForEach(n => n.MaxDepth += 2);
             }
 
 
