@@ -39,6 +39,8 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong Pawn => pawn;
 
+        public Piece Color => color;
+
         public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         public Bitboard Add(Piece piece) => Toggle(piece);

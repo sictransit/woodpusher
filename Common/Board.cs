@@ -272,32 +272,31 @@ namespace SicTransit.Woodpusher.Common
         {
             var threats = internals.Attacks.GetThreatMask(piece);
 
-            var opponentColor = piece.OpponentColor();
+            var opponent = GetBitboard(piece.OpponentColor());
 
-            if (!IsOccupied(threats.Any, opponentColor))
+            if ((opponent.All & threats.Any) == 0)
             {
                 yield break;
             }
-
-            foreach (var pawn in GetPieces(opponentColor, Piece.Pawn, threats.Pawn))
+            
+            foreach (var pawn in GetPieces(opponent.Color, Piece.Pawn, threats.Pawn))
             {
                 yield return pawn;
             }
 
-            foreach (var knight in GetPieces(opponentColor, Piece.Knight, threats.Knight))
+            foreach (var knight in GetPieces(opponent.Color, Piece.Knight, threats.Knight))
             {
                 yield return knight;
             }
 
-            foreach (var king in GetPieces(opponentColor, Piece.King, threats.King))
+            foreach (var king in GetPieces(opponent.Color, Piece.King, threats.King))
             {
                 yield return king;
             }
 
             var target = piece.GetMask();
 
-
-            foreach (var queen in GetPieces(opponentColor, Piece.Queen, threats.Queen))
+            foreach (var queen in GetPieces(opponent.Color, Piece.Queen, threats.Queen))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
                 {
@@ -305,7 +304,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var rook in GetPieces(opponentColor, Piece.Rook, threats.Rook))
+            foreach (var rook in GetPieces(opponent.Color, Piece.Rook, threats.Rook))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
                 {
@@ -313,7 +312,7 @@ namespace SicTransit.Woodpusher.Common
                 }
             }
 
-            foreach (var bishop in GetPieces(opponentColor, Piece.Bishop, threats.Bishop))
+            foreach (var bishop in GetPieces(opponent.Color, Piece.Bishop, threats.Bishop))
             {
                 if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
                 {
