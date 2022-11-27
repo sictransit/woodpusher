@@ -204,18 +204,17 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void MateInMovesWinningTest()
         {
-            var patzer = new Patzer();
-            patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
-
             var infos = new List<string>();
-
             void Callback(string s)
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
             }
 
-            var move = patzer.FindBestMove(5000, Callback);
+            var patzer = new Patzer(Callback);
+            patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
+
+            var move = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(move);
 
@@ -225,18 +224,17 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void MateInMovesLosingTest()
         {
-            var patzer = new Patzer();
-            patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
-
             var infos = new List<string>();
-
             void Callback(string s)
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
             }
 
-            var move = patzer.FindBestMove(5000, Callback);
+            var patzer = new Patzer(Callback);
+            patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
+
+            var move = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(move);
 
@@ -327,15 +325,15 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 new("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5, 164075551),
             };
 
-            IEngine engine = new Patzer();
+
+
+
 
             foreach (var (fen, depth, nodes) in tests)
             {
-                engine.Position(fen);
-
                 var success = false;
 
-                engine.Perft(depth, s =>
+                void Callback(string s)
                 {
                     if (s.Contains(nodes.ToString()))
                     {
@@ -343,7 +341,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         Log.Information($"{fen}: {nodes} nodes @ depth {depth}");
                     }
-                });
+                }
+
+                IEngine engine = new Patzer(Callback);
+
+                engine.Position(fen);
+
+                engine.Perft(depth);
 
                 Assert.IsTrue(success);
             }

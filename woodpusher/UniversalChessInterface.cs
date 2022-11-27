@@ -198,11 +198,11 @@ namespace SicTransit.Woodpusher
                     {
                         var depth = int.Parse(perftMatch.Groups[1].Value);
 
-                        engine.Perft(depth, s => consoleOutput(s));
+                        engine.Perft(depth);
                     }
                     else
                     {
-                        var timeLimit = 10000;
+                        var timeLimit = 30000;
 
                         if (movetimeMatch.Success)
                         {
@@ -216,7 +216,7 @@ namespace SicTransit.Woodpusher
                             timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
                         }
 
-                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit), s => consoleOutput(s));
+                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit));
                         var ponder = bestMove.Ponder != null ? $" ponder {bestMove.Ponder.Notation}" : string.Empty;
 
                         consoleOutput($"bestmove {bestMove.Move.Notation}" + ponder);

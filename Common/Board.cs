@@ -49,8 +49,8 @@ namespace SicTransit.Woodpusher.Common
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    //var attackers = GetAttackers(piece.GetMask(), piece.GetColor()).Count();
-                    //var defenders = GetAttackers(piece.GetMask(), piece.GetColor().OpponentColor()).Count();
+                    //var attackers = GetAttackers(piece).Count();
+                    //var defenders = GetAttackers(piece ^ Piece.White ).Count();
 
                     //if (attackers > defenders)
                     //{

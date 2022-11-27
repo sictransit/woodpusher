@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher
                 Log.Information($"Sent: {s}");
             }
 
-            var uci = new UniversalChessInterface(ConsoleOutput, new Patzer());
+            var uci = new UniversalChessInterface(ConsoleOutput, new Patzer(ConsoleOutput));
 
             while (!uci.Quit)
             {

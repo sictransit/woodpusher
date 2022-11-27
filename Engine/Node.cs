@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Engine.Enums;
+using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
@@ -6,15 +7,18 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Node
     {
-        public Node(Move move)
+        public Node(Move move, NodeStatus status = NodeStatus.Waiting)
         {
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
             Score = -Sign * Declarations.MoveMaximumScore;
             MaxDepth = 2;
             Move = move;
+            Status = status;
         }
 
-        public int MaxDepth { get; set; }        
+        public int MaxDepth { get; set; }
+
+        public NodeStatus Status { get; set; }
 
         public Move Move { get; }
 

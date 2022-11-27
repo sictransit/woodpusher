@@ -3,19 +3,18 @@ using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Engine.Enums;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Xml.Linq;
 
 namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
         public IBoard Board { get; private set; }
-
-        private readonly Random random = new();
 
         private CancellationTokenSource cancellationTokenSource = new();
 
@@ -24,18 +23,21 @@ namespace SicTransit.Woodpusher.Engine
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
         private readonly IDictionary<ulong, PrincipalVariationNode> hashTable = new Dictionary<ulong, PrincipalVariationNode>();
+        private readonly Action<string>? infoCallback;
 
-        public Patzer()
+        public Patzer(Action<string>? infoCallback = null)
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            this.infoCallback = infoCallback;
         }
 
         public void Initialize()
         {
             Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
             repetitions.Clear();
-            hashTable.Clear();            
         }
+
+        private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
 
         public void Play(Move move)
         {
@@ -65,7 +67,7 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        public void Perft(int depth, Action<string> infoCallback)
+        public void Perft(int depth)
         {
             cancellationTokenSource = new CancellationTokenSource();
 
@@ -84,13 +86,13 @@ namespace SicTransit.Woodpusher.Engine
 
                 total += nodes;
 
-                infoCallback($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
+                SendInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
             });
 
-            infoCallback(Environment.NewLine + $"Nodes searched: {total}");
+            SendInfo(Environment.NewLine + $"Nodes searched: {total}");
         }
 
-        public BestMove FindBestMove(int timeLimit = 1000, Action<string>? infoCallback = null)
+        public BestMove FindBestMove(int timeLimit = 1000)
         {
             cancellationTokenSource = new CancellationTokenSource();
 
@@ -105,10 +107,11 @@ namespace SicTransit.Woodpusher.Engine
             });
 
             stopwatch.Restart();
+            hashTable.Clear();
 
             var openingMoves = Board.GetOpeningBookMoves();
 
-            var nodes = (openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)).ToList();
+            var nodes = new ConcurrentBag<Node>((openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)));
 
             if (!nodes.Any())
             {
@@ -127,31 +130,31 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                var tasks = nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(n => n.Score).Select(node => Task.Run(() =>
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score).Take(Environment.ProcessorCount);
+
+                var tasks = nodesToAnalyze.Select(node => Task.Run(() =>
                 {
                     try
                     {
+                        node.Status = NodeStatus.Running;
+
                         var score = EvaluateBoard(Board.Play(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
                         {
                             node.Score = score;
+
                             var principalVariation = FindPrincipalVariation(Board, node).ToArray();
                             node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
 
-                            if (infoCallback != null)
-                            {
-                                SendAnalysisInfo(infoCallback, node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
-                            }
+                            SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
 
+                            node.Status = NodeStatus.Waiting;
                             node.MaxDepth += 2;
                         }
                         else
                         {
-                            if (infoCallback != null)
-                            {
-                                SendDebugInfo(infoCallback, $"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
-                            }
+                            SendDebugInfo($"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
 
                             Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");
                         }
@@ -162,30 +165,25 @@ namespace SicTransit.Woodpusher.Engine
                     }
                     catch (Exception ex)
                     {
-                        if (infoCallback != null)
-                        {
-                            SendExceptionInfo(infoCallback, ex);
-                        }
+                        SendExceptionInfo(ex);
 
                         throw;
                     }
 
                 })).ToArray();
 
-                Task.WaitAll(tasks);
+                Task.WaitAny(tasks);
             }
 
 
             // Set node score to zero for threefold repetition moves.
             UpdateForThreefoldRepetition(nodes);
 
-            var bestNodeGroup = nodes.GroupBy(e => e.AbsoluteScore).OrderByDescending(g => g.Key).First().ToArray();
-
-            var bestNode = bestNodeGroup[random.Next(bestNodeGroup.Length)];
+            var bestNode = nodes.OrderByDescending(n => n.AbsoluteScore).First();
 
             Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
-            return new BestMove(new AlgebraicMove(bestNode.Move), bestNode.PonderMove != null ? new AlgebraicMove(bestNode.PonderMove) : null) ;
+            return new BestMove(new AlgebraicMove(bestNode.Move), bestNode.PonderMove != null ? new AlgebraicMove(bestNode.PonderMove) : null);
         }
 
         private IEnumerable<Move> FindPrincipalVariation(IBoard board, Node node)
@@ -209,7 +207,7 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private void UpdateForThreefoldRepetition(List<Node> nodes)
+        private void UpdateForThreefoldRepetition(IReadOnlyCollection<Node> nodes)
         {
             foreach (var node in nodes)
             {
@@ -234,22 +232,22 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private static void SendInfo(Action<string> callback, string info)
+        private void SendInfo(string info)
         {
-            callback.Invoke($"info {info}");
+            SendCallbackInfo($"info {info}");
         }
 
-        private static void SendDebugInfo(Action<string> callback, string info)
+        private void SendDebugInfo(string debugInfo)
         {
-            SendInfo(callback, $"string debug {info}");
+            SendInfo($"string debug {debugInfo}");
         }
 
-        private static void SendExceptionInfo(Action<string> callback, Exception exception)
+        private void SendExceptionInfo(Exception exception)
         {
-            SendInfo(callback, $"string exception {exception.GetType().Name} {exception.Message}");
+            SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private static void SendAnalysisInfo(Action<string> callback, int depth, long nodes, Node node, IEnumerable<Move> principalVariation, long time)
+        private void SendAnalysisInfo(int depth, long nodes, Node node, IEnumerable<Move> principalVariation, long time)
         {
             var pv = string.Join(' ', principalVariation.Select(m => m.ToAlgebraicMoveNotation()));
 
@@ -257,7 +255,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            SendInfo(callback, $"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
+            SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
         }
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
