@@ -234,9 +234,7 @@ namespace SicTransit.Woodpusher.Common
                 : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
         }
 
-        private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
-
-        private bool IsOccupied(ulong mask, Piece color) => GetBitboard(color).IsOccupied(mask);
+        private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;        
 
         private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
@@ -331,20 +329,29 @@ namespace SicTransit.Woodpusher.Common
 
         public IEnumerable<Move> GetLegalMoves(Piece piece)
         {
+            var whiteIsPlaying = ActiveColor.Is(Piece.White);
+
             foreach (var vector in internals.Moves.GetVectors(piece))
             {
                 foreach (var move in vector)
                 {
-                    if (!ValidateMove(move))
+                    var friendlyTarget = whiteIsPlaying ? white.Peek(move.Target) : black.Peek(move.Target);
+
+                    if (friendlyTarget != Piece.None)
                     {
                         break;
                     }
 
-                    var tookPiece = IsOccupied(move.Target);
+                    var hostileTarget = whiteIsPlaying ? black.Peek(move.Target) : white.Peek(move.Target);
+
+                    if (!ValidateMove(move, hostileTarget))
+                    {
+                        break;
+                    }
 
                     if (IsMovingIntoCheck(move))
                     {
-                        if (tookPiece)
+                        if (hostileTarget != Piece.None)
                         {
                             break;
                         }
@@ -354,7 +361,7 @@ namespace SicTransit.Woodpusher.Common
 
                     yield return move;
 
-                    if (tookPiece)
+                    if (hostileTarget != Piece.None)
                     {
                         break;
                     }
@@ -362,26 +369,20 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
-        private bool ValidateMove(Move move)
-        {
-            // taking own piece
-            if (IsOccupied(move.Target, move.Piece))
-            {
-                return false;
-            }
-
+        private bool ValidateMove(Move move, Piece hostileTarget)
+        {            
             if (move.Piece.Is(Piece.Pawn))
             {
-                if (IsOccupied(move.Target))
+                if (hostileTarget == Piece.None)
                 {
-                    if (move.Flags.HasFlag(SpecialMove.PawnMoves))
+                    if (move.Flags.HasFlag(SpecialMove.PawnTakes))
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    if (move.Flags.HasFlag(SpecialMove.PawnTakes))
+                    if (move.Flags.HasFlag(SpecialMove.PawnMoves))
                     {
                         return false;
                     }
