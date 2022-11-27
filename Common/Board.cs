@@ -49,14 +49,6 @@ namespace SicTransit.Woodpusher.Common
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    //var attackers = GetAttackers(piece).Count();
-                    //var defenders = GetAttackers(piece ^ Piece.White ).Count();
-
-                    //if (attackers > defenders)
-                    //{
-                    //    evaluation /= 2;
-                    //}
-
                     switch (piece.GetPieceType())
                     {
                         case Piece.Pawn:
@@ -64,16 +56,6 @@ namespace SicTransit.Woodpusher.Common
                             {
                                 evaluation *= 2;
                             }
-                            break;
-                        case Piece.Knight:
-                            break;
-                        case Piece.Bishop:
-                            break;
-                        case Piece.Rook:
-                            break;
-                        case Piece.Queen:
-                            break;
-                        case Piece.King:
                             break;
                         default:
                             break;
@@ -110,8 +92,8 @@ namespace SicTransit.Woodpusher.Common
         public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
         public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
-                ? new Board(white.Add(piece), black, Counters, internals, BoardInternals.InvalidHash)
-                : (IBoard)new Board(white, black.Add(piece), Counters, internals, BoardInternals.InvalidHash);
+                ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
+                : (IBoard)new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
 
         public IBoard Play(Move move)
         {
@@ -125,7 +107,7 @@ namespace SicTransit.Woodpusher.Common
 
             if (capture != Piece.None)
             {
-                opponentBitboard = opponentBitboard.Remove(capture);
+                opponentBitboard = opponentBitboard.Toggle(capture);
 
                 hash ^= internals.Zobrist.GetPieceHash(capture);
             }
@@ -229,7 +211,7 @@ namespace SicTransit.Woodpusher.Common
             {
                 var promotedPiece = move.Piece.SetMask(move.Target);
                 var promotionPiece = (ActiveColor | move.PromotionType).SetMask(move.Target);
-                activeBitboard = activeBitboard.Remove(promotedPiece).Add(promotionPiece);
+                activeBitboard = activeBitboard.Toggle(promotedPiece).Toggle(promotionPiece);
 
                 hash ^= internals.Zobrist.GetPieceHash(promotedPiece) ^ internals.Zobrist.GetPieceHash(promotionPiece);
             }
