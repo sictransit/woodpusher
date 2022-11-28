@@ -34,8 +34,6 @@ namespace SicTransit.Woodpusher.Model
 
         public int Phase => BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
 
-        public Bitboard Move(Piece piece, ulong to) => Toggle(piece, to);
-
         private ulong GetBitmap(Piece pieceType) => pieceType switch
         {
             Piece.Pawn => Pawn,

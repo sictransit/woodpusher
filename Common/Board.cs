@@ -112,7 +112,7 @@ namespace SicTransit.Woodpusher.Common
                 hash ^= internals.Zobrist.GetPieceHash(capture);
             }
 
-            var activeBitboard = GetBitboard(ActiveColor).Move(move.Piece, move.Target);
+            var activeBitboard = GetBitboard(ActiveColor).Toggle(move.Piece, move.Target);
 
             hash ^= internals.Zobrist.GetPieceHash(move.Piece) ^ internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
 
