@@ -109,9 +109,9 @@ namespace SicTransit.Woodpusher.Engine
             stopwatch.Restart();
             hashTable.Clear();
 
-            var openingMoves = Board.GetOpeningBookMoves();
+            var openingMoves = Board.GetOpeningBookMoves().ToArray();
 
-            var nodes = new ConcurrentBag<Node>((openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(m)));
+            var nodes = new ConcurrentBag<Node>((openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(Board, m)));
 
             if (!nodes.Any())
             {
@@ -130,7 +130,7 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score);
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Board.Counters.Capture != Piece.None).ThenByDescending(n => n.Score);
 
                 var tasks = nodesToAnalyze.Select(node => Task.Run(() =>
                 {
@@ -138,7 +138,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         node.Status = NodeStatus.Running;
 
-                        var score = EvaluateBoard(Board.Play(node.Move), node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
+                        var score = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
                         if (!cancellationToken.IsCancellationRequested)
                         {

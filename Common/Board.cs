@@ -155,7 +155,7 @@ namespace SicTransit.Woodpusher.Common
                     {
                         var rook = Piece.Rook | ActiveColor.SetMask(castling.from);
 
-                        activeBitboard = activeBitboard.Move(rook, castling.to);
+                        activeBitboard = activeBitboard.Toggle(rook, castling.to);
 
                         hash ^= internals.Zobrist.GetPieceHash(rook) ^ internals.Zobrist.GetPieceHash(rook.SetMask(castling.to));
                     }
