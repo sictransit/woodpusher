@@ -9,10 +9,7 @@ namespace SicTransit.Woodpusher.Model
         // 00 .. 63
         // A1 .. H8
 
-        public Bitboard(Piece color) : this(color, 0, 0, 0, 0, 0, 0)
-        { }
-
-        public Bitboard(Piece color, ulong pawn, ulong rook, ulong knight, ulong bishop, ulong queen, ulong king)
+        public Bitboard(Piece color, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
         {
             Color = color;
             Pawn = pawn;
@@ -36,8 +33,6 @@ namespace SicTransit.Woodpusher.Model
         public ulong All { get; }
 
         public int Phase => BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
-
-        public bool IsOccupied(ulong mask) => (All & mask) != 0;
 
         public Bitboard Move(Piece piece, ulong to) => Toggle(piece, to);
 
@@ -64,20 +59,6 @@ namespace SicTransit.Woodpusher.Model
         }
 
         private IEnumerable<Piece> GetPieces(Piece type) => GetPieces(type, ulong.MaxValue);
-
-        public IEnumerable<ulong> GetPositions(Piece type, ulong mask)
-        {
-            var bitmap = GetBitmap(type) & mask;
-
-            while (bitmap != 0ul)
-            {
-                var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
-
-                yield return bit;
-
-                bitmap &= ~bit;
-            }
-        }
 
         public IEnumerable<Piece> GetPieces(Piece type, ulong mask)
         {

@@ -50,7 +50,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 promotionType = promotionMatch.Groups[2].Value[0].ToPieceType();
             }
 
-            PgnMove pgnMove = null;
+            PgnMove? pgnMove = null;
 
             if (TryParseSimplePawnMove(s, promotionType, out var simplePawnMove))
             {
@@ -77,16 +77,15 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 pgnMove = fileMove!;
             }
 
-            if (pgnMove != null)
+            if (pgnMove == null)
             {
-                pgnMove.Annotation = annotation;
-                pgnMove.Raw = raw;
-
-                return pgnMove;
+                throw new ArgumentException($"unable to parse: [{s}]");
             }
 
+            pgnMove.Annotation = annotation;
+            pgnMove.Raw = raw;
 
-            throw new ArgumentException($"unable to parse: [{s}]");
+            return pgnMove;
         }
 
         private static bool TryParseSimplePawnMove(string s, Piece promotionType, out SimplePawnMove? move)

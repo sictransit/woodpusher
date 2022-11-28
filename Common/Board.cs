@@ -234,7 +234,7 @@ namespace SicTransit.Woodpusher.Common
                 : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
         }
 
-        private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;        
+        private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
 
         private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
@@ -370,7 +370,7 @@ namespace SicTransit.Woodpusher.Common
         }
 
         private bool ValidateMove(Move move, Piece hostileTarget)
-        {            
+        {
             if (move.Piece.Is(Piece.Pawn))
             {
                 if (hostileTarget == Piece.None)

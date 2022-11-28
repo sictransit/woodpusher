@@ -130,7 +130,7 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score).Take(Environment.ProcessorCount);
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score);
 
                 var tasks = nodesToAnalyze.Select(node => Task.Run(() =>
                 {

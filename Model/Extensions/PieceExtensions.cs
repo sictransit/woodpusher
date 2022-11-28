@@ -16,8 +16,6 @@ public static class PieceExtensions
 
     public static Piece GetPiece(this Piece p) => (Piece)((int)p & PieceMask);
 
-    public static Piece GetColor(this Piece p) => p.Is(Piece.White) ? Piece.White : Piece.None;
-
     public static Piece GetPieceType(this Piece p) => p.GetPiece() & ~Piece.White;
 
     public static Square GetSquare(this Piece p) => p.GetMask().ToSquare();
