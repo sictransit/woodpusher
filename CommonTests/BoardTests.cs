@@ -402,7 +402,7 @@ g1h3: 120669525
             Assert.IsTrue(PerftAndCompare(board, stockfish, 7));
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void Perft6StartingPositionTest()
         {
             var stockfish = @"

@@ -82,10 +82,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             });
         }
 
-        public Move[][] GetVectors(Piece piece)
-        {
-            return vectors[piece];
-        }
+        public Move[][] GetVectors(Piece piece) => vectors[piece];
 
         private static IEnumerable<IEnumerable<Move>> CreateVectors(Piece piece)
         {
