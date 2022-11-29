@@ -86,10 +86,10 @@ namespace SicTransit.Woodpusher.Engine
 
                 total += nodes;
 
-                SendInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
+                SendCallbackInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
             });
 
-            SendInfo(Environment.NewLine + $"Nodes searched: {total}");
+            SendCallbackInfo(Environment.NewLine + $"Nodes searched: {total}");
         }
 
         public BestMove FindBestMove(int timeLimit = 1000)
