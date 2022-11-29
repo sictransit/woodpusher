@@ -3,6 +3,7 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace SicTransit.Woodpusher.Common.Extensions
@@ -56,9 +57,26 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             ulong count = 0;
 
+            Parallel.ForEach(board.GetLegalMoves(), move =>
+            {
+                Interlocked.Add(ref count, board.Play(move).ParallelPerft(depth - 1));
+            });
+
+            return count;
+        }
+
+        private static ulong ParallelPerft(this IBoard board, int depth)
+        {
+            if (depth <= 1)
+            {
+                return 1;
+            }
+
+            ulong count = 0;
+
             foreach (var move in board.GetLegalMoves())
             {
-                count += Perft(board.Play(move), depth - 1);
+                count += board.Play(move).ParallelPerft(depth - 1);
             }
 
             return count;
