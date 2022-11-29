@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 {
     public class Moves
     {
-        private readonly Dictionary<Piece, IReadOnlyCollection<Move[]>> vectors = new();
+        private readonly Dictionary<Piece, Move[][]> vectors = new();
         private readonly Dictionary<ulong, ulong> travelMasks = new();
         private readonly Dictionary<Piece, ulong> passedPawnMasks = new();
 
@@ -82,7 +82,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             });
         }
 
-        public IReadOnlyCollection<Move[]> GetVectors(Piece piece)
+        public Move[][] GetVectors(Piece piece)
         {
             return vectors[piece];
         }

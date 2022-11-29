@@ -77,11 +77,11 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
                         if (piece.Is(Piece.White))
                         {
-                            white = white.Add(piece.SetSquare(square));
+                            white = white.Toggle(piece.SetSquare(square));
                         }
                         else
                         {
-                            black = black.Add(piece.SetSquare(square));
+                            black = black.Toggle(piece.SetSquare(square));
                         }
                     }
                 }

@@ -42,11 +42,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             for (var i = 0; i < 10; i++)
             {
-                var move = patzer.FindBestMove();
+                var bestMove = patzer.FindBestMove();
 
-                Assert.IsNotNull(move);
+                Assert.IsNotNull(bestMove);
 
-                moves.Add(move);
+                moves.Add(bestMove.Move);
 
                 patzer.Position(ForsythEdwardsNotation.StartingPosition, moves);
             }
@@ -55,32 +55,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void TakeTheQueenTest()
         {
-            //+---+---+---+---+---+---+---+---+
-            //| Q |   |   | K |   |   |   | k | 8
-            //+---+---+---+---+---+---+---+---+
-            //|   |   |   |   |   |   |   |   | 7
-            //+---+---+---+---+---+---+---+---+
-            //|   |   | p |   |   |   |   |   | 6
-            //+---+---+---+---+---+---+---+---+
-            //|   |   |   | b |   |   |   |   | 5
-            //+---+---+---+---+---+---+---+---+
-            //|   | p |   |   |   |   |   |   | 4
-            //+---+---+---+---+---+---+---+---+
-            //|   | n | P |   |   |   |   |   | 3
-            //+---+---+---+---+---+---+---+---+
-            //| q | q |   |   |   |   |   |   | 2
-            //+---+---+---+---+---+---+---+---+
-            //|   |   |   |   |   | r |   |   | 1
-            //+---+---+---+---+---+---+---+---+
-            //  a   b   c   d   e   f   g   h
-
             var patzer = new Patzer();
 
             patzer.Position("Q2K3k/8/2p5/3b4/1p6/1nP5/qq6/5r2 b - - 0 93");
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2a8", bestMove.Notation);
+            Assert.AreEqual("a2a8", bestMove.Move.Notation);
         }
 
         [TestMethod]
@@ -91,7 +72,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("b6b7", bestMove.Notation);
+            Assert.AreEqual("b6b7", bestMove.Move.Notation);
         }
 
         [TestMethod]
@@ -103,7 +84,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreNotEqual("d8d2", bestMove.Notation);
+            Assert.AreNotEqual("d8d2", bestMove.Move.Notation);
         }
 
         [TestMethod]
@@ -111,32 +92,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             // e8f8 is a good move; pushing e.g. a B pawn is not 
 
-            //+---+---+---+---+---+---+---+---+
-            //| r | n | b | q | k |   | n | r | 8
-            //+---+---+---+---+---+---+---+---+
-            //| p | p | p |   | b |   |   | p | 7
-            //+---+---+---+---+---+---+---+---+
-            //|   |   |   |   |   |   | P |   | 6
-            //+---+---+---+---+---+---+---+---+
-            //|   |   |   | p |   |   |   | Q | 5
-            //+---+---+---+---+---+---+---+---+
-            //|   |   |   | N | p |   |   |   | 4
-            //+---+---+---+---+---+---+---+---+
-            //|   |   | N |   |   |   |   |   | 3
-            //+---+---+---+---+---+---+---+---+
-            //| P | P | P | P |   | P | P | P | 2
-            //+---+---+---+---+---+---+---+---+
-            //| R |   | B |   | K | B |   | R | 1
-            //+---+---+---+---+---+---+---+---+
-            //  a   b   c   d   e   f   g   h
-
             var patzer = new Patzer();
 
             patzer.Position("rnbqk1nr/ppp1b2p/6P1/3p3Q/3Np3/2N5/PPPP1PPP/R1B1KB1R b KQkq - 0 7");
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.AreEqual("e8f8", bestMove.Notation);
+            Assert.AreEqual("e8f8", bestMove.Move.Notation);
         }
 
         [TestMethod]
@@ -148,7 +110,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.AreEqual("e1e7", bestMove.Notation);
+            Assert.AreEqual("e1e7", bestMove.Move.Notation);
         }
 
         [TestMethod]
@@ -172,7 +134,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.AreNotEqual("d8g5", bestMove.Notation);
+            Assert.AreNotEqual("d8g5", bestMove.Move.Notation);
         }
 
         [TestMethod]
@@ -187,7 +149,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.IsTrue(bestMove.Notation.Length == 4);
+            Assert.IsTrue(bestMove.Move.Notation.Length == 4);
         }
 
         [TestMethod]
@@ -198,24 +160,23 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2b3", bestMove.Notation);
+            Assert.AreEqual("a2b3", bestMove.Move.Notation);
         }
 
         [TestMethod]
         public void MateInMovesWinningTest()
         {
-            var patzer = new Patzer();
-            patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
-
             var infos = new List<string>();
-
             void Callback(string s)
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
             }
 
-            var move = patzer.FindBestMove(5000, Callback);
+            var patzer = new Patzer(Callback);
+            patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
+
+            var move = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(move);
 
@@ -225,18 +186,17 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void MateInMovesLosingTest()
         {
-            var patzer = new Patzer();
-            patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
-
             var infos = new List<string>();
-
             void Callback(string s)
             {
                 infos.Add(s);
                 Trace.WriteLine(s);
             }
 
-            var move = patzer.FindBestMove(5000, Callback);
+            var patzer = new Patzer(Callback);
+            patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
+
+            var move = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(move);
 
@@ -272,7 +232,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         Log.Information($"Found (@{thinkingTime} ms): {engineMove}");
 
-                        if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Notation))
+                        if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Move.Notation))
                         {
                             foundAlterantive = true;
                             break;
@@ -327,23 +287,25 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 new("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5, 164075551),
             };
 
-            IEngine engine = new Patzer();
-
-            foreach (var test in tests)
+            foreach (var (fen, depth, nodes) in tests)
             {
-                engine.Position(test.fen);
-
                 var success = false;
 
-                engine.Perft(test.depth, s =>
+                void Callback(string s)
                 {
-                    if (s.Contains(test.nodes.ToString()))
+                    if (s.Contains(nodes.ToString()))
                     {
                         success = true;
 
-                        Log.Information($"{test.fen}: {test.nodes} nodes @ depth {test.depth}");
+                        Log.Information($"{fen}: {nodes} nodes @ depth {depth}");
                     }
-                });
+                }
+
+                IEngine engine = new Patzer(Callback);
+
+                engine.Position(fen);
+
+                engine.Perft(depth);
 
                 Assert.IsTrue(success);
             }

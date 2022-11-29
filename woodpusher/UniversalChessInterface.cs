@@ -11,7 +11,7 @@ namespace SicTransit.Woodpusher
 {
     public class UniversalChessInterface
     {
-        private volatile Action<string> consoleOutput;
+        private readonly Action<string> consoleOutput;
 
         private static readonly Regex UciCommand = new(@"^uci$", RegexOptions.Compiled);
         private static readonly Regex IsReadyCommand = new(@"^isready$", RegexOptions.Compiled);
@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
 
-        private volatile IEngine engine;
+        private readonly IEngine engine;
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {
@@ -102,6 +102,7 @@ namespace SicTransit.Woodpusher
                 {
                     consoleOutput("id name Woodpusher");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
+                    consoleOutput("option name Ponder type check default false");
                     consoleOutput("uciok");
                 }
             });
@@ -197,11 +198,11 @@ namespace SicTransit.Woodpusher
                     {
                         var depth = int.Parse(perftMatch.Groups[1].Value);
 
-                        engine.Perft(depth, s => consoleOutput(s));
+                        engine.Perft(depth);
                     }
                     else
                     {
-                        var timeLimit = 10000;
+                        var timeLimit = 30000;
 
                         if (movetimeMatch.Success)
                         {
@@ -215,9 +216,10 @@ namespace SicTransit.Woodpusher
                             timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
                         }
 
-                        var move = engine.FindBestMove(Math.Max(0, timeLimit), s => consoleOutput(s));
+                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit));
+                        var ponder = bestMove.Ponder != null ? $" ponder {bestMove.Ponder.Notation}" : string.Empty;
 
-                        consoleOutput($"bestmove {move.Notation}");
+                        consoleOutput($"bestmove {bestMove.Move.Notation}" + ponder);
                     }
                 }
             });
