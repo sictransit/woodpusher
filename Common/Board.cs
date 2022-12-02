@@ -49,16 +49,14 @@ namespace SicTransit.Woodpusher.Common
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    switch (piece.GetPieceType())
+                    if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
                     {
-                        case Piece.Pawn:
-                            if (IsPassedPawn(piece))
-                            {
-                                evaluation *= 2;
-                            }
-                            break;
-                        default:
-                            break;
+                        evaluation *= 2;
+                    }
+
+                    if (IsBlocked(piece))
+                    {
+                        evaluation /= 2;
                     }
 
                     score += piece.Is(Piece.White) ? evaluation : -evaluation;
