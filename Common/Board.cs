@@ -316,9 +316,16 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
+        private bool IsBlocked(Piece piece)
+        {
+            var blockedMask = internals.Moves.GetBlockedMask(piece);
+
+            return (blockedMask & GetBitboard(ActiveColor).All) == blockedMask;
+        }
+
         public IEnumerable<Move> GetLegalMoves()
         {
-            foreach (var piece in GetPieces(ActiveColor))
+            foreach (var piece in GetPieces(ActiveColor).Where(p => !IsBlocked(p)))
             {
                 foreach (var move in GetLegalMoves(piece))
                 {
