@@ -313,6 +313,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        [Ignore("Not finished and will run for a long time anyway.")]
         public void StrategicTestSuiteTest()
         {
             var epdLines = new List<string>();
