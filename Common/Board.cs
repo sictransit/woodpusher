@@ -56,7 +56,7 @@ namespace SicTransit.Woodpusher.Common
 
                     if (IsBlocked(piece))
                     {
-                        evaluation /= 2;
+                        evaluation = evaluation * phase / 24;
                     }
 
                     score += piece.Is(Piece.White) ? evaluation : -evaluation;
