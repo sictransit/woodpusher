@@ -98,7 +98,7 @@ namespace SicTransit.Woodpusher.Engine
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
-                Log.Information($"thinking time: {timeLimit}");
+                Log.Debug($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
                 if (!cancellationTokenSource.IsCancellationRequested && !Debugger.IsAttached)
                 {
@@ -119,7 +119,7 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Information($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
+            Log.Debug($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
 
             var cancellationToken = cancellationTokenSource.Token;
 

@@ -8,6 +8,7 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -308,6 +309,43 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 engine.Perft(depth);
 
                 Assert.IsTrue(success);
+            }
+        }
+
+        [TestMethod]
+        public void StrategicTestSuiteTest()
+        {
+            var epdLines = new List<string>();
+            foreach (var epdFile in new DirectoryInfo("resources/sts").EnumerateFiles("*.epd"))
+            {
+                epdLines.AddRange(File.ReadAllLines(epdFile.FullName));
+            }
+
+            var epdRegex = new Regex(@"(.+)\sbm\s(.+?);");
+
+            IEngine engine = new Patzer();
+
+            foreach (var epdLine in epdLines)
+            {
+                var match = epdRegex.Match(epdLine);
+
+                if (match.Success)
+                {
+                    var fen = match.Groups[1].Value;
+                    var epdBestMove = match.Groups[2].Value;
+
+                    engine.Position(fen);
+
+                    var engineBestMove = engine.FindBestMove();
+
+                    // TODO: Check suggested best move against engine move.
+
+                    Log.Information($"FEN: {fen}; BM: {epdBestMove}; ENGINE: {engineBestMove.Move.Notation}");
+                }
+                else
+                {
+                    Assert.Fail($"Unable to parse: {epdLine}");
+                }
             }
         }
     }
