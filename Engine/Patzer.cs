@@ -139,7 +139,7 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Board.Counters.Capture != Piece.None).ThenByDescending(n => n.Score);
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score);
 
                 var tasks = nodesToAnalyze.Select(node => Task.Run(() =>
                 {
@@ -278,7 +278,6 @@ namespace SicTransit.Woodpusher.Engine
 
             var moves = board.GetLegalMoves();
 
-            // ReSharper disable once PossibleMultipleEnumeration
             if (!moves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
@@ -290,12 +289,6 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            //if (hashTable.TryGetValue(board.Hash, out var pvNode))
-            //{
-            //    moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
-            //}
-
-            // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
             {
                 node.Count++;

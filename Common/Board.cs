@@ -354,7 +354,10 @@ namespace SicTransit.Woodpusher.Common
                         break;
                     }
 
-                    if (IsMovingIntoCheck(move))
+                    var testBoard = Play(move);
+
+                    // Moving into check?
+                    if (testBoard.IsAttacked(testBoard.FindKing(ActiveColor)))
                     {
                         if (hostileTarget != Piece.None)
                         {
@@ -424,13 +427,6 @@ namespace SicTransit.Woodpusher.Common
             }
 
             return true;
-        }
-
-        private bool IsMovingIntoCheck(Move move)
-        {
-            var testBoard = Play(move);
-
-            return testBoard.IsAttacked(testBoard.FindKing(ActiveColor));
         }
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor));
