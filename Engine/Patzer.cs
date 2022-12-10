@@ -267,7 +267,7 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
         }
 
-        private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken)
         {
             var maximizing = board.ActiveColor.Is(Piece.White);
 
@@ -290,47 +290,47 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            if (hashTable.TryGetValue(board.Hash, out var pvNode))
-            {
-                moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
-            }
+            //if (hashTable.TryGetValue(board.Hash, out var pvNode))
+            //{
+            //    moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
+            //}
 
             // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
             {
                 node.Count++;
 
-                var score = EvaluateBoard(board.Play(move), node, depth + 1, alpha, beta, cancellationToken);
+                var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
 
                 if (maximizing)
                 {
-                    if (score >= beta)
+                    if (score >= β)
                     {
-                        return beta;
+                        return β;
                     }
 
-                    if (score > alpha)
+                    if (score > α)
                     {
                         UpdateHashTable(board.Hash, move, score);
-                        alpha = score;
+                        α = score;
                     }
                 }
                 else
                 {
-                    if (score <= alpha)
+                    if (score <= α)
                     {
-                        return alpha;
+                        return α;
                     }
 
-                    if (score < beta)
+                    if (score < β)
                     {
                         UpdateHashTable(board.Hash, move, -score);
-                        beta = score;
+                        β = score;
                     }
                 }
             }
 
-            return maximizing ? alpha : beta;
+            return maximizing ? α : β;
         }
 
         private void UpdateHashTable(ulong hash, Move move, int score)
