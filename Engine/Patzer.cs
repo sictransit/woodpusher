@@ -82,9 +82,18 @@ namespace SicTransit.Woodpusher.Engine
 
             Parallel.ForEach(initialMoves, options, i =>
             {
-                var nodes = i.board.Perft(depth);
+                ulong nodes = 0;
 
-                total += nodes;
+                if (depth > 1)
+                {
+                    nodes += i.board.Perft(depth);
+                }
+                else
+                {
+                    nodes = 1;
+                }
+
+                Interlocked.Add(ref total, nodes);
 
                 SendCallbackInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
             });
