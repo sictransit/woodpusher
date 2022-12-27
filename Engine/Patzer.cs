@@ -289,41 +289,43 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
+            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+
             foreach (var move in moves)
             {
                 node.Count++;
 
-                var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
+                evaluation = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
 
                 if (maximizing)
                 {
-                    if (score >= β)
+                    if (evaluation > β)
                     {
-                        return β;
+                        break;
                     }
 
-                    if (score > α)
+                    if (evaluation > α)
                     {
-                        UpdateHashTable(board.Hash, move, score);
-                        α = score;
+                        UpdateHashTable(board.Hash, move, evaluation);
+                        α = evaluation;
                     }
                 }
                 else
                 {
-                    if (score <= α)
+                    if (evaluation < α)
                     {
-                        return α;
+                        break;
                     }
 
-                    if (score < β)
+                    if (evaluation < β)
                     {
-                        UpdateHashTable(board.Hash, move, -score);
-                        β = score;
+                        UpdateHashTable(board.Hash, move, -evaluation);
+                        β = evaluation;
                     }
                 }
             }
 
-            return maximizing ? α : β;
+            return evaluation;
         }
 
         private void UpdateHashTable(ulong hash, Move move, int score)
