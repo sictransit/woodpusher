@@ -295,11 +295,11 @@ namespace SicTransit.Woodpusher.Engine
             {
                 node.Count++;
 
-                evaluation = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
-
                 if (maximizing)
                 {
-                    if (evaluation >= β)
+                    evaluation = Math.Max(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+
+                    if (evaluation > β)
                     {
                         break;
                     }
@@ -312,7 +312,9 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (evaluation <= α)
+                    evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+
+                    if (evaluation < α)
                     {
                         break;
                     }
