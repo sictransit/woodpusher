@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
-        private readonly IDictionary<ulong, PrincipalVariationNode> hashTable = new Dictionary<ulong, PrincipalVariationNode>();
+        private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new ConcurrentDictionary<ulong, PrincipalVariationNode>();
         private readonly Action<string>? infoCallback;
 
         public Patzer(Action<string>? infoCallback = null)
@@ -141,7 +141,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score);
 
-                var tasks = nodesToAnalyze.Select(node => Task.Run(() =>
+                Task.WaitAny(nodesToAnalyze.Select(node => Task.Run(() =>
                 {
                     try
                     {
@@ -179,9 +179,7 @@ namespace SicTransit.Woodpusher.Engine
                         throw;
                     }
 
-                })).ToArray();
-
-                Task.WaitAny(tasks);
+                })).ToArray());
             }
 
 
@@ -299,33 +297,27 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     evaluation = Math.Max(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
 
+                    UpdateHashTable(board.Hash, move, evaluation);
+
                     if (evaluation > β)
                     {
                         break;
                     }
 
-                    if (evaluation > α)
-                    {
-                        UpdateHashTable(board.Hash, move, evaluation);
-
-                        α = evaluation;
-                    }
+                    α = Math.Max(α, evaluation);
                 }
                 else
                 {
                     evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+                    
+                    UpdateHashTable(board.Hash, move, -evaluation);
 
                     if (evaluation < α)
                     {                        
                         break;
                     }
 
-                    if (evaluation < β)
-                    {
-                        UpdateHashTable(board.Hash, move, -evaluation);
-
-                        β = evaluation;
-                    }
+                    β = Math.Min(β, evaluation);
                 }
             }
 
@@ -334,20 +326,17 @@ namespace SicTransit.Woodpusher.Engine
 
         private void UpdateHashTable(ulong hash, Move move, int score)
         {
-            lock (hashTable)
+            if (hashTable.TryGetValue(hash, out var pvNode))
             {
-                if (hashTable.TryGetValue(hash, out var pvNode))
+                if (score > pvNode.Score)
                 {
-                    if (score > pvNode.Score)
-                    {
-                        pvNode.Move = move;
-                        pvNode.Score = score;
-                    }
+                    pvNode.Move = move;
+                    pvNode.Score = score;
                 }
-                else
-                {
-                    hashTable.Add(hash, new PrincipalVariationNode(move, score));
-                }
+            }
+            else
+            {
+                hashTable.TryAdd(hash, new PrincipalVariationNode(move, score));
             }
         }
 
