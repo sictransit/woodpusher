@@ -299,7 +299,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (maximizing)
                 {
-                    if (evaluation > β)
+                    if (evaluation >= β)
                     {
                         break;
                     }
@@ -312,7 +312,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (evaluation < α)
+                    if (evaluation <= α)
                     {
                         break;
                     }
