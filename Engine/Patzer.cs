@@ -307,6 +307,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (evaluation > α)
                     {
                         UpdateHashTable(board.Hash, move, evaluation);
+
                         α = evaluation;
                     }
                 }
@@ -315,13 +316,14 @@ namespace SicTransit.Woodpusher.Engine
                     evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
 
                     if (evaluation < α)
-                    {
+                    {                        
                         break;
                     }
 
                     if (evaluation < β)
                     {
                         UpdateHashTable(board.Hash, move, -evaluation);
+
                         β = evaluation;
                     }
                 }
