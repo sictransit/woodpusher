@@ -68,7 +68,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void FindMateInOneTest()
         {
-            var patzer = new Patzer();
+            void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
+
             patzer.Position("k7/8/1QP5/8/8/8/8/7K w - - 0 1");
 
             var bestMove = patzer.FindBestMove();
@@ -105,7 +111,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void FindMateInThreeTest()
         {
-            var patzer = new Patzer();
+            void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
 
             patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38");
 
@@ -197,7 +208,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var patzer = new Patzer(Callback);
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
-            var move = patzer.FindBestMove(5000);
+            var move = patzer.FindBestMove(10000);
 
             Assert.IsNotNull(move);
 

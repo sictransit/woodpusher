@@ -11,7 +11,7 @@ namespace SicTransit.Woodpusher.Engine
         public Node(IBoard board, Move move)
         {
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
-            Score = -Sign * Declarations.MoveMaximumScore;
+            Score = Sign * Declarations.MateScore / 2;
             MaxDepth = 2;
             Move = move;
             Status = NodeStatus.Waiting;

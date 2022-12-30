@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
-        private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new ConcurrentDictionary<ulong, PrincipalVariationNode>();
+        private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new();
         private readonly Action<string>? infoCallback;
 
         public Patzer(Action<string>? infoCallback = null)
@@ -132,26 +132,33 @@ namespace SicTransit.Woodpusher.Engine
 
             var cancellationToken = cancellationTokenSource.Token;
 
-            while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1)
+            while (!cancellationTokenSource.IsCancellationRequested)
             {
                 if (nodes.Any(n => n.MateIn > 0))
                 {
                     break;
                 }
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Score);
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue);
 
-                Task.WaitAny(nodesToAnalyze.Select(node => Task.Run(() =>
+                if (nodesToAnalyze.Count() <= 1)
+                {
+                    break;
+                }
+
+                var waitingNodes = nodesToAnalyze.Where(n => n.Status == NodeStatus.Waiting).OrderByDescending(n => n.AbsoluteScore);
+
+                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount).Select(node => Task.Run(() =>
                 {
                     try
                     {
                         node.Status = NodeStatus.Running;
 
-                        var score = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
+                        var evaluation = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
-                        if (!cancellationToken.IsCancellationRequested)
+                        if (node.Status != NodeStatus.Cancelled)
                         {
-                            node.Score = score;
+                            node.Score = evaluation;
 
                             var principalVariation = FindPrincipalVariation(Board, node).ToArray();
                             node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
@@ -174,6 +181,8 @@ namespace SicTransit.Woodpusher.Engine
                     }
                     catch (Exception ex)
                     {
+                        Log.Error(ex, "Caught Exception during evaluation.");
+
                         SendExceptionInfo(ex);
 
                         throw;
@@ -269,9 +278,13 @@ namespace SicTransit.Woodpusher.Engine
         {
             var maximizing = board.ActiveColor.Is(Piece.White);
 
+            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+
             if (cancellationToken.IsCancellationRequested)
             {
-                return maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+                node.Status = NodeStatus.Cancelled;
+
+                return evaluation;
             }
 
             var moves = board.GetLegalMoves();
@@ -279,6 +292,7 @@ namespace SicTransit.Woodpusher.Engine
             if (!moves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
+
                 return board.IsChecked ? mateScore : Declarations.DrawScore;
             }
 
@@ -286,8 +300,6 @@ namespace SicTransit.Woodpusher.Engine
             {
                 return board.Score;
             }
-
-            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
             foreach (var move in moves)
             {
@@ -309,11 +321,11 @@ namespace SicTransit.Woodpusher.Engine
                 else
                 {
                     evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
-                    
+
                     UpdateHashTable(board.Hash, move, -evaluation);
 
                     if (evaluation < α)
-                    {                        
+                    {
                         break;
                     }
 
