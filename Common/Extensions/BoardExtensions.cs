@@ -49,6 +49,18 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
         public static ulong Perft(this IBoard board, int depth)
         {
+            ulong count = 0;
+
+            Parallel.ForEach(board.GetLegalMoves(), move =>
+            {
+                Interlocked.Add(ref count, board.Play(move).ParallelPerft(depth - 1));
+            });
+
+            return count;
+        }
+
+        private static ulong ParallelPerft(this IBoard board, int depth)
+        {
             if (depth <= 1)
             {
                 return 1;
@@ -58,7 +70,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             foreach (var move in board.GetLegalMoves())
             {
-                count += Perft(board.Play(move), depth - 1);
+                count += board.Play(move).ParallelPerft(depth - 1);
             }
 
             return count;

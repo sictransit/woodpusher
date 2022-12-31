@@ -3,6 +3,7 @@
     public enum NodeStatus
     {
         Waiting,
-        Running
+        Running,
+        Cancelled
     }
 }

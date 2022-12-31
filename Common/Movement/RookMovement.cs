@@ -29,10 +29,6 @@ namespace SicTransit.Woodpusher.Common.Movement
             {
                 yield return Enumerable.Range(0, square.File).Reverse().Select(f => new Move(piece, square.NewFile(f)));
             }
-
         }
     }
-
-
-
 }

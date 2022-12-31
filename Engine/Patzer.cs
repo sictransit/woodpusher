@@ -22,7 +22,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
-        private readonly IDictionary<ulong, PrincipalVariationNode> hashTable = new Dictionary<ulong, PrincipalVariationNode>();
+        private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new();
         private readonly Action<string>? infoCallback;
 
         public Patzer(Action<string>? infoCallback = null)
@@ -82,9 +82,18 @@ namespace SicTransit.Woodpusher.Engine
 
             Parallel.ForEach(initialMoves, options, i =>
             {
-                var nodes = i.board.Perft(depth);
+                ulong nodes = 0;
 
-                total += nodes;
+                if (depth > 1)
+                {
+                    nodes += i.board.Perft(depth);
+                }
+                else
+                {
+                    nodes = 1;
+                }
+
+                Interlocked.Add(ref total, nodes);
 
                 SendCallbackInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
             });
@@ -98,7 +107,7 @@ namespace SicTransit.Woodpusher.Engine
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
-                Log.Information($"thinking time: {timeLimit}");
+                Log.Debug($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
                 if (!cancellationTokenSource.IsCancellationRequested && !Debugger.IsAttached)
                 {
@@ -119,30 +128,37 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Information($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
+            Log.Debug($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
 
             var cancellationToken = cancellationTokenSource.Token;
 
-            while (!cancellationTokenSource.IsCancellationRequested && nodes.Count > 1)
+            while (!cancellationTokenSource.IsCancellationRequested)
             {
                 if (nodes.Any(n => n.MateIn > 0))
                 {
                     break;
                 }
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue && n.Status == NodeStatus.Waiting).OrderByDescending(n => n.Board.Counters.Capture != Piece.None).ThenByDescending(n => n.Score);
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue);
 
-                var tasks = nodesToAnalyze.Select(node => Task.Run(() =>
+                if (nodesToAnalyze.Count() <= 1)
+                {
+                    break;
+                }
+
+                var waitingNodes = nodesToAnalyze.Where(n => n.Status == NodeStatus.Waiting).OrderByDescending(n => n.AbsoluteScore);
+
+                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount).Select(node => Task.Run(() =>
                 {
                     try
                     {
                         node.Status = NodeStatus.Running;
 
-                        var score = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
+                        var evaluation = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
-                        if (!cancellationToken.IsCancellationRequested)
+                        if (node.Status != NodeStatus.Cancelled)
                         {
-                            node.Score = score;
+                            node.Score = evaluation;
 
                             var principalVariation = FindPrincipalVariation(Board, node).ToArray();
                             node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
@@ -165,14 +181,14 @@ namespace SicTransit.Woodpusher.Engine
                     }
                     catch (Exception ex)
                     {
+                        Log.Error(ex, "Caught Exception during evaluation.");
+
                         SendExceptionInfo(ex);
 
                         throw;
                     }
 
-                })).ToArray();
-
-                Task.WaitAny(tasks);
+                })).ToArray());
             }
 
 
@@ -258,21 +274,25 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
         }
 
-        private int EvaluateBoard(IBoard board, Node node, int depth, int alpha, int beta, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken)
         {
             var maximizing = board.ActiveColor.Is(Piece.White);
 
+            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+
             if (cancellationToken.IsCancellationRequested)
             {
-                return maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+                node.Status = NodeStatus.Cancelled;
+
+                return evaluation;
             }
 
             var moves = board.GetLegalMoves();
 
-            // ReSharper disable once PossibleMultipleEnumeration
             if (!moves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
+
                 return board.IsChecked ? mateScore : Declarations.DrawScore;
             }
 
@@ -281,65 +301,54 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            if (hashTable.TryGetValue(board.Hash, out var pvNode))
-            {
-                moves = moves.OrderByDescending(m => m.Equals(pvNode.Move));
-            }
-
-            // ReSharper disable once PossibleMultipleEnumeration
             foreach (var move in moves)
             {
                 node.Count++;
 
-                var score = EvaluateBoard(board.Play(move), node, depth + 1, alpha, beta, cancellationToken);
-
                 if (maximizing)
                 {
-                    if (score >= beta)
+                    evaluation = Math.Max(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+
+                    UpdateHashTable(board.Hash, move, evaluation);
+
+                    if (evaluation > β)
                     {
-                        return beta;
+                        break;
                     }
 
-                    if (score > alpha)
-                    {
-                        UpdateHashTable(board.Hash, move, score);
-                        alpha = score;
-                    }
+                    α = Math.Max(α, evaluation);
                 }
                 else
                 {
-                    if (score <= alpha)
+                    evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+
+                    UpdateHashTable(board.Hash, move, -evaluation);
+
+                    if (evaluation < α)
                     {
-                        return alpha;
+                        break;
                     }
 
-                    if (score < beta)
-                    {
-                        UpdateHashTable(board.Hash, move, -score);
-                        beta = score;
-                    }
+                    β = Math.Min(β, evaluation);
                 }
             }
 
-            return maximizing ? alpha : beta;
+            return evaluation;
         }
 
         private void UpdateHashTable(ulong hash, Move move, int score)
         {
-            lock (hashTable)
+            if (hashTable.TryGetValue(hash, out var pvNode))
             {
-                if (hashTable.TryGetValue(hash, out var pvNode))
+                if (score > pvNode.Score)
                 {
-                    if (score > pvNode.Score)
-                    {
-                        pvNode.Move = move;
-                        pvNode.Score = score;
-                    }
+                    pvNode.Move = move;
+                    pvNode.Score = score;
                 }
-                else
-                {
-                    hashTable.Add(hash, new PrincipalVariationNode(move, score));
-                }
+            }
+            else
+            {
+                hashTable.TryAdd(hash, new PrincipalVariationNode(move, score));
             }
         }
 

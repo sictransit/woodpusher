@@ -8,6 +8,7 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -67,7 +68,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void FindMateInOneTest()
         {
-            var patzer = new Patzer();
+            void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
+
             patzer.Position("k7/8/1QP5/8/8/8/8/7K w - - 0 1");
 
             var bestMove = patzer.FindBestMove();
@@ -104,7 +111,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void FindMateInThreeTest()
         {
-            var patzer = new Patzer();
+            void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
 
             patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38");
 
@@ -196,7 +208,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var patzer = new Patzer(Callback);
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
-            var move = patzer.FindBestMove(5000);
+            var move = patzer.FindBestMove(10000);
 
             Assert.IsNotNull(move);
 
@@ -308,6 +320,44 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 engine.Perft(depth);
 
                 Assert.IsTrue(success);
+            }
+        }
+
+        [TestMethod]
+        [Ignore("Not finished and will run for a long time anyway.")]
+        public void StrategicTestSuiteTest()
+        {
+            var epdLines = new List<string>();
+            foreach (var epdFile in new DirectoryInfo("resources/sts").EnumerateFiles("*.epd"))
+            {
+                epdLines.AddRange(File.ReadAllLines(epdFile.FullName));
+            }
+
+            var epdRegex = new Regex(@"(.+)\sbm\s(.+?);");
+
+            IEngine engine = new Patzer();
+
+            foreach (var epdLine in epdLines)
+            {
+                var match = epdRegex.Match(epdLine);
+
+                if (match.Success)
+                {
+                    var fen = match.Groups[1].Value;
+                    var epdBestMove = match.Groups[2].Value;
+
+                    engine.Position(fen);
+
+                    var engineBestMove = engine.FindBestMove();
+
+                    // TODO: Check suggested best move against engine move.
+
+                    Log.Information($"FEN: {fen}; BM: {epdBestMove}; ENGINE: {engineBestMove.Move.Notation}");
+                }
+                else
+                {
+                    Assert.Fail($"Unable to parse: {epdLine}");
+                }
             }
         }
     }

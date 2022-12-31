@@ -33,7 +33,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             using var httpClient = new HttpClient();
             foreach (var file in new[] { "a", "b", "c", "d", "e" })
             {
-                var url = $"https://raw.githubusercontent.com/lichess-org/chess-openings/master/dist/{file}.tsv";
+                var url = $"https://raw.githubusercontent.com/lichess-org/chess-openings/master/{file}.tsv";                
 
                 using var textStream = httpClient.GetStreamAsync(url).Result;
 

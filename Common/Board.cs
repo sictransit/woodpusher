@@ -49,16 +49,14 @@ namespace SicTransit.Woodpusher.Common
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    switch (piece.GetPieceType())
+                    if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
                     {
-                        case Piece.Pawn:
-                            if (IsPassedPawn(piece))
-                            {
-                                evaluation *= 2;
-                            }
-                            break;
-                        default:
-                            break;
+                        evaluation *= 2;
+                    }
+
+                    if (IsBlocked(piece))
+                    {
+                        evaluation = evaluation * phase / 24;
                     }
 
                     score += piece.Is(Piece.White) ? evaluation : -evaluation;
@@ -316,9 +314,16 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
+        private bool IsBlocked(Piece piece)
+        {
+            var blockedMask = internals.Moves.GetBlockedMask(piece);
+
+            return (blockedMask & GetBitboard(ActiveColor).All) == blockedMask;
+        }
+
         public IEnumerable<Move> GetLegalMoves()
         {
-            foreach (var piece in GetPieces(ActiveColor))
+            foreach (var piece in GetPieces(ActiveColor).Where(p => !IsBlocked(p)))
             {
                 foreach (var move in GetLegalMoves(piece))
                 {
@@ -349,7 +354,10 @@ namespace SicTransit.Woodpusher.Common
                         break;
                     }
 
-                    if (IsMovingIntoCheck(move))
+                    var testBoard = Play(move);
+
+                    // Moving into check?
+                    if (testBoard.IsAttacked(testBoard.FindKing(ActiveColor)))
                     {
                         if (hostileTarget != Piece.None)
                         {
@@ -419,13 +427,6 @@ namespace SicTransit.Woodpusher.Common
             }
 
             return true;
-        }
-
-        private bool IsMovingIntoCheck(Move move)
-        {
-            var testBoard = Play(move);
-
-            return testBoard.IsAttacked(testBoard.FindKing(ActiveColor));
         }
 
         public bool IsChecked => IsAttacked(FindKing(ActiveColor));
