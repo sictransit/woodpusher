@@ -7,6 +7,7 @@ using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
@@ -28,37 +29,41 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             var root = new DirectoryInfo(@"C:\Users\micke\OneDrive\Documents\Chess Games");            
 
-            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
+            foreach (var zipFiles in root.EnumerateFiles("*.zip", SearchOption.AllDirectories).Chunk(Environment.ProcessorCount))
             {
-                var games = new List<PortableGameNotation>();
+                var games = new ConcurrentBag<PortableGameNotation>();
 
-                Trace.WriteLine(zipFile.FullName);
-                using ZipArchive zipArchive = ZipFile.OpenRead(zipFile.FullName);
-                foreach (ZipArchiveEntry zipEntry in zipArchive.Entries)
+                Parallel.ForEach(zipFiles, zipFile =>
                 {
-                    Trace.WriteLine(zipEntry.Name);
-                    
-                    using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
+                    Trace.WriteLine($"Parsing PGN: {zipFile.FullName}");
 
-                    var sb = new StringBuilder();
+                    using ZipArchive zipArchive = ZipFile.OpenRead(zipFile.FullName);
 
-                    while (reader.ReadLine() is { } headerLine)
+                    foreach (ZipArchiveEntry zipEntry in zipArchive.Entries)
                     {
-                        if (headerLine.StartsWith("[Event"))
-                        {
-                            games.Add(PortableGameNotation.Parse(sb.ToString()));
+                        using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
 
-                            sb.Clear();
+                        var sb = new StringBuilder();
+
+                        while (reader.ReadLine() is { } headerLine)
+                        {
+                            if (headerLine.StartsWith("[Event"))
+                            {
+                                games.Add(PortableGameNotation.Parse(sb.ToString()));
+
+                                sb.Clear();
+                            }
+
+                            sb.AppendLine(headerLine);
                         }
 
-                        sb.AppendLine(headerLine);
+                        games.Add(PortableGameNotation.Parse(sb.ToString()));
                     }
 
-                    games.Add(PortableGameNotation.Parse(sb.ToString()));
-                }
+                });
 
-                Trace.WriteLine($"{games.Count} games");
-            }
+                Trace.WriteLine($"Total: {games.Count}");
+            }            
         }
 
         [Ignore("external content")]
