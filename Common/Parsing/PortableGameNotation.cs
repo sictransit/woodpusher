@@ -64,7 +64,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
         {
             tag = default;
 
-            Regex tagsRegex = new(@"\[\s*(.+?)\s*\""(.+)\""\s*\]");
+            Regex tagsRegex = new(@"\[\s*(.+?)\s*\""(.*?)\""\s*\]");
 
             var match = tagsRegex.Match(s);
 

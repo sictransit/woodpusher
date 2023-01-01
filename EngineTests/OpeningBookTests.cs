@@ -7,6 +7,9 @@ using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Diagnostics;
+using System.IO.Compression;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -18,6 +21,44 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void Initialize()
         {
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
+        }
+
+        [TestMethod]
+        public void GamesTest()
+        {
+            var root = new DirectoryInfo(@"C:\Users\micke\OneDrive\Documents\Chess Games");            
+
+            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
+            {
+                var games = new List<PortableGameNotation>();
+
+                Trace.WriteLine(zipFile.FullName);
+                using ZipArchive zipArchive = ZipFile.OpenRead(zipFile.FullName);
+                foreach (ZipArchiveEntry zipEntry in zipArchive.Entries)
+                {
+                    Trace.WriteLine(zipEntry.Name);
+                    
+                    using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
+
+                    var sb = new StringBuilder();
+
+                    while (reader.ReadLine() is { } headerLine)
+                    {
+                        if (headerLine.StartsWith("[Event"))
+                        {
+                            games.Add(PortableGameNotation.Parse(sb.ToString()));
+
+                            sb.Clear();
+                        }
+
+                        sb.AppendLine(headerLine);
+                    }
+
+                    games.Add(PortableGameNotation.Parse(sb.ToString()));
+                }
+
+                Trace.WriteLine($"{games.Count} games");
+            }
         }
 
         [Ignore("external content")]
