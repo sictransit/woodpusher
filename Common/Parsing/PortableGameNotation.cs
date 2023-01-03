@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
     {
         private static readonly Regex ResultRegex = new(@"(1\-0|0-1|1\/2.1\/2|\*)", RegexOptions.Compiled);
         private static readonly Regex MoveRegex = new(@"^[abcdefgh12345678RNBQKPO\-x=\?!]+$", RegexOptions.Compiled);
-        private static readonly Regex IndexRegex = new( @"\d+\.+", RegexOptions.Compiled );
+        private static readonly Regex IndexRegex = new(@"\d+\.+", RegexOptions.Compiled);
 
         public IDictionary<string, string> Tags { get; }
 
@@ -106,10 +106,10 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
 
         private static IEnumerable<PgnMove> ParseMoves(string s)
-        {   
+        {
             var movesPart = ResultRegex.Split(s);
 
-            var moves = IndexRegex.Split(movesPart[0]).Where(s=>!string.IsNullOrWhiteSpace(s));
+            var moves = IndexRegex.Split(movesPart[0]).Where(p => !string.IsNullOrWhiteSpace(p));
 
             foreach (var move in moves)
             {
@@ -123,9 +123,9 @@ namespace SicTransit.Woodpusher.Common.Parsing
                     }
                     else
                     {
-                        throw new PgnParsingException(s, $"Failed to parse ply: {ply}");                        
+                        throw new PgnParsingException(s, $"Failed to parse ply: {ply}");
                     }
-                }                
+                }
             }
         }
     }

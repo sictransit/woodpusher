@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
+using SicTransit.Woodpusher.Common.Parsing.Enum;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -27,43 +28,62 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void GamesTest()
         {
-            var root = new DirectoryInfo(@"C:\Users\micke\OneDrive\Documents\Chess Games");            
+            var root = new DirectoryInfo(@"C:\tmp\Chess Games");
 
-            foreach (var zipFiles in root.EnumerateFiles("*.zip", SearchOption.AllDirectories).Chunk(Environment.ProcessorCount))
+            var engine = new Patzer();
+            var openingBook = new OpeningBook(true);
+
+            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
             {
-                var games = new ConcurrentBag<PortableGameNotation>();
+                var games = new List<PortableGameNotation>();
 
-                Parallel.ForEach(zipFiles, zipFile =>
+                Trace.WriteLine($"Parsing PGN: {zipFile.FullName}");
+
+                using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
+
+                foreach (var zipEntry in zipArchive.Entries)
                 {
-                    Trace.WriteLine($"Parsing PGN: {zipFile.FullName}");
+                    using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
 
-                    using ZipArchive zipArchive = ZipFile.OpenRead(zipFile.FullName);
+                    var sb = new StringBuilder();
 
-                    foreach (ZipArchiveEntry zipEntry in zipArchive.Entries)
+                    while (reader.ReadLine() is { } headerLine)
                     {
-                        using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
-
-                        var sb = new StringBuilder();
-
-                        while (reader.ReadLine() is { } headerLine)
+                        if (headerLine.StartsWith("[Event"))
                         {
-                            if (headerLine.StartsWith("[Event"))
-                            {
-                                games.Add(PortableGameNotation.Parse(sb.ToString()));
+                            games.Add(PortableGameNotation.Parse(sb.ToString()));
 
-                                sb.Clear();
-                            }
-
-                            sb.AppendLine(headerLine);
+                            sb.Clear();
                         }
 
-                        games.Add(PortableGameNotation.Parse(sb.ToString()));
+                        sb.AppendLine(headerLine);
                     }
 
-                });
+                    games.Add(PortableGameNotation.Parse(sb.ToString()));
+                }
 
                 Trace.WriteLine($"Total: {games.Count}");
-            }            
+
+                foreach (var game in games.Where(g=>g.PgnMoves.Any() && g.Result != Result.Ongoing))
+                {
+                    engine.Initialize();
+
+                    foreach (var pgnMove in game.PgnMoves)
+                    {
+                        var move = pgnMove.GetMove(engine);
+
+                        var hash = engine.Board.Hash;
+
+                        engine.Play(move);
+
+                        openingBook.AddMove(hash, move);
+                    }
+                }
+            }
+
+            openingBook.SaveToFile("games.json");
+            openingBook.LoadFromFile("games.json");
+
         }
 
         [Ignore("external content")]
@@ -79,7 +99,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             using var httpClient = new HttpClient();
             foreach (var file in new[] { "a", "b", "c", "d", "e" })
             {
-                var url = $"https://raw.githubusercontent.com/lichess-org/chess-openings/master/{file}.tsv";                
+                var url = $"https://raw.githubusercontent.com/lichess-org/chess-openings/master/{file}.tsv";
 
                 using var textStream = httpClient.GetStreamAsync(url).Result;
 
