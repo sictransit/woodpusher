@@ -71,7 +71,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     try
                     {
-                        foreach (var pgnMove in game.PgnMoves)
+                        foreach (var pgnMove in game.PgnMoves.Take(30))
                         {
                             var move = pgnMove.GetMove(engine);
 

@@ -42,7 +42,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 }
             }
 
-            throw new PgnParsingException(Raw, "unable to a legal move to match");
+            throw new PgnParsingException(Raw, "unable to match a legal move");
         }
     }
 }
