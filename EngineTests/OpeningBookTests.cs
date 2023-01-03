@@ -13,6 +13,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
+using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -68,22 +69,28 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 {
                     engine.Initialize();
 
-                    foreach (var pgnMove in game.PgnMoves)
+                    try
                     {
-                        var move = pgnMove.GetMove(engine);
+                        foreach (var pgnMove in game.PgnMoves)
+                        {
+                            var move = pgnMove.GetMove(engine);
 
-                        var hash = engine.Board.Hash;
+                            var hash = engine.Board.Hash;
 
-                        engine.Play(move);
+                            engine.Play(move);
 
-                        openingBook.AddMove(hash, move);
+                            openingBook.AddMove(hash, move);
+                        }
+                    }
+                    catch (PgnParsingException e)
+                    {
+                        Log.Error(e, game.Source);
                     }
                 }
             }
 
             openingBook.SaveToFile("games.json");
             openingBook.LoadFromFile("games.json");
-
         }
 
         [Ignore("external content")]

@@ -20,19 +20,21 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
         public Result Result { get; private set; }
 
+        public string Source { get; }
 
-        private PortableGameNotation()
+        private PortableGameNotation(string source)
         {
             Tags = new Dictionary<string, string>();
             PgnMoves = new List<PgnMove>();
             Result = Result.Ongoing;
+            Source = source;
         }
 
         public static PortableGameNotation Parse(string s)
         {
             Log.Debug($"Parsing PGN:\n{s}");
 
-            var pgn = new PortableGameNotation();
+            var pgn = new PortableGameNotation(s);
 
             var sb = new StringBuilder();
 
