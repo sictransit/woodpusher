@@ -38,7 +38,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             {
                 var games = new List<PortableGameNotation>();
 
-                Trace.WriteLine($"Parsing PGN: {zipFile.FullName}");
+                Log.Information($"Parsing PGN: {zipFile.FullName}");
 
                 using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
 
@@ -63,7 +63,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     games.Add(PortableGameNotation.Parse(sb.ToString()));
                 }
 
-                Trace.WriteLine($"Total: {games.Count}");
+                Log.Information($"Total: {games.Count}");
 
                 foreach (var game in games.Where(g=>g.PgnMoves.Any() && g.Result != Result.Ongoing))
                 {
