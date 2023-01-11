@@ -29,12 +29,32 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void GamesTest()
         {
+            Func<int?, int?, bool> eloPredicate = (w, b) =>
+            {
+                if (!w.HasValue || !b.HasValue)
+                {
+                    return false;
+                }
+
+                if ((w + b) / 2 < 2000)
+                {
+                    return false;
+                }
+
+                if (Math.Abs(w.Value - b.Value) > 500)
+                {
+                    return false;
+                }
+
+                return true;
+            };
+
             var root = new DirectoryInfo(@"C:\tmp\Chess Games");
 
             var engine = new Patzer();
             var openingBook = new OpeningBook(true);
 
-            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
+            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories).Take(5))
             {
                 var games = new List<PortableGameNotation>();
 
@@ -65,7 +85,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Log.Information($"Total: {games.Count}");
 
-                foreach (var game in games.Where(g=>g.PgnMoves.Any() && g.Result != Result.Ongoing))
+                foreach (var game in games.Where(g=>g.PgnMoves.Any() && g.Result != Result.Ongoing && eloPredicate(g.WhiteElo, g.BlackElo)))
                 {
                     engine.Initialize();
 

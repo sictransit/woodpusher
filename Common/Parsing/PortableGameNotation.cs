@@ -5,6 +5,8 @@ using SicTransit.Woodpusher.Common.Parsing.Extensions;
 using SicTransit.Woodpusher.Common.Parsing.Moves;
 using System.Text;
 using System.Text.RegularExpressions;
+using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Parsing
 {
@@ -21,6 +23,17 @@ namespace SicTransit.Woodpusher.Common.Parsing
         public Result Result { get; private set; }
 
         public string Source { get; }
+
+        public int? WhiteElo => GetElo(Piece.White);
+
+        public int? BlackElo => GetElo(Piece.None);
+
+        private int? GetElo(Piece color)
+        {
+            var key = color.Is(Piece.White) ? "WhiteElo" : "BlackElo";
+
+            return Tags.TryGetValue(key, out var value) && int.TryParse(value, out var elo) ? elo : null;
+        }
 
         private PortableGameNotation(string source)
         {
