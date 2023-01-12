@@ -26,6 +26,6 @@ namespace SicTransit.Woodpusher.Model
             Capture = capture;
         }
 
-        public static Counters Default => new(Piece.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, 0, 0, 0, Piece.None);
+        public static Counters Default => new(Piece.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, 0, 0, 1, Piece.None);
     }
 }

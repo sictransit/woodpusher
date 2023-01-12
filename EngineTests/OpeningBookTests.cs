@@ -49,7 +49,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 return true;
             };
 
-            var root = new DirectoryInfo(@"C:\tmp\Chess Games");
+            var root = new DirectoryInfo(@"C:\Users\micke\OneDrive\Documents\Chess Games");
 
             var engine = new Patzer();
             var openingBook = new OpeningBook(true);
