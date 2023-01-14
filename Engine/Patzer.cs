@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
@@ -64,11 +63,18 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in moves)
             {
-                var move = legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+                var move = legalMoves.Where(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation)).FirstOrDefault();
 
-                Log.Information($"Found opening book move: {move}");
+                if (move != null)
+                {
+                    Log.Information($"Found opening book move: {move}");
 
-                yield return move;
+                    yield return move;
+                }
+                else
+                {
+                    Log.Warning($"Found illegal move in opening book. Hash collision?");
+                }
             }
         }
 

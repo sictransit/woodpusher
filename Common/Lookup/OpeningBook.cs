@@ -31,7 +31,15 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                book = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, uint>>>(File.ReadAllText(filename))!;
+                var loadedBook = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, uint>>>(File.ReadAllText(filename))!;
+
+                foreach (var hash in loadedBook)
+                {
+                    foreach (var move in hash.Value)
+                    {
+                        AddMove(hash.Key, move.Key, move.Value);
+                    }
+                }
             }
         }
 
@@ -44,37 +52,37 @@ namespace SicTransit.Woodpusher.Common.Lookup
             File.WriteAllText(filename, json);
         }
 
-        public void AddMove(ulong hash, Move move)
+        public void AddMove(ulong hash, string move, uint count = 1)
         {
-            var key = move.ToAlgebraicMoveNotation();
-
             if (book.TryGetValue(hash, out var moves))
             {
-                if (moves.ContainsKey(key))
+                if (moves.ContainsKey(move))
                 {
-                    moves[key]++;
+                    moves[move] += count;
                 }
                 else
                 {
-                    moves.Add(key, 1);
-                }                
+                    moves.Add(move, count);
+                }
             }
             else
             {
                 var moveEntry = new Dictionary<string, uint>
                 {
-                    { key, 1 }
+                    { move, count }
                 };
 
                 book.Add(hash, moveEntry);
             }
         }
 
+        public void AddMove(ulong hash, Move move) => AddMove(hash, move.ToAlgebraicMoveNotation());
+
         public IEnumerable<AlgebraicMove> GetMoves(ulong hash)
         {
             if (book.TryGetValue(hash, out var moves))
             {
-                return moves.OrderByDescending(m => m.Value).Select(m=>AlgebraicMove.Parse(m.Key));
+                return moves.OrderByDescending(m => m.Value).Select(m => AlgebraicMove.Parse(m.Key));
             }
 
             return Enumerable.Empty<AlgebraicMove>();

@@ -3,10 +3,10 @@ using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Common.Parsing.Extensions;
 using SicTransit.Woodpusher.Common.Parsing.Moves;
-using System.Text;
-using System.Text.RegularExpressions;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Common.Parsing
 {

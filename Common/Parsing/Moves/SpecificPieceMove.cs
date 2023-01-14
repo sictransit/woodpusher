@@ -9,8 +9,8 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
     public class SpecificPieceMove : PgnMove
     {
         private readonly Piece pieceType;
-        private readonly Square position; 
-        private readonly Square square;        
+        private readonly Square position;
+        private readonly Square square;
         private readonly Piece promotionType;
 
         public SpecificPieceMove(Piece pieceType, Square position, Square square, Piece promotionType)

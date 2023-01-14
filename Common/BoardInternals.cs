@@ -41,7 +41,7 @@ namespace SicTransit.Woodpusher.Common
         {
             Attacks = new Attacks();
             Scoring = new Scoring();
-            Moves = new Moves();            
+            Moves = new Moves();
             Zobrist = new Zobrist();
         }
     }
