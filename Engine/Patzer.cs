@@ -3,6 +3,7 @@ using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Engine.Enums;
 using SicTransit.Woodpusher.Model;
@@ -24,6 +25,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
         private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new();
+        private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
         public Patzer(Action<string>? infoCallback = null)
@@ -47,6 +49,27 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"{color} plays: {move}");
 
             Board = Board.Play(move);
+        }
+
+        private IEnumerable<Move> GetOpeningBookMoves()
+        {
+            var moves = openingBook.GetMoves(Board.Hash).Take(1);
+
+            if (!moves.Any())
+            {
+                yield break;
+            }
+
+            var legalMoves = Board.GetLegalMoves().ToArray();
+
+            foreach (var algebraicMove in moves)
+            {
+                var move = legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+
+                Log.Information($"Found opening book move: {move}");
+
+                yield return move;
+            }
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -119,7 +142,7 @@ namespace SicTransit.Woodpusher.Engine
             stopwatch.Restart();
             hashTable.Clear();
 
-            var openingMoves = Board.GetOpeningBookMoves().ToArray();
+            var openingMoves = GetOpeningBookMoves().ToArray();
 
             var nodes = new ConcurrentBag<Node>((openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(Board, m)));
 

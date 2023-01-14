@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var engine = new Patzer();
             var openingBook = new OpeningBook(true);
 
-            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories).Take(5))
+            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
             {
                 var games = new List<PortableGameNotation>();
 
@@ -86,7 +86,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Log.Information($"Total: {games.Count}");
 
-                foreach (var game in games.Where(g=>g.PgnMoves.Any() && g.Result != Result.Ongoing && eloPredicate(g.WhiteElo, g.BlackElo)))
+                foreach (var game in games.Where(g=>g.PgnMoves.Any() && g.Result != Result.Ongoing && eloPredicate(g.WhiteElo, g.BlackElo)).OrderByDescending(g=>g.WhiteElo+g.BlackElo).Take(100))
                 {
                     engine.Initialize();
 

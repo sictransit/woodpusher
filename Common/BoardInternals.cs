@@ -35,16 +35,13 @@ namespace SicTransit.Woodpusher.Common
 
         public Moves Moves { get; }
 
-        public OpeningBook OpeningBook { get; }
-
         public Zobrist Zobrist { get; }
 
         public BoardInternals()
         {
             Attacks = new Attacks();
             Scoring = new Scoring();
-            Moves = new Moves();
-            OpeningBook = new OpeningBook();
+            Moves = new Moves();            
             Zobrist = new Zobrist();
         }
     }

@@ -74,27 +74,6 @@ namespace SicTransit.Woodpusher.Common
             }
         }
 
-        public IEnumerable<Move> GetOpeningBookMoves()
-        {
-            var moves = internals.OpeningBook.GetMoves(Hash);
-
-            if (!moves.Any())
-            {
-                yield break;
-            }
-
-            var legalMoves = GetLegalMoves().ToArray();
-
-            foreach (var algebraicMove in moves)
-            {
-                var move = legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
-
-                Log.Information($"Found opening book move: {move}");
-
-                yield return move;
-            }
-        }
-
         public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
         public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)

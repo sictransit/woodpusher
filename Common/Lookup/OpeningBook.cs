@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         // Credit: https://github.com/lichess-org/chess-openings
 
-        private Dictionary<ulong, HashSet<string>> book = new();
+        private Dictionary<ulong, Dictionary<string, uint>> book = new();
 
         private static readonly string BookFilename = Path.Combine(@"Resources\eco.json");
 
@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                book = JsonConvert.DeserializeObject<Dictionary<ulong, HashSet<string>>>(File.ReadAllText(filename))!;
+                book = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, uint>>>(File.ReadAllText(filename))!;
             }
         }
 
@@ -46,19 +46,38 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void AddMove(ulong hash, Move move)
         {
+            var key = move.ToAlgebraicMoveNotation();
+
             if (book.TryGetValue(hash, out var moves))
             {
-                moves.Add(move.ToAlgebraicMoveNotation());
+                if (moves.ContainsKey(key))
+                {
+                    moves[key]++;
+                }
+                else
+                {
+                    moves.Add(key, 1);
+                }                
             }
             else
             {
-                book.Add(hash, new HashSet<string> { move.ToAlgebraicMoveNotation() });
+                var moveEntry = new Dictionary<string, uint>
+                {
+                    { key, 1 }
+                };
+
+                book.Add(hash, moveEntry);
             }
         }
 
         public IEnumerable<AlgebraicMove> GetMoves(ulong hash)
         {
-            return book.TryGetValue(hash, out var moves) ? moves.Select(AlgebraicMove.Parse) : Enumerable.Empty<AlgebraicMove>();
+            if (book.TryGetValue(hash, out var moves))
+            {
+                return moves.OrderByDescending(m => m.Value).Select(m=>AlgebraicMove.Parse(m.Key));
+            }
+
+            return Enumerable.Empty<AlgebraicMove>();
         }
     }
 }
