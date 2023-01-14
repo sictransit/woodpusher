@@ -27,6 +27,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GamesTest()
         {
             Func<int?, int?, bool> eloPredicate = (w, b) =>

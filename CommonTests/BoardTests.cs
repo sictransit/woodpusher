@@ -21,6 +21,15 @@ namespace SicTransit.Woodpusher.Common.Tests
         }
 
         [TestMethod]
+        public void StartingPositionTest()
+        {
+            var b0 = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var b1 = Board.StartingPosition();
+
+            Assert.AreEqual(b0.Hash, b1.Hash);
+        }
+
+        [TestMethod]
         public void BoardTest()
         {
             IBoard board = new Board();
@@ -117,7 +126,7 @@ namespace SicTransit.Woodpusher.Common.Tests
             var board = new Board().SetPiece(whiteBishop.SetSquare(c1)).SetPiece(blackPawn.SetSquare(g7));
 
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
-            Assert.AreEqual(0, board.Counters.FullmoveNumber);
+            Assert.AreEqual(1, board.Counters.FullmoveNumber);
             Assert.AreEqual(Piece.White, board.Counters.ActiveColor);
             Assert.AreEqual(0ul, board.Counters.EnPassantTarget);
 
@@ -128,7 +137,7 @@ namespace SicTransit.Woodpusher.Common.Tests
             board = board.Play(new(whiteBishop.SetSquare(c1), d2));
             Assert.AreEqual(Piece.None, board.Counters.ActiveColor);
             Assert.AreEqual(1, board.Counters.HalfmoveClock);
-            Assert.AreEqual(0, board.Counters.FullmoveNumber);
+            Assert.AreEqual(1, board.Counters.FullmoveNumber);
 
             Trace.WriteLine(board.PrettyPrint());
 
@@ -138,14 +147,14 @@ namespace SicTransit.Woodpusher.Common.Tests
             Assert.AreEqual(Piece.White, board.Counters.ActiveColor);
             Assert.AreEqual(new Square("g6").ToMask(), board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
-            Assert.AreEqual(1, board.Counters.FullmoveNumber);
+            Assert.AreEqual(2, board.Counters.FullmoveNumber);
 
             Trace.WriteLine(board.PrettyPrint());
 
             board = board.Play(new(whiteBishop.SetSquare(d2), g5));
             Assert.AreEqual(0ul, board.Counters.EnPassantTarget);
             Assert.AreEqual(0, board.Counters.HalfmoveClock);
-            Assert.AreEqual(1, board.Counters.FullmoveNumber);
+            Assert.AreEqual(2, board.Counters.FullmoveNumber);
 
             Trace.WriteLine(board.PrettyPrint());
 
@@ -174,9 +183,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void MovesFromStartingPieceTest()
         {
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-
-            var moves = board.GetLegalMoves().ToArray();
+            var moves = Board.StartingPosition().GetLegalMoves().ToArray();
 
             Assert.AreEqual(20, moves.Length);
             Assert.AreEqual(16, moves.Count(p => p.Piece.Is(Piece.Pawn)));
@@ -397,9 +404,7 @@ g1f3: 147678554
 g1h3: 120669525
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 7));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 7));
         }
 
         [TestMethod]
@@ -428,9 +433,7 @@ g1f3: 5723523
 g1h3: 4877234
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 6));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 6));
         }
 
         [TestMethod]
@@ -459,9 +462,7 @@ g1f3: 233491
 g1h3: 198502
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 5));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 5));
         }
 
         [TestMethod]
@@ -490,9 +491,7 @@ g1f3: 9748
 g1h3: 8881
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 4));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 4));
         }
 
         [TestMethod]
@@ -521,7 +520,7 @@ g8f6: 460
 g8h6: 418
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = Board.StartingPosition();
 
             var move = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
 
@@ -555,7 +554,7 @@ d1b3: 27
 d1a4: 6
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = Board.StartingPosition();
 
             var c2c3 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
             board = board.Play(c2c3);
@@ -578,7 +577,7 @@ c8d7: 1
 d8d7: 1
 ";
 
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = Board.StartingPosition();
 
             var c2c3 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
             board = board.Play(c2c3);

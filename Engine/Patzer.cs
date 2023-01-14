@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
@@ -27,13 +28,13 @@ namespace SicTransit.Woodpusher.Engine
 
         public Patzer(Action<string>? infoCallback = null)
         {
-            Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            Board = Common.Board.StartingPosition();
             this.infoCallback = infoCallback;
         }
 
         public void Initialize()
         {
-            Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            Board = Common.Board.StartingPosition();
             repetitions.Clear();
         }
 

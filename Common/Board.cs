@@ -35,6 +35,14 @@ namespace SicTransit.Woodpusher.Common
         {
         }
 
+        public static IBoard StartingPosition()
+        {
+            var white = new Bitboard(Piece.White, 65280, 129, 66, 36, 8, 16);
+            var black = new Bitboard(Piece.None, 71776119061217280, 9295429630892703744, 4755801206503243776, 2594073385365405696, 576460752303423488, 1152921504606846976);
+
+            return new Board(white, black, Counters.Default);
+        }
+
         public ulong Hash { get; }
 
         public int Score
