@@ -97,13 +97,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     var openingBook = new OpeningBook(true);
                     var engine = new Patzer();
 
-                    foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result != Result.Ongoing && eloPredicate(g.WhiteElo, g.BlackElo)).OrderByDescending(g => g.WhiteElo + g.BlackElo).Take(10))
+                    foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result != Result.Ongoing && eloPredicate(g.WhiteElo, g.BlackElo)).OrderByDescending(g => g.WhiteElo + g.BlackElo).Take(1000))
                     {
                         engine.Initialize();
 
                         try
                         {
-                            foreach (var pgnMove in game.PgnMoves.Take(30))
+                            foreach (var pgnMove in game.PgnMoves.Take(40))
                             {
                                 var move = pgnMove.GetMove(engine);
 
@@ -131,7 +131,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 newOpeningBook.LoadFromFile(jsonFile.FullName);
             }
 
-            newOpeningBook.SaveToFile("eco.json");
+            newOpeningBook.SaveToFile("openings.json");
         }
 
         [Ignore("external content")]
@@ -196,8 +196,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Log.Information($"Longest opening: {longest}");
 
-            openingBook.SaveToFile("test.json");
-            openingBook.LoadFromFile("test.json");
+            openingBook.SaveToFile("openings.json");
+            openingBook.LoadFromFile("openings.json");
 
             Assert.IsFalse(openingBook.GetMoves(ulong.MinValue).Any());
             Assert.IsFalse(openingBook.GetMoves(ulong.MaxValue).Any());
@@ -205,8 +205,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
             var moves = openingBook.GetMoves(11121976597367932187).ToArray(); // starting position           
 
             Assert.AreEqual(20, moves.Length);
-            Assert.IsTrue(moves.Any(m => m.Notation.Equals("g1h3")));
-            Assert.IsTrue(moves.Any(m => m.Notation.Equals("d2d4")));
+            Assert.IsTrue(moves.Any(m => m.Move.Notation.Equals("g1h3")));
+            Assert.IsTrue(moves.Any(m => m.Move.Notation.Equals("d2d4")));
         }
 
 
@@ -226,7 +226,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             {
                 var algebraicMove = AlgebraicMove.Parse(notation);
 
-                var suggestedMove = book.GetMoves(engine.Board.Hash).SingleOrDefault(m => m.Equals(algebraicMove));
+                var suggestedMove = book.GetMoves(engine.Board.Hash).SingleOrDefault(m => m.Move.Equals(algebraicMove));
 
                 Assert.IsNotNull(suggestedMove);
 
@@ -265,7 +265,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 var suggestedMoves = book.GetMoves(hash);
 
-                Assert.IsTrue(suggestedMoves.Any(m => m.Equals(algebraicMove)));
+                Assert.IsTrue(suggestedMoves.Any(m => m.Move.Equals(algebraicMove)));
 
                 var move = engine.Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
 

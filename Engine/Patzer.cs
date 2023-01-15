@@ -17,6 +17,8 @@ namespace SicTransit.Woodpusher.Engine
     {
         public IBoard Board { get; private set; }
 
+        private readonly Random random = new();
+
         private CancellationTokenSource cancellationTokenSource = new();
 
         private readonly Stopwatch stopwatch = new();
@@ -50,32 +52,36 @@ namespace SicTransit.Woodpusher.Engine
             Board = Board.Play(move);
         }
 
-        private IEnumerable<Move> GetOpeningBookMoves()
+        private Move? GetOpeningBookMove()
         {
-            var moves = openingBook.GetMoves(Board.Hash).Take(1);
-
-            if (!moves.Any())
-            {
-                yield break;
-            }
+            var openingBookMoves = openingBook.GetMoves(Board.Hash);
 
             var legalMoves = Board.GetLegalMoves().ToArray();
 
-            foreach (var algebraicMove in moves)
+            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(m => m.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
+
+            if (!legalOpeningBookMoves.Any())
             {
-                var move = legalMoves.Where(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation)).FirstOrDefault();
-
-                if (move != null)
-                {
-                    Log.Information($"Found opening book move: {move}");
-
-                    yield return move;
-                }
-                else
-                {
-                    Log.Warning($"Found illegal move in opening book. Hash collision?");
-                }
+                return null;
             }
+
+            var totalMoves = legalOpeningBookMoves.Sum(l => l.openingBookMove.Count);
+
+            // TODO: Does this work? All moves should have a fair chance to be returned. 
+
+            foreach (var potentialMove in legalOpeningBookMoves)
+            {
+                if (random.Next(totalMoves) < potentialMove.openingBookMove.Count)
+                {
+                    return potentialMove.legalMove;
+                }
+
+                totalMoves -= potentialMove.openingBookMove.Count;
+            }
+
+            Log.Warning("We shouldn't end up here. If there are legal moves, one of them should be returned.");
+
+            return null;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -148,9 +154,9 @@ namespace SicTransit.Woodpusher.Engine
             stopwatch.Restart();
             hashTable.Clear();
 
-            var openingMoves = GetOpeningBookMoves().ToArray();
+            var openingMove = GetOpeningBookMove();
 
-            var nodes = new ConcurrentBag<Node>((openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(Board, m)));
+            var nodes = new ConcurrentBag<Node>((openingMove != null ? new[] { openingMove } : Board.GetLegalMoves()).Select(m => new Node(Board, m)));
 
             if (!nodes.Any())
             {
@@ -195,8 +201,8 @@ namespace SicTransit.Woodpusher.Engine
 
                             SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
 
-                            node.Status = NodeStatus.Waiting;
                             node.MaxDepth += 2;
+                            node.Status = NodeStatus.Waiting;
                         }
                         else
                         {
@@ -337,9 +343,14 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (maximizing)
                 {
-                    evaluation = Math.Max(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+                    var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
 
-                    UpdateHashTable(board.Hash, move, evaluation);
+                    if (score > evaluation)
+                    {
+                        evaluation = score;
+
+                        UpdateHashTable(board.Hash, move, evaluation);
+                    }
 
                     if (evaluation > β)
                     {
@@ -350,9 +361,14 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+                    var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
 
-                    UpdateHashTable(board.Hash, move, -evaluation);
+                    if (score < evaluation)
+                    {
+                        evaluation = score;
+
+                        UpdateHashTable(board.Hash, move, evaluation);
+                    }
 
                     if (evaluation < α)
                     {
