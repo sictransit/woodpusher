@@ -60,28 +60,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(m => m.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
-            if (!legalOpeningBookMoves.Any())
-            {
-                return null;
-            }
-
-            var totalMoves = legalOpeningBookMoves.Sum(l => l.openingBookMove.Count);
-
-            // TODO: Does this work? All moves should have a fair chance to be returned. 
-
-            foreach (var potentialMove in legalOpeningBookMoves)
-            {
-                if (random.Next(totalMoves) < potentialMove.openingBookMove.Count)
-                {
-                    return potentialMove.legalMove;
-                }
-
-                totalMoves -= potentialMove.openingBookMove.Count;
-            }
-
-            Log.Warning("We shouldn't end up here. If there are legal moves, one of them should be returned.");
-
-            return null;
+            return legalOpeningBookMoves.OrderByDescending(m => random.Next(m.openingBookMove.Count)).ThenByDescending(_ => random.NextDouble()).FirstOrDefault()?.legalMove;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
