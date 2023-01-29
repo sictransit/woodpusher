@@ -32,13 +32,13 @@ namespace SicTransit.Woodpusher.Engine
         public Patzer(Action<string>? infoCallback = null)
         {
             Board = Common.Board.StartingPosition();
-            
+
             this.infoCallback = infoCallback;
         }
 
         public void Initialize()
         {
-            Board = Common.Board.StartingPosition();                                    
+            Board = Common.Board.StartingPosition();
         }
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
@@ -118,8 +118,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public BestMove FindBestMove(int timeLimit = 1000)
         {
-            stopwatch.Restart(); 
-            
+            stopwatch.Restart();
+
             cancellationTokenSource = new CancellationTokenSource();
 
             ThreadPool.QueueUserWorkItem(_ =>
@@ -316,7 +316,7 @@ namespace SicTransit.Woodpusher.Engine
             else
             {
                 moves = board.GetLegalMoves();
-            }            
+            }
 
             if (!moves.Any())
             {
@@ -334,10 +334,10 @@ namespace SicTransit.Woodpusher.Engine
             {
                 node.Count++;
 
+                var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
+
                 if (maximizing)
                 {
-                    var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
-
                     if (score > evaluation)
                     {
                         evaluation = score;
@@ -354,8 +354,6 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
-
                     if (score < evaluation)
                     {
                         evaluation = score;
@@ -377,7 +375,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void UpdateHashTable(ulong hash, Move move)
         {
-            hashTable.AddOrUpdate(hash, move, (_,_) => move);
+            hashTable.AddOrUpdate(hash, move, (_, _) => move);
         }
 
         public void Stop()
