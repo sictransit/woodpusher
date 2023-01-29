@@ -607,6 +607,35 @@ d8d7: 1
             Assert.AreEqual(1, blackPassedPawns.Length);
         }
 
+        [TestMethod]
+        public void MoveEqualityTest()
+        {
+            var board = Board.StartingPosition();
+            var moves = board.GetLegalMoves().ToArray();
+
+            Assert.IsTrue(moves.Any());
+
+            foreach (var referenceMove in Board.StartingPosition().GetLegalMoves())
+            {
+                Assert.IsFalse(moves.Any(m => m.Equals(referenceMove)));
+            }
+
+            var e2Pawn = board.GetPieces().Single(p => p.GetSquare().ToAlgebraicNotation() == "e2");
+
+            var kingsPawn = board.Play(new Move(e2Pawn, new Square("e4")));
+
+            var d2Pawn = board.GetPieces().Single(p => p.GetSquare().ToAlgebraicNotation() == "d2");
+
+            var queensPawn = board.Play(new Move(e2Pawn, new Square("d4")));
+
+            var kingsLegalMoves = kingsPawn.GetLegalMoves().ToArray();
+
+            foreach (var referenceMove in queensPawn.GetLegalMoves())
+            {
+                Assert.IsTrue(kingsLegalMoves.Any(m => m.Equals(referenceMove)));
+            }
+        }
+
 
         private static bool PerftAndCompare(IBoard board, string expected, int depth)
         {
@@ -635,6 +664,8 @@ d8d7: 1
 
             return success;
         }
+
+        
 
     }
 }

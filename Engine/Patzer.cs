@@ -25,20 +25,20 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
-        private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new();
+        private readonly ConcurrentDictionary<ulong, Move> hashTable = new();
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
         public Patzer(Action<string>? infoCallback = null)
         {
             Board = Common.Board.StartingPosition();
+            
             this.infoCallback = infoCallback;
         }
 
         public void Initialize()
         {
-            Board = Common.Board.StartingPosition();
-            repetitions.Clear();
+            Board = Common.Board.StartingPosition();                                    
         }
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
@@ -118,6 +118,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public BestMove FindBestMove(int timeLimit = 1000)
         {
+            stopwatch.Restart(); 
+            
             cancellationTokenSource = new CancellationTokenSource();
 
             ThreadPool.QueueUserWorkItem(_ =>
@@ -130,8 +132,11 @@ namespace SicTransit.Woodpusher.Engine
                 }
             });
 
-            stopwatch.Restart();
-            hashTable.Clear();
+            if (Board.Counters.HalfmoveClock == 0)
+            {
+                repetitions.Clear();
+                hashTable.Clear();
+            }
 
             var openingMove = GetOpeningBookMove();
 
@@ -229,12 +234,12 @@ namespace SicTransit.Woodpusher.Engine
 
                 board = board.Play(move);
 
-                if (!hashTable.TryGetValue(board.Hash, out var pvNode))
+                if (!hashTable.TryGetValue(board.Hash, out var pvMove))
                 {
                     yield break;
                 }
 
-                move = pvNode.Move;
+                move = pvMove;
             }
         }
 
@@ -302,7 +307,16 @@ namespace SicTransit.Woodpusher.Engine
                 return evaluation;
             }
 
-            var moves = board.GetLegalMoves();
+            IEnumerable<Move> moves;
+
+            if (hashTable.TryGetValue(board.Hash, out var hashMove))
+            {
+                moves = board.GetLegalMoves().OrderByDescending(m => m.Equals(hashMove));
+            }
+            else
+            {
+                moves = board.GetLegalMoves();
+            }            
 
             if (!moves.Any())
             {
@@ -328,7 +342,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         evaluation = score;
 
-                        UpdateHashTable(board.Hash, move, evaluation);
+                        UpdateHashTable(board.Hash, move);
                     }
 
                     if (evaluation > β)
@@ -346,7 +360,7 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         evaluation = score;
 
-                        UpdateHashTable(board.Hash, move, evaluation);
+                        UpdateHashTable(board.Hash, move);
                     }
 
                     if (evaluation < α)
@@ -361,20 +375,9 @@ namespace SicTransit.Woodpusher.Engine
             return evaluation;
         }
 
-        private void UpdateHashTable(ulong hash, Move move, int score)
+        private void UpdateHashTable(ulong hash, Move move)
         {
-            if (hashTable.TryGetValue(hash, out var pvNode))
-            {
-                if (score > pvNode.Score)
-                {
-                    pvNode.Move = move;
-                    pvNode.Score = score;
-                }
-            }
-            else
-            {
-                hashTable.TryAdd(hash, new PrincipalVariationNode(move, score));
-            }
+            hashTable.AddOrUpdate(hash, move, (_,_) => move);
         }
 
         public void Stop()
