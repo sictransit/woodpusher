@@ -12,10 +12,10 @@ namespace SicTransit.Woodpusher.Engine
         {
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
             Score = Sign * Declarations.MateScore / 2;
-            MaxDepth = 2;
             Move = move;
             Status = NodeStatus.Waiting;
             Board = board.Play(move);
+            MaxDepth = 2;
         }
 
         public IBoard Board { get; }
