@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
-        private readonly ConcurrentDictionary<ulong, Move> hashTable = new();
+        private readonly ConcurrentDictionary<ulong, (Move, int)> hashTable = new();
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
@@ -168,7 +168,9 @@ namespace SicTransit.Woodpusher.Engine
 
                 var waitingNodes = nodesToAnalyze.Where(n => n.Status == NodeStatus.Waiting).OrderByDescending(n => n.AbsoluteScore);
 
-                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount).Select(node => Task.Run(() =>
+                var runningNodes = nodesToAnalyze.Count(n => n.Status == NodeStatus.Running);
+
+                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount-runningNodes).Select(node => Task.Run(() =>
                 {
                     try
                     {
@@ -239,7 +241,7 @@ namespace SicTransit.Woodpusher.Engine
                     yield break;
                 }
 
-                move = pvMove;
+                move = pvMove.Item1;
             }
         }
 
@@ -311,7 +313,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (hashTable.TryGetValue(board.Hash, out var hashMove))
             {
-                moves = board.GetLegalMoves().OrderByDescending(m => m.Equals(hashMove));
+                moves = board.GetLegalMoves().OrderByDescending(m=>m.Equals(hashMove.Item1));
             }
             else
             {
@@ -342,11 +344,13 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         evaluation = score;
 
-                        UpdateHashTable(board.Hash, move);
+                        
                     }
 
                     if (evaluation > β)
                     {
+                        UpdateHashTable(board.Hash, move, evaluation);
+
                         break;
                     }
 
@@ -358,11 +362,13 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         evaluation = score;
 
-                        UpdateHashTable(board.Hash, move);
+                        
                     }
 
                     if (evaluation < α)
                     {
+                        UpdateHashTable(board.Hash, move, -evaluation);
+
                         break;
                     }
 
@@ -373,9 +379,16 @@ namespace SicTransit.Woodpusher.Engine
             return evaluation;
         }
 
-        private void UpdateHashTable(ulong hash, Move move)
+        private void UpdateHashTable(ulong hash, Move move, int evaluation)
         {
-            hashTable.AddOrUpdate(hash, move, (_, _) => move);
+            hashTable.AddOrUpdate(hash, (move, evaluation), (key, old) => {
+                if (evaluation < old.Item2)
+                {
+                    return old;
+                }
+
+                return (move, evaluation);
+            });
         }
 
         public void Stop()
