@@ -183,11 +183,11 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void MovesFromStartingPieceTest()
         {
-            var moves = Board.StartingPosition().GetLegalMoves().ToArray();
+            var legalMoves = Board.StartingPosition().GetLegalMoves().ToArray();
 
-            Assert.AreEqual(20, moves.Length);
-            Assert.AreEqual(16, moves.Count(p => p.Piece.Is(Piece.Pawn)));
-            Assert.AreEqual(4, moves.Count(p => p.Piece.Is(Piece.Knight)));
+            Assert.AreEqual(20, legalMoves.Length);
+            Assert.AreEqual(16, legalMoves.Count(l => l.Move.Piece.Is(Piece.Pawn)));
+            Assert.AreEqual(4, legalMoves.Count(l => l.Move.Piece.Is(Piece.Knight)));
         }
 
         [TestMethod]
@@ -197,13 +197,13 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetLegalMoves().ToArray();
+            var legalMoves = board.GetLegalMoves().ToArray();
 
-            Assert.AreEqual(15, moves.Count(p => p.Piece.Is(Piece.Pawn)));
-            Assert.AreEqual(1, moves.Count(p => p.Piece.Is(Piece.King)));
-            Assert.AreEqual(5, moves.Count(p => p.Piece.Is(Piece.Knight)));
-            Assert.AreEqual(5, moves.Count(p => p.Piece.Is(Piece.Bishop)));
-            Assert.AreEqual(4, moves.Count(p => p.Piece.Is(Piece.Queen)));
+            Assert.AreEqual(15, legalMoves.Count(l => l.Move.Piece.Is(Piece.Pawn)));
+            Assert.AreEqual(1, legalMoves.Count(l => l.Move.Piece.Is(Piece.King)));
+            Assert.AreEqual(5, legalMoves.Count(l => l.Move.Piece.Is(Piece.Knight)));
+            Assert.AreEqual(5, legalMoves.Count(l => l.Move.Piece.Is(Piece.Bishop)));
+            Assert.AreEqual(4, legalMoves.Count(l => l.Move.Piece.Is(Piece.Queen)));
         }
 
         [TestMethod]
@@ -213,15 +213,15 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetLegalMoves().ToArray();
+            var legalMoves = board.GetLegalMoves().ToArray();
 
-            Assert.AreEqual(11, moves.Count(p => p.Piece.Is(Piece.Pawn)));
-            Assert.AreEqual(1, moves.Count(p => p.Piece.Is(Piece.Queen)));
-            Assert.AreEqual(7, moves.Count(p => p.Piece.Is(Piece.Knight)));
-            Assert.AreEqual(9, moves.Count(p => p.Piece.Is(Piece.Bishop)));
-            Assert.AreEqual(2, moves.Count(p => p.Piece.Is(Piece.Rook)));
-            Assert.AreEqual(3, moves.Count(p => p.Piece.Is(Piece.King)));
-            Assert.AreEqual(1, moves.Count(p => p.Piece.Is(Piece.King) && p.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.AreEqual(11, legalMoves.Count(l => l.Move.Piece.Is(Piece.Pawn)));
+            Assert.AreEqual(1, legalMoves.Count(l => l.Move.Piece.Is(Piece.Queen)));
+            Assert.AreEqual(7, legalMoves.Count(l => l.Move.Piece.Is(Piece.Knight)));
+            Assert.AreEqual(9, legalMoves.Count(l => l.Move.Piece.Is(Piece.Bishop)));
+            Assert.AreEqual(2, legalMoves.Count(l => l.Move.Piece.Is(Piece.Rook)));
+            Assert.AreEqual(3, legalMoves.Count(l => l.Move.Piece.Is(Piece.King)));
+            Assert.AreEqual(1, legalMoves.Count(l => l.Move.Piece.Is(Piece.King) && l.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod]
@@ -233,13 +233,13 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
-            var moves = board.GetLegalMoves().ToArray();
+            var legalMoves = board.GetLegalMoves().ToArray();
 
-            var enPassantMove = moves.SingleOrDefault(p => p.Flags.HasFlag(SpecialMove.PawnTakesEnPassant));
+            var enPassantMove = legalMoves.SingleOrDefault(l => l.Move.Flags.HasFlag(SpecialMove.PawnTakesEnPassant));
 
             Assert.IsNotNull(enPassantMove);
 
-            Assert.AreEqual(new Square("f6"), enPassantMove.GetTarget());
+            Assert.AreEqual(new Square("f6"), enPassantMove.Move.GetTarget());
         }
 
         [TestMethod]
@@ -249,11 +249,11 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var moves = board.GetLegalMoves().ToArray();
+            var legalMoves = board.GetLegalMoves().ToArray();
 
             Assert.AreEqual(Piece.None, board.ActiveColor);
 
-            Assert.IsTrue(!moves.Any(m => m.Piece.Is(Piece.King) && m.Flags.HasFlag(SpecialMove.CastleKing)));
+            Assert.IsTrue(!legalMoves.Any(l => l.Move.Piece.Is(Piece.King) && l.Move.Flags.HasFlag(SpecialMove.CastleKing)));
         }
 
         [TestMethod]
@@ -286,9 +286,9 @@ namespace SicTransit.Woodpusher.Common.Tests
 
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
-            var moves = board.GetLegalMoves().ToArray();
+            var legalMoves = board.GetLegalMoves().ToArray();
 
-            Assert.IsTrue(moves.Any(m => m.ToAlgebraicMoveNotation() == "b7b5"));
+            Assert.IsTrue(legalMoves.Any(l => l.Move.ToAlgebraicMoveNotation() == "b7b5"));
         }
 
         [TestMethod]
@@ -366,12 +366,12 @@ e8f7: 1
 
             var board = ForsythEdwardsNotation.Parse("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
 
-            var h2g3 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("h2")) && m.GetTarget().Equals(new Square("g3")));
-            board = board.Play(h2g3);
-            var h7h2 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("h7")) && m.GetTarget().Equals(new Square("h2")));
-            board = board.Play(h7h2);
-            var a1a8 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("a1")) && m.GetTarget().Equals(new Square("a8")));
-            board = board.Play(a1a8);
+            var h2g3 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("h2")) && l.Move.GetTarget().Equals(new Square("g3")));
+            board = h2g3.Board;
+            var h7h2 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("h7")) && l.Move.GetTarget().Equals(new Square("h2")));
+            board = h7h2.Board;
+            var a1a8 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("a1")) && l.Move.GetTarget().Equals(new Square("a8")));
+            board = a1a8.Board;
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
@@ -522,9 +522,9 @@ g8h6: 418
 
             var board = Board.StartingPosition();
 
-            var move = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
+            var move = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("c2")) && l.Move.GetTarget().Equals(new Square("c3")));
 
-            Assert.IsTrue(PerftAndCompare(board.Play(move), stockfish, 3));
+            Assert.IsTrue(PerftAndCompare(move.Board, stockfish, 3));
         }
 
         [TestMethod]
@@ -556,11 +556,11 @@ d1a4: 6
 
             var board = Board.StartingPosition();
 
-            var c2c3 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
-            board = board.Play(c2c3);
+            var c2c3 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("c2")) && l.Move.GetTarget().Equals(new Square("c3")));
+            board = c2c3.Board;
 
-            var d7d6 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("d7")) && m.GetTarget().Equals(new Square("d6")));
-            board = board.Play(d7d6);
+            var d7d6 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("d7")) && l.Move.GetTarget().Equals(new Square("d6")));
+            board = d7d6.Board;
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
         }
@@ -579,14 +579,14 @@ d8d7: 1
 
             var board = Board.StartingPosition();
 
-            var c2c3 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("c2")) && m.GetTarget().Equals(new Square("c3")));
-            board = board.Play(c2c3);
+            var c2c3 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("c2")) && l.Move.GetTarget().Equals(new Square("c3")));
+            board = c2c3.Board;
 
-            var d7d6 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("d7")) && m.GetTarget().Equals(new Square("d6")));
-            board = board.Play(d7d6);
+            var d7d6 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("d7")) && l.Move.GetTarget().Equals(new Square("d6")));
+            board = d7d6.Board;
 
-            var d1a4 = board.GetLegalMoves().Single(m => m.Piece.GetSquare().Equals(new Square("d1")) && m.GetTarget().Equals(new Square("a4")));
-            board = board.Play(d1a4);
+            var d1a4 = board.GetLegalMoves().Single(l => l.Move.Piece.GetSquare().Equals(new Square("d1")) && l.Move.GetTarget().Equals(new Square("a4")));
+            board = d1a4.Board;
 
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
@@ -611,13 +611,13 @@ d8d7: 1
         public void MoveEqualityTest()
         {
             var board = Board.StartingPosition();
-            var moves = board.GetLegalMoves().ToArray();
+            var moves = board.GetLegalMoves().Select(l=>l.Move).ToArray();
 
             Assert.IsTrue(moves.Any());
 
-            foreach (var referenceMove in Board.StartingPosition().GetLegalMoves())
+            foreach (var referenceMoves in Board.StartingPosition().GetLegalMoves().Select(l=>l.Move))
             {
-                Assert.IsFalse(moves.Any(m => m.Equals(referenceMove)));
+                Assert.IsFalse(moves.Any(m => m.Equals(referenceMoves)));
             }
 
             var e2Pawn = board.GetPieces().Single(p => p.GetSquare().ToAlgebraicNotation() == "e2");
@@ -628,9 +628,9 @@ d8d7: 1
 
             var queensPawn = board.Play(new Move(e2Pawn, new Square("d4")));
 
-            var kingsLegalMoves = kingsPawn.GetLegalMoves().ToArray();
+            var kingsLegalMoves = kingsPawn.GetLegalMoves().Select(l => l.Move).ToArray();
 
-            foreach (var referenceMove in queensPawn.GetLegalMoves())
+            foreach (var referenceMove in queensPawn.GetLegalMoves().Select(l => l.Move))
             {
                 Assert.IsTrue(kingsLegalMoves.Any(m => m.Equals(referenceMove)));
             }
@@ -643,9 +643,9 @@ d8d7: 1
 
             var success = true;
 
-            foreach (var move in board.GetLegalMoves())
+            foreach (var legalMove in board.GetLegalMoves())
             {
-                var result = $"{move.ToAlgebraicMoveNotation()}: {(depth > 1 ? board.Play(move).Perft(depth) : 1)}";
+                var result = $"{legalMove.Move.ToAlgebraicMoveNotation()}: {(depth > 1 ? legalMove.Board.Perft(depth) : 1)}";
 
                 if (!expectedMoves.Remove(result))
                 {

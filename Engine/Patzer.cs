@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
@@ -58,9 +59,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var legalMoves = Board.GetLegalMoves().ToArray();
 
-            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(m => m.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
+            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(l => l.Move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
-            return legalOpeningBookMoves.OrderByDescending(m => random.Next(m.openingBookMove.Count)).ThenByDescending(_ => random.NextDouble()).FirstOrDefault()?.legalMove;
+            return legalOpeningBookMoves.OrderByDescending(m => random.Next(m.openingBookMove.Count)).ThenByDescending(_ => random.NextDouble()).FirstOrDefault()?.legalMove.Move;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -71,14 +72,14 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var legalMove = Board.GetLegalMoves().SingleOrDefault(l => l.Move.Piece.GetSquare().Equals(algebraicMove.From) && l.Move.GetTarget().Equals(algebraicMove.To) && l.Move.PromotionType == algebraicMove.Promotion);
 
-                if (move == null)
+                if (legalMove == null)
                 {
                     throw new ArgumentOutOfRangeException(nameof(algebraicMoves), $"unable to play: {algebraicMove}");
                 }
 
-                Play(move);
+                Play(legalMove.Move);
             }
         }
 
@@ -86,7 +87,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             cancellationTokenSource = new CancellationTokenSource();
 
-            var initialMoves = Board.GetLegalMoves().Select(m => new { move = m, board = Board.Play(m) });
+            var initialMoves = Board.GetLegalMoves();
 
             ulong total = 0;
 
@@ -101,7 +102,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (depth > 1)
                 {
-                    nodes += i.board.Perft(depth);
+                    nodes += i.Board.Perft(depth);
                 }
                 else
                 {
@@ -110,7 +111,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 Interlocked.Add(ref total, nodes);
 
-                SendCallbackInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
+                SendCallbackInfo($"{i.Move.ToAlgebraicMoveNotation()}: {nodes}");
             });
 
             SendCallbackInfo(Environment.NewLine + $"Nodes searched: {total}");
@@ -126,7 +127,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 Log.Debug($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
-                if (!cancellationTokenSource.IsCancellationRequested && !Debugger.IsAttached)
+                if (!cancellationTokenSource.IsCancellationRequested)
                 {
                     cancellationTokenSource.Cancel();
                 }
@@ -140,7 +141,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var openingMove = GetOpeningBookMove();
 
-            var nodes = new ConcurrentBag<Node>((openingMove != null ? new[] { openingMove } : Board.GetLegalMoves()).Select(m => new Node(Board, m)));
+            var nodes = new ConcurrentBag<Node>((openingMove != null ? new[] { openingMove } : Board.GetLegalMoves().Select(l=>l.Move)).Select(m => new Node(Board, m)));
 
             if (!nodes.Any())
             {
@@ -309,18 +310,18 @@ namespace SicTransit.Woodpusher.Engine
                 return evaluation;
             }
 
-            IEnumerable<Move> moves;
+            IEnumerable<LegalMove> legalMoves;
 
             if (hashTable.TryGetValue(board.Hash, out var hashMove))
             {
-                moves = board.GetLegalMoves().OrderByDescending(m => m.Equals(hashMove.Item1));
+                legalMoves = board.GetLegalMoves().OrderByDescending(m => m.Move.Equals(hashMove.Item1));
             }
             else
             {
-                moves = board.GetLegalMoves();
+                legalMoves = board.GetLegalMoves();
             }
 
-            if (!moves.Any())
+            if (!legalMoves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
 
@@ -332,24 +333,22 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            foreach (var move in moves)
+            foreach (var legalMove in legalMoves)
             {
                 node.Count++;
 
-                var score = EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken);
+                var score = EvaluateBoard(legalMove.Board, node, depth + 1, α, β, cancellationToken);
 
                 if (maximizing)
                 {
                     if (score > evaluation)
                     {
                         evaluation = score;
-
-
                     }
 
                     if (evaluation > β)
                     {
-                        UpdateHashTable(board.Hash, move, evaluation);
+                        UpdateHashTable(legalMove, evaluation);
 
                         break;
                     }
@@ -367,7 +366,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (evaluation < α)
                     {
-                        UpdateHashTable(board.Hash, move, -evaluation);
+                        UpdateHashTable(legalMove, -evaluation);
 
                         break;
                     }
@@ -379,16 +378,16 @@ namespace SicTransit.Woodpusher.Engine
             return evaluation;
         }
 
-        private void UpdateHashTable(ulong hash, Move move, int evaluation)
+        private void UpdateHashTable(LegalMove legalMove, int evaluation)
         {
-            hashTable.AddOrUpdate(hash, (move, evaluation), (key, old) =>
+            hashTable.AddOrUpdate(legalMove.Board.Hash, (legalMove.Move, evaluation), (key, old) =>
             {
                 if (evaluation < old.Item2)
                 {
                     return old;
                 }
 
-                return (move, evaluation);
+                return (legalMove.Move, evaluation);
             });
         }
 

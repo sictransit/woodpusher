@@ -31,11 +31,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             {
                 var legalMoves = board.GetLegalMoves(piece).ToArray();
 
-                var move = legalMoves.SingleOrDefault(m => m.Piece.GetSquare().Equals(position) && m.GetTarget().Equals(square) && m.PromotionType == promotionType);
+                var legalMove = legalMoves.SingleOrDefault(l => l.Move.Piece.GetSquare().Equals(position) && l.Move.GetTarget().Equals(square) && l.Move.PromotionType == promotionType);
 
-                if (move != null)
+                if (legalMove != null)
                 {
-                    return move;
+                    return legalMove.Move;
                 }
             }
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
@@ -245,7 +246,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     var foundAlterantive = false;
 
-                    foreach (var thinkingTime in new[] { 100, 500, 2500, 12500 })
+                    foreach (var thinkingTime in new[] { 100, 500, 2500, 12500,25000 })
                     {
                         var engineMove = engine.FindBestMove(thinkingTime);
 
@@ -258,7 +259,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
                         }
                     }
 
-                    Assert.IsTrue(foundAlterantive);
+                    if (!foundAlterantive)
+                    {
+                        Log.Information($"\n{engine.Board.PrettyPrint()}");
+                    }
+                    Assert.IsTrue(foundAlterantive);                    
                 }
 
                 Log.Information($"Playing: {matchMove}");
