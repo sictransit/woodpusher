@@ -60,6 +60,10 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             {
                 pgnMove = simplePieceMove!;
             }
+            else if (TryParseSpecificPieceMove(s, promotionType, out var specificPieceMove))
+            {
+                pgnMove = specificPieceMove!;
+            }
             else if (TryParseCastlingMove(s, out var castlingMove))
             {
                 pgnMove = castlingMove!;
@@ -115,6 +119,22 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             if (match.Success)
             {
                 move = new SimplePieceMove(match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value), promotionType);
+            }
+
+            return move != default;
+        }
+
+        private static bool TryParseSpecificPieceMove(string s, Piece promotionType, out SpecificPieceMove? move)
+        {
+            move = default;
+
+            Regex regex = new(@"^([PRNBQK])([a-h][1-8])([a-h][1-8])$"); // Qc1c2
+
+            var match = regex.Match(s);
+
+            if (match.Success)
+            {
+                move = new SpecificPieceMove(match.Groups[1].Value[0].ToPieceType(), new Square(match.Groups[2].Value), new Square(match.Groups[3].Value), promotionType);
             }
 
             return move != default;

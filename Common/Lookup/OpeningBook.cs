@@ -9,9 +9,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         // Credit: https://github.com/lichess-org/chess-openings
 
-        private Dictionary<ulong, HashSet<string>> book = new();
+        private Dictionary<ulong, Dictionary<string, int>> book = new();
 
-        private static readonly string BookFilename = Path.Combine(@"Resources\eco.json");
+        private static readonly string BookFilename = Path.Combine(@"Resources\openings.json");
 
         public OpeningBook(bool startEmpty = false)
         {
@@ -31,7 +31,15 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                book = JsonConvert.DeserializeObject<Dictionary<ulong, HashSet<string>>>(File.ReadAllText(filename))!;
+                var loadedBook = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllText(filename))!;
+
+                foreach (var hash in loadedBook)
+                {
+                    foreach (var move in hash.Value)
+                    {
+                        AddMove(hash.Key, move.Key, move.Value);
+                    }
+                }
             }
         }
 
@@ -44,21 +52,53 @@ namespace SicTransit.Woodpusher.Common.Lookup
             File.WriteAllText(filename, json);
         }
 
-        public void AddMove(ulong hash, Move move)
+        public void AddMove(ulong hash, string move, int count = 1)
         {
             if (book.TryGetValue(hash, out var moves))
             {
-                moves.Add(move.ToAlgebraicMoveNotation());
+                if (moves.ContainsKey(move))
+                {
+                    moves[move] += count;
+                }
+                else
+                {
+                    moves.Add(move, count);
+                }
             }
             else
             {
-                book.Add(hash, new HashSet<string> { move.ToAlgebraicMoveNotation() });
+                var moveEntry = new Dictionary<string, int>
+                {
+                    { move, count }
+                };
+
+                book.Add(hash, moveEntry);
             }
         }
 
-        public IEnumerable<AlgebraicMove> GetMoves(ulong hash)
+        public void AddMove(ulong hash, Move move) => AddMove(hash, move.ToAlgebraicMoveNotation());
+
+        public IEnumerable<OpeningBookMove> GetMoves(ulong hash)
         {
-            return book.TryGetValue(hash, out var moves) ? moves.Select(AlgebraicMove.Parse) : Enumerable.Empty<AlgebraicMove>();
+            if (book.TryGetValue(hash, out var moves))
+            {
+                return moves.Select(m => new OpeningBookMove(AlgebraicMove.Parse(m.Key), m.Value));
+            }
+
+            return Enumerable.Empty<OpeningBookMove>();
+        }
+
+        public class OpeningBookMove
+        {
+            public int Count { get; }
+
+            public AlgebraicMove Move { get; }
+
+            public OpeningBookMove(AlgebraicMove move, int Count)
+            {
+                Move = move;
+                this.Count = Count;
+            }
         }
     }
 }

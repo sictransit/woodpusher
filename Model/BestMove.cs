@@ -10,5 +10,10 @@
 
         public AlgebraicMove Move { get; }
         public AlgebraicMove? Ponder { get; }
+
+        public override string ToString()
+        {
+            return $"{Move}" + (Ponder != null ? $" (pondering {Ponder}) " : string.Empty);
+        }
     }
 }

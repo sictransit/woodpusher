@@ -1,7 +1,10 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
+using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Common.Parsing.Extensions;
 using SicTransit.Woodpusher.Common.Parsing.Moves;
+using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -9,7 +12,9 @@ namespace SicTransit.Woodpusher.Common.Parsing
 {
     public class PortableGameNotation
     {
-        private static readonly Regex ResultRegex = new(@"(1\-0|0-1|1\/2-1\/2|\*)", RegexOptions.Compiled);
+        private static readonly Regex ResultRegex = new(@"(1\-0|0-1|1\/2.1\/2|\*)", RegexOptions.Compiled);
+        private static readonly Regex MoveRegex = new(@"^[abcdefgh12345678RNBQKPO\-x=\?!]+$", RegexOptions.Compiled);
+        private static readonly Regex IndexRegex = new(@"\d+\.+", RegexOptions.Compiled);
 
         public IDictionary<string, string> Tags { get; }
 
@@ -17,19 +22,32 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
         public Result Result { get; private set; }
 
+        public string Source { get; }
 
-        private PortableGameNotation()
+        public int? WhiteElo => GetElo(Piece.White);
+
+        public int? BlackElo => GetElo(Piece.None);
+
+        private int? GetElo(Piece color)
+        {
+            var key = color.Is(Piece.White) ? "WhiteElo" : "BlackElo";
+
+            return Tags.TryGetValue(key, out var value) && int.TryParse(value, out var elo) ? elo : null;
+        }
+
+        private PortableGameNotation(string source)
         {
             Tags = new Dictionary<string, string>();
             PgnMoves = new List<PgnMove>();
             Result = Result.Ongoing;
+            Source = source;
         }
 
         public static PortableGameNotation Parse(string s)
         {
             Log.Debug($"Parsing PGN:\n{s}");
 
-            var pgn = new PortableGameNotation();
+            var pgn = new PortableGameNotation(s);
 
             var sb = new StringBuilder();
 
@@ -64,7 +82,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
         {
             tag = default;
 
-            Regex tagsRegex = new(@"\[\s*(.+?)\s*\""(.+)\""\s*\]");
+            Regex tagsRegex = new(@"\[\s*(.+?)\s*\""(.*?)\""\s*\]");
 
             var match = tagsRegex.Match(s);
 
@@ -93,6 +111,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
                     case "0-1":
                         return Result.BlackWin;
                     case "1/2-1/2":
+                    case "1/2 1/2":
                         return Result.Draw;
                 }
             }
@@ -103,30 +122,24 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
         private static IEnumerable<PgnMove> ParseMoves(string s)
         {
-            var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var movesPart = ResultRegex.Split(s);
 
-            var indexRegex = new Regex(@"(\d+)\.");
-            var moveRegex = new Regex(@"[abcdefgh12345678RNBQKPO\-x=]+");
+            var moves = IndexRegex.Split(movesPart[0]).Where(p => !string.IsNullOrWhiteSpace(p));
 
-
-            foreach (var part in parts)
+            foreach (var move in moves)
             {
-                var indexMatch = indexRegex.Match(part);
+                var plys = move.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                if (indexMatch.Success)
+                foreach (var ply in plys)
                 {
-                    continue;
-                }
-
-                var moveMatch = moveRegex.Match(part);
-
-                if (moveMatch.Success && !ResultRegex.IsMatch(part))
-                {
-                    yield return PgnMove.Parse(part);
-                }
-                else
-                {
-                    Log.Debug($"failed to parse: {part}");
+                    if (MoveRegex.IsMatch(ply))
+                    {
+                        yield return PgnMove.Parse(ply);
+                    }
+                    else
+                    {
+                        throw new PgnParsingException(s, $"Failed to parse ply: {ply}");
+                    }
                 }
             }
         }

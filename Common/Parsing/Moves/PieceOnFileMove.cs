@@ -34,15 +34,15 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             foreach (var piece in pieces.Where(p => p.GetSquare().File == file))
             {
-                var move = engine.Board.GetLegalMoves(piece).SingleOrDefault(m => m.GetTarget().Equals(square) && m.PromotionType == promotionType);
+                var legalMove = engine.Board.GetLegalMoves(piece).SingleOrDefault(l => l.Move.GetTarget().Equals(square) && l.Move.PromotionType == promotionType);
 
-                if (move != null)
+                if (legalMove != null)
                 {
-                    return move;
+                    return legalMove.Move;
                 }
             }
 
-            throw new PgnParsingException(Raw, "unable to a legal move to match");
+            throw new PgnParsingException(Raw, "unable to match a legal move");
         }
     }
 }

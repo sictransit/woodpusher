@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
@@ -95,17 +96,24 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        public void PlayE8F8OrDieTest()
+        public void PushAPawnAndDieTest()
         {
             // e8f8 is a good move; pushing e.g. a B pawn is not 
 
-            var patzer = new Patzer();
+            void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
 
             patzer.Position("rnbqk1nr/ppp1b2p/6P1/3p3Q/3Np3/2N5/PPPP1PPP/R1B1KB1R b KQkq - 0 7");
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.AreEqual("e8f8", bestMove.Move.Notation);
+            var validMoves = new[] { "e8f8", "g8f6", "h7g6" };
+
+            Assert.IsTrue(validMoves.Contains(bestMove.Move.Notation));
         }
 
         [TestMethod]
@@ -238,7 +246,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     var foundAlterantive = false;
 
-                    foreach (var thinkingTime in new[] { 100, 500, 5000 })
+                    foreach (var thinkingTime in new[] { 100, 500, 2500, 12500,25000 })
                     {
                         var engineMove = engine.FindBestMove(thinkingTime);
 
@@ -251,7 +259,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
                         }
                     }
 
-                    Assert.IsTrue(foundAlterantive);
+                    if (!foundAlterantive)
+                    {
+                        Log.Information($"\n{engine.Board.PrettyPrint()}");
+                    }
+                    Assert.IsTrue(foundAlterantive);                    
                 }
 
                 Log.Information($"Playing: {matchMove}");

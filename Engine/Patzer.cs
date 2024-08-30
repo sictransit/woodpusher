@@ -1,7 +1,9 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Engine.Enums;
 using SicTransit.Woodpusher.Model;
@@ -16,25 +18,28 @@ namespace SicTransit.Woodpusher.Engine
     {
         public IBoard Board { get; private set; }
 
+        private readonly Random random = new();
+
         private CancellationTokenSource cancellationTokenSource = new();
 
         private readonly Stopwatch stopwatch = new();
 
         private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
 
-        private readonly ConcurrentDictionary<ulong, PrincipalVariationNode> hashTable = new();
+        private readonly ConcurrentDictionary<ulong, (Move, int)> hashTable = new();
+        private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
         public Patzer(Action<string>? infoCallback = null)
         {
-            Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            Board = Common.Board.StartingPosition();
+
             this.infoCallback = infoCallback;
         }
 
         public void Initialize()
         {
-            Board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
-            repetitions.Clear();
+            Board = Common.Board.StartingPosition();
         }
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
@@ -48,6 +53,17 @@ namespace SicTransit.Woodpusher.Engine
             Board = Board.Play(move);
         }
 
+        private Move? GetOpeningBookMove()
+        {
+            var openingBookMoves = openingBook.GetMoves(Board.Hash);
+
+            var legalMoves = Board.GetLegalMoves().ToArray();
+
+            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(l => l.Move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
+
+            return legalOpeningBookMoves.OrderByDescending(m => random.Next(m.openingBookMove.Count)).ThenByDescending(_ => random.NextDouble()).FirstOrDefault()?.legalMove.Move;
+        }
+
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
             algebraicMoves ??= Enumerable.Empty<AlgebraicMove>();
@@ -56,14 +72,14 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var move = Board.GetLegalMoves().SingleOrDefault(m => m.Piece.GetSquare().Equals(algebraicMove.From) && m.GetTarget().Equals(algebraicMove.To) && m.PromotionType == algebraicMove.Promotion);
+                var legalMove = Board.GetLegalMoves().SingleOrDefault(l => l.Move.Piece.GetSquare().Equals(algebraicMove.From) && l.Move.GetTarget().Equals(algebraicMove.To) && l.Move.PromotionType == algebraicMove.Promotion);
 
-                if (move == null)
+                if (legalMove == null)
                 {
                     throw new ArgumentOutOfRangeException(nameof(algebraicMoves), $"unable to play: {algebraicMove}");
                 }
 
-                Play(move);
+                Play(legalMove.Move);
             }
         }
 
@@ -71,7 +87,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             cancellationTokenSource = new CancellationTokenSource();
 
-            var initialMoves = Board.GetLegalMoves().Select(m => new { move = m, board = Board.Play(m) });
+            var initialMoves = Board.GetLegalMoves();
 
             ulong total = 0;
 
@@ -86,7 +102,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (depth > 1)
                 {
-                    nodes += i.board.Perft(depth);
+                    nodes += i.Board.Perft(depth);
                 }
                 else
                 {
@@ -95,7 +111,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 Interlocked.Add(ref total, nodes);
 
-                SendCallbackInfo($"{i.move.ToAlgebraicMoveNotation()}: {nodes}");
+                SendCallbackInfo($"{i.Move.ToAlgebraicMoveNotation()}: {nodes}");
             });
 
             SendCallbackInfo(Environment.NewLine + $"Nodes searched: {total}");
@@ -103,24 +119,29 @@ namespace SicTransit.Woodpusher.Engine
 
         public BestMove FindBestMove(int timeLimit = 1000)
         {
+            stopwatch.Restart();
+
             cancellationTokenSource = new CancellationTokenSource();
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 Log.Debug($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
-                if (!cancellationTokenSource.IsCancellationRequested && !Debugger.IsAttached)
+                if (!cancellationTokenSource.IsCancellationRequested)
                 {
                     cancellationTokenSource.Cancel();
                 }
             });
 
-            stopwatch.Restart();
-            hashTable.Clear();
+            if (Board.Counters.HalfmoveClock == 0)
+            {
+                repetitions.Clear();
+                hashTable.Clear();
+            }
 
-            var openingMoves = Board.GetOpeningBookMoves().ToArray();
+            var openingMove = GetOpeningBookMove();
 
-            var nodes = new ConcurrentBag<Node>((openingMoves.Any() ? openingMoves : Board.GetLegalMoves()).Select(m => new Node(Board, m)));
+            var nodes = new ConcurrentBag<Node>((openingMove != null ? new[] { openingMove } : Board.GetLegalMoves().Select(l=>l.Move)).Select(m => new Node(Board, m)));
 
             if (!nodes.Any())
             {
@@ -148,7 +169,9 @@ namespace SicTransit.Woodpusher.Engine
 
                 var waitingNodes = nodesToAnalyze.Where(n => n.Status == NodeStatus.Waiting).OrderByDescending(n => n.AbsoluteScore);
 
-                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount).Select(node => Task.Run(() =>
+                var runningNodes = nodesToAnalyze.Count(n => n.Status == NodeStatus.Running);
+
+                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount - runningNodes).Select(node => Task.Run(() =>
                 {
                     try
                     {
@@ -165,8 +188,8 @@ namespace SicTransit.Woodpusher.Engine
 
                             SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
 
-                            node.Status = NodeStatus.Waiting;
                             node.MaxDepth += 2;
+                            node.Status = NodeStatus.Waiting;
                         }
                         else
                         {
@@ -214,12 +237,12 @@ namespace SicTransit.Woodpusher.Engine
 
                 board = board.Play(move);
 
-                if (!hashTable.TryGetValue(board.Hash, out var pvNode))
+                if (!hashTable.TryGetValue(board.Hash, out var pvMove))
                 {
                     yield break;
                 }
 
-                move = pvNode.Move;
+                move = pvMove.Item1;
             }
         }
 
@@ -287,9 +310,18 @@ namespace SicTransit.Woodpusher.Engine
                 return evaluation;
             }
 
-            var moves = board.GetLegalMoves();
+            IEnumerable<LegalMove> legalMoves;
 
-            if (!moves.Any())
+            if (hashTable.TryGetValue(board.Hash, out var hashMove))
+            {
+                legalMoves = board.GetLegalMoves().OrderByDescending(m => m.Move.Equals(hashMove.Item1));
+            }
+            else
+            {
+                legalMoves = board.GetLegalMoves();
+            }
+
+            if (!legalMoves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
 
@@ -301,18 +333,23 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            foreach (var move in moves)
+            foreach (var legalMove in legalMoves)
             {
                 node.Count++;
 
+                var score = EvaluateBoard(legalMove.Board, node, depth + 1, α, β, cancellationToken);
+
                 if (maximizing)
                 {
-                    evaluation = Math.Max(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
-
-                    UpdateHashTable(board.Hash, move, evaluation);
+                    if (score > evaluation)
+                    {
+                        evaluation = score;
+                    }
 
                     if (evaluation > β)
                     {
+                        UpdateHashTable(legalMove, evaluation);
+
                         break;
                     }
 
@@ -320,12 +357,17 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    evaluation = Math.Min(evaluation, EvaluateBoard(board.Play(move), node, depth + 1, α, β, cancellationToken));
+                    if (score < evaluation)
+                    {
+                        evaluation = score;
 
-                    UpdateHashTable(board.Hash, move, -evaluation);
+
+                    }
 
                     if (evaluation < α)
                     {
+                        UpdateHashTable(legalMove, -evaluation);
+
                         break;
                     }
 
@@ -336,20 +378,17 @@ namespace SicTransit.Woodpusher.Engine
             return evaluation;
         }
 
-        private void UpdateHashTable(ulong hash, Move move, int score)
+        private void UpdateHashTable(LegalMove legalMove, int evaluation)
         {
-            if (hashTable.TryGetValue(hash, out var pvNode))
+            hashTable.AddOrUpdate(legalMove.Board.Hash, (legalMove.Move, evaluation), (key, old) =>
             {
-                if (score > pvNode.Score)
+                if (evaluation < old.Item2)
                 {
-                    pvNode.Move = move;
-                    pvNode.Score = score;
+                    return old;
                 }
-            }
-            else
-            {
-                hashTable.TryAdd(hash, new PrincipalVariationNode(move, score));
-            }
+
+                return (legalMove.Move, evaluation);
+            });
         }
 
         public void Stop()

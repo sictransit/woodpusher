@@ -12,14 +12,13 @@ namespace SicTransit.Woodpusher.Model
         public Bitboard(Piece color, ulong pawn = 0, ulong rook = 0, ulong knight = 0, ulong bishop = 0, ulong queen = 0, ulong king = 0)
         {
             Color = color;
+
             Pawn = pawn;
             Rook = rook;
             Knight = knight;
             Bishop = bishop;
             Queen = queen;
             King = king;
-
-            All = pawn | rook | knight | bishop | queen | king;
         }
 
         public Piece Color { get; }
@@ -30,7 +29,8 @@ namespace SicTransit.Woodpusher.Model
         public ulong Bishop { get; }
         public ulong Queen { get; }
         public ulong King { get; }
-        public ulong All { get; }
+
+        public ulong All => Pawn | Rook | Knight | Bishop | Queen | King;
 
         public int Phase => BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
 

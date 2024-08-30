@@ -1,436 +1,389 @@
-﻿using Serilog;
-using SicTransit.Woodpusher.Common.Interfaces;
+﻿using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
-namespace SicTransit.Woodpusher.Common
+namespace SicTransit.Woodpusher.Common;
+
+public class Board : IBoard
 {
-    public class Board : IBoard
+    private readonly Bitboard white;
+    private readonly Bitboard black;
+    private readonly BoardInternals internals;
+
+    public Counters Counters { get; }
+
+    public Piece ActiveColor => Counters.ActiveColor;
+
+    public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
     {
-        private readonly Bitboard white;
-        private readonly Bitboard black;
-        private readonly BoardInternals internals;
 
-        public Counters Counters { get; }
+    }
 
-        public Piece ActiveColor => Counters.ActiveColor;
+    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
+    {
+        this.white = white;
+        this.black = black;
 
-        public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
+        Counters = counters;
+        this.internals = internals;
+        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
+    }
+
+    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
+    {
+    }
+
+    public static IBoard StartingPosition()
+    {
+        var white = new Bitboard(Piece.White, 65280, 129, 66, 36, 8, 16);
+        var black = new Bitboard(Piece.None, 71776119061217280, 9295429630892703744, 4755801206503243776, 2594073385365405696, 576460752303423488, 1152921504606846976);
+
+        return new Board(white, black, Counters.Default);
+    }
+
+    public ulong Hash { get; }
+
+    public int Score
+    {
+        get
         {
+            var phase = white.Phase + black.Phase;
 
-        }
+            var score = 0;
 
-        private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
-        {
-            this.white = white;
-            this.black = black;
-
-            Counters = counters;
-            this.internals = internals;
-            Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
-        }
-
-        public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
-        {
-        }
-
-        public ulong Hash { get; }
-
-        public int Score
-        {
-            get
+            foreach (var piece in GetPieces())
             {
-                var phase = white.Phase + black.Phase;
+                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                var score = 0;
-
-                foreach (var piece in GetPieces())
+                if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
                 {
-                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
-
-                    if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
-                    {
-                        evaluation *= 2;
-                    }
-
-                    if (IsBlocked(piece))
-                    {
-                        evaluation = evaluation * phase / 24;
-                    }
-
-                    score += piece.Is(Piece.White) ? evaluation : -evaluation;
+                    evaluation *= 2;
                 }
 
-                return score;
+                score += piece.Is(Piece.White) ? evaluation : -evaluation;
             }
+
+            return score;
+        }
+    }
+
+    public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
+
+    public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
+            ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
+            : (IBoard)new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
+
+    public IBoard Play(Move move)
+    {
+        var hash = Hash;
+
+        var whitePlaying = ActiveColor.Is(Piece.White);
+
+        var opponentBitboard = whitePlaying ? black : white;
+
+        var capture = opponentBitboard.Peek(move.EnPassantTarget == 0 ? move.Target : move.EnPassantMask);
+
+        if (capture != Piece.None)
+        {
+            opponentBitboard = opponentBitboard.Toggle(capture);
+
+            hash ^= internals.Zobrist.GetPieceHash(capture);
         }
 
-        public IEnumerable<Move> GetOpeningBookMoves()
+        var activeBitboard = GetBitboard(ActiveColor).Toggle(move.Piece, move.Target);
+
+        hash ^= internals.Zobrist.GetPieceHash(move.Piece) ^ internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
+
+        var castlings = Counters.Castlings;
+
+        if (castlings != Castlings.None)
         {
-            var moves = internals.OpeningBook.GetMoves(Hash);
-
-            if (!moves.Any())
+            if (move.Piece.Is(Piece.King))
             {
-                yield break;
-            }
+                (ulong from, ulong to) castling = default;
 
-            var legalMoves = GetLegalMoves().ToArray();
-
-            foreach (var algebraicMove in moves)
-            {
-                var move = legalMoves.Single(m => m.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
-
-                Log.Information($"Found opening book move: {move}");
-
-                yield return move;
-            }
-        }
-
-        public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
-
-        public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
-                ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
-                : (IBoard)new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
-
-        public IBoard Play(Move move)
-        {
-            var hash = Hash;
-
-            var whitePlaying = ActiveColor.Is(Piece.White);
-
-            var opponentBitboard = whitePlaying ? black : white;
-
-            var capture = opponentBitboard.Peek(move.EnPassantTarget == 0 ? move.Target : move.EnPassantMask);
-
-            if (capture != Piece.None)
-            {
-                opponentBitboard = opponentBitboard.Toggle(capture);
-
-                hash ^= internals.Zobrist.GetPieceHash(capture);
-            }
-
-            var activeBitboard = GetBitboard(ActiveColor).Toggle(move.Piece, move.Target);
-
-            hash ^= internals.Zobrist.GetPieceHash(move.Piece) ^ internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
-
-            var castlings = Counters.Castlings;
-
-            if (castlings != Castlings.None)
-            {
-                if (move.Piece.Is(Piece.King))
+                if (whitePlaying)
                 {
-                    (ulong from, ulong to) castling = default;
+                    castlings &= ~(Castlings.WhiteKingside | Castlings.WhiteQueenside);
 
-                    if (whitePlaying)
+                    if (move.Flags.HasFlag(SpecialMove.CastleQueen))
                     {
-                        castlings &= ~(Castlings.WhiteKingside | Castlings.WhiteQueenside);
-
-                        if (move.Flags.HasFlag(SpecialMove.CastleQueen))
-                        {
-                            castling = (BoardInternals.WhiteQueensideRookStartingSquare, BoardInternals.WhiteQueensideRookCastlingSquare);
-                        }
-                        else if (move.Flags.HasFlag(SpecialMove.CastleKing))
-                        {
-                            castling = (BoardInternals.WhiteKingsideRookStartingSquare, BoardInternals.WhiteKingsideRookCastlingSquare);
-                        }
+                        castling = (BoardInternals.WhiteQueensideRookStartingSquare, BoardInternals.WhiteQueensideRookCastlingSquare);
                     }
-                    else
+                    else if (move.Flags.HasFlag(SpecialMove.CastleKing))
                     {
-                        castlings &= ~(Castlings.BlackKingside | Castlings.BlackQueenside);
-
-                        if (move.Flags.HasFlag(SpecialMove.CastleQueen))
-                        {
-                            castling = (BoardInternals.BlackQueensideRookStartingSquare, BoardInternals.BlackQueensideRookCastlingSquare);
-                        }
-                        else if (move.Flags.HasFlag(SpecialMove.CastleKing))
-                        {
-                            castling = (BoardInternals.BlackKingsideRookStartingSquare, BoardInternals.BlackKingsideRookCastlingSquare);
-                        }
-                    }
-
-                    if (castling != default)
-                    {
-                        var rook = Piece.Rook | ActiveColor.SetMask(castling.from);
-
-                        activeBitboard = activeBitboard.Toggle(rook, castling.to);
-
-                        hash ^= internals.Zobrist.GetPieceHash(rook) ^ internals.Zobrist.GetPieceHash(rook.SetMask(castling.to));
+                        castling = (BoardInternals.WhiteKingsideRookStartingSquare, BoardInternals.WhiteKingsideRookCastlingSquare);
                     }
                 }
                 else
                 {
-                    if (whitePlaying)
-                    {
-                        if (move.Piece == BoardInternals.WhiteKingsideRook)
-                        {
-                            castlings &= ~Castlings.WhiteKingside;
-                        }
-                        else if (move.Piece == BoardInternals.WhiteQueensideRook)
-                        {
-                            castlings &= ~Castlings.WhiteQueenside;
-                        }
+                    castlings &= ~(Castlings.BlackKingside | Castlings.BlackQueenside);
 
-                        if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
-                        {
-                            castlings &= ~Castlings.BlackKingside;
-                        }
-                        else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
-                        {
-                            castlings &= ~Castlings.BlackQueenside;
-                        }
+                    if (move.Flags.HasFlag(SpecialMove.CastleQueen))
+                    {
+                        castling = (BoardInternals.BlackQueensideRookStartingSquare, BoardInternals.BlackQueensideRookCastlingSquare);
                     }
-                    else
+                    else if (move.Flags.HasFlag(SpecialMove.CastleKing))
                     {
-                        if (move.Piece == BoardInternals.BlackKingsideRook)
-                        {
-                            castlings &= ~Castlings.BlackKingside;
-                        }
-                        else if (move.Piece == BoardInternals.BlackQueensideRook)
-                        {
-                            castlings &= ~Castlings.BlackQueenside;
-                        }
-
-                        if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
-                        {
-                            castlings &= ~Castlings.WhiteKingside;
-                        }
-                        else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
-                        {
-                            castlings &= ~Castlings.WhiteQueenside;
-                        }
+                        castling = (BoardInternals.BlackKingsideRookStartingSquare, BoardInternals.BlackKingsideRookCastlingSquare);
                     }
                 }
 
-                hash ^= internals.Zobrist.GetCastlingsHash(Counters.Castlings) ^ internals.Zobrist.GetCastlingsHash(castlings);
-            }
+                if (castling != default)
+                {
+                    var rook = Piece.Rook | ActiveColor.SetMask(castling.from);
 
-            if (move.Flags.HasFlag(SpecialMove.PawnPromotes))
+                    activeBitboard = activeBitboard.Toggle(rook, castling.to);
+
+                    hash ^= internals.Zobrist.GetPieceHash(rook) ^ internals.Zobrist.GetPieceHash(rook.SetMask(castling.to));
+                }
+            }
+            else
             {
-                var promotedPiece = move.Piece.SetMask(move.Target);
-                var promotionPiece = (ActiveColor | move.PromotionType).SetMask(move.Target);
-                activeBitboard = activeBitboard.Toggle(promotedPiece).Toggle(promotionPiece);
+                if (whitePlaying)
+                {
+                    if (move.Piece == BoardInternals.WhiteKingsideRook)
+                    {
+                        castlings &= ~Castlings.WhiteKingside;
+                    }
+                    else if (move.Piece == BoardInternals.WhiteQueensideRook)
+                    {
+                        castlings &= ~Castlings.WhiteQueenside;
+                    }
 
-                hash ^= internals.Zobrist.GetPieceHash(promotedPiece) ^ internals.Zobrist.GetPieceHash(promotionPiece);
+                    if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
+                    {
+                        castlings &= ~Castlings.BlackKingside;
+                    }
+                    else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
+                    {
+                        castlings &= ~Castlings.BlackQueenside;
+                    }
+                }
+                else
+                {
+                    if (move.Piece == BoardInternals.BlackKingsideRook)
+                    {
+                        castlings &= ~Castlings.BlackKingside;
+                    }
+                    else if (move.Piece == BoardInternals.BlackQueensideRook)
+                    {
+                        castlings &= ~Castlings.BlackQueenside;
+                    }
+
+                    if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
+                    {
+                        castlings &= ~Castlings.WhiteKingside;
+                    }
+                    else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
+                    {
+                        castlings &= ~Castlings.WhiteQueenside;
+                    }
+                }
             }
 
-            var counters = new Counters(
-                whitePlaying ? Piece.None : Piece.White,
-                castlings,
-                move.EnPassantTarget,
-                move.Piece.Is(Piece.Pawn) || capture.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1,
-                Counters.FullmoveNumber + (whitePlaying ? 0 : 1),
-                capture);
-
-            hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
-                ^ internals.Zobrist.GetMaskHash(counters.EnPassantTarget)
-                ^ internals.Zobrist.GetPieceHash(Counters.ActiveColor)
-                ^ internals.Zobrist.GetPieceHash(counters.ActiveColor);
-
-            return whitePlaying
-                ? new Board(activeBitboard, opponentBitboard, counters, internals, hash)
-                : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
+            hash ^= internals.Zobrist.GetCastlingsHash(Counters.Castlings) ^ internals.Zobrist.GetCastlingsHash(castlings);
         }
 
-        private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
-
-        private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
-
-        public Piece FindKing(Piece color) => Piece.King | color.SetMask(GetBitboard(color).King);
-
-        public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
-
-        public IEnumerable<Piece> GetPieces(Piece color) => GetBitboard(color).GetPieces();
-
-        public IEnumerable<Piece> GetPieces(Piece color, Piece type) => GetPieces(color, type, ulong.MaxValue);
-
-        private IEnumerable<Piece> GetPieces(Piece color, Piece type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
-
-        public IEnumerable<Piece> GetAttackers(Piece piece)
+        if (move.Flags.HasFlag(SpecialMove.PawnPromotes))
         {
-            var threats = internals.Attacks.GetThreatMask(piece);
+            var promotedPiece = move.Piece.SetMask(move.Target);
+            var promotionPiece = (ActiveColor | move.PromotionType).SetMask(move.Target);
+            activeBitboard = activeBitboard.Toggle(promotedPiece).Toggle(promotionPiece);
 
-            var opponent = GetBitboard(piece.OpponentColor());
+            hash ^= internals.Zobrist.GetPieceHash(promotedPiece) ^ internals.Zobrist.GetPieceHash(promotionPiece);
+        }
 
-            if ((opponent.All & threats.Any) == 0)
+        var counters = new Counters(
+            whitePlaying ? Piece.None : Piece.White,
+            castlings,
+            move.EnPassantTarget,
+            move.Piece.Is(Piece.Pawn) || capture.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1,
+            Counters.FullmoveNumber + (whitePlaying ? 0 : 1),
+            capture);
+
+        hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
+            ^ internals.Zobrist.GetMaskHash(counters.EnPassantTarget)
+            ^ internals.Zobrist.GetPieceHash(Counters.ActiveColor)
+            ^ internals.Zobrist.GetPieceHash(counters.ActiveColor);
+
+        return whitePlaying
+            ? new Board(activeBitboard, opponentBitboard, counters, internals, hash)
+            : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
+    }
+
+    private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
+
+    private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
+
+    public Piece FindKing(Piece color) => Piece.King | color.SetMask(GetBitboard(color).King);
+
+    public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
+
+    public IEnumerable<Piece> GetPieces(Piece color) => GetBitboard(color).GetPieces();
+
+    public IEnumerable<Piece> GetPieces(Piece color, Piece type) => GetPieces(color, type, ulong.MaxValue);
+
+    private IEnumerable<Piece> GetPieces(Piece color, Piece type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
+
+    public IEnumerable<Piece> GetAttackers(Piece piece)
+    {
+        var threats = internals.Attacks.GetThreatMask(piece);
+
+        var opponent = GetBitboard(piece.OpponentColor());
+
+        var target = piece.GetMask();
+
+        foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
+        {
+            yield return knight;
+        }
+
+        foreach (var pawn in opponent.GetPieces(Piece.Pawn, threats.Pawn))
+        {
+            yield return pawn;
+        }
+
+        foreach (var king in opponent.GetPieces(Piece.King, threats.King))
+        {
+            yield return king;
+        }
+
+        foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
+        {
+            if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
             {
-                yield break;
-            }
-
-            var target = piece.GetMask();
-
-            if (opponent.Bishop != 0)
-            {
-                foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
-                {
-                    if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
-                    {
-                        yield return bishop;
-                    }
-                }
-            }
-
-            if (opponent.Queen != 0)
-            {
-                foreach (var queen in opponent.GetPieces(Piece.Queen, threats.Queen))
-                {
-                    if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
-                    {
-                        yield return queen;
-                    }
-                }
-            }
-
-            if (opponent.Knight != 0)
-            {
-                foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
-                {
-                    yield return knight;
-                }
-            }
-
-            if (opponent.Rook != 0)
-            {
-                foreach (var rook in opponent.GetPieces(Piece.Rook, threats.Rook))
-                {
-                    if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
-                    {
-                        yield return rook;
-                    }
-                }
-            }
-
-            if (opponent.Pawn != 0)
-            {
-                foreach (var pawn in opponent.GetPieces(Piece.Pawn, threats.Pawn))
-                {
-                    yield return pawn;
-                }
-            }
-
-            foreach (var king in opponent.GetPieces(Piece.King, threats.King))
-            {
-                yield return king;
+                yield return bishop;
             }
         }
 
-        private bool IsBlocked(Piece piece)
+        foreach (var queen in opponent.GetPieces(Piece.Queen, threats.Queen))
         {
-            var blockedMask = internals.Moves.GetBlockedMask(piece);
-
-            return (blockedMask & GetBitboard(ActiveColor).All) == blockedMask;
-        }
-
-        public IEnumerable<Move> GetLegalMoves()
-        {
-            foreach (var piece in GetPieces(ActiveColor).Where(p => !IsBlocked(p)))
+            if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
             {
-                foreach (var move in GetLegalMoves(piece))
-                {
-                    yield return move;
-                }
+                yield return queen;
             }
         }
 
-        public IEnumerable<Move> GetLegalMoves(Piece piece)
+        foreach (var rook in opponent.GetPieces(Piece.Rook, threats.Rook))
         {
-            var whiteIsPlaying = ActiveColor.Is(Piece.White);
-
-            foreach (var vector in internals.Moves.GetVectors(piece))
+            if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
             {
-                foreach (var move in vector)
+                yield return rook;
+            }
+        }
+    }
+
+    public IEnumerable<LegalMove> GetLegalMoves()
+    {
+        foreach (var piece in GetPieces(ActiveColor))
+        {
+            foreach (var move in GetLegalMoves(piece))
+            {
+                yield return move;
+            }
+        }
+    }
+
+    public IEnumerable<LegalMove> GetLegalMoves(Piece piece)
+    {
+        var whiteIsPlaying = ActiveColor.Is(Piece.White);
+
+        foreach (var vector in internals.Moves.GetVectors(piece))
+        {
+            foreach (var move in vector)
+            {
+                var friendlyTarget = whiteIsPlaying ? white.Peek(move.Target) : black.Peek(move.Target);
+
+                if (friendlyTarget != Piece.None)
                 {
-                    var friendlyTarget = whiteIsPlaying ? white.Peek(move.Target) : black.Peek(move.Target);
+                    break;
+                }
 
-                    if (friendlyTarget != Piece.None)
-                    {
-                        break;
-                    }
+                var hostileTarget = whiteIsPlaying ? black.Peek(move.Target) : white.Peek(move.Target);
 
-                    var hostileTarget = whiteIsPlaying ? black.Peek(move.Target) : white.Peek(move.Target);
+                if (!ValidateMove(move, hostileTarget))
+                {
+                    break;
+                }
 
-                    if (!ValidateMove(move, hostileTarget))
-                    {
-                        break;
-                    }
+                var testBoard = Play(move);
 
-                    var testBoard = Play(move);
-
-                    // Moving into check?
-                    if (testBoard.IsAttacked(testBoard.FindKing(ActiveColor)))
-                    {
-                        if (hostileTarget != Piece.None)
-                        {
-                            break;
-                        }
-
-                        continue;
-                    }
-
-                    yield return move;
-
+                // Moving into check?
+                if (testBoard.IsAttacked(testBoard.FindKing(ActiveColor)))
+                {
                     if (hostileTarget != Piece.None)
                     {
                         break;
                     }
+
+                    continue;
+                }
+
+                yield return new LegalMove(move, testBoard);
+
+                if (hostileTarget != Piece.None)
+                {
+                    break;
                 }
             }
         }
-
-        private bool ValidateMove(Move move, Piece hostileTarget)
-        {
-            if (move.Piece.Is(Piece.Pawn))
-            {
-                if (hostileTarget == Piece.None)
-                {
-                    if (move.Flags.HasFlag(SpecialMove.PawnTakes))
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (move.Flags.HasFlag(SpecialMove.PawnMoves))
-                    {
-                        return false;
-                    }
-                }
-
-                if (move.Flags.HasFlag(SpecialMove.PawnTakesEnPassant) && move.Target != Counters.EnPassantTarget)
-                {
-                    return false;
-                }
-            }
-            else if (move.Piece.Is(Piece.King) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
-            {
-                if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !Counters.Castlings.HasFlag(ActiveColor.Is(Piece.White) ? Castlings.WhiteQueenside : Castlings.BlackQueenside))
-                {
-                    return false;
-                }
-
-                if (move.Flags.HasFlag(SpecialMove.CastleKing) && !Counters.Castlings.HasFlag(ActiveColor.Is(Piece.White) ? Castlings.WhiteKingside : Castlings.BlackKingside))
-                {
-                    return false;
-                }
-
-                // castling path is blocked
-                if (IsOccupied(move.CastlingEmptySquaresMask | move.CastlingCheckMask))
-                {
-                    return false;
-                }
-
-                // castling from or into check
-                if (IsAttacked(move.Piece) || IsAttacked(move.Piece.SetMask(move.CastlingCheckMask)) || IsAttacked(move.Piece.SetMask(move.Target)))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public bool IsChecked => IsAttacked(FindKing(ActiveColor));
-
-        public bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
     }
+
+    private bool ValidateMove(Move move, Piece hostileTarget)
+    {
+        if (move.Piece.Is(Piece.Pawn))
+        {
+            if (hostileTarget == Piece.None)
+            {
+                if (move.Flags.HasFlag(SpecialMove.PawnTakes))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (move.Flags.HasFlag(SpecialMove.PawnMoves))
+                {
+                    return false;
+                }
+            }
+
+            if (move.Flags.HasFlag(SpecialMove.PawnTakesEnPassant) && move.Target != Counters.EnPassantTarget)
+            {
+                return false;
+            }
+        }
+        else if (move.Piece.Is(Piece.King) && (move.Flags.HasFlag(SpecialMove.CastleQueen) || move.Flags.HasFlag(SpecialMove.CastleKing)))
+        {
+            if (move.Flags.HasFlag(SpecialMove.CastleQueen) && !Counters.Castlings.HasFlag(ActiveColor.Is(Piece.White) ? Castlings.WhiteQueenside : Castlings.BlackQueenside))
+            {
+                return false;
+            }
+
+            if (move.Flags.HasFlag(SpecialMove.CastleKing) && !Counters.Castlings.HasFlag(ActiveColor.Is(Piece.White) ? Castlings.WhiteKingside : Castlings.BlackKingside))
+            {
+                return false;
+            }
+
+            // castling path is blocked
+            if (IsOccupied(move.CastlingEmptySquaresMask | move.CastlingCheckMask))
+            {
+                return false;
+            }
+
+            // castling from or into check
+            if (IsAttacked(move.Piece) || IsAttacked(move.Piece.SetMask(move.CastlingCheckMask)) || IsAttacked(move.Piece.SetMask(move.Target)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool IsChecked => IsAttacked(FindKing(ActiveColor));
+
+    public bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
 }

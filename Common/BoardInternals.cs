@@ -35,8 +35,6 @@ namespace SicTransit.Woodpusher.Common
 
         public Moves Moves { get; }
 
-        public OpeningBook OpeningBook { get; }
-
         public Zobrist Zobrist { get; }
 
         public BoardInternals()
@@ -44,7 +42,6 @@ namespace SicTransit.Woodpusher.Common
             Attacks = new Attacks();
             Scoring = new Scoring();
             Moves = new Moves();
-            OpeningBook = new OpeningBook();
             Zobrist = new Zobrist();
         }
     }

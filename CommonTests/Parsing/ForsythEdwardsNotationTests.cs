@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
         [TestMethod]
         public void ParseSetupTest()
         {
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = Board.StartingPosition();
 
             Assert.AreEqual(Piece.White, board.Counters.ActiveColor);
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, board.Counters.Castlings);
@@ -54,7 +54,7 @@ namespace SicTransit.Woodpusher.Common.Tests.Parsing
         [TestMethod]
         public void ExportStartingPositionTest()
         {
-            var board = ForsythEdwardsNotation.Parse(ForsythEdwardsNotation.StartingPosition);
+            var board = Board.StartingPosition();
 
             var export = ForsythEdwardsNotation.Export(board);
 

@@ -2,18 +2,21 @@
 using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
+using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Parsing.Moves
 {
-    public class SimplePieceMove : PgnMove
+    public class SpecificPieceMove : PgnMove
     {
         private readonly Piece pieceType;
+        private readonly Square position;
         private readonly Square square;
         private readonly Piece promotionType;
 
-        public SimplePieceMove(Piece pieceType, Square square, Piece promotionType)
+        public SpecificPieceMove(Piece pieceType, Square position, Square square, Piece promotionType)
         {
             this.pieceType = pieceType;
+            this.position = position;
             this.square = square;
             this.promotionType = promotionType;
         }
@@ -28,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
             {
                 var legalMoves = board.GetLegalMoves(piece).ToArray();
 
-                var legalMove = legalMoves.SingleOrDefault(l => l.Move.GetTarget().Equals(square) && l.Move.PromotionType == promotionType);
+                var legalMove = legalMoves.SingleOrDefault(l => l.Move.Piece.GetSquare().Equals(position) && l.Move.GetTarget().Equals(square) && l.Move.PromotionType == promotionType);
 
                 if (legalMove != null)
                 {
@@ -41,7 +44,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
         public override string ToString()
         {
-            return $"[{base.ToString()}] {pieceType} to {square}";
+            return $"[{base.ToString()}] {pieceType} from {position} to {square}";
         }
     }
 }
