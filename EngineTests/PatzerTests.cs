@@ -204,6 +204,27 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        public void FindMateInTenTest()
+        {
+            var infos = new List<string>();
+            void Callback(string s)
+            {
+                infos.Add(s);
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
+            
+            patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
+            
+            var move = patzer.FindBestMove(10000);
+
+            Assert.IsNotNull(move);
+
+            Assert.IsTrue(infos.Any(i => i.Contains("mate 10")));
+        }
+
+        [TestMethod]
         public void MateInMovesLosingTest()
         {
             var infos = new List<string>();
