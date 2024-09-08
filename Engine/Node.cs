@@ -1,5 +1,4 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Engine.Enums;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -12,9 +11,8 @@ namespace SicTransit.Woodpusher.Engine
         {
             Sign = move.Piece.Is(Piece.White) ? 1 : -1;
             Score = Sign * Declarations.MateScore / 2;
-            Move = move;
-            Status = NodeStatus.Waiting;
-            Board = board.Play(move);
+            Move = move;            
+            Board = board.Play(move);            
             MaxDepth = 2;
         }
 
@@ -22,13 +20,15 @@ namespace SicTransit.Woodpusher.Engine
 
         public int MaxDepth { get; set; }
 
-        public NodeStatus Status { get; set; }
-
         public Move Move { get; }
 
         public Move? PonderMove { get; set; }
 
+        public bool Cancelled { get; set; }
+
         public int Score { get; set; }
+
+        public int Improvement => Score - Board.Score;
 
         public int Count { get; set; }
 

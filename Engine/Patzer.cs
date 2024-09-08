@@ -5,7 +5,6 @@ using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
-using SicTransit.Woodpusher.Engine.Enums;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -25,8 +24,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly Stopwatch stopwatch = new();
 
         private readonly Dictionary<string, int> repetitions = [];
-
-        private readonly ConcurrentDictionary<ulong, (Move, int)> hashTable = new();
+        
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
@@ -135,8 +133,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (Board.Counters.HalfmoveClock == 0)
             {
-                repetitions.Clear();
-                hashTable.Clear();
+                repetitions.Clear();                
             }
 
             var openingMove = GetOpeningBookMove();
@@ -160,42 +157,34 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue);
+                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(n => n.Improvement).ToArray();
 
-                if (nodesToAnalyze.Count() <= 1)
+                if (nodesToAnalyze.Length <= 1)
                 {
                     break;
                 }
 
-                var waitingNodes = nodesToAnalyze.Where(n => n.Status == NodeStatus.Waiting).OrderByDescending(n => n.AbsoluteScore);
-
-                var runningNodes = nodesToAnalyze.Count(n => n.Status == NodeStatus.Running);
-
-                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount - runningNodes).Select(node => Task.Run(() =>
+                foreach(var node in nodesToAnalyze) 
                 {
                     try
                     {
-                        node.Status = NodeStatus.Running;
-
                         var evaluation = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
 
-                        if (node.Status != NodeStatus.Cancelled)
+                        if (!node.Cancelled)
                         {
                             node.Score = evaluation;
 
-                            var principalVariation = FindPrincipalVariation(Board, node).ToArray();
-                            node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
+                            SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
 
-                            SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
-
-                            node.MaxDepth += 2;
-                            node.Status = NodeStatus.Waiting;
+                            node.MaxDepth += 2;                                
                         }
                         else
                         {
+                            node.Cancelled = false;
+
                             SendDebugInfo($"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
 
-                            Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");
+                            Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");                            
                         }
                     }
                     catch (OperationCanceledException)
@@ -210,8 +199,7 @@ namespace SicTransit.Woodpusher.Engine
 
                         throw;
                     }
-
-                })).ToArray());
+                }
             }
 
 
@@ -223,27 +211,6 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
 
             return new BestMove(new AlgebraicMove(bestNode.Move), bestNode.PonderMove != null ? new AlgebraicMove(bestNode.PonderMove) : null);
-        }
-
-        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Node node)
-        {
-            var move = node.Move;
-
-            var depth = 0;
-
-            while (depth++ < node.MaxDepth)
-            {
-                yield return move;
-
-                board = board.Play(move);
-
-                if (!hashTable.TryGetValue(board.Hash, out var pvMove))
-                {
-                    yield break;
-                }
-
-                move = pvMove.Item1;
-            }
         }
 
         private void UpdateForThreefoldRepetition(IReadOnlyCollection<Node> nodes)
@@ -282,15 +249,13 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private void SendAnalysisInfo(int depth, long nodes, Node node, IEnumerable<Move> principalVariation, long time)
+        private void SendAnalysisInfo(int depth, long nodes, Node node, long time)
         {
-            var pv = string.Join(' ', principalVariation.Select(m => m.ToAlgebraicMoveNotation()));
-
             var score = node.MateIn.HasValue ? $"mate {node.MateIn.Value}" : $"cp {node.AbsoluteScore}";
 
             var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
 
-            SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
+            SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {node.Move.ToAlgebraicMoveNotation()}");
         }
 
         private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken)
@@ -301,21 +266,12 @@ namespace SicTransit.Woodpusher.Engine
 
             if (cancellationToken.IsCancellationRequested)
             {
-                node.Status = NodeStatus.Cancelled;
+                node.Cancelled = true;
 
                 return evaluation;
             }
 
-            IEnumerable<LegalMove> legalMoves;
-
-            if (hashTable.TryGetValue(board.Hash, out var hashMove))
-            {
-                legalMoves = board.GetLegalMoves().OrderByDescending(m => m.Move.Equals(hashMove.Item1));
-            }
-            else
-            {
-                legalMoves = board.GetLegalMoves();
-            }
+            IEnumerable<LegalMove> legalMoves = board.GetLegalMoves();            
 
             if (!legalMoves.Any())
             {
@@ -344,8 +300,6 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (evaluation > β)
                     {
-                        UpdateHashTable(legalMove, evaluation);
-
                         break;
                     }
 
@@ -356,14 +310,10 @@ namespace SicTransit.Woodpusher.Engine
                     if (score < evaluation)
                     {
                         evaluation = score;
-
-
                     }
 
                     if (evaluation < α)
                     {
-                        UpdateHashTable(legalMove, -evaluation);
-
                         break;
                     }
 
@@ -372,19 +322,6 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             return evaluation;
-        }
-
-        private void UpdateHashTable(LegalMove legalMove, int evaluation)
-        {
-            hashTable.AddOrUpdate(legalMove.Board.Hash, (legalMove.Move, evaluation), (key, old) =>
-            {
-                if (evaluation < old.Item2)
-                {
-                    return old;
-                }
-
-                return (legalMove.Move, evaluation);
-            });
         }
 
         public void Stop()
