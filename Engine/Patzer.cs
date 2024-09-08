@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
-        private readonly IDictionary<string, int> repetitions = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> repetitions = [];
 
         private readonly ConcurrentDictionary<ulong, (Move, int)> hashTable = new();
         private readonly OpeningBook openingBook = new();
@@ -66,7 +66,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
-            algebraicMoves ??= Enumerable.Empty<AlgebraicMove>();
+            algebraicMoves ??= [];
 
             Board = ForsythEdwardsNotation.Parse(fen);
 
@@ -141,9 +141,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var openingMove = GetOpeningBookMove();
 
-            var nodes = new ConcurrentBag<Node>((openingMove != null ? new[] { openingMove } : Board.GetLegalMoves().Select(l=>l.Move)).Select(m => new Node(Board, m)));
+            var nodes = new ConcurrentBag<Node>((openingMove != null ? [openingMove] : Board.GetLegalMoves().Select(l => l.Move)).Select(m => new Node(Board, m)));
 
-            if (!nodes.Any())
+            if (nodes.IsEmpty)
             {
                 throw new PatzerException("No valid moves found for this board.");
             }
@@ -253,13 +253,9 @@ namespace SicTransit.Woodpusher.Engine
                 var algebraic = node.Move.ToAlgebraicMoveNotation();
                 var key = $"{Board.Hash}_{algebraic}";
 
-                if (repetitions.ContainsKey(key))
+                if (!repetitions.TryAdd(key, 1))
                 {
                     repetitions[key] += 1;
-                }
-                else
-                {
-                    repetitions.Add(key, 1);
                 }
 
                 if (repetitions[key] > 1)
