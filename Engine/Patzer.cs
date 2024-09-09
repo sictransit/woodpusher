@@ -24,7 +24,9 @@ namespace SicTransit.Woodpusher.Engine
         private readonly Stopwatch stopwatch = new();
 
         private readonly Dictionary<string, int> repetitions = [];
-        
+
+        private readonly Dictionary<Move, Move[]> pv = new();
+
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
@@ -150,6 +152,8 @@ namespace SicTransit.Woodpusher.Engine
 
             var cancellationToken = cancellationTokenSource.Token;
 
+            pv.Clear();
+
             while (!cancellationTokenSource.IsCancellationRequested)
             {
                 if (nodes.Any(n => n.MateIn > 0))
@@ -258,7 +262,7 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {node.Move.ToAlgebraicMoveNotation()}");
         }
 
-        private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken)
+        private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken, LegalMove rootMove = null)
         {
             var maximizing = board.ActiveColor.Is(Piece.White);
 
@@ -285,21 +289,35 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score;
             }
 
-            foreach (var legalMove in legalMoves)
+            Move preferredMove = null;
+            if (depth > 1 && rootMove != null)
+            {
+                preferredMove = pv[rootMove.Move][depth - 1];
+            }
+
+            foreach (var legalMove in legalMoves.OrderByDescending(m=>m.Move.Equals(preferredMove)))
             {
                 node.Count++;
 
-                var score = EvaluateBoard(legalMove.Board, node, depth + 1, α, β, cancellationToken);
+                if (depth == 1)
+                { 
+                    pv.TryAdd(legalMove.Move, new Move[16]);
+
+                    rootMove = legalMove;
+                }                
+
+                var score = EvaluateBoard(legalMove.Board, node, depth + 1, α, β, cancellationToken, rootMove);
 
                 if (maximizing)
                 {
                     if (score > evaluation)
                     {
                         evaluation = score;
+                        pv[rootMove.Move][depth - 1] = legalMove.Move;
                     }
 
                     if (evaluation > β)
-                    {
+                    {                        
                         break;
                     }
 
@@ -310,10 +328,12 @@ namespace SicTransit.Woodpusher.Engine
                     if (score < evaluation)
                     {
                         evaluation = score;
+                        pv[rootMove.Move][depth - 1] = legalMove.Move;
                     }
 
                     if (evaluation < α)
                     {
+                        
                         break;
                     }
 
