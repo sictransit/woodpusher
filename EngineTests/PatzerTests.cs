@@ -148,7 +148,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
             //1 R N B Q K B   R
             //  A B C D E F G H
 
-            var patzer = new Patzer();
+            static void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
 
             patzer.Position("rnbqkbnr/ppp2ppp/8/3pp3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3");
 

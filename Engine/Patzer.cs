@@ -10,6 +10,9 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using static System.Formats.Asn1.AsnWriter;
+using System.Xml.Linq;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -18,6 +21,10 @@ namespace SicTransit.Woodpusher.Engine
         public IBoard Board { get; private set; }
 
         private readonly Random random = new();
+
+        private bool timeIsUp = false;
+        private int maxDepth = 0;
+        private long nodeCount = 0;
 
         private CancellationTokenSource cancellationTokenSource = new();
 
@@ -119,16 +126,15 @@ namespace SicTransit.Woodpusher.Engine
         {
             stopwatch.Restart();
 
-            cancellationTokenSource = new CancellationTokenSource();
+            timeIsUp = false;
+            maxDepth = 0;
+            nodeCount = 0;
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 Log.Debug($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
-                if (!cancellationTokenSource.IsCancellationRequested)
-                {
-                    cancellationTokenSource.Cancel();
-                }
+                timeIsUp = true;
             });
 
             if (Board.Counters.HalfmoveClock == 0)
@@ -136,102 +142,75 @@ namespace SicTransit.Woodpusher.Engine
                 repetitions.Clear();                
             }
 
-            var openingMove = GetOpeningBookMove();
+            // TODO: Use the opening book!
+            //var openingMove = GetOpeningBookMove();
 
-            var nodes = new ConcurrentBag<Node>((openingMove != null ? [openingMove] : Board.GetLegalMoves().Select(l => l.Move)).Select(m => new Node(Board, m)));
+            var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-            if (nodes.IsEmpty)
+            (Move?, int) bestEvaluation = (default, -sign*Declarations.MoveMaximumScore);
+
+            while (maxDepth < Declarations.MaxDepth-2)
             {
-                throw new PatzerException("No valid moves found for this board.");
-            }
-
-            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Debug($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
-
-            var cancellationToken = cancellationTokenSource.Token;
-
-            while (!cancellationTokenSource.IsCancellationRequested)
-            {
-                if (nodes.Any(n => n.MateIn > 0))
+                try
                 {
-                    break;
-                }
+                    maxDepth += 2;
 
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue).OrderByDescending(n => n.Improvement).ToArray();
+                    // TODO: Check for threefold repetition. Note the we might seek that!
 
-                if (nodesToAnalyze.Length <= 1)
-                {
-                    break;
-                }
+                    var evaluation = EvaluateBoard(Board,  0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore);
 
-                foreach(var node in nodesToAnalyze) 
-                {
-                    try
+                    if (!timeIsUp)
                     {
-                        var evaluation = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
-
-                        if (!node.Cancelled)
-                        {
-                            node.Score = evaluation;
-
-                            SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, stopwatch.ElapsedMilliseconds);
-
-                            node.MaxDepth += 2;                                
+                        // 15 is better than 10 for white, but -15 is better than -10 for black.
+                        if (Math.Sign(evaluation.Item2 - bestEvaluation.Item2) == sign)
+                        { 
+                            bestEvaluation = evaluation;
                         }
-                        else
-                        {
-                            node.Cancelled = false;
 
-                            SendDebugInfo($"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
+                        var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
+                        var scoreString = GenerateScoreString(evaluation.Item2, sign);
+                        var pvString = evaluation.Item1.ToAlgebraicMoveNotation();
+                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
 
-                            Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");                            
-                        }
                     }
-                    catch (OperationCanceledException)
+                    else
                     {
-                        throw;
+                        SendDebugInfo($"aborting @ depth {maxDepth}");    
+                        
+                        break;
                     }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Caught Exception during evaluation.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Caught Exception during evaluation.");
 
-                        SendExceptionInfo(ex);
+                    SendExceptionInfo(ex);
 
-                        throw;
-                    }
+                    throw;
                 }
             }
 
+            var bestMove = bestEvaluation.Item1;
 
-            // Set node score to zero for threefold repetition moves.
-            UpdateForThreefoldRepetition(nodes);
+            Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
 
-            var bestNode = nodes.OrderByDescending(n => n.AbsoluteScore).First();
+            // TODO! Return ponder move.
 
-            Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
-
-            return new BestMove(new AlgebraicMove(bestNode.Move), bestNode.PonderMove != null ? new AlgebraicMove(bestNode.PonderMove) : null);
+            return new BestMove(new AlgebraicMove(bestMove));
         }
 
-        private void UpdateForThreefoldRepetition(IReadOnlyCollection<Node> nodes)
+        private static string GenerateScoreString(int evaluation, int sign)
         {
-            foreach (var node in nodes)
+            var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
+
+            if (mateIn <= Declarations.MaxDepth)
             {
-                var algebraic = node.Move.ToAlgebraicMoveNotation();
-                var key = $"{Board.Hash}_{algebraic}";
+                var mateSign = evaluation * sign > 0 ? 1 : -1;
 
-                if (!repetitions.TryAdd(key, 1))
-                {
-                    repetitions[key] += 1;
-                }
-
-                if (repetitions[key] > 1)
-                {
-                    Log.Information($"Resetting score to zero for threefold repetition of: {algebraic}");
-
-                    node.Score = 0;
-                }
+                return $"mate {mateSign * mateIn / 2}";
             }
+            
+            return $"score cp {evaluation*sign}";            
         }
 
         private void SendInfo(string info)
@@ -249,27 +228,9 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private void SendAnalysisInfo(int depth, long nodes, Node node, long time)
-        {
-            var score = node.MateIn.HasValue ? $"mate {node.MateIn.Value}" : $"cp {node.AbsoluteScore}";
-
-            var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
-
-            SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {node.Move.ToAlgebraicMoveNotation()}");
-        }
-
-        private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken)
+        private (Move?,int) EvaluateBoard(IBoard board, int depth, int α, int β)
         {
             var maximizing = board.ActiveColor.Is(Piece.White);
-
-            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                node.Cancelled = true;
-
-                return evaluation;
-            }
 
             IEnumerable<LegalMove> legalMoves = board.GetLegalMoves();            
 
@@ -277,25 +238,30 @@ namespace SicTransit.Woodpusher.Engine
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
 
-                return board.IsChecked ? mateScore : Declarations.DrawScore;
+                return (board.LastMove, board.IsChecked ? mateScore : Declarations.DrawScore);
             }
 
-            if (depth == node.MaxDepth)
+            if (depth == maxDepth || timeIsUp)
             {
-                return board.Score;
+                return (board.LastMove, board.Score);
             }
+
+            Move? bestMove = default;
+
+            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
             foreach (var legalMove in legalMoves)
             {
-                node.Count++;
+                nodeCount++;
 
-                var score = EvaluateBoard(legalMove.Board, node, depth + 1, α, β, cancellationToken);
+                var score = EvaluateBoard(legalMove.Board, depth + 1, α, β);
 
                 if (maximizing)
                 {
-                    if (score > evaluation)
+                    if (score.Item2 > evaluation)
                     {
-                        evaluation = score;
+                        bestMove = legalMove.Move;
+                        evaluation = score.Item2;
                     }
 
                     if (evaluation > β)
@@ -307,9 +273,10 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (score < evaluation)
+                    if (score.Item2 < evaluation)
                     {
-                        evaluation = score;
+                        bestMove = legalMove.Move;
+                        evaluation = score.Item2;
                     }
 
                     if (evaluation < α)
@@ -321,7 +288,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            return evaluation;
+            return (bestMove, evaluation);
         }
 
         public void Stop()
