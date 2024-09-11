@@ -149,7 +149,9 @@ namespace SicTransit.Woodpusher.Engine
 
             (Move?, int) bestEvaluation = (default, -sign*Declarations.MoveMaximumScore);
 
-            while (maxDepth < Declarations.MaxDepth-2)
+            var foundMate = false;
+
+            while (maxDepth < Declarations.MaxDepth-2 && !foundMate)
             {
                 try
                 {
@@ -168,11 +170,15 @@ namespace SicTransit.Woodpusher.Engine
                         }
 
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
-                        var scoreString = GenerateScoreString(evaluation.Item2, sign);
+                        var mateIn = GenerateScoreString(evaluation.Item2, sign);
+                        foundMate = mateIn is > 0;
+
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"score cp {evaluation.Item2 * sign}";
+                        
                         var pvString = evaluation.Item1.ToAlgebraicMoveNotation();
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
-
                     }
+                    
                     else
                     {
                         SendDebugInfo($"aborting @ depth {maxDepth}");    
@@ -199,7 +205,7 @@ namespace SicTransit.Woodpusher.Engine
             return new BestMove(new AlgebraicMove(bestMove));
         }
 
-        private static string GenerateScoreString(int evaluation, int sign)
+        private static int? GenerateScoreString(int evaluation, int sign)
         {
             var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
 
@@ -207,10 +213,10 @@ namespace SicTransit.Woodpusher.Engine
             {
                 var mateSign = evaluation * sign > 0 ? 1 : -1;
 
-                return $"mate {mateSign * mateIn / 2}";
+                return mateSign * mateIn / 2;
             }
-            
-            return $"score cp {evaluation*sign}";            
+
+            return null;
         }
 
         private void SendInfo(string info)
