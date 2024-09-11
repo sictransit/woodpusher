@@ -272,7 +272,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     var foundAlterantive = false;
 
-                    foreach (var thinkingTime in new[] { 100, 500, 2500, 12500,25000 })
+                    foreach (var thinkingTime in new[] { 100, 1000, 10000 })
                     {
                         var engineMove = engine.FindBestMove(thinkingTime);
 

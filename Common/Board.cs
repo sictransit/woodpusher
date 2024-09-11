@@ -292,19 +292,19 @@ public class Board : IBoard
     public IEnumerable<LegalMove> GetLegalMoves(Piece piece)
     {
         var whiteIsPlaying = ActiveColor.Is(Piece.White);
+        var friendlyBoard = whiteIsPlaying ? white : black;
+        var hostileBoard = whiteIsPlaying ? black : white;
 
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
             foreach (var move in vector)
             {
-                var friendlyTarget = whiteIsPlaying ? white.Peek(move.Target) : black.Peek(move.Target);
-
-                if (friendlyTarget != Piece.None)
+                if (friendlyBoard.Peek(move.Target) != Piece.None)
                 {
                     break;
                 }
 
-                var hostileTarget = whiteIsPlaying ? black.Peek(move.Target) : white.Peek(move.Target);
+                var hostileTarget =hostileBoard.Peek(move.Target);
 
                 if (!ValidateMove(move, hostileTarget))
                 {

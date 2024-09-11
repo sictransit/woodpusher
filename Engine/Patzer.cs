@@ -238,15 +238,6 @@ namespace SicTransit.Woodpusher.Engine
         {
             var maximizing = board.ActiveColor.Is(Piece.White);
 
-            IEnumerable<LegalMove> legalMoves = board.GetLegalMoves();            
-
-            if (!legalMoves.Any())
-            {
-                var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
-
-                return (board.LastMove, board.IsChecked ? mateScore : Declarations.DrawScore);
-            }
-
             if (depth == maxDepth || timeIsUp)
             {
                 return (board.LastMove, board.Score);
@@ -256,7 +247,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
-            foreach (var legalMove in legalMoves)
+            foreach (var legalMove in board.GetLegalMoves())
             {
                 nodeCount++;
 
@@ -270,12 +261,12 @@ namespace SicTransit.Woodpusher.Engine
                         evaluation = score.Item2;
                     }
 
-                    if (evaluation > β)
+                    α = Math.Max(α, evaluation);
+
+                    if (α >= β)
                     {
                         break;
-                    }
-
-                    α = Math.Max(α, evaluation);
+                    }                    
                 }
                 else
                 {
@@ -285,13 +276,20 @@ namespace SicTransit.Woodpusher.Engine
                         evaluation = score.Item2;
                     }
 
-                    if (evaluation < α)
+                    β = Math.Min(β, evaluation);
+
+                    if (β <= α)
                     {
                         break;
-                    }
-
-                    β = Math.Min(β, evaluation);
+                    }                    
                 }
+            }
+
+            if (bestMove == default)
+            {
+                var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
+
+                return (board.LastMove, board.IsChecked ? mateScore : Declarations.DrawScore);
             }
 
             return (bestMove, evaluation);
