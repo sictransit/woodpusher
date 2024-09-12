@@ -298,6 +298,7 @@ namespace SicTransit.Woodpusher.Engine
         public void Stop()
         {
             cancellationTokenSource.Cancel();
+            timeIsUp = true;
         }
     }
 }
