@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard SetPiece(Piece piece);
 
-        IEnumerable<Piece> GetAttackers(Piece piece);
+        IEnumerable<Piece> GetPiecesInRange(Piece piece, Piece color);
 
         bool IsAttacked(Piece piece);
 

@@ -173,7 +173,8 @@ namespace SicTransit.Woodpusher.Common.Tests
         {
             var board = ForsythEdwardsNotation.Parse("5r2/2Q2n2/5k2/7r/P3P1p1/1B6/5P2/6K1 b - a3 0 34");
 
-            var attackers = board.GetAttackers(Piece.Pawn.SetSquare(new Square("f7"))).ToArray();
+            var pawn = Piece.Pawn.SetSquare(new Square("f7"));
+            var attackers = board.GetPiecesInRange(pawn, pawn.OpponentColor()).ToArray();
 
             Assert.AreEqual(2, attackers.Length);
             Assert.IsTrue(attackers.Any(a => a.HasFlag(Piece.Queen | Piece.White)));

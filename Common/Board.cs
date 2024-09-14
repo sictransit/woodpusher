@@ -230,13 +230,11 @@ public class Board : IBoard
 
     private IEnumerable<Piece> GetPieces(Piece color, Piece type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
 
-    public IEnumerable<Piece> GetAttackers(Piece piece)
+    public IEnumerable<Piece> GetPiecesInRange(Piece piece, Piece color)
     {
         var threats = internals.Attacks.GetThreatMask(piece);
 
-        var opponent = GetBitboard(piece.OpponentColor());
-
-        var target = piece.GetMask();
+        var opponent = GetBitboard(color);        
 
         foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
         {
@@ -252,6 +250,8 @@ public class Board : IBoard
         {
             yield return king;
         }
+
+        var target = piece.GetMask();
 
         foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
         {
@@ -388,5 +388,5 @@ public class Board : IBoard
 
     public bool IsChecked => IsAttacked(FindKing(ActiveColor));
 
-    public bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
+    public bool IsAttacked(Piece piece) => GetPiecesInRange(piece, piece.OpponentColor()).Any();
 }
