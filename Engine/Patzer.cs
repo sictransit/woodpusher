@@ -1,6 +1,4 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
@@ -8,11 +6,7 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Collections.Concurrent;
 using System.Diagnostics;
-using static System.Formats.Asn1.AsnWriter;
-using System.Xml.Linq;
-using System.Numerics;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -147,7 +141,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-            (Move?, int) bestEvaluation = (default, -sign*Declarations.MoveMaximumScore);
+            (Move? move, int score) bestEvaluation = (default, -sign*Declarations.MoveMaximumScore);
 
             var foundMate = false;
 
@@ -157,28 +151,27 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     maxDepth += 2;
 
-                    // TODO: Check for threefold repetition. Note the we might seek that!
+                    // TODO: Check for threefold repetition. Note that we might seek that!
 
-                    var evaluation = EvaluateBoard(Board,  0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore);
+                    var evaluation = EvaluateBoard(Board,  0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
 
                     if (!timeIsUp)
                     {
                         // 15 is better than 10 for white, but -15 is better than -10 for black.
-                        if (Math.Sign(evaluation.Item2 - bestEvaluation.Item2) == sign)
+                        if (Math.Sign(evaluation.score - bestEvaluation.score) == sign)
                         { 
                             bestEvaluation = evaluation;
                         }
 
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
-                        var mateIn = GenerateScoreString(evaluation.Item2, sign);
+                        var mateIn = GenerateScoreString(evaluation.score, sign);
                         foundMate = mateIn is > 0;
 
-                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"score cp {evaluation.Item2 * sign}";
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"score cp {evaluation.score * sign}";
                         
-                        var pvString = evaluation.Item1.ToAlgebraicMoveNotation();
+                        var pvString = evaluation.move.ToAlgebraicMoveNotation();
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
-                    }
-                    
+                    }                    
                     else
                     {
                         SendDebugInfo($"aborting @ depth {maxDepth}");    
@@ -196,7 +189,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            var bestMove = bestEvaluation.Item1;
+            var bestMove = bestEvaluation.move;
 
             Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
 
@@ -234,10 +227,8 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private (Move?,int) EvaluateBoard(IBoard board, int depth, int α, int β)
+        private (Move? move,int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
         {
-            var maximizing = board.ActiveColor.Is(Piece.White);
-
             if (depth == maxDepth || timeIsUp)
             {
                 return (board.LastMove, board.Score);
@@ -245,23 +236,23 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = default;
 
-            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+            var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
             foreach (var legalMove in board.GetLegalMoves())
             {
                 nodeCount++;
 
-                var score = EvaluateBoard(legalMove.Board, depth + 1, α, β);
+                var evaluation = EvaluateBoard(legalMove.Board, depth + 1, α, β, !maximizing);
 
                 if (maximizing)
                 {
-                    if (score.Item2 > evaluation)
+                    if (evaluation.score > bestScore)
                     {
                         bestMove = legalMove.Move;
-                        evaluation = score.Item2;
+                        bestScore = evaluation.score;
                     }
 
-                    α = Math.Max(α, evaluation);
+                    α = Math.Max(α, bestScore);
 
                     if (α >= β)
                     {
@@ -270,13 +261,13 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (score.Item2 < evaluation)
+                    if (evaluation.score < bestScore)
                     {
                         bestMove = legalMove.Move;
-                        evaluation = score.Item2;
+                        bestScore = evaluation.score;
                     }
 
-                    β = Math.Min(β, evaluation);
+                    β = Math.Min(β, bestScore);
 
                     if (β <= α)
                     {
@@ -292,7 +283,7 @@ namespace SicTransit.Woodpusher.Engine
                 return (board.LastMove, board.IsChecked ? mateScore : Declarations.DrawScore);
             }
 
-            return (bestMove, evaluation);
+            return (bestMove, bestScore);
         }
 
         public void Stop()
