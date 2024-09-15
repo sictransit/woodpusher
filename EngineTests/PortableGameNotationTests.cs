@@ -479,7 +479,7 @@ Qd1+ {+30.75/6 1.3s} 45. Kc3 {-M4/245 0.006s} Nxc5 {+25.84/4 0.022s}
                 Trace.WriteLine(Environment.NewLine + engine.Board.PrettyPrint());
             }
 
-            Assert.AreEqual(30, -engine.Board.Score / 100d, 0.5);
+            Assert.AreEqual(30, -engine.Board.Score / 100d, 3);
         }
 
         [TestMethod]

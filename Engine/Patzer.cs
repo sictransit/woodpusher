@@ -238,7 +238,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
-            foreach (var legalMove in board.GetLegalMoves())
+            foreach (var legalMove in board.GetLegalMoves().OrderByDescending(m=>m.Board.Counters.Capture != default))
             {
                 nodeCount++;
 

@@ -14,4 +14,6 @@ public class LegalMove
     public Move Move { get; init; }
 
     public IBoard Board { get; init; }
+
+    public override string ToString() => $"{Move} {Board}";
 }

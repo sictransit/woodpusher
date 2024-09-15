@@ -84,6 +84,34 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        public void DoNotMoveIntoMateInOne()
+        {
+            // The engine was moving into mate in one. 
+            // Playing h1g1 is a mate in one for black. Don't do that!
+
+            //position fen 2r5/R3n1p1/4kn2/7p/3P4/8/3NPPPP/4KB1R w K - 1 23
+            //go
+            //info depth 2 nodes 244 nps 22181 score cp 915 time 12 pv h1g1
+            //info depth 4 nodes 19528 nps 58819 score cp 896 time 332 pv a7a6
+            //info depth 6 nodes 1674452 nps 468116 score cp 868 time 3577 pv e1d1
+            //info string debug aborting @ depth 8
+            //bestmove h1g1            
+
+            void Callback(string s)
+            {
+                Trace.WriteLine(s);
+            }
+
+            var patzer = new Patzer(Callback);
+
+            patzer.Position("2r5/R3n1p1/4kn2/7p/3P4/8/3NPPPP/4KB1R w K - 1 23");
+
+            var bestMove = patzer.FindBestMove(30000);
+
+            Assert.AreNotEqual("h1g1", bestMove.Move.Notation);
+        }
+
+        [TestMethod]
         public void DoNotPlayQueenD2Test()
         {
             var patzer = new Patzer();
