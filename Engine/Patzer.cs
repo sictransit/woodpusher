@@ -229,6 +229,16 @@ namespace SicTransit.Woodpusher.Engine
 
         private (Move? move,int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
         {
+
+            var legalMoves = board.GetLegalMoves().OrderByDescending(m => m.Board.Counters.Capture != default).ToArray();
+            
+            if (legalMoves.Length == 0)
+            {
+                var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
+
+                return (board.LastMove, board.IsChecked ? mateScore : Declarations.DrawScore);
+            }
+
             if (depth == maxDepth || timeIsUp)
             {
                 return (board.LastMove, board.Score);
@@ -238,7 +248,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
-            foreach (var legalMove in board.GetLegalMoves().OrderByDescending(m=>m.Board.Counters.Capture != default))
+            foreach (var legalMove in legalMoves)
             {
                 nodeCount++;
 
@@ -274,13 +284,6 @@ namespace SicTransit.Woodpusher.Engine
                         break;
                     }                    
                 }
-            }
-
-            if (bestMove == default)
-            {
-                var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
-
-                return (board.LastMove, board.IsChecked ? mateScore : Declarations.DrawScore);
             }
 
             return (bestMove, bestScore);

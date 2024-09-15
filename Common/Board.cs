@@ -57,20 +57,20 @@ public class Board : IBoard
 
             foreach (var piece in GetPieces())
             {
-                //if (piece.GetPieceType() != Piece.King)
-                //{
-                //    var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
-                //    if ( attackers>0)
-                //    {
-                //        var defenders = GetPiecesInRange(piece, piece & Piece.White).Count();
+                if (piece.GetPieceType() != Piece.King)
+                {
+                    var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
+                    if (attackers > 0)
+                    {
+                        var defenders = GetPiecesInRange(piece, piece & Piece.White).Count();
 
-                //        if (attackers > defenders)
-                //        {
-                //            // A piece not defended will score zero.
-                //            continue;
-                //        }
-                //    }
-                //}
+                        if (attackers > defenders)
+                        {
+                            // A piece not defended will score zero.
+                            continue;
+                        }
+                    }
+                }
 
                 var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
