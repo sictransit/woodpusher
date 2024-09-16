@@ -58,9 +58,10 @@ namespace SicTransit.Woodpusher.Engine
 
             var legalMoves = Board.GetLegalMoves().ToArray();
 
+            // All found opening book moves found should be legal moves.
             var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(l => l.Move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
-            return legalOpeningBookMoves.OrderByDescending(m => random.Next(m.openingBookMove.Count)).ThenByDescending(_ => random.NextDouble()).FirstOrDefault()?.legalMove.Move;
+            return legalOpeningBookMoves.OrderByDescending(m=>m.openingBookMove.Count).FirstOrDefault()?.legalMove?.Move;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -136,8 +137,11 @@ namespace SicTransit.Woodpusher.Engine
                 repetitions.Clear();
             }
 
-            // TODO: Use the opening book!
-            //var openingMove = GetOpeningBookMove();
+            var openingMove = GetOpeningBookMove();
+            if (openingMove != null)
+            {
+                return new BestMove(new AlgebraicMove(openingMove));
+            }
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
@@ -157,12 +161,6 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (!timeIsUp)
                     {
-                        // 15 is better than 10 for white, but -15 is better than -10 for black.
-                        if (Math.Sign(evaluation.score - bestEvaluation.score) == sign)
-                        {
-                            bestEvaluation = evaluation;
-                        }
-
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
                         var mateIn = GenerateScoreString(evaluation.score, sign);
                         foundMate = mateIn is > 0;

@@ -57,6 +57,8 @@ public class Board : IBoard
 
             foreach (var piece in GetPieces())
             {
+                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+
                 if (piece.GetPieceType() != Piece.King)
                 {
                     var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
@@ -66,17 +68,15 @@ public class Board : IBoard
 
                         if (attackers > defenders)
                         {
-                            // A piece not defended will score zero.
-                            continue;
+                            // A piece not defended will score half.
+                            evaluation /= 2;
                         }
                     }
-                }
 
-                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
-
-                if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
-                {
-                    evaluation *= 2;
+                    if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
+                    {
+                        evaluation *= 2;
+                    }
                 }
 
                 score += piece.Is(Piece.White) ? evaluation : -evaluation;
