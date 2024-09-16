@@ -230,9 +230,9 @@ namespace SicTransit.Woodpusher.Engine
         private (Move? move,int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
         {
 
-            var legalMoves = board.GetLegalMoves().OrderByDescending(m => m.Board.Counters.Capture != default).ToArray();
+            var legalMoves = board.GetLegalMoves();
             
-            if (legalMoves.Length == 0)
+            if (!legalMoves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
 

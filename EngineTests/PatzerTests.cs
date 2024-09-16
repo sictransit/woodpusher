@@ -16,17 +16,27 @@ namespace SicTransit.Woodpusher.Engine.Tests
     [TestClass()]
     public class PatzerTests
     {
+        private Patzer patzer;
+        private readonly List<string> traceLines = [];
+
+        private void PatzerCallback(string s)
+        {
+            Trace.WriteLine(s);
+            traceLines.Add(s);
+        }
+
         [TestInitialize]
         public void Initialize()
         {
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
+
+            traceLines.Clear();
+            patzer = new Patzer(PatzerCallback);            
         }
 
         [TestMethod]
         public void InitializeTest()
         {
-            var patzer = new Patzer();
-
             Assert.IsNotNull(patzer.Board);
 
             Assert.AreEqual(Piece.White, patzer.Board.ActiveColor);
@@ -38,8 +48,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void PlayMultipleBestMoveTest()
         {
-            var patzer = new Patzer();
-
             var moves = new List<AlgebraicMove>();
 
             for (var i = 0; i < 10; i++)
@@ -57,8 +65,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void TakeTheQueenTest()
         {
-            var patzer = new Patzer();
-
             patzer.Position("Q2K3k/8/2p5/3b4/1p6/1nP5/qq6/5r2 b - - 0 93");
 
             var bestMove = patzer.FindBestMove();
@@ -69,13 +75,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void FindMateInOneTest()
         {
-            void Callback(string s)
-            {
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
-
             patzer.Position("k7/8/1QP5/8/8/8/8/7K w - - 0 1");
 
             var bestMove = patzer.FindBestMove();
@@ -97,13 +96,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
             //info string debug aborting @ depth 8
             //bestmove h1g1            
 
-            void Callback(string s)
-            {
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
-
             patzer.Position("2r5/R3n1p1/4kn2/7p/3P4/8/3NPPPP/4KB1R w K - 1 23");
 
             var bestMove = patzer.FindBestMove();
@@ -114,8 +106,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void DoNotPlayQueenD2Test()
         {
-            var patzer = new Patzer();
-
             patzer.Position("rnbqkbnr/ppp2ppp/8/4p3/4N3/5N2/PPPP1PPP/R1BQKB1R b KQkq - 0 4");
 
             var bestMove = patzer.FindBestMove();
@@ -127,13 +117,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void PushAPawnAndDieTest()
         {
             // e8f8 is a good move; pushing e.g. a B pawn is not 
-
-            void Callback(string s)
-            {
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
 
             patzer.Position("rnbqk1nr/ppp1b2p/6P1/3p3Q/3Np3/2N5/PPPP1PPP/R1B1KB1R b KQkq - 0 7");
 
@@ -147,13 +130,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void FindMateInThreeTest()
         {
-            void Callback(string s)
-            {
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
-
             patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38");
 
             var bestMove = patzer.FindBestMove(10000);
@@ -176,13 +152,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
             //1 R N B Q K B   R
             //  A B C D E F G H
 
-            static void Callback(string s)
-            {
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
-
             patzer.Position("rnbqkbnr/ppp2ppp/8/3pp3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3");
 
             var bestMove = patzer.FindBestMove(1000);
@@ -196,8 +165,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
             // The engine was making no-op moves instead of promoting.
             // ... and it turns out that Stockfish agrees.
 
-            var patzer = new Patzer();
-
             patzer.Position("6K1/8/1k6/8/6b1/8/6p1/8 b - - 3 156");
 
             var bestMove = patzer.FindBestMove(10000);
@@ -208,7 +175,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void NodeEvaluationTest()
         {
-            var patzer = new Patzer();
             patzer.Position("7k/8/8/8/8/1p6/B7/7K w - - 0 1");
 
             var bestMove = patzer.FindBestMove();
@@ -219,62 +185,37 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestMethod]
         public void MateInMovesWinningTest()
         {
-            var infos = new List<string>();
-            void Callback(string s)
-            {
-                infos.Add(s);
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
 
             var move = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(infos.Any(i => i.Contains("mate 4")));
+            Assert.IsTrue(traceLines.Any(i => i.Contains("mate 4")));
         }
 
         [TestMethod]
         public void FindMateInTenTest()
         {
-            var infos = new List<string>();
-            void Callback(string s)
-            {
-                infos.Add(s);
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
-            
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
             
             var move = patzer.FindBestMove(30000);
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(infos.Any(i => i.Contains("mate 10")));
+            Assert.IsTrue(traceLines.Any(i => i.Contains("mate 10")));
         }
 
         [TestMethod]
         public void MateInMovesLosingTest()
         {
-            var infos = new List<string>();
-            void Callback(string s)
-            {
-                infos.Add(s);
-                Trace.WriteLine(s);
-            }
-
-            var patzer = new Patzer(Callback);
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
             var move = patzer.FindBestMove(10000);
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(infos.Any(i => i.Contains("mate -4")));
+            Assert.IsTrue(traceLines.Any(i => i.Contains("mate -4")));
         }
 
         [TestMethod]
@@ -288,11 +229,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var pgn = PortableGameNotation.Parse(pgnFile);
 
-            IEngine engine = new Patzer();
-
             foreach (var pgnMove in pgn.PgnMoves)
             {
-                var matchMove = pgnMove.GetMove(engine);
+                var matchMove = pgnMove.GetMove(patzer);
 
                 if (pgnMove.Annotation != PgnAnnotation.None)
                 {
@@ -302,7 +241,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     foreach (var thinkingTime in new[] { 100, 1000, 10000 })
                     {
-                        var engineMove = engine.FindBestMove(thinkingTime);
+                        var engineMove = patzer.FindBestMove(thinkingTime);
 
                         Log.Information($"Found (@{thinkingTime} ms): {engineMove}");
 
@@ -315,13 +254,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     if (!foundAlterantive)
                     {
-                        Log.Information($"\n{engine.Board.PrettyPrint()}");
+                        Log.Information($"\n{patzer.Board.PrettyPrint()}");
                     }
                     Assert.IsTrue(foundAlterantive);                    
                 }
 
                 Log.Information($"Playing: {matchMove}");
-                engine.Play(matchMove);
+                patzer.Play(matchMove);
             }
         }
 
@@ -335,16 +274,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var pgn = PortableGameNotation.Parse(pgnFile);
 
-            IEngine engine = new Patzer();
-
             foreach (var pgnMove in pgn.PgnMoves)
             {
-                var matchMove = pgnMove.GetMove(engine);
+                var matchMove = pgnMove.GetMove(patzer);
 
-                engine.Play(matchMove);
+                patzer.Play(matchMove);
             }
 
-            var bestMove = engine.FindBestMove(3000);
+            var bestMove = patzer.FindBestMove(3000);
 
             Assert.IsNotNull(bestMove);
 
@@ -352,7 +289,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("long running: 1,7 minutes on dev machine")]
+        [Ignore("long running: 1,3 minutes on dev machine")]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]
@@ -369,21 +306,16 @@ namespace SicTransit.Woodpusher.Engine.Tests
             {
                 var success = false;
 
-                void Callback(string s)
+                patzer.Position(fen);
+
+                patzer.Perft(depth);
+
+                if (traceLines.Any(l=>l.Contains(nodes.ToString())))
                 {
-                    if (s.Contains(nodes.ToString()))
-                    {
-                        success = true;
+                    success = true;
 
-                        Log.Information($"{fen}: {nodes} nodes @ depth {depth}");
-                    }
+                    Log.Information($"{fen}: {nodes} nodes @ depth {depth}");
                 }
-
-                IEngine engine = new Patzer(Callback);
-
-                engine.Position(fen);
-
-                engine.Perft(depth);
 
                 Assert.IsTrue(success);
             }
@@ -401,8 +333,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var epdRegex = new Regex(@"(.+)\sbm\s(.+?);");
 
-            IEngine engine = new Patzer();
-
             foreach (var epdLine in epdLines)
             {
                 var match = epdRegex.Match(epdLine);
@@ -412,9 +342,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     var fen = match.Groups[1].Value;
                     var epdBestMove = match.Groups[2].Value;
 
-                    engine.Position(fen);
+                    patzer.Position(fen);
 
-                    var engineBestMove = engine.FindBestMove();
+                    var engineBestMove = patzer.FindBestMove();
 
                     // TODO: Check suggested best move against engine move.
 
