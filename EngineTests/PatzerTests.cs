@@ -2,7 +2,6 @@
 using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Model;
@@ -31,7 +30,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
 
             traceLines.Clear();
-            patzer = new Patzer(PatzerCallback);            
+            patzer = new Patzer(PatzerCallback);
         }
 
         [TestMethod]
@@ -198,7 +197,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void FindMateInTenTest()
         {
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
-            
+
             var move = patzer.FindBestMove(30000);
 
             Assert.IsNotNull(move);
@@ -256,7 +255,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     {
                         Log.Information($"\n{patzer.Board.PrettyPrint()}");
                     }
-                    Assert.IsTrue(foundAlterantive);                    
+                    Assert.IsTrue(foundAlterantive);
                 }
 
                 Log.Information($"Playing: {matchMove}");
@@ -310,7 +309,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 patzer.Perft(depth);
 
-                if (traceLines.Any(l=>l.Contains(nodes.ToString())))
+                if (traceLines.Any(l => l.Contains(nodes.ToString())))
                 {
                     success = true;
 

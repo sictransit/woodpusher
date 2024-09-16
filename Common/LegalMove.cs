@@ -4,7 +4,7 @@ using SicTransit.Woodpusher.Model;
 namespace SicTransit.Woodpusher.Common;
 
 public class LegalMove
-{ 
+{
     public LegalMove(Move move, IBoard board)
     {
         Move = move;

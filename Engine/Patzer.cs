@@ -25,7 +25,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly Stopwatch stopwatch = new();
 
         private readonly Dictionary<string, int> repetitions = [];
-        
+
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
@@ -133,7 +133,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (Board.Counters.HalfmoveClock == 0)
             {
-                repetitions.Clear();                
+                repetitions.Clear();
             }
 
             // TODO: Use the opening book!
@@ -141,11 +141,11 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-            (Move? move, int score) bestEvaluation = (default, -sign*Declarations.MoveMaximumScore);
+            (Move? move, int score) bestEvaluation = (default, -sign * Declarations.MoveMaximumScore);
 
             var foundMate = false;
 
-            while (maxDepth < Declarations.MaxDepth-2 && !foundMate)
+            while (maxDepth < Declarations.MaxDepth - 2 && !foundMate)
             {
                 try
                 {
@@ -153,13 +153,13 @@ namespace SicTransit.Woodpusher.Engine
 
                     // TODO: Check for threefold repetition. Note that we might seek that!
 
-                    var evaluation = EvaluateBoard(Board,  0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
+                    var evaluation = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
 
                     if (!timeIsUp)
                     {
                         // 15 is better than 10 for white, but -15 is better than -10 for black.
                         if (Math.Sign(evaluation.score - bestEvaluation.score) == sign)
-                        { 
+                        {
                             bestEvaluation = evaluation;
                         }
 
@@ -168,14 +168,14 @@ namespace SicTransit.Woodpusher.Engine
                         foundMate = mateIn is > 0;
 
                         var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"score cp {evaluation.score * sign}";
-                        
+
                         var pvString = evaluation.move.ToAlgebraicMoveNotation();
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
-                    }                    
+                    }
                     else
                     {
-                        SendDebugInfo($"aborting @ depth {maxDepth}");    
-                        
+                        SendDebugInfo($"aborting @ depth {maxDepth}");
+
                         break;
                     }
                 }
@@ -227,11 +227,11 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private (Move? move,int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
+        private (Move? move, int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
         {
 
             var legalMoves = board.GetLegalMoves();
-            
+
             if (!legalMoves.Any())
             {
                 var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
@@ -267,7 +267,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (α >= β)
                     {
                         break;
-                    }                    
+                    }
                 }
                 else
                 {
@@ -282,7 +282,7 @@ namespace SicTransit.Woodpusher.Engine
                     if (β <= α)
                     {
                         break;
-                    }                    
+                    }
                 }
             }
 

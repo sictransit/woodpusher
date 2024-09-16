@@ -612,11 +612,11 @@ d8d7: 1
         public void MoveEqualityTest()
         {
             var board = Board.StartingPosition();
-            var moves = board.GetLegalMoves().Select(l=>l.Move).ToArray();
+            var moves = board.GetLegalMoves().Select(l => l.Move).ToArray();
 
             Assert.IsTrue(moves.Any());
 
-            foreach (var referenceMoves in Board.StartingPosition().GetLegalMoves().Select(l=>l.Move))
+            foreach (var referenceMoves in Board.StartingPosition().GetLegalMoves().Select(l => l.Move))
             {
                 Assert.IsFalse(moves.Any(m => m.Equals(referenceMoves)));
             }

@@ -9,7 +9,7 @@ public class Board : IBoard
 {
     private readonly Bitboard white;
     private readonly Bitboard black;
-    private readonly BoardInternals internals;    
+    private readonly BoardInternals internals;
 
     public Counters Counters { get; }
 
@@ -249,7 +249,7 @@ public class Board : IBoard
     {
         var threats = internals.Attacks.GetThreatMask(piece);
 
-        var opponent = GetBitboard(color);        
+        var opponent = GetBitboard(color);
 
         foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
         {
@@ -319,7 +319,7 @@ public class Board : IBoard
                     break;
                 }
 
-                var hostileTarget =hostileBoard.Peek(move.Target);
+                var hostileTarget = hostileBoard.Peek(move.Target);
 
                 if (!ValidateMove(move, hostileTarget))
                 {
