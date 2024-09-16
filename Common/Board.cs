@@ -61,17 +61,18 @@ public class Board : IBoard
 
                 if (piece.GetPieceType() != Piece.King)
                 {
-                    var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
-                    if (attackers > 0)
-                    {
-                        var defenders = GetPiecesInRange(piece, piece & Piece.White).Count();
+                    // TODO: Good idea, but too slow. Node pruning will be needed.
+                    //var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
+                    //if (attackers > 0)
+                    //{
+                    //    var defenders = GetPiecesInRange(piece, piece & Piece.White).Count();
 
-                        if (attackers > defenders)
-                        {
-                            // A piece not defended will score half.
-                            evaluation /= 2;
-                        }
-                    }
+                    //    if (attackers > defenders)
+                    //    {
+                    //        // A piece not defended will score half.
+                    //        evaluation /= 2;
+                    //    }
+                    //}
 
                     if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
                     {
@@ -313,7 +314,7 @@ public class Board : IBoard
         {
             foreach (var move in vector)
             {
-                if (friendlyBoard.Peek(move.Target) != Piece.None)
+                if (friendlyBoard.IsOccupied(move.Target))
                 {
                     break;
                 }
