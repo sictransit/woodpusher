@@ -169,15 +169,6 @@ public class Board : IBoard
                     {
                         castlings &= ~Castlings.WhiteQueenside;
                     }
-
-                    if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.BlackKingside;
-                    }
-                    else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.BlackQueenside;
-                    }
                 }
                 else
                 {
@@ -189,15 +180,23 @@ public class Board : IBoard
                     {
                         castlings &= ~Castlings.BlackQueenside;
                     }
+                }
 
-                    if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.WhiteKingside;
-                    }
-                    else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.WhiteQueenside;
-                    }
+                if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.BlackKingside;
+                }
+                else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.BlackQueenside;
+                }
+                else if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.WhiteKingside;
+                }
+                else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.WhiteQueenside;
                 }
             }
 
