@@ -161,8 +161,10 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (!timeIsUp)
                     {
+                        bestEvaluation = evaluation;
+
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
-                        var mateIn = GenerateScoreString(evaluation.score, sign);
+                        var mateIn = CalculateMateIn(evaluation.score, sign);
                         foundMate = mateIn is > 0;
 
                         var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"score cp {evaluation.score * sign}";
@@ -185,18 +187,16 @@ namespace SicTransit.Woodpusher.Engine
 
                     throw;
                 }
-            }
+            }            
 
-            var bestMove = bestEvaluation.move;
-
-            Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
+            Log.Debug($"evaluated {nodeCount} nodes, found: {bestEvaluation.move}");
 
             // TODO! Return ponder move.
 
-            return new BestMove(new AlgebraicMove(bestMove));
+            return new BestMove(new AlgebraicMove(bestEvaluation.move));
         }
 
-        private static int? GenerateScoreString(int evaluation, int sign)
+        private static int? CalculateMateIn(int evaluation, int sign)
         {
             var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
 
@@ -227,7 +227,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private (Move? move, int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
         {
-
             var legalMoves = board.GetLegalMoves();
 
             if (!legalMoves.Any())
