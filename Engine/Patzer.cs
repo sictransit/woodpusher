@@ -249,14 +249,14 @@ namespace SicTransit.Woodpusher.Engine
             {
                 nodeCount++;
 
-                var evaluation = EvaluateBoard(legalMove.Board, depth + 1, α, β, !maximizing);
+                var (_, score) = EvaluateBoard(legalMove.Board, depth + 1, α, β, !maximizing);
 
                 if (maximizing)
                 {
-                    if (evaluation.score > bestScore)
+                    if (score > bestScore)
                     {
                         bestMove = legalMove.Move;
-                        bestScore = evaluation.score;
+                        bestScore = score;
                     }
 
                     α = Math.Max(α, bestScore);
@@ -268,10 +268,10 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (evaluation.score < bestScore)
+                    if (score < bestScore)
                     {
                         bestMove = legalMove.Move;
-                        bestScore = evaluation.score;
+                        bestScore = score;
                     }
 
                     β = Math.Min(β, bestScore);
