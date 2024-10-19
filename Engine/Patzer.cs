@@ -29,6 +29,8 @@ namespace SicTransit.Woodpusher.Engine
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
+        private readonly HashSet<ulong> cutoffs = new();
+
         public Patzer(Action<string>? infoCallback = null)
         {
             Board = Common.Board.StartingPosition();
@@ -167,10 +169,10 @@ namespace SicTransit.Woodpusher.Engine
                         var mateIn = CalculateMateIn(evaluation.score, sign);
                         foundMate = mateIn is > 0;
 
-                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"score cp {evaluation.score * sign}";
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {evaluation.score * sign}";
 
                         var pvString = evaluation.move.ToAlgebraicMoveNotation();
-                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
                     }
                     else
                     {
@@ -226,8 +228,8 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         private (Move? move, int score) EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
-        {
-            var legalMoves = board.GetLegalMoves();
+        {            
+            var legalMoves = board.GetLegalMoves().OrderByDescending(x=> cutoffs.Contains(x.Board.Hash)).ThenByDescending(x=>x.Board.Counters.Capture != Piece.None).ToArray();
 
             if (!legalMoves.Any())
             {
@@ -263,7 +265,8 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (α >= β)
                     {
-                        break;
+                        cutoffs.Add(legalMove.Board.Hash);
+                        break;                        
                     }
                 }
                 else
@@ -278,6 +281,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (β <= α)
                     {
+                        cutoffs.Add(legalMove.Board.Hash);
                         break;
                     }
                 }
