@@ -61,7 +61,7 @@ namespace SicTransit.Woodpusher.Engine
             // All found opening book moves found should be legal moves.
             var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(l => l.Move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
-            return legalOpeningBookMoves.OrderByDescending(m=>m.openingBookMove.Count).FirstOrDefault()?.legalMove?.Move;
+            return legalOpeningBookMoves.OrderByDescending(m => m.openingBookMove.Count).FirstOrDefault()?.legalMove?.Move;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -187,7 +187,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     throw;
                 }
-            }            
+            }
 
             Log.Debug($"evaluated {nodeCount} nodes, found: {bestEvaluation.move}");
 
