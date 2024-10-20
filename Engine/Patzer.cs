@@ -257,18 +257,21 @@ namespace SicTransit.Woodpusher.Engine
                 return (board.LastMove, board.Score);
             }
 
-            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply >= board.Counters.Ply)
-            {
-                //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
+            // TODO: Fix! This breaks mate detection somehow.
+            //if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply >= board.Counters.Ply)
+            //{
+            //    //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
                 
-                return (cached.move, cached.score);
-            }
+            //    return (cached.move, cached.score);
+            //}
 
             Move? bestMove = default;
 
             var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
-            foreach (var legalMove in board.GetLegalMoves().OrderByDescending(l=>cutoffs.Contains(l.Board.Hash)))
+            var legalMoves = board.GetLegalMoves().OrderByDescending(l => cutoffs.Contains(l.Board.Hash)).ThenByDescending(l=>l.Board.Counters.Capture != Piece.None).ThenByDescending(l=>l.Move.Flags != SpecialMove.None);
+
+            foreach (var legalMove in legalMoves)
             {
                 nodeCount++;
 
