@@ -16,6 +16,8 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Capture { get; }
 
+        public int Ply => FullmoveNumber * 2 - (ActiveColor == Piece.White ? 2 : 1);
+
         public Counters(Piece activeColor, Castlings castlings, ulong enPassantTarget, int halfmoveClock, int fullmoveNumber, Piece capture)
         {
             ActiveColor = activeColor;

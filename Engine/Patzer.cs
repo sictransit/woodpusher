@@ -27,6 +27,10 @@ namespace SicTransit.Woodpusher.Engine
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
+        private readonly Dictionary<ulong, (int ply, Move move, int score)> transpositionTable = new();
+
+        private readonly HashSet<ulong> cutoffs = new();
+
         public Patzer(Action<string>? infoCallback = null)
         {
             Board = Common.Board.StartingPosition();
@@ -141,10 +145,9 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-            var move = default(Move);
-            var score = -sign * Declarations.MoveMaximumScore;
+            var bestMove = default(Move);            
 
-            var foundMate = false;
+            var foundMate = false;            
 
             while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp)
             {
@@ -152,20 +155,25 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     maxDepth += 2;
 
+                    transpositionTable.Clear();
+                    cutoffs.Clear();
+
                     // TODO: Check for threefold repetition. Note that we might seek that!
 
-                    (move, score) = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
+                    var (move, score) = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
 
                     if (!timeIsUp)
                     {
+                        bestMove = move!;
+
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
                         var mateIn = CalculateMateIn(score, sign);
                         foundMate = mateIn is > 0;
 
                         var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score * sign}";
 
-                        var pvString = move?.ToAlgebraicMoveNotation() ?? string.Empty;
-                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+                        var pvString = move != null ? GetPrincipalVariationString(move, maxDepth) : string.Empty;
+                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} {pvString}");
                     }
                 }
                 catch (Exception ex)
@@ -180,11 +188,38 @@ namespace SicTransit.Woodpusher.Engine
 
             SendDebugInfo($"aborting @ depth {maxDepth}");
 
-            Log.Debug($"evaluated {nodeCount} nodes, found: {move}");
+            Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
 
             // TODO! Return ponder move.
 
-            return new BestMove(new AlgebraicMove(move));
+            return new BestMove(new AlgebraicMove(bestMove));
+        }
+
+        private string GetPrincipalVariationString(Move move, int depth)
+        {
+            var principalVariation = new List<string>
+            {
+                "pv",
+                move.ToAlgebraicMoveNotation()
+            };
+
+            var pvBoard = Board.Play(move);
+
+            for (var i = 0; i < depth; i++)
+            {
+                if (transpositionTable.TryGetValue(pvBoard.Hash, out var cached))
+                {
+                    principalVariation.Add(cached.move.ToAlgebraicMoveNotation());
+
+                    pvBoard = pvBoard.Play(cached.move);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return string.Join(" ", principalVariation);
         }
 
         private static int? CalculateMateIn(int evaluation, int sign)
@@ -223,11 +258,18 @@ namespace SicTransit.Woodpusher.Engine
                 return (board.LastMove, board.Score);
             }
 
+            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply >= board.Counters.Ply)
+            {
+                //Log.Debug($"Transposition table hit: {board.Hash}");
+                //return (cached.move, cached.score);
+            }
+
+
             Move? bestMove = default;
 
             var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
 
-            foreach (var legalMove in board.GetLegalMoves())
+            foreach (var legalMove in board.GetLegalMoves().OrderByDescending(l=>cutoffs.Contains(l.Board.Hash)))
             {
                 nodeCount++;
 
@@ -245,7 +287,8 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (α >= β)
                     {
-                        break;
+                        cutoffs.Add(legalMove.Board.Hash);
+                        break;                        
                     }
                 }
                 else
@@ -260,7 +303,8 @@ namespace SicTransit.Woodpusher.Engine
 
                     if (β <= α)
                     {
-                        break;
+                        cutoffs.Add(legalMove.Board.Hash);
+                        break;                        
                     }
                 }
             }
@@ -278,6 +322,8 @@ namespace SicTransit.Woodpusher.Engine
                     bestScore = Declarations.DrawScore;
                 }           
             }
+
+            transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
             return (bestMove, bestScore);
         }
