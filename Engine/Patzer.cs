@@ -254,60 +254,43 @@ namespace SicTransit.Woodpusher.Engine
         {
             if (depth == maxDepth || timeIsUp)
             {
-                return (board.LastMove, board.Score);
+                return (board.LastMove, board.Score * (maximizing ? 1 : -1));
             }
 
             // TODO: Fix! This breaks mate detection somehow.
             //if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply >= board.Counters.Ply)
             //{
             //    //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
-                
+
             //    return (cached.move, cached.score);
             //}
 
             Move? bestMove = default;
 
-            var bestScore = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
+            var bestScore =  -Declarations.MoveMaximumScore ;
 
-            var legalMoves = board.GetLegalMoves().OrderByDescending(l => cutoffs.Contains(l.Board.Hash)).ThenByDescending(l=>l.Board.Counters.Capture != Piece.None).ThenByDescending(l=>l.Move.Flags != SpecialMove.None);
+            var legalMoves = board.GetLegalMoves();
+            //var legalMoves = board.GetLegalMoves().OrderByDescending(l => transpositionTable.ContainsKey(l.Board.Hash));
 
             foreach (var legalMove in legalMoves)
             {
                 nodeCount++;
 
-                var (_, score) = EvaluateBoard(legalMove.Board, depth + 1, α, β, !maximizing);
+                var (_, score) = EvaluateBoard(legalMove.Board, depth + 1, -β, -α, !maximizing);
+                score=-score;
 
-                if (maximizing)
+                if (score > bestScore)
                 {
-                    if (score > bestScore)
-                    {
-                        bestMove = legalMove.Move;
-                        bestScore = score;
-                    }
-
-                    α = Math.Max(α, bestScore);
-
-                    if (α >= β)
-                    {
-                        cutoffs.Add(legalMove.Board.Hash);
-                        break;                        
-                    }
+                    bestMove = legalMove.Move;
+                    bestScore = score;
                 }
-                else
+
+                α = Math.Max(α, bestScore);
+
+                if (α >= β)
                 {
-                    if (score < bestScore)
-                    {
-                        bestMove = legalMove.Move;
-                        bestScore = score;
-                    }
-
-                    β = Math.Min(β, bestScore);
-
-                    if (β <= α)
-                    {
-                        cutoffs.Add(legalMove.Board.Hash);
-                        break;                        
-                    }
+                    cutoffs.Add(legalMove.Board.Hash);
+                    break;                        
                 }
             }
 
@@ -317,7 +300,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (board.IsChecked)
                 {
-                    bestScore = maximizing ? -Declarations.MateScore + board.Counters.Ply  : Declarations.MateScore - board.Counters.Ply;
+                    bestScore = -Declarations.MateScore + board.Counters.Ply;
                 }
                 else
                 {
