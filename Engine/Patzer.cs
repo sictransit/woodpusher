@@ -222,15 +222,14 @@ namespace SicTransit.Woodpusher.Engine
             return string.Join(" ", principalVariation);
         }
 
-        private static int? CalculateMateIn(int evaluation, int sign)
+        private int? CalculateMateIn(int evaluation, int sign)
         {
-            var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
+            var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore) - Board.Counters.Ply;
 
             if (mateIn <= Declarations.MaxDepth)
             {
-                var mateSign = evaluation * sign > 0 ? 1 : -1;
 
-                return mateSign * mateIn / 2;
+                return sign * (mateIn / 2 + (sign > 0 ? 1 : 0));
             }
 
             return null;
@@ -260,10 +259,10 @@ namespace SicTransit.Woodpusher.Engine
 
             if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply >= board.Counters.Ply)
             {
-                //Log.Debug($"Transposition table hit: {board.Hash}");
-                //return (cached.move, cached.score);
+                //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
+                
+                return (cached.move, cached.score);
             }
-
 
             Move? bestMove = default;
 
@@ -315,14 +314,14 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (board.IsChecked)
                 {
-                    bestScore = maximizing ? -Declarations.MateScore + depth   : Declarations.MateScore - depth;
+                    bestScore = maximizing ? -Declarations.MateScore + board.Counters.Ply  : Declarations.MateScore - board.Counters.Ply;
                 }
                 else
                 {
                     bestScore = Declarations.DrawScore;
                 }           
             }
-
+            
             transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
             return (bestMove, bestScore);

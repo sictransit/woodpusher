@@ -27,7 +27,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         [TestInitialize]
         public void Initialize()
         {
-            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Information);
+            Logging.EnableUnitTestLogging(Serilog.Events.LogEventLevel.Debug);
 
             traceLines.Clear();
             patzer = new Patzer(PatzerCallback);
