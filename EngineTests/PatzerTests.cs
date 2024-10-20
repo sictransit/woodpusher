@@ -121,7 +121,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     failures++;
                 }
                 else
-                { 
+                {
                     Log.Information($"Success: {positions[i]} - {bestMove.Move.Notation} == {solutions[i]}");
                 }
             }

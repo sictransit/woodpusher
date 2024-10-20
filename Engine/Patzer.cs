@@ -29,8 +29,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Dictionary<ulong, (int ply, Move move, int score)> transpositionTable = new();
 
-        private readonly HashSet<ulong> cutoffs = new();
-
         public Patzer(Action<string>? infoCallback = null)
         {
             Board = Common.Board.StartingPosition();
@@ -145,18 +143,21 @@ namespace SicTransit.Woodpusher.Engine
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-            var bestMove = default(Move);            
+            var bestMove = default(Move);
 
-            var foundMate = false;            
+            var foundMate = false;
 
-            while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp)
+            var enoughTime = true;
+
+            while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp && enoughTime)
             {
                 try
                 {
+                    var startTime = stopwatch.ElapsedMilliseconds;
+
                     maxDepth += 2;
 
                     transpositionTable.Clear();
-                    cutoffs.Clear();
 
                     // TODO: Check for threefold repetition. Note that we might seek that!
 
@@ -174,6 +175,9 @@ namespace SicTransit.Woodpusher.Engine
 
                         var pvString = move != null ? GetPrincipalVariationString(move, maxDepth) : string.Empty;
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} {pvString}");
+
+                        // TODO: This is obviously not accurate. 
+                        enoughTime = (timeLimit - stopwatch.ElapsedMilliseconds) > (stopwatch.ElapsedMilliseconds - startTime) * Math.PI;
                     }
                 }
                 catch (Exception ex)
@@ -267,17 +271,17 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = default;
 
-            var bestScore =  -Declarations.MoveMaximumScore ;
+            var bestScore = -Declarations.MoveMaximumScore;
 
             var legalMoves = board.GetLegalMoves();
-            //var legalMoves = board.GetLegalMoves().OrderByDescending(l => transpositionTable.ContainsKey(l.Board.Hash));
+            //var legalMoves = board.GetLegalMoves().OrderByDescending(l => transpositionTable.ContainsKey(l.Board.Hash)).ThenByDescending(l=>l.Board.Counters.Capture != Piece.None);
 
             foreach (var legalMove in legalMoves)
             {
                 nodeCount++;
 
                 var (_, score) = EvaluateBoard(legalMove.Board, depth + 1, -β, -α, !maximizing);
-                score=-score;
+                score = -score;
 
                 if (score > bestScore)
                 {
@@ -289,8 +293,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (α >= β)
                 {
-                    cutoffs.Add(legalMove.Board.Hash);
-                    break;                        
+                    break;
                 }
             }
 
@@ -305,9 +308,9 @@ namespace SicTransit.Woodpusher.Engine
                 else
                 {
                     bestScore = Declarations.DrawScore;
-                }           
+                }
             }
-            
+
             transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
             return (bestMove, bestScore);

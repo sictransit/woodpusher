@@ -202,7 +202,7 @@ namespace SicTransit.Woodpusher
                     }
                     else
                     {
-                        var timeLimit = 30000;
+                        var timeLimit = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
 
                         if (movetimeMatch.Success)
                         {
