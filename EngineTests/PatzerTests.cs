@@ -268,7 +268,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
-            var move = patzer.FindBestMove(10000);
+            var move = patzer.FindBestMove(1000);
 
             Assert.IsNotNull(move);
 

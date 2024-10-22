@@ -262,12 +262,12 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             // TODO: Fix! This breaks mate detection somehow.
-            //if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply >= board.Counters.Ply)
-            //{
-            //    //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
+            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
+            {
+                //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
 
-            //    return (cached.move, cached.score);
-            //}
+                return (cached.move, cached.score);
+            }
 
             Move? bestMove = default;
 
@@ -310,7 +310,7 @@ namespace SicTransit.Woodpusher.Engine
                     bestScore = Declarations.DrawScore;
                 }
             }
-
+            
             transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
             return (bestMove, bestScore);
