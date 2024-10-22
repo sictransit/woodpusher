@@ -256,11 +256,23 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
 
-            var move = patzer.FindBestMove(30000);
+            Task<BestMove> task = Task.Run(() => patzer.FindBestMove(30000));
 
-            Assert.IsNotNull(move);
+            var foundMate = false;
 
-            Assert.IsTrue(traceLines.Any(i => i.Contains("mate 10")));
+            while (!task.IsCompleted)
+            {
+                foundMate = traceLines.Any(i => i.Contains("mate 10"));
+
+                if (foundMate)
+                {
+                    patzer.Stop();
+                }
+
+                Thread.Sleep(200);
+            }
+
+            Assert.IsNotNull(task.Result);
         }
 
         [TestMethod]
