@@ -166,13 +166,13 @@ namespace SicTransit.Woodpusher.Engine
                 return new BestMove(new AlgebraicMove(openingMove));
             }
 
-            //var predictedMove = FindPonderMove();
-            //if (predictedMove != null)
-            //{
-            //    Log.Information("Returning ponder move: {0}", predictedMove);
-            //    SendDebugInfo($"playing best line {predictedMove.ToAlgebraicMoveNotation()}");
-            //    return new BestMove(new AlgebraicMove(predictedMove));
-            //}
+            var predictedMove = FindPonderMove();
+            if (predictedMove != null)
+            {
+                Log.Information("Returning ponder move: {0}", predictedMove);
+                SendDebugInfo($"playing best line {predictedMove.ToAlgebraicMoveNotation()}");
+                return new BestMove(new AlgebraicMove(predictedMove));
+            }
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
@@ -361,8 +361,11 @@ namespace SicTransit.Woodpusher.Engine
                     bestScore = Declarations.DrawScore;
                 }
             }
-            
-            transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
+
+            if (!transpositionTable.TryGetValue(board.Hash, out var c) || c.score < bestScore)
+            {
+                transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
+            }            
 
             return (bestMove, bestScore);
         }
