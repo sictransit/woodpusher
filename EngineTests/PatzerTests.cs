@@ -2,6 +2,7 @@
 using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
+using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Model;
@@ -41,6 +42,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.AreEqual(Piece.White, patzer.Board.ActiveColor);
 
             Assert.AreEqual(Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, patzer.Board.Counters.Castlings);
+
+            Assert.AreEqual(0, patzer.Board.Counters.Ply);
         }
 
 
@@ -59,6 +62,49 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 patzer.Position(ForsythEdwardsNotation.StartingPosition, moves);
             }
+        }
+
+        [TestMethod]
+        public void PlayPonderMoveImmediatelyTest()
+        {
+            static Move? findMove(IBoard board, string notation)
+            {
+                foreach (var legalMove in board.GetLegalMoves())
+                {
+                    if (legalMove.Move.ToAlgebraicMoveNotation().Equals(notation))
+                    {
+                        return legalMove.Move;
+                    }
+                }
+
+                return null;
+            }
+
+            patzer.Position("8/6k1/5pp1/3p4/3P4/5PP1/6K1/8 w - - 0 1");
+
+            var bestMove = patzer.FindBestMove();
+
+            Assert.IsNotNull(bestMove);
+            Assert.IsNotNull(bestMove.Move);
+            Assert.IsNotNull(bestMove.Ponder);
+
+            var move = findMove(patzer.Board, bestMove.Move.Notation);
+            Assert.IsNotNull(move);
+
+            patzer.Play(move);
+
+            var ponderMove = findMove(patzer.Board, bestMove.Ponder.Notation);
+            Assert.IsNotNull(ponderMove);
+
+            patzer.Play(ponderMove);
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var nextmove = patzer.FindBestMove(10000);
+
+            Assert.IsTrue(sw.ElapsedMilliseconds < 10); 
+            Assert.IsNotNull(nextmove);            
         }
 
         [TestMethod]
@@ -281,7 +327,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
-            var move = patzer.FindBestMove(2000);
+            var move = patzer.FindBestMove(10000);
 
             Assert.IsNotNull(move);
 

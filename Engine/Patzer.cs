@@ -30,9 +30,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Dictionary<ulong, (int ply, Move move, int score)> transpositionTable = new();
 
-        private readonly List<(int ply, Move move)> bestLine = new();
-
-        private Move ponderMove;
+        private readonly List<(int ply, Move move)> bestLine = new();        
 
         public Patzer(Action<string>? infoCallback = null)
         {
@@ -71,12 +69,21 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? FindPonderMove()
         {
-            if (Board.LastMove == null)
+            IEnumerable<(int ply, Move move)> line = bestLine.SkipWhile(l => l.ply != Board.Counters.Ply);
+
+            foreach (var l in line)
             {
-                return null;
+                if (l.move.Equals(Board.LastMove))
+                {
+                    return line.Skip(1).FirstOrDefault().move;
+                }
+                else
+                {
+                    break;
+                }
             }
 
-            return Board.LastMove.Equals(ponderMove) ? ponderMove : null;
+            return null;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -150,19 +157,22 @@ namespace SicTransit.Woodpusher.Engine
                 repetitions.Clear();
             }
 
+            // TODO: Fill bestLine with the opening book moves.
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
             {
                 Log.Information("Returning opening book move: {0}", openingMove);
+                SendDebugInfo($"playing opening book {openingMove.ToAlgebraicMoveNotation()}");
                 return new BestMove(new AlgebraicMove(openingMove));
             }
 
-            var ponderMove = FindPonderMove();
-            if (ponderMove != null)
-            {
-                Log.Information("Returning ponder move: {0}", ponderMove);
-                return new BestMove(new AlgebraicMove(ponderMove));
-            }
+            //var predictedMove = FindPonderMove();
+            //if (predictedMove != null)
+            //{
+            //    Log.Information("Returning ponder move: {0}", predictedMove);
+            //    SendDebugInfo($"playing best line {predictedMove.ToAlgebraicMoveNotation()}");
+            //    return new BestMove(new AlgebraicMove(predictedMove));
+            //}
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
@@ -241,7 +251,7 @@ namespace SicTransit.Woodpusher.Engine
                 throw new InvalidOperationException("No move found.");
             }
 
-            ponderMove = bestLine.Count>1 ? bestLine[1].move : null;
+            var ponderMove = bestLine.Count>1 ? bestLine[1].move : null;
 
             return new BestMove(new AlgebraicMove(bestMove), ponderMove != null ? new AlgebraicMove(ponderMove) : null);
         }
@@ -305,11 +315,8 @@ namespace SicTransit.Woodpusher.Engine
                 return (board.LastMove, board.Score * (maximizing ? 1 : -1));
             }
 
-            // TODO: Fix! This breaks mate detection somehow.
             if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
             {
-                //Log.Debug($"Transposition table hit: {board.Hash} {cached.move} {cached.score}");
-
                 return (cached.move, cached.score);
             }
 
