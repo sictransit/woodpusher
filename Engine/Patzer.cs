@@ -67,25 +67,6 @@ namespace SicTransit.Woodpusher.Engine
             return legalOpeningBookMoves.OrderByDescending(m => m.openingBookMove.Count).FirstOrDefault()?.legalMove?.Move;
         }
 
-        private Move? FindPonderMove()
-        {
-            IEnumerable<(int ply, Move move)> line = bestLine.SkipWhile(l => l.ply != Board.Counters.Ply);
-
-            foreach (var l in line)
-            {
-                if (l.move.Equals(Board.LastMove))
-                {
-                    return line.Skip(1).FirstOrDefault().move;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return null;
-        }
-
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
             algebraicMoves ??= Array.Empty<AlgebraicMove>();
@@ -137,7 +118,7 @@ namespace SicTransit.Woodpusher.Engine
             SendCallbackInfo(Environment.NewLine + $"Nodes searched: {total}");
         }
 
-        public BestMove FindBestMove(int timeLimit = 1000)
+        public AlgebraicMove FindBestMove(int timeLimit = 1000)
         {
             stopwatch.Restart();
 
@@ -163,15 +144,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 Log.Information("Returning opening book move: {0}", openingMove);
                 SendDebugInfo($"playing opening book {openingMove.ToAlgebraicMoveNotation()}");
-                return new BestMove(new AlgebraicMove(openingMove));
-            }
-
-            var predictedMove = FindPonderMove();
-            if (predictedMove != null)
-            {
-                Log.Information("Returning ponder move: {0}", predictedMove);
-                SendDebugInfo($"playing best line {predictedMove.ToAlgebraicMoveNotation()}");
-                return new BestMove(new AlgebraicMove(predictedMove));
+                return new AlgebraicMove(openingMove);
             }
 
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
@@ -251,9 +224,7 @@ namespace SicTransit.Woodpusher.Engine
                 throw new InvalidOperationException("No move found.");
             }
 
-            var ponderMove = bestLine.Count>1 ? bestLine[1].move : null;
-
-            return new BestMove(new AlgebraicMove(bestMove), ponderMove != null ? new AlgebraicMove(ponderMove) : null);
+            return new AlgebraicMove(bestMove);
         }
 
         private void UpdateBestLine(Move bestMove, int depth)

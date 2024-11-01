@@ -58,53 +58,10 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Assert.IsNotNull(bestMove);
 
-                moves.Add(bestMove.Move);
+                moves.Add(bestMove);
 
                 patzer.Position(ForsythEdwardsNotation.StartingPosition, moves);
             }
-        }
-
-        [TestMethod]
-        public void PlayPonderMoveImmediatelyTest()
-        {
-            static Move? findMove(IBoard board, string notation)
-            {
-                foreach (var legalMove in board.GetLegalMoves())
-                {
-                    if (legalMove.Move.ToAlgebraicMoveNotation().Equals(notation))
-                    {
-                        return legalMove.Move;
-                    }
-                }
-
-                return null;
-            }
-
-            patzer.Position("8/6k1/5pp1/3p4/3P4/5PP1/6K1/8 w - - 0 1");
-
-            var bestMove = patzer.FindBestMove();
-
-            Assert.IsNotNull(bestMove);
-            Assert.IsNotNull(bestMove.Move);
-            Assert.IsNotNull(bestMove.Ponder);
-
-            var move = findMove(patzer.Board, bestMove.Move.Notation);
-            Assert.IsNotNull(move);
-
-            patzer.Play(move);
-
-            var ponderMove = findMove(patzer.Board, bestMove.Ponder.Notation);
-            Assert.IsNotNull(ponderMove);
-
-            patzer.Play(ponderMove);
-
-            var sw = new Stopwatch();
-            sw.Start();
-
-            var nextmove = patzer.FindBestMove(10000);
-
-            Assert.IsTrue(sw.ElapsedMilliseconds < 10); 
-            Assert.IsNotNull(nextmove);            
         }
 
         [TestMethod]
@@ -114,7 +71,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2a8", bestMove.Move.Notation);
+            Assert.AreEqual("a2a8", bestMove.Notation);
         }
 
         [TestMethod]
@@ -161,14 +118,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 var bestMove = patzer.FindBestMove(10000);
 
-                if (!bestMove.Move.Notation.Equals(solutions[i]))
+                if (!bestMove.Notation.Equals(solutions[i]))
                 {
-                    Log.Error($"Failed: {positions[i]} - {bestMove.Move.Notation} != {solutions[i]}");
+                    Log.Error($"Failed: {positions[i]} - {bestMove.Notation} != {solutions[i]}");
                     failures++;
                 }
                 else
                 {
-                    Log.Information($"Success: {positions[i]} - {bestMove.Move.Notation} == {solutions[i]}");
+                    Log.Information($"Success: {positions[i]} - {bestMove.Notation} == {solutions[i]}");
                 }
             }
 
@@ -182,7 +139,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("b6b7", bestMove.Move.Notation);
+            Assert.AreEqual("b6b7", bestMove.Notation);
         }
 
         [TestMethod]
@@ -203,7 +160,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreNotEqual("h1g1", bestMove.Move.Notation);
+            Assert.AreNotEqual("h1g1", bestMove.Notation);
         }
 
         [TestMethod]
@@ -213,7 +170,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreNotEqual("d8d2", bestMove.Move.Notation);
+            Assert.AreNotEqual("d8d2", bestMove.Notation);
         }
 
         [TestMethod]
@@ -227,7 +184,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var validMoves = new[] { "e8f8", "g8f6", "h7g6" };
 
-            Assert.IsTrue(validMoves.Contains(bestMove.Move.Notation));
+            Assert.IsTrue(validMoves.Contains(bestMove.Notation));
         }
 
         [TestMethod]
@@ -237,7 +194,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.AreEqual("e1e7", bestMove.Move.Notation);
+            Assert.AreEqual("e1e7", bestMove.Notation);
         }
 
         [TestMethod]
@@ -259,7 +216,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove(1000);
 
-            Assert.AreNotEqual("d8g5", bestMove.Move.Notation);
+            Assert.AreNotEqual("d8g5", bestMove.Notation);
         }
 
         [TestMethod]
@@ -272,7 +229,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove(10000);
 
-            Assert.IsTrue(bestMove.Move.Notation.Length == 4);
+            Assert.IsTrue(bestMove.Notation.Length == 4);
         }
 
         [TestMethod]
@@ -282,7 +239,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2b3", bestMove.Move.Notation);
+            Assert.AreEqual("a2b3", bestMove.Notation);
         }
 
         [TestMethod]
@@ -302,7 +259,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
 
-            Task<BestMove> task = Task.Run(() => patzer.FindBestMove(30000));
+            Task<AlgebraicMove> task = Task.Run(() => patzer.FindBestMove(30000));
 
             var foundMate = false;
 
@@ -361,7 +318,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         Log.Information($"Found (@{thinkingTime} ms): {engineMove}");
 
-                        if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Move.Notation))
+                        if (!matchMove.ToAlgebraicMoveNotation().Equals(engineMove.Notation))
                         {
                             foundAlterantive = true;
                             break;
@@ -464,7 +421,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     // TODO: Check suggested best move against engine move.
 
-                    Log.Information($"FEN: {fen}; BM: {epdBestMove}; ENGINE: {engineBestMove.Move.Notation}");
+                    Log.Information($"FEN: {fen}; BM: {epdBestMove}; ENGINE: {engineBestMove.Notation}");
                 }
                 else
                 {
