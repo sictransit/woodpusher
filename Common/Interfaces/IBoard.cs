@@ -15,6 +15,8 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IEnumerable<LegalMove> GetLegalMoves(Piece piece);
 
+        bool IsLegalMove(Move move);
+
         IEnumerable<Piece> GetPieces();
 
         IEnumerable<Piece> GetPieces(Piece color);

@@ -286,7 +286,7 @@ namespace SicTransit.Woodpusher.Engine
                 return (board.LastMove, board.Score * (maximizing ? 1 : -1));
             }
 
-            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
+            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply && board.IsLegalMove(cached.move))
             {
                 return (cached.move, cached.score);
             }
@@ -333,10 +333,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (!transpositionTable.TryGetValue(board.Hash, out var c) || c.score < bestScore)
-            {
-                transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
-            }            
+            transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
             return (bestMove, bestScore);
         }

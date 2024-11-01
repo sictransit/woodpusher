@@ -293,6 +293,8 @@ public class Board : IBoard
         }
     }
 
+    public bool IsLegalMove(Move move) => GetLegalMoves().Any(l => l.Move.Equals(move));
+
     public IEnumerable<LegalMove> GetLegalMoves()
     {
         foreach (var piece in GetPieces(ActiveColor))
