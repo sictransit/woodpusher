@@ -230,11 +230,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Assert.IsNotNull(suggestedMove);
 
-                var legalMove = engine.Board.GetLegalMoves().SingleOrDefault(l => l.Move.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
+                var legalMove = engine.Board.GetLegalMoves().SingleOrDefault(l => l.ToAlgebraicMoveNotation().Equals(algebraicMove.Notation));
 
                 Assert.IsNotNull(legalMove);
 
-                engine.Play(legalMove.Move);
+                engine.Play(legalMove);
             }
 
             Log.Information("\n" + engine.Board.PrettyPrint());
@@ -267,11 +267,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Assert.IsTrue(suggestedMoves.Any(m => m.Move.Equals(algebraicMove)));
 
-                var legalMove = engine.Board.GetLegalMoves().SingleOrDefault(l => l.Move.Piece.GetSquare().Equals(algebraicMove.From) && l.Move.GetTarget().Equals(algebraicMove.To) && l.Move.PromotionType == algebraicMove.Promotion);
+                var legalMove = engine.Board.GetLegalMoves().SingleOrDefault(l => l.Piece.GetSquare().Equals(algebraicMove.From) && l.GetTarget().Equals(algebraicMove.To) && l.PromotionType == algebraicMove.Promotion);
 
                 Assert.IsNotNull(legalMove);
 
-                engine.Play(legalMove.Move);
+                engine.Play(legalMove);
             }
         }
     }

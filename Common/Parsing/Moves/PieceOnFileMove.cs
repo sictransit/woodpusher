@@ -34,11 +34,11 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             foreach (var piece in pieces.Where(p => p.GetSquare().File == file))
             {
-                var legalMove = engine.Board.GetLegalMoves(piece).SingleOrDefault(l => l.Move.GetTarget().Equals(square) && l.Move.PromotionType == promotionType);
+                var legalMove = engine.Board.GetLegalMoves(piece).SingleOrDefault(l => l.GetTarget().Equals(square) && l.PromotionType == promotionType);
 
                 if (legalMove != null)
                 {
-                    return legalMove.Move;
+                    return legalMove;
                 }
             }
 

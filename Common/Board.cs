@@ -293,9 +293,9 @@ public class Board : IBoard
         }
     }
 
-    public bool IsLegalMove(Move move) => GetLegalMoves().Any(l => l.Move.Equals(move));
+    public bool IsLegalMove(Move move) => GetLegalMoves().Any(l => l.Equals(move));
 
-    public IEnumerable<LegalMove> GetLegalMoves()
+    public IEnumerable<Move> GetLegalMoves()
     {
         foreach (var piece in GetPieces(ActiveColor))
         {
@@ -306,7 +306,7 @@ public class Board : IBoard
         }
     }
 
-    public IEnumerable<LegalMove> GetLegalMoves(Piece piece)
+    public IEnumerable<Move> GetLegalMoves(Piece piece)
     {
         var whiteIsPlaying = ActiveColor.Is(Piece.White);
         var friendlyBoard = whiteIsPlaying ? white : black;
@@ -341,7 +341,7 @@ public class Board : IBoard
                     continue;
                 }
 
-                yield return new LegalMove(move, testBoard);
+                yield return move;
 
                 if (hostileTarget != Piece.None)
                 {

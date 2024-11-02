@@ -53,7 +53,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             Parallel.ForEach(board.GetLegalMoves(), legalMove =>
             {
-                Interlocked.Add(ref count, legalMove.Board.ParallelPerft(depth - 1));
+                Interlocked.Add(ref count, board.Play(legalMove).ParallelPerft(depth - 1));
             });
 
             return count;
@@ -70,7 +70,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             foreach (var legalMove in board.GetLegalMoves())
             {
-                count += legalMove.Board.ParallelPerft(depth - 1);
+                count += board.Play(legalMove).ParallelPerft(depth - 1);
             }
 
             return count;
