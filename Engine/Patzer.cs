@@ -288,7 +288,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score * (maximizing ? 1 : -1);
             }
 
-            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply && board.IsLegalMove(cached.move))
+            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
             {
                 return cached.score;
             }
@@ -296,11 +296,8 @@ namespace SicTransit.Woodpusher.Engine
             Move? bestMove = default;
 
             var bestScore = -Declarations.MoveMaximumScore;
-
-            var legalMoves = board.GetLegalMoves();
-            //var legalMoves = board.GetLegalMoves().OrderByDescending(l => transpositionTable.ContainsKey(l.Board.Hash)).ThenByDescending(l=>l.Board.Counters.Capture != Piece.None);
-
-            foreach (var legalMove in legalMoves)
+            
+            foreach (var legalMove in board.GetLegalMoves())
             {
                 nodeCount++;
 
@@ -336,7 +333,7 @@ namespace SicTransit.Woodpusher.Engine
 
             transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
-                evaluatedBestMove = bestMove;
+            evaluatedBestMove = bestMove;
 
             return bestScore;
         }
