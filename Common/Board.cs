@@ -56,9 +56,25 @@ public class Board : IBoard
             {
                 var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
+                if (piece.GetPieceType() != Piece.King)
                 {
-                    evaluation *= 2;
+                    // TODO: Good idea, but too slow. Node pruning will be needed.
+                    //var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
+                    //if (attackers > 0)
+                    //{
+                    //    var defenders = GetPiecesInRange(piece, piece & Piece.White).Count();
+
+                    //    if (attackers > defenders)
+                    //    {
+                    //        // A piece not defended will score half.
+                    //        evaluation /= 2;
+                    //    }
+                    //}
+
+                    if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
+                    {
+                        evaluation *= 2;
+                    }
                 }
 
                 score += piece.Is(Piece.White) ? evaluation : -evaluation;
@@ -151,15 +167,6 @@ public class Board : IBoard
                     {
                         castlings &= ~Castlings.WhiteQueenside;
                     }
-
-                    if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.BlackKingside;
-                    }
-                    else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.BlackQueenside;
-                    }
                 }
                 else
                 {
@@ -171,15 +178,23 @@ public class Board : IBoard
                     {
                         castlings &= ~Castlings.BlackQueenside;
                     }
+                }
 
-                    if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.WhiteKingside;
-                    }
-                    else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
-                    {
-                        castlings &= ~Castlings.WhiteQueenside;
-                    }
+                if (move.Target == BoardInternals.BlackKingsideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.BlackKingside;
+                }
+                else if (move.Target == BoardInternals.BlackQueensideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.BlackQueenside;
+                }
+                else if (move.Target == BoardInternals.WhiteKingsideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.WhiteKingside;
+                }
+                else if (move.Target == BoardInternals.WhiteQueensideRookStartingSquare)
+                {
+                    castlings &= ~Castlings.WhiteQueenside;
                 }
             }
 
@@ -201,6 +216,7 @@ public class Board : IBoard
             move.EnPassantTarget,
             move.Piece.Is(Piece.Pawn) || capture.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1,
             Counters.FullmoveNumber + (whitePlaying ? 0 : 1),
+            move,
             capture);
 
         hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
@@ -227,13 +243,11 @@ public class Board : IBoard
 
     private IEnumerable<Piece> GetPieces(Piece color, Piece type, ulong mask) => GetBitboard(color).GetPieces(type, mask);
 
-    public IEnumerable<Piece> GetAttackers(Piece piece)
+    public IEnumerable<Piece> GetPiecesInRange(Piece piece, Piece color)
     {
         var threats = internals.Attacks.GetThreatMask(piece);
 
-        var opponent = GetBitboard(piece.OpponentColor());
-
-        var target = piece.GetMask();
+        var opponent = GetBitboard(color);
 
         foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
         {
@@ -249,6 +263,8 @@ public class Board : IBoard
         {
             yield return king;
         }
+
+        var target = piece.GetMask();
 
         foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
         {
@@ -275,43 +291,53 @@ public class Board : IBoard
         }
     }
 
-    public IEnumerable<LegalMove> GetLegalMoves()
+    public IEnumerable<Move> GetLegalMoves()
+    {
+        return PlayLegalMoves().Select(b => b.Counters.LastMove);
+    }
+
+    public IEnumerable<Move> GetLegalMoves(Piece piece)
+    {
+        return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
+    }
+
+    public IEnumerable<IBoard> PlayLegalMoves()
     {
         foreach (var piece in GetPieces(ActiveColor))
         {
-            foreach (var move in GetLegalMoves(piece))
+            foreach (var board in PlayLegalMoves(piece))
             {
-                yield return move;
+                yield return board;
             }
         }
     }
 
-    public IEnumerable<LegalMove> GetLegalMoves(Piece piece)
+    public IEnumerable<IBoard> PlayLegalMoves(Piece piece)
     {
         var whiteIsPlaying = ActiveColor.Is(Piece.White);
+        var friendlyBoard = whiteIsPlaying ? white : black;
+        var hostileBoard = whiteIsPlaying ? black : white;
 
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
             foreach (var move in vector)
             {
-                var friendlyTarget = whiteIsPlaying ? white.Peek(move.Target) : black.Peek(move.Target);
-
-                if (friendlyTarget != Piece.None)
+                if (friendlyBoard.IsOccupied(move.Target))
                 {
                     break;
                 }
 
-                var hostileTarget = whiteIsPlaying ? black.Peek(move.Target) : white.Peek(move.Target);
+                var hostileTarget = hostileBoard.Peek(move.Target);
 
                 if (!ValidateMove(move, hostileTarget))
                 {
                     break;
                 }
 
-                var testBoard = Play(move);
+                var board = Play(move);
 
                 // Moving into check?
-                if (testBoard.IsAttacked(testBoard.FindKing(ActiveColor)))
+                if (board.IsAttacked(board.FindKing(ActiveColor)))
                 {
                     if (hostileTarget != Piece.None)
                     {
@@ -321,7 +347,7 @@ public class Board : IBoard
                     continue;
                 }
 
-                yield return new LegalMove(move, testBoard);
+                yield return board;
 
                 if (hostileTarget != Piece.None)
                 {
@@ -385,5 +411,5 @@ public class Board : IBoard
 
     public bool IsChecked => IsAttacked(FindKing(ActiveColor));
 
-    public bool IsAttacked(Piece piece) => GetAttackers(piece).Any();
+    public bool IsAttacked(Piece piece) => GetPiecesInRange(piece, piece.OpponentColor()).Any();
 }

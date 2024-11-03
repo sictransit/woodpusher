@@ -11,9 +11,11 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         bool IsPassedPawn(Piece piece);
 
-        IEnumerable<LegalMove> GetLegalMoves();
+        IEnumerable<IBoard> PlayLegalMoves();
 
-        IEnumerable<LegalMove> GetLegalMoves(Piece piece);
+        IEnumerable<Move> GetLegalMoves();
+
+        IEnumerable<Move> GetLegalMoves(Piece piece);
 
         IEnumerable<Piece> GetPieces();
 
@@ -23,7 +25,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard SetPiece(Piece piece);
 
-        IEnumerable<Piece> GetAttackers(Piece piece);
+        IEnumerable<Piece> GetPiecesInRange(Piece piece, Piece color);
 
         bool IsAttacked(Piece piece);
 

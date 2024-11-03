@@ -202,7 +202,7 @@ namespace SicTransit.Woodpusher
                     }
                     else
                     {
-                        var timeLimit = 30000;
+                        var timeLimit = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
 
                         if (movetimeMatch.Success)
                         {
@@ -217,9 +217,8 @@ namespace SicTransit.Woodpusher
                         }
 
                         var bestMove = engine.FindBestMove(Math.Max(0, timeLimit));
-                        var ponder = bestMove.Ponder != null ? $" ponder {bestMove.Ponder.Notation}" : string.Empty;
 
-                        consoleOutput($"bestmove {bestMove.Move.Notation}" + ponder);
+                        consoleOutput($"bestmove {bestMove.Notation}");
                     }
                 }
             });

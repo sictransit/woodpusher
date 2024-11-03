@@ -72,6 +72,8 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
+        public bool IsOccupied(ulong mask) => (All & mask) != 0;
+
         public Piece Peek(ulong mask)
         {
             if ((All & mask) == 0)

@@ -1,15 +1,12 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Common.Exceptions;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
-using SicTransit.Woodpusher.Engine.Enums;
+using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace SicTransit.Woodpusher.Engine
@@ -18,17 +15,24 @@ namespace SicTransit.Woodpusher.Engine
     {
         public IBoard Board { get; private set; }
 
-        private readonly Random random = new();
+        private bool timeIsUp = false;
+        private int maxDepth = 0;
+        private long nodeCount = 0;
 
-        private CancellationTokenSource cancellationTokenSource = new();
+        private readonly CancellationTokenSource cancellationTokenSource = new();
 
         private readonly Stopwatch stopwatch = new();
 
-        private readonly Dictionary<string, int> repetitions = [];
+        private readonly Dictionary<string, int> repetitions = new();
 
-        private readonly ConcurrentDictionary<ulong, (Move, int)> hashTable = new();
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
+
+        private readonly Dictionary<ulong, (int ply, Move move, int score)> transpositionTable = new();
+
+        private readonly List<(int ply, Move move)> bestLine = new();
+
+        private Move evaluatedBestMove = null;
 
         public Patzer(Action<string>? infoCallback = null)
         {
@@ -59,34 +63,33 @@ namespace SicTransit.Woodpusher.Engine
 
             var legalMoves = Board.GetLegalMoves().ToArray();
 
-            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(l => l.Move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
+            // All found opening book moves found should be legal moves.
+            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(move => move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
-            return legalOpeningBookMoves.OrderByDescending(m => random.Next(m.openingBookMove.Count)).ThenByDescending(_ => random.NextDouble()).FirstOrDefault()?.legalMove.Move;
+            return legalOpeningBookMoves.OrderByDescending(m => m.openingBookMove.Count).FirstOrDefault()?.legalMove;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
-            algebraicMoves ??= [];
+            algebraicMoves ??= Array.Empty<AlgebraicMove>();
 
             Board = ForsythEdwardsNotation.Parse(fen);
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var legalMove = Board.GetLegalMoves().SingleOrDefault(l => l.Move.Piece.GetSquare().Equals(algebraicMove.From) && l.Move.GetTarget().Equals(algebraicMove.To) && l.Move.PromotionType == algebraicMove.Promotion);
+                var legalMove = Board.GetLegalMoves().SingleOrDefault(move => move.Piece.GetSquare().Equals(algebraicMove.From) && move.GetTarget().Equals(algebraicMove.To) && move.PromotionType == algebraicMove.Promotion);
 
                 if (legalMove == null)
                 {
                     throw new ArgumentOutOfRangeException(nameof(algebraicMoves), $"unable to play: {algebraicMove}");
                 }
 
-                Play(legalMove.Move);
+                Play(legalMove);
             }
         }
 
         public void Perft(int depth)
         {
-            cancellationTokenSource = new CancellationTokenSource();
-
             var initialMoves = Board.GetLegalMoves();
 
             ulong total = 0;
@@ -102,7 +105,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (depth > 1)
                 {
-                    nodes += i.Board.Perft(depth);
+                    nodes += Board.Play(i).Perft(depth);
                 }
                 else
                 {
@@ -111,160 +114,156 @@ namespace SicTransit.Woodpusher.Engine
 
                 Interlocked.Add(ref total, nodes);
 
-                SendCallbackInfo($"{i.Move.ToAlgebraicMoveNotation()}: {nodes}");
+                SendCallbackInfo($"{i.ToAlgebraicMoveNotation()}: {nodes}");
             });
 
             SendCallbackInfo(Environment.NewLine + $"Nodes searched: {total}");
         }
 
-        public BestMove FindBestMove(int timeLimit = 1000)
+        public AlgebraicMove FindBestMove(int timeLimit = 1000)
         {
             stopwatch.Restart();
 
-            cancellationTokenSource = new CancellationTokenSource();
+            timeIsUp = false;
+            maxDepth = 0;
+            nodeCount = 0;
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 Log.Debug($"thinking time: {timeLimit}");
                 Thread.Sleep(timeLimit);
-                if (!cancellationTokenSource.IsCancellationRequested)
-                {
-                    cancellationTokenSource.Cancel();
-                }
+                timeIsUp = true;
             });
 
             if (Board.Counters.HalfmoveClock == 0)
             {
                 repetitions.Clear();
-                hashTable.Clear();
             }
 
+            // TODO: Fill bestLine with the opening book moves.
             var openingMove = GetOpeningBookMove();
-
-            var nodes = new ConcurrentBag<Node>((openingMove != null ? [openingMove] : Board.GetLegalMoves().Select(l => l.Move)).Select(m => new Node(Board, m)));
-
-            if (nodes.IsEmpty)
+            if (openingMove != null)
             {
-                throw new PatzerException("No valid moves found for this board.");
+                Log.Information("Returning opening book move: {0}", openingMove);
+                SendDebugInfo($"playing opening book {openingMove.ToAlgebraicMoveNotation()}");
+                return new AlgebraicMove(openingMove);
             }
 
-            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Debug($"Legal moves for {color}: {string.Join(';', nodes.Select(n => n.Move))}");
+            var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-            var cancellationToken = cancellationTokenSource.Token;
+            var bestMove = default(Move);
 
-            while (!cancellationTokenSource.IsCancellationRequested)
+            var foundMate = false;
+
+            var enoughTime = true;
+
+            var progress = new List<(int depth, long time)>();
+
+            while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp && enoughTime)
             {
-                if (nodes.Any(n => n.MateIn > 0))
+                try
+                {
+                    maxDepth += 2;
+
+                    transpositionTable.Clear();
+
+                    // TODO: Check for threefold repetition. Note that we might seek that!
+
+                    long startTime = stopwatch.ElapsedMilliseconds;
+
+                    var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
+
+                    long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
+
+                    if (!timeIsUp)
+                    {
+                        bestMove = evaluatedBestMove;
+
+                        UpdateBestLine(bestMove, maxDepth);
+
+                        var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
+
+                        var mateIn = CalculateMateIn(score, sign);
+                        foundMate = mateIn is > 0;
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
+
+                        var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
+                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+
+                        if (evaluationTime > 0)
+                        {
+                            progress.Add((maxDepth, evaluationTime));
+
+                            if (progress.Count > 2 && maxDepth > 6)
+                            {
+                                var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
+                                var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
+
+                                enoughTime = remainingTime > estimatedTime;
+
+                                Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Caught Exception during evaluation.");
+
+                    SendExceptionInfo(ex);
+
+                    throw;
+                }
+            }
+
+            SendDebugInfo($"aborting @ depth {maxDepth}");
+
+            Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
+
+
+            if (bestMove == null)
+            {
+                throw new InvalidOperationException("No move found.");
+            }
+
+            return new AlgebraicMove(bestMove);
+        }
+
+        private void UpdateBestLine(Move bestMove, int depth)
+        {
+            var ply = Board.Counters.Ply + 1;
+
+            bestLine.Clear();
+            bestLine.Add((ply, bestMove));
+
+            var board = Board.Play(bestMove);
+
+            for (var i = 0; i < depth; i++)
+            {
+                if (transpositionTable.TryGetValue(board.Hash, out var cached))
+                {
+                    bestLine.Add((ply + i + 1, cached.move));
+
+                    board = board.Play(cached.move);
+                }
+                else
                 {
                     break;
                 }
-
-                var nodesToAnalyze = nodes.Where(n => !n.MateIn.HasValue);
-
-                if (nodesToAnalyze.Count() <= 1)
-                {
-                    break;
-                }
-
-                var waitingNodes = nodesToAnalyze.Where(n => n.Status == NodeStatus.Waiting).OrderByDescending(n => n.AbsoluteScore);
-
-                var runningNodes = nodesToAnalyze.Count(n => n.Status == NodeStatus.Running);
-
-                Task.WaitAny(waitingNodes.Take(Environment.ProcessorCount - runningNodes).Select(node => Task.Run(() =>
-                {
-                    try
-                    {
-                        node.Status = NodeStatus.Running;
-
-                        var evaluation = EvaluateBoard(node.Board, node, 1, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, cancellationToken);
-
-                        if (node.Status != NodeStatus.Cancelled)
-                        {
-                            node.Score = evaluation;
-
-                            var principalVariation = FindPrincipalVariation(Board, node).ToArray();
-                            node.PonderMove = principalVariation.Length > 1 ? principalVariation[1] : null;
-
-                            SendAnalysisInfo(node.MaxDepth, nodes.Sum(n => n.Count), node, principalVariation, stopwatch.ElapsedMilliseconds);
-
-                            node.MaxDepth += 2;
-                            node.Status = NodeStatus.Waiting;
-                        }
-                        else
-                        {
-                            SendDebugInfo($"aborting {node.Move.ToAlgebraicMoveNotation()} @ depth {node.MaxDepth}");
-
-                            Log.Debug($"Discarding evaluation due to timeout: {node.Move} @ depth {node.MaxDepth}");
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Caught Exception during evaluation.");
-
-                        SendExceptionInfo(ex);
-
-                        throw;
-                    }
-
-                })).ToArray());
-            }
-
-
-            // Set node score to zero for threefold repetition moves.
-            UpdateForThreefoldRepetition(nodes);
-
-            var bestNode = nodes.OrderByDescending(n => n.AbsoluteScore).First();
-
-            Log.Debug($"evaluated {nodes.Sum(n => n.Count)} nodes, found: {bestNode}");
-
-            return new BestMove(new AlgebraicMove(bestNode.Move), bestNode.PonderMove != null ? new AlgebraicMove(bestNode.PonderMove) : null);
-        }
-
-        private IEnumerable<Move> FindPrincipalVariation(IBoard board, Node node)
-        {
-            var move = node.Move;
-
-            var depth = 0;
-
-            while (depth++ < node.MaxDepth)
-            {
-                yield return move;
-
-                board = board.Play(move);
-
-                if (!hashTable.TryGetValue(board.Hash, out var pvMove))
-                {
-                    yield break;
-                }
-
-                move = pvMove.Item1;
             }
         }
 
-        private void UpdateForThreefoldRepetition(IReadOnlyCollection<Node> nodes)
+        private int? CalculateMateIn(int evaluation, int sign)
         {
-            foreach (var node in nodes)
+            var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore) - Board.Counters.Ply;
+
+            if (mateIn <= Declarations.MaxDepth)
             {
-                var algebraic = node.Move.ToAlgebraicMoveNotation();
-                var key = $"{Board.Hash}_{algebraic}";
 
-                if (!repetitions.TryAdd(key, 1))
-                {
-                    repetitions[key] += 1;
-                }
-
-                if (repetitions[key] > 1)
-                {
-                    Log.Information($"Resetting score to zero for threefold repetition of: {algebraic}");
-
-                    node.Score = 0;
-                }
+                return sign * (mateIn / 2 + (sign > 0 ? 1 : 0));
             }
+
+            return null;
         }
 
         private void SendInfo(string info)
@@ -282,114 +281,67 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private void SendAnalysisInfo(int depth, long nodes, Node node, IEnumerable<Move> principalVariation, long time)
+        private int EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
         {
-            var pv = string.Join(' ', principalVariation.Select(m => m.ToAlgebraicMoveNotation()));
-
-            var score = node.MateIn.HasValue ? $"mate {node.MateIn.Value}" : $"cp {node.AbsoluteScore}";
-
-            var nodesPerSecond = time == 0 ? 0 : nodes * 1000 / time;
-
-            SendInfo($"depth {depth} nodes {nodes} nps {nodesPerSecond} score {score} time {time} pv {pv}");
-        }
-
-        private int EvaluateBoard(IBoard board, Node node, int depth, int α, int β, CancellationToken cancellationToken)
-        {
-            var maximizing = board.ActiveColor.Is(Piece.White);
-
-            var evaluation = maximizing ? -Declarations.MoveMaximumScore : Declarations.MoveMaximumScore;
-
-            if (cancellationToken.IsCancellationRequested)
+            if (depth == maxDepth || timeIsUp)
             {
-                node.Status = NodeStatus.Cancelled;
-
-                return evaluation;
+                return board.Score * (maximizing ? 1 : -1);
             }
 
-            IEnumerable<LegalMove> legalMoves;
-
-            if (hashTable.TryGetValue(board.Hash, out var hashMove))
+            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
             {
-                legalMoves = board.GetLegalMoves().OrderByDescending(m => m.Move.Equals(hashMove.Item1));
-            }
-            else
-            {
-                legalMoves = board.GetLegalMoves();
+                return cached.score;
             }
 
-            if (!legalMoves.Any())
+            Move? bestMove = default;
+
+            var bestScore = -Declarations.MoveMaximumScore;
+
+            foreach (var newBoard in board.PlayLegalMoves())
             {
-                var mateScore = maximizing ? -Declarations.MateScore + depth + 1 : Declarations.MateScore - (depth + 1);
+                nodeCount++;
 
-                return board.IsChecked ? mateScore : Declarations.DrawScore;
-            }
+                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, !maximizing);
 
-            if (depth == node.MaxDepth)
-            {
-                return board.Score;
-            }
-
-            foreach (var legalMove in legalMoves)
-            {
-                node.Count++;
-
-                var score = EvaluateBoard(legalMove.Board, node, depth + 1, α, β, cancellationToken);
-
-                if (maximizing)
+                if (score > bestScore)
                 {
-                    if (score > evaluation)
-                    {
-                        evaluation = score;
-                    }
+                    bestMove = newBoard.Counters.LastMove;
+                    bestScore = score;
+                }
 
-                    if (evaluation > β)
-                    {
-                        UpdateHashTable(legalMove, evaluation);
+                α = Math.Max(α, bestScore);
 
-                        break;
-                    }
+                if (α >= β)
+                {
+                    break;
+                }
+            }
 
-                    α = Math.Max(α, evaluation);
+            if (bestMove == default)
+            {
+                if (board.IsChecked)
+                {
+                    bestScore = -Declarations.MateScore + board.Counters.Ply;
                 }
                 else
                 {
-                    if (score < evaluation)
-                    {
-                        evaluation = score;
-
-
-                    }
-
-                    if (evaluation < α)
-                    {
-                        UpdateHashTable(legalMove, -evaluation);
-
-                        break;
-                    }
-
-                    β = Math.Min(β, evaluation);
+                    bestScore = Declarations.DrawScore;
                 }
             }
-
-            return evaluation;
-        }
-
-        private void UpdateHashTable(LegalMove legalMove, int evaluation)
-        {
-            hashTable.AddOrUpdate(legalMove.Board.Hash, (legalMove.Move, evaluation), (key, old) =>
+            else
             {
-                if (evaluation < old.Item2)
-                {
-                    return old;
-                }
+                transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
-                return (legalMove.Move, evaluation);
-            });
+                evaluatedBestMove = bestMove;
+            }
+
+            return bestScore;
         }
 
         public void Stop()
         {
             cancellationTokenSource.Cancel();
+            timeIsUp = true;
         }
     }
 }
