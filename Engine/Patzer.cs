@@ -185,7 +185,7 @@ namespace SicTransit.Woodpusher.Engine
                         
                         var mateIn = CalculateMateIn(score, sign);
                         foundMate = mateIn is > 0;
-                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score * sign}";                        
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";                        
 
                         var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
@@ -194,7 +194,7 @@ namespace SicTransit.Woodpusher.Engine
                         {
                             progress.Add((maxDepth, evaluationTime));
 
-                            if (progress.Count > 2)
+                            if (progress.Count > 2 && maxDepth > 6)
                             {
                                 var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
                                 var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
@@ -331,7 +331,7 @@ namespace SicTransit.Woodpusher.Engine
             else
             {
                 transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
-
+                
                 evaluatedBestMove = bestMove;
             }
 
