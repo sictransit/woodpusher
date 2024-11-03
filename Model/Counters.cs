@@ -16,18 +16,21 @@ namespace SicTransit.Woodpusher.Model
 
         public Piece Capture { get; }
 
+        public Move LastMove { get; }
+
         public int Ply => FullmoveNumber * 2 - (ActiveColor == Piece.White ? 2 : 1);
 
-        public Counters(Piece activeColor, Castlings castlings, ulong enPassantTarget, int halfmoveClock, int fullmoveNumber, Piece capture)
+        public Counters(Piece activeColor, Castlings castlings, ulong enPassantTarget, int halfmoveClock, int fullmoveNumber, Move lastMove,  Piece capture)
         {
             ActiveColor = activeColor;
             Castlings = castlings;
             EnPassantTarget = enPassantTarget;
             HalfmoveClock = halfmoveClock;
             FullmoveNumber = fullmoveNumber;
+            LastMove = lastMove;
             Capture = capture;
         }
 
-        public static Counters Default => new(Piece.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, 0, 0, 1, Piece.None);
+        public static Counters Default => new(Piece.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, 0, 0, 1, null, Piece.None);
     }
 }

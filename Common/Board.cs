@@ -216,6 +216,7 @@ public class Board : IBoard
             move.EnPassantTarget,
             move.Piece.Is(Piece.Pawn) || capture.GetPieceType() != Piece.None ? 0 : Counters.HalfmoveClock + 1,
             Counters.FullmoveNumber + (whitePlaying ? 0 : 1),
+            move,
             capture);
 
         hash ^= internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
@@ -292,16 +293,26 @@ public class Board : IBoard
 
     public IEnumerable<Move> GetLegalMoves()
     {
+        return PlayLegalMoves().Select(b => b.Counters.LastMove);
+    }
+
+    public IEnumerable<Move> GetLegalMoves(Piece piece)
+    {
+        return PlayLegalMoves().Where(b=>b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
+    }
+
+    public IEnumerable<IBoard> PlayLegalMoves()
+    {
         foreach (var piece in GetPieces(ActiveColor))
         {
-            foreach (var move in GetLegalMoves(piece))
+            foreach (var board in PlayLegalMoves(piece))
             {
-                yield return move;
+                yield return board;
             }
         }
     }
 
-    public IEnumerable<Move> GetLegalMoves(Piece piece)
+    public IEnumerable<IBoard> PlayLegalMoves(Piece piece)
     {
         var whiteIsPlaying = ActiveColor.Is(Piece.White);
         var friendlyBoard = whiteIsPlaying ? white : black;
@@ -323,10 +334,10 @@ public class Board : IBoard
                     break;
                 }
 
-                var testBoard = Play(move);
+                var board = Play(move);
 
                 // Moving into check?
-                if (testBoard.IsAttacked(testBoard.FindKing(ActiveColor)))
+                if (board.IsAttacked(board.FindKing(ActiveColor)))
                 {
                     if (hostileTarget != Piece.None)
                     {
@@ -336,7 +347,7 @@ public class Board : IBoard
                     continue;
                 }
 
-                yield return move;
+                yield return board;
 
                 if (hostileTarget != Piece.None)
                 {

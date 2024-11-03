@@ -11,7 +11,9 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         bool IsPassedPawn(Piece piece);
 
-        IEnumerable<Move> GetLegalMoves();
+        IEnumerable<IBoard> PlayLegalMoves();
+
+        IEnumerable<Move> GetLegalMoves();        
 
         IEnumerable<Move> GetLegalMoves(Piece piece);        
 

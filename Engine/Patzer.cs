@@ -297,15 +297,15 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = -Declarations.MoveMaximumScore;
             
-            foreach (var legalMove in board.GetLegalMoves())
+            foreach (var newBoard in board.PlayLegalMoves())
             {
                 nodeCount++;
 
-                var score = -EvaluateBoard(board.Play(legalMove), depth + 1, -β, -α, !maximizing);                
+                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, !maximizing);                
 
                 if (score > bestScore)
                 {
-                    bestMove = legalMove;
+                    bestMove = newBoard.Counters.LastMove;
                     bestScore = score;
                 }
 
