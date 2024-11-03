@@ -319,8 +319,6 @@ namespace SicTransit.Woodpusher.Engine
 
             if (bestMove == default)
             {
-                bestMove = board.LastMove;
-
                 if (board.IsChecked)
                 {
                     bestScore = -Declarations.MateScore + board.Counters.Ply;
@@ -330,10 +328,12 @@ namespace SicTransit.Woodpusher.Engine
                     bestScore = Declarations.DrawScore;
                 }
             }
+            else
+            {
+                transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
-            transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
-
-            evaluatedBestMove = bestMove;
+                evaluatedBestMove = bestMove;
+            }
 
             return bestScore;
         }

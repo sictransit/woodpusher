@@ -37,8 +37,6 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         bool IsChecked { get; }
 
-        Counters Counters { get; }
-
-        Move LastMove { get; }
+        Counters Counters { get; }        
     }
 }

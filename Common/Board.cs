@@ -13,8 +13,6 @@ public class Board : IBoard
 
     public Counters Counters { get; }
 
-    public Move? LastMove { get; }
-
     public Piece ActiveColor => Counters.ActiveColor;
 
     public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
@@ -22,18 +20,17 @@ public class Board : IBoard
 
     }
 
-    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash, Move? lastMove)
+    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
     {
         this.white = white;
         this.black = black;
 
         Counters = counters;
         this.internals = internals;
-        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
-        LastMove = lastMove;
+        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;        
     }
 
-    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash, default)
+    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
     {
     }
 
@@ -90,8 +87,8 @@ public class Board : IBoard
     public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
     public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
-            ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash, null)
-            : (IBoard)new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash, null);
+            ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
+            : (IBoard)new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
 
     public IBoard Play(Move move)
     {
@@ -227,8 +224,8 @@ public class Board : IBoard
             ^ internals.Zobrist.GetPieceHash(counters.ActiveColor);
 
         return whitePlaying
-            ? new Board(activeBitboard, opponentBitboard, counters, internals, hash, move)
-            : new Board(opponentBitboard, activeBitboard, counters, internals, hash, move);
+            ? new Board(activeBitboard, opponentBitboard, counters, internals, hash)
+            : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
     }
 
     private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
