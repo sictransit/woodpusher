@@ -2,7 +2,6 @@
 using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Model;

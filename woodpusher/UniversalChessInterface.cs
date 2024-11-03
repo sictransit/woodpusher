@@ -216,7 +216,7 @@ namespace SicTransit.Woodpusher
                             timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
                         }
 
-                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit));                        
+                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit));
 
                         consoleOutput($"bestmove {bestMove.Notation}");
                     }

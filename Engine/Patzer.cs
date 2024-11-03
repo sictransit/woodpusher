@@ -182,10 +182,10 @@ namespace SicTransit.Woodpusher.Engine
                         UpdateBestLine(bestMove, maxDepth);
 
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
-                        
+
                         var mateIn = CalculateMateIn(score, sign);
                         foundMate = mateIn is > 0;
-                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";                        
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
 
                         var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
@@ -231,7 +231,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void UpdateBestLine(Move bestMove, int depth)
         {
-            var ply = Board.Counters.Ply +1;
+            var ply = Board.Counters.Ply + 1;
 
             bestLine.Clear();
             bestLine.Add((ply, bestMove));
@@ -296,12 +296,12 @@ namespace SicTransit.Woodpusher.Engine
             Move? bestMove = default;
 
             var bestScore = -Declarations.MoveMaximumScore;
-            
+
             foreach (var newBoard in board.PlayLegalMoves())
             {
                 nodeCount++;
 
-                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, !maximizing);                
+                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, !maximizing);
 
                 if (score > bestScore)
                 {
@@ -331,7 +331,7 @@ namespace SicTransit.Woodpusher.Engine
             else
             {
                 transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
-                
+
                 evaluatedBestMove = bestMove;
             }
 

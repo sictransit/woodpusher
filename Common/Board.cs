@@ -27,7 +27,7 @@ public class Board : IBoard
 
         Counters = counters;
         this.internals = internals;
-        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;        
+        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
     }
 
     public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
@@ -298,7 +298,7 @@ public class Board : IBoard
 
     public IEnumerable<Move> GetLegalMoves(Piece piece)
     {
-        return PlayLegalMoves().Where(b=>b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
+        return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
     public IEnumerable<IBoard> PlayLegalMoves()

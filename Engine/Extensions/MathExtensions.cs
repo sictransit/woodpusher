@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SicTransit.Woodpusher.Engine.Extensions
+﻿namespace SicTransit.Woodpusher.Engine.Extensions
 {
     public static class MathExtensions
     {
@@ -21,12 +15,12 @@ namespace SicTransit.Woodpusher.Engine.Extensions
             double sumXSquared = 0;
 
             for (int i = 0; i < n; i++)
-            {                
+            {
                 sumX += progress[i].depth;
                 logTimes[i] = Math.Log(progress[i].time);
                 sumLogY += logTimes[i];
                 sumXLogY += progress[i].depth * logTimes[i];
-                sumXSquared += progress[i].depth* progress[i].depth;
+                sumXSquared += progress[i].depth * progress[i].depth;
             }
 
             // Calculate the slope (b) and intercept (ln(a)) of the linear fit

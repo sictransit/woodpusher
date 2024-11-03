@@ -13,9 +13,9 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IEnumerable<IBoard> PlayLegalMoves();
 
-        IEnumerable<Move> GetLegalMoves();        
+        IEnumerable<Move> GetLegalMoves();
 
-        IEnumerable<Move> GetLegalMoves(Piece piece);        
+        IEnumerable<Move> GetLegalMoves(Piece piece);
 
         IEnumerable<Piece> GetPieces();
 
@@ -37,6 +37,6 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         bool IsChecked { get; }
 
-        Counters Counters { get; }        
+        Counters Counters { get; }
     }
 }
