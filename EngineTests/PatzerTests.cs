@@ -382,7 +382,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 patzer.Perft(depth);
 
-                if (traceLines.Any(l => l.Contains(nodes.ToString())))
+                if (traceLines.Any(line => line.Contains(nodes.ToString())))
                 {
                     success = true;
 

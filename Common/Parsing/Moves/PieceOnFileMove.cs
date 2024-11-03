@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             foreach (var piece in pieces.Where(p => p.GetSquare().File == file))
             {
-                var legalMove = engine.Board.GetLegalMoves(piece).SingleOrDefault(l => l.GetTarget().Equals(square) && l.PromotionType == promotionType);
+                var legalMove = engine.Board.GetLegalMoves(piece).SingleOrDefault(move => move.GetTarget().Equals(square) && move.PromotionType == promotionType);
 
                 if (legalMove != null)
                 {

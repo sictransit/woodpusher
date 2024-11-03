@@ -64,7 +64,7 @@ namespace SicTransit.Woodpusher.Engine
             var legalMoves = Board.GetLegalMoves().ToArray();
 
             // All found opening book moves found should be legal moves.
-            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(l => l.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
+            var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(move => move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
             return legalOpeningBookMoves.OrderByDescending(m => m.openingBookMove.Count).FirstOrDefault()?.legalMove;
         }
@@ -77,7 +77,7 @@ namespace SicTransit.Woodpusher.Engine
 
             foreach (var algebraicMove in algebraicMoves)
             {
-                var legalMove = Board.GetLegalMoves().SingleOrDefault(l => l.Piece.GetSquare().Equals(algebraicMove.From) && l.GetTarget().Equals(algebraicMove.To) && l.PromotionType == algebraicMove.Promotion);
+                var legalMove = Board.GetLegalMoves().SingleOrDefault(move => move.Piece.GetSquare().Equals(algebraicMove.From) && move.GetTarget().Equals(algebraicMove.To) && move.PromotionType == algebraicMove.Promotion);
 
                 if (legalMove == null)
                 {

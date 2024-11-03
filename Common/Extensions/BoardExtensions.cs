@@ -51,9 +51,9 @@ namespace SicTransit.Woodpusher.Common.Extensions
         {
             ulong count = 0;
 
-            Parallel.ForEach(board.GetLegalMoves(), legalMove =>
+            Parallel.ForEach(board.GetLegalMoves(), m =>
             {
-                Interlocked.Add(ref count, board.Play(legalMove).ParallelPerft(depth - 1));
+                Interlocked.Add(ref count, board.Play(m).ParallelPerft(depth - 1));
             });
 
             return count;
@@ -68,9 +68,9 @@ namespace SicTransit.Woodpusher.Common.Extensions
 
             ulong count = 0;
 
-            foreach (var legalMove in board.GetLegalMoves())
+            foreach (var move in board.GetLegalMoves())
             {
-                count += board.Play(legalMove).ParallelPerft(depth - 1);
+                count += board.Play(move).ParallelPerft(depth - 1);
             }
 
             return count;
