@@ -171,7 +171,7 @@ namespace SicTransit.Woodpusher.Engine
 
                     long startTime = stopwatch.ElapsedMilliseconds;
 
-                    var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, Board.ActiveColor.Is(Piece.White));
+                    var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
 
                     long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
@@ -281,11 +281,16 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
         }
 
-        private int EvaluateBoard(IBoard board, int depth, int α, int β, bool maximizing)
+        private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
         {
-            if (depth == maxDepth || timeIsUp)
+            if (timeIsUp)
             {
-                return board.Score * (maximizing ? 1 : -1);
+                return 0;
+            }
+
+            if (depth == maxDepth)
+            {
+                return board.Score * sign;
             }
 
             if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
@@ -301,7 +306,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 nodeCount++;
 
-                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, !maximizing);
+                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
 
                 if (score > bestScore)
                 {
