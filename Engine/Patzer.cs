@@ -32,7 +32,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly List<(int ply, Move move)> bestLine = new();
 
-        private Move evaluatedBestMove = null;
+        private Move? evaluatedBestMove = null;
 
         public Patzer(Action<string>? infoCallback = null)
         {
@@ -179,7 +179,11 @@ namespace SicTransit.Woodpusher.Engine
                     {
                         bestMove = evaluatedBestMove;
 
-                        UpdateBestLine(bestMove, maxDepth);
+                        bestLine.Clear();
+                        if (bestMove != null)
+                        {
+                            UpdateBestLine(bestMove, maxDepth);
+                        }                        
 
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
 
@@ -232,15 +236,14 @@ namespace SicTransit.Woodpusher.Engine
         private void UpdateBestLine(Move bestMove, int depth)
         {
             var ply = Board.Counters.Ply + 1;
-
-            bestLine.Clear();
+            
             bestLine.Add((ply, bestMove));
 
             var board = Board.Play(bestMove);
 
             for (var i = 0; i < depth; i++)
             {
-                if (transpositionTable.TryGetValue(board.Hash, out var cached))
+                if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.move != default)
                 {
                     bestLine.Add((ply + i + 1, cached.move));
 
@@ -333,12 +336,10 @@ namespace SicTransit.Woodpusher.Engine
                     bestScore = Declarations.DrawScore;
                 }
             }
-            else
-            {
-                transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
 
-                evaluatedBestMove = bestMove;
-            }
+            transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
+
+            evaluatedBestMove = bestMove;
 
             return bestScore;
         }
