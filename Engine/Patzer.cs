@@ -295,7 +295,7 @@ namespace SicTransit.Woodpusher.Engine
                 return 0;
             }
 
-            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.Capture != Piece.None).ToArray();
+            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.Capture).ToArray();
 
             if (boards.Length == 0)
             {
@@ -345,11 +345,9 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     break;
                 }
-            }
+            }            
 
-            var entry = transpositionTable[transpositionIndex];
-
-            if (entry.Ply <= board.Counters.Ply || (entry.Ply == board.Counters.Ply && entry.Score < bestScore))
+            if (transpositionTable[transpositionIndex].Ply <= board.Counters.Ply)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash);
             }
