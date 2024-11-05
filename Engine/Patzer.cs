@@ -30,7 +30,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private const int transpositionTableSize = 1_000_000;
 
-        private readonly (int ply, Move? move, int score, ulong hash)[] transpositionTable = new (int ply, Move? move, int score, ulong hash)[transpositionTableSize];
+        private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
 
         private readonly List<(int ply, Move move)> bestLine = new();
 
@@ -194,7 +194,7 @@ namespace SicTransit.Woodpusher.Engine
 
                         var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
                         var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));                        
-                        var hashFull = transpositionTable.Count(t=>t != default)*1000 / transpositionTableSize;
+                        var hashFull = transpositionTable.Count(t=>t.Hash != 0)*1000 / transpositionTableSize;
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
 
                         if (evaluationTime > 0)
@@ -246,12 +246,12 @@ namespace SicTransit.Woodpusher.Engine
 
             for (var i = 0; i < depth; i++)
             {
-                var cached = transpositionTable[board.Hash % transpositionTableSize];
-                if (cached != default && cached.hash == board.Hash && cached.move != default)
+                var entry = transpositionTable[board.Hash % transpositionTableSize];
+                if (entry.Hash == board.Hash && entry.Move != null && board.GetLegalMoves().Contains(entry.Move))
                 {
-                    bestLine.Add((ply + i + 1, cached.move));
+                    bestLine.Add((ply + i + 1, entry.Move));
 
-                    board = board.Play(cached.move);
+                    board = board.Play(entry.Move);
                 }
                 else
                 {
@@ -314,11 +314,13 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score * sign;
             }
 
-            var cached = transpositionTable[board.Hash % transpositionTableSize];
+            var transpositionIndex = board.Hash % transpositionTableSize;
 
-            if (cached.hash == board.Hash && cached.ply == board.Counters.Ply)
+            var cachedEntry = transpositionTable[transpositionIndex];
+
+            if (cachedEntry.Hash == board.Hash && cachedEntry.Ply == board.Counters.Ply)
             {
-                return cached.score;
+                return cachedEntry.Score;
             }
 
             Move? bestMove = null;
@@ -345,7 +347,12 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            transpositionTable[board.Hash % transpositionTableSize] = (board.Counters.Ply, bestMove, bestScore, board.Hash);
+            var entry = transpositionTable[transpositionIndex];
+
+            if (entry.Ply <= board.Counters.Ply || (entry.Ply == board.Counters.Ply && entry.Score < bestScore))
+            {
+                transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash);
+            }
 
             evaluatedBestMove = bestMove;
 
