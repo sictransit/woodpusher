@@ -28,7 +28,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
-        private readonly Dictionary<ulong, (int ply, Move move, int score)> transpositionTable = new();
+        private readonly Dictionary<ulong, (int ply, Move? move, int score)> transpositionTable = new();
 
         private readonly List<(int ply, Move move)> bestLine = new();
 
@@ -303,7 +303,6 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     return Declarations.DrawScore;
                 }
-
             }
 
             if (depth == maxDepth)
@@ -316,7 +315,7 @@ namespace SicTransit.Woodpusher.Engine
                 return cached.score;
             }
 
-            Move? bestMove = default;
+            Move? bestMove = null;
 
             var bestScore = -Declarations.MoveMaximumScore;
 

@@ -226,7 +226,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        public void MateInMovesWinningTest()
+        public void MateIn4WinningTest()
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
 
@@ -263,7 +263,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        public void MateInMovesLosingTest()
+        public void MateIn4LosingTest()
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
