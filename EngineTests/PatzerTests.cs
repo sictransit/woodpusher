@@ -1,12 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Parsing;
-using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
-using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -275,7 +272,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.IsNotNull(move);
 
             Assert.IsTrue(traceLines.Any(i => i.Contains("mate -4")));
-        }        
+        }
 
         [TestMethod]
         [Ignore("long running: 1,5 minutes on dev machine")]

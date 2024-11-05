@@ -183,7 +183,7 @@ namespace SicTransit.Woodpusher.Engine
                         if (bestMove != null)
                         {
                             UpdateBestLine(bestMove, maxDepth);
-                        }                        
+                        }
 
                         var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
 
@@ -236,7 +236,7 @@ namespace SicTransit.Woodpusher.Engine
         private void UpdateBestLine(Move bestMove, int depth)
         {
             var ply = Board.Counters.Ply + 1;
-            
+
             bestLine.Add((ply, bestMove));
 
             var board = Board.Play(bestMove);
@@ -291,6 +291,21 @@ namespace SicTransit.Woodpusher.Engine
                 return 0;
             }
 
+            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.Capture != Piece.None).ToArray();
+
+            if (boards.Length == 0)
+            {
+                if (board.IsChecked)
+                {
+                    return -Declarations.MateScore + board.Counters.Ply;
+                }
+                else
+                {
+                    return Declarations.DrawScore;
+                }
+
+            }
+
             if (depth == maxDepth)
             {
                 return board.Score * sign;
@@ -305,7 +320,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var bestScore = -Declarations.MoveMaximumScore;
 
-            foreach (var newBoard in board.PlayLegalMoves())
+            foreach (var newBoard in boards)
             {
                 nodeCount++;
 
@@ -322,18 +337,6 @@ namespace SicTransit.Woodpusher.Engine
                 if (α >= β)
                 {
                     break;
-                }
-            }
-
-            if (bestMove == default)
-            {
-                if (board.IsChecked)
-                {
-                    bestScore = -Declarations.MateScore + board.Counters.Ply;
-                }
-                else
-                {
-                    bestScore = Declarations.DrawScore;
                 }
             }
 
