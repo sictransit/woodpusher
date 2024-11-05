@@ -347,10 +347,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }            
 
-            if (transpositionTable[transpositionIndex].Ply <= board.Counters.Ply)
-            {
-                transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash);
-            }
+            transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash);
 
             evaluatedBestMove = bestMove;
 
