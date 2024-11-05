@@ -32,6 +32,8 @@ namespace SicTransit.Woodpusher
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
 
+        private const int engineLatency = 100;
+
         private readonly IEngine engine;
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
@@ -182,8 +184,7 @@ namespace SicTransit.Woodpusher
         }
 
         private Task Go(string command)
-        {
-            const int latency = 100;
+        {            
             return Task.Run(() =>
             {
                 lock (engine)
@@ -206,17 +207,28 @@ namespace SicTransit.Woodpusher
 
                         if (movetimeMatch.Success)
                         {
-                            timeLimit = int.Parse(movetimeMatch.Groups[1].Value) - latency;
+                            timeLimit = int.Parse(movetimeMatch.Groups[1].Value) ;
                         }
-                        else if (movesToGoMatch.Success && whiteTimeMatch.Success && blackTimeMatch.Success)
+                        else if (whiteTimeMatch.Success && blackTimeMatch.Success)
                         {
                             var timeLeft = int.Parse(engine.Board.ActiveColor.Is(Piece.White) ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
-                            var movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
 
-                            timeLimit = Math.Min(timeLimit, timeLeft / movesToGo - latency);
+                            int movesToGo;
+
+                            if (movesToGoMatch.Success)
+                            {
+                                movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);                                
+                            }
+                            else
+                            {
+                                movesToGo = Math.Max(8, 40 - (engine.Board.Counters.FullmoveNumber % 40));
+                                consoleOutput($"info movestogo not specified, assuming {movesToGo}");
+                            }
+
+                            timeLimit = Math.Min(timeLimit, timeLeft / movesToGo );
                         }
 
-                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit));
+                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
 
                         consoleOutput($"bestmove {bestMove.Notation}");
                     }

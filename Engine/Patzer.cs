@@ -28,7 +28,9 @@ namespace SicTransit.Woodpusher.Engine
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
 
-        private readonly Dictionary<ulong, (int ply, Move? move, int score)> transpositionTable = new();
+        private const int transpositionTableSize = 1_000_000;
+
+        private readonly (int ply, Move? move, int score, ulong hash)[] transpositionTable = new (int ply, Move? move, int score, ulong hash)[transpositionTableSize];
 
         private readonly List<(int ply, Move move)> bestLine = new();
 
@@ -165,7 +167,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     maxDepth += 2;
 
-                    transpositionTable.Clear();
+                    Array.Clear(transpositionTable, 0, transpositionTable.Length);
 
                     // TODO: Check for threefold repetition. Note that we might seek that!
 
@@ -189,16 +191,17 @@ namespace SicTransit.Woodpusher.Engine
 
                         var mateIn = CalculateMateIn(score, sign);
                         foundMate = mateIn is > 0;
-                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
 
-                        var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
-                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
+                        var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));                        
+                        var hashFull = transpositionTable.Count(t=>t != default)*1000 / transpositionTableSize;
+                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
 
                         if (evaluationTime > 0)
                         {
                             progress.Add((maxDepth, evaluationTime));
 
-                            if (progress.Count > 2 && maxDepth > 6)
+                            if (progress.Count > 2)
                             {
                                 var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
                                 var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
@@ -243,7 +246,8 @@ namespace SicTransit.Woodpusher.Engine
 
             for (var i = 0; i < depth; i++)
             {
-                if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.move != default)
+                var cached = transpositionTable[board.Hash % transpositionTableSize];
+                if (cached != default && cached.hash == board.Hash && cached.move != default)
                 {
                     bestLine.Add((ply + i + 1, cached.move));
 
@@ -310,7 +314,9 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score * sign;
             }
 
-            if (transpositionTable.TryGetValue(board.Hash, out var cached) && cached.ply == board.Counters.Ply)
+            var cached = transpositionTable[board.Hash % transpositionTableSize];
+
+            if (cached.hash == board.Hash && cached.ply == board.Counters.Ply)
             {
                 return cached.score;
             }
@@ -339,7 +345,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            transpositionTable[board.Hash] = (board.Counters.Ply, bestMove, bestScore);
+            transpositionTable[board.Hash % transpositionTableSize] = (board.Counters.Ply, bestMove, bestScore, board.Hash);
 
             evaluatedBestMove = bestMove;
 
