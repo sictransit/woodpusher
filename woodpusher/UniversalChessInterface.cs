@@ -5,6 +5,7 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
@@ -102,7 +103,11 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    consoleOutput("id name Woodpusher");
+                    var version = Assembly.GetExecutingAssembly()
+                      .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                      .InformationalVersion;
+
+                    consoleOutput($"id name Woodpusher {version}");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("option name Ponder type check default false");
                     consoleOutput("uciok");
