@@ -68,7 +68,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
-            algebraicMoves ??= Array.Empty<AlgebraicMove>();
+            algebraicMoves ??= [];
 
             Board = ForsythEdwardsNotation.Parse(fen);
 
@@ -197,8 +197,6 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Caught Exception during evaluation.");
-
                     SendExceptionInfo(ex);
 
                     throw;
@@ -304,7 +302,9 @@ namespace SicTransit.Woodpusher.Engine
             {
                 nodeCount++;
 
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
                 if (score > bestScore)
                 {

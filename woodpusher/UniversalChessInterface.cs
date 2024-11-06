@@ -227,7 +227,7 @@ namespace SicTransit.Woodpusher
                             else
                             {
                                 movesToGo = Math.Max(8, 40 - (engine.Board.Counters.FullmoveNumber % 40));
-                                consoleOutput($"info movestogo not specified, using {movesToGo}");
+                                consoleOutput($"info string movestogo not specified, using {movesToGo}");
                             }
 
                             timeLimit = Math.Min(timeLimit, timeLeft / movesToGo );
