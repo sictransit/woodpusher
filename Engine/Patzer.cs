@@ -19,11 +19,9 @@ namespace SicTransit.Woodpusher.Engine
         private int maxDepth = 0;
         private long nodeCount = 0;
 
-        private readonly CancellationTokenSource cancellationTokenSource = new();
-
         private readonly Stopwatch stopwatch = new();
 
-        private readonly Dictionary<string, int> repetitions = new();
+        private readonly Dictionary<string, int> repetitions = [];
 
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
@@ -32,7 +30,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
 
-        private readonly List<(int ply, Move move)> bestLine = new();
+        private readonly List<(int ply, Move move)> bestLine = [];
 
         private Move? evaluatedBestMove = null;
 
@@ -43,10 +41,7 @@ namespace SicTransit.Woodpusher.Engine
             this.infoCallback = infoCallback;
         }
 
-        public void Initialize()
-        {
-            Board = Common.Board.StartingPosition();
-        }
+        public void Initialize() => Board = Common.Board.StartingPosition();
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
 
@@ -92,34 +87,21 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Perft(int depth)
         {
-            var initialMoves = Board.GetLegalMoves();
+            ulong nodes = 0;
 
-            ulong total = 0;
-
-            var options = new ParallelOptions
+            foreach (var board in Board.PlayLegalMoves())
             {
-                CancellationToken = cancellationTokenSource.Token
-            };
-
-            Parallel.ForEach(initialMoves, options, i =>
-            {
-                ulong nodes = 0;
-
                 if (depth > 1)
                 {
-                    nodes += Board.Play(i).Perft(depth);
+                    nodes += board.Perft(depth);
                 }
                 else
                 {
-                    nodes = 1;
+                    nodes += 1;
                 }
+            }
 
-                Interlocked.Add(ref total, nodes);
-
-                SendCallbackInfo($"{i.ToAlgebraicMoveNotation()}: {nodes}");
-            });
-
-            SendCallbackInfo(Environment.NewLine + $"Nodes searched: {total}");
+            SendCallbackInfo(Environment.NewLine + $"Nodes searched: {nodes}");
         }
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000)
@@ -273,20 +255,11 @@ namespace SicTransit.Woodpusher.Engine
             return null;
         }
 
-        private void SendInfo(string info)
-        {
-            SendCallbackInfo($"info {info}");
-        }
+        private void SendInfo(string info) => SendCallbackInfo($"info {info}");
 
-        private void SendDebugInfo(string debugInfo)
-        {
-            SendInfo($"string debug {debugInfo}");
-        }
+        private void SendDebugInfo(string debugInfo) => SendInfo($"string debug {debugInfo}");
 
-        private void SendExceptionInfo(Exception exception)
-        {
-            SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
-        }
+        private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
         private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
         {
@@ -354,10 +327,6 @@ namespace SicTransit.Woodpusher.Engine
             return bestScore;
         }
 
-        public void Stop()
-        {
-            cancellationTokenSource.Cancel();
-            timeIsUp = true;
-        }
+        public void Stop() => timeIsUp = true;
     }
 }
