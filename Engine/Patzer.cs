@@ -136,9 +136,7 @@ namespace SicTransit.Woodpusher.Engine
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
             var bestMove = default(Move);
-
             var foundMate = false;
-
             var enoughTime = true;
 
             var progress = new List<(int depth, long time)>();
@@ -289,9 +287,18 @@ namespace SicTransit.Woodpusher.Engine
 
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.Hash == board.Hash && cachedEntry.Ply == board.Counters.Ply)
+            if (cachedEntry.Hash == board.Hash)
             {
-                return cachedEntry.Score;
+                if (cachedEntry.Ply == board.Counters.Ply)
+                {
+                    return cachedEntry.Score;
+                }
+                var moveIndex = Array.FindIndex(boards, b => b.Counters.LastMove.Equals(cachedEntry.Move));
+
+                if (moveIndex > 0)
+                {
+                    (boards[moveIndex], boards[0]) = (boards[0], boards[moveIndex]);
+                }
             }
 
             Move? bestMove = null;
