@@ -52,11 +52,14 @@ public class Board : IBoard
 
             var score = 0;
 
-            foreach (var piece in GetPieces())
+            foreach (var piece in white.GetPieces())
             {
-                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+                score += internals.Scoring.EvaluatePiece(piece, phase);
+            }
 
-                score += piece.Is(Piece.White) ? evaluation : -evaluation;
+            foreach (var piece in black.GetPieces())
+            {
+                score -= internals.Scoring.EvaluatePiece(piece, phase);
             }
 
             return score;

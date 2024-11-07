@@ -8,13 +8,15 @@ namespace SicTransit.Woodpusher.Engine
         public Move? Move { get; }
         public int Score { get; }
         public ulong Hash { get; }
+        public int MaxDepth { get; }
 
-        public TranspositionTableEntry(int ply, Move? move, int score, ulong hash)
+        public TranspositionTableEntry(int ply, Move? move, int score, ulong hash, int maxDepth)
         {
             Ply = ply;
             Move = move;
             Score = score;
             Hash = hash;
+            MaxDepth = maxDepth;
         }
     }
 }

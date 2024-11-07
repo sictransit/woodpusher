@@ -109,7 +109,7 @@ namespace SicTransit.Woodpusher
 
                     consoleOutput($"id name Woodpusher {version}");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-                    consoleOutput("option name Ponder type check default false");
+                    //consoleOutput("option name Ponder type check default false");
                     consoleOutput("uciok");
                 }
             });

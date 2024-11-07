@@ -147,8 +147,6 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     maxDepth += 2;
 
-                    Array.Clear(transpositionTable, 0, transpositionTable.Length);
-
                     // TODO: Check for threefold repetition. Note that we might seek that!
 
                     long startTime = stopwatch.ElapsedMilliseconds;
@@ -181,7 +179,8 @@ namespace SicTransit.Woodpusher.Engine
                         {
                             progress.Add((maxDepth, evaluationTime));
 
-                            if (progress.Count > 2)
+                            // Don't try to estimate enought time unless we've got >2 points and we're at least at depth 6.
+                            if (progress.Count > 2 && maxDepth>=6)
                             {
                                 var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
                                 var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
@@ -289,10 +288,11 @@ namespace SicTransit.Woodpusher.Engine
 
             if (cachedEntry.Hash == board.Hash)
             {
-                if (cachedEntry.Ply == board.Counters.Ply)
+                if (cachedEntry.MaxDepth >= maxDepth && cachedEntry.Ply == board.Counters.Ply)
                 {
                     return cachedEntry.Score;
                 }
+
                 var moveIndex = Array.FindIndex(boards, b => b.Counters.LastMove.Equals(cachedEntry.Move));
 
                 if (moveIndex > 0)
@@ -327,7 +327,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }            
 
-            transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash);
+            transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash, maxDepth);
 
             evaluatedBestMove = bestMove;
 
