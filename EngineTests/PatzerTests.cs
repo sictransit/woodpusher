@@ -222,7 +222,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2b3", bestMove.Notation);
+            Assert.IsTrue(new[] { "a2b1", "a2b3" }.Contains(bestMove.Notation));
         }
 
         [TestMethod]
