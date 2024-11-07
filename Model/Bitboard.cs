@@ -19,6 +19,8 @@ namespace SicTransit.Woodpusher.Model
             Bishop = bishop;
             Queen = queen;
             King = king;
+
+            AllPieces = pawn | rook | knight | bishop | queen | king;
         }
 
         public Piece Color { get; }
@@ -30,7 +32,7 @@ namespace SicTransit.Woodpusher.Model
         public ulong Queen { get; }
         public ulong King { get; }
 
-        public ulong All => Pawn | Rook | Knight | Bishop | Queen | King;
+        public ulong AllPieces { get; }
 
         public int Phase => BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen);
 
@@ -72,11 +74,11 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public bool IsOccupied(ulong mask) => (All & mask) != 0;
+        public bool IsOccupied(ulong mask) => (AllPieces & mask) != 0;
 
         public Piece Peek(ulong mask)
         {
-            if ((All & mask) == 0)
+            if ((AllPieces & mask) == 0)
             {
                 return Piece.None;
             }

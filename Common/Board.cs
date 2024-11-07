@@ -229,7 +229,7 @@ public class Board : IBoard
             : new Board(opponentBitboard, activeBitboard, counters, internals, hash);
     }
 
-    private bool IsOccupied(ulong mask) => ((white.All | black.All) & mask) != 0;
+    private bool IsOccupied(ulong mask) => ((white.AllPieces | black.AllPieces) & mask) != 0;
 
     private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
