@@ -7,9 +7,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
     {
         Piece ActiveColor { get; }
 
-        IBoard Play(Move move);
-
-        bool IsPassedPawn(Piece piece);
+        IBoard Play(Move move);        
 
         IEnumerable<IBoard> PlayLegalMoves();
 

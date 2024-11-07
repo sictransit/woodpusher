@@ -592,21 +592,7 @@ d8d7: 1
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
-        }
-
-        [TestMethod]
-        public void IsPassedPawnTest()
-        {
-            var board = ForsythEdwardsNotation.Parse("8/8/7p/1P2Pp1P/2Pp1PP1/8/8/8 w - - 0 1");
-
-            var whitePassedPawns = board.GetPieces(Piece.White, Piece.Pawn).Where(p => board.IsPassedPawn(p)).ToArray();
-
-            Assert.AreEqual(3, whitePassedPawns.Length);
-
-            var blackPassedPawns = board.GetPieces(Piece.None, Piece.Pawn).Where(p => board.IsPassedPawn(p)).ToArray();
-
-            Assert.AreEqual(1, blackPassedPawns.Length);
-        }
+        }     
 
         [TestMethod]
         public void MoveEqualityTest()

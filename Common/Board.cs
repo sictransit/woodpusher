@@ -56,35 +56,12 @@ public class Board : IBoard
             {
                 var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                if (piece.GetPieceType() != Piece.King)
-                {
-                    // TODO: Good idea, but too slow. Node pruning will be needed.
-                    //var attackers = GetPiecesInRange(piece, piece.OpponentColor()).Count();
-                    //if (attackers > 0)
-                    //{
-                    //    var defenders = GetPiecesInRange(piece, piece & Piece.White).Count();
-
-                    //    if (attackers > defenders)
-                    //    {
-                    //        // A piece not defended will score half.
-                    //        evaluation /= 2;
-                    //    }
-                    //}
-
-                    if (piece.GetPieceType() == Piece.Pawn && IsPassedPawn(piece))
-                    {
-                        evaluation *= 2;
-                    }
-                }
-
                 score += piece.Is(Piece.White) ? evaluation : -evaluation;
             }
 
             return score;
         }
-    }
-
-    public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
+    }    
 
     public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
             ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
@@ -233,7 +210,7 @@ public class Board : IBoard
 
     private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
 
-    public Piece FindKing(Piece color) => Piece.King | color.SetMask(GetBitboard(color).King);
+    public Piece FindKing(Piece color) => GetBitboard(color).GetKing();
 
     public IEnumerable<Piece> GetPieces() => GetPieces(Piece.White).Concat(GetPieces(Piece.None));
 
