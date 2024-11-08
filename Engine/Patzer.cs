@@ -21,7 +21,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Stopwatch stopwatch = new();
 
-        private readonly Dictionary<string, int> repetitions = [];
+        private readonly Dictionary<ulong, int> repetitions = [];
 
         private readonly OpeningBook openingBook = new();
         private readonly Action<string>? infoCallback;
@@ -41,7 +41,13 @@ namespace SicTransit.Woodpusher.Engine
             this.infoCallback = infoCallback;
         }
 
-        public void Initialize() => Board = Common.Board.StartingPosition();
+        public void Initialize()
+        {
+            Board = Common.Board.StartingPosition();
+
+            repetitions.Clear();
+            repetitions.Add(Board.Hash, 1);
+        }
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
 
@@ -52,6 +58,8 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"{color} plays: {move}");
 
             Board = Board.Play(move);
+            
+            repetitions.Add(Board.Hash, repetitions.GetValueOrDefault(Board.Hash) + 1);
         }
 
         private Move? GetOpeningBookMove()
@@ -119,11 +127,6 @@ namespace SicTransit.Woodpusher.Engine
                 timeIsUp = true;
             });
 
-            if (Board.Counters.HalfmoveClock == 0)
-            {
-                repetitions.Clear();
-            }
-
             // TODO: Fill bestLine with the opening book moves.
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
@@ -149,12 +152,8 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     maxDepth += 2;
 
-                    // TODO: Check for threefold repetition. Note that we might seek that!
-
                     long startTime = stopwatch.ElapsedMilliseconds;
-
                     var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
-
                     long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
                     if (!timeIsUp)
@@ -205,7 +204,6 @@ namespace SicTransit.Woodpusher.Engine
             SendDebugInfo($"aborting @ depth {maxDepth}");
 
             Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
-
 
             if (bestMove == null)
             {
@@ -281,6 +279,11 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
+                if (repetitions.GetValueOrDefault(board.Hash) >= 2)
+                {
+                    return 0;
+                }
+
                 return board.Score * sign;
             }
 
