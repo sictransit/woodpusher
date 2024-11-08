@@ -234,7 +234,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(traceLines.Any(i => i.Contains("mate 4")));
+            Assert.IsTrue(traceLines.Exists(i => i.Contains("mate 4")));
         }
 
         [TestMethod]
@@ -248,7 +248,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             while (!task.IsCompleted)
             {
-                foundMate = traceLines.Any(i => i.Contains("mate 10"));
+                foundMate = traceLines.Exists(i => i.Contains("mate 10"));
 
                 if (foundMate)
                 {
@@ -274,7 +274,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(traceLines.Any(i => i.Contains("mate -4")));
+            Assert.IsTrue(traceLines.Exists(i => i.Contains("mate -4")));
         }
 
         [TestMethod]
@@ -299,7 +299,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 patzer.Perft(depth);
 
-                if (traceLines.Any(line => line.Contains(nodes.ToString())))
+                if (traceLines.Exists(line => line.Contains(nodes.ToString())))
                 {
                     success = true;
 

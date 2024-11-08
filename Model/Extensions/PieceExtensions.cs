@@ -60,9 +60,9 @@ public static class PieceExtensions
         return type | color;
     }
 
-    public static IEnumerable<Piece> Colors => new[] { Piece.White, Piece.None };
+    public static IEnumerable<Piece> Colors => [Piece.White, Piece.None];
 
-    public static Piece[] Types => new[] { Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King };
+    public static Piece[] Types => [Piece.Pawn, Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King];
 
     public static IEnumerable<Piece> AllPieces => Colors.Select(c => Types.Select(t => c | t)).SelectMany(p => p);
 }

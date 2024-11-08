@@ -55,7 +55,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
 
-            Log.Debug($"{color} plays: {move}");
+            Log.Debug("{Color} plays: {Move}", color, move);
 
             Board = Board.Play(move);
 
@@ -129,7 +129,7 @@ namespace SicTransit.Woodpusher.Engine
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
-                Log.Debug($"thinking time: {timeLimit}");
+                Log.Debug("thinking time: {TimeLimit}", timeLimit);
                 Thread.Sleep(timeLimit);
                 timeIsUp = true;
             });
@@ -222,7 +222,7 @@ namespace SicTransit.Woodpusher.Engine
 
             SendDebugInfo($"aborting @ depth {maxDepth}");
 
-            Log.Debug($"evaluated {nodeCount} nodes, found: {bestMove}");
+            Log.Debug("evaluated {NodeCount} nodes, found: {BestMove}", nodeCount, bestMove);
 
             if (bestMove == null)
             {

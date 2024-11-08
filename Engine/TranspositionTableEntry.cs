@@ -2,7 +2,7 @@ using SicTransit.Woodpusher.Model;
 
 namespace SicTransit.Woodpusher.Engine
 {
-    public struct TranspositionTableEntry
+    public readonly struct TranspositionTableEntry
     {
         public int Ply { get; }
         public Move? Move { get; }
