@@ -288,7 +288,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (cachedEntry.Hash == board.Hash)
             {
-                if (cachedEntry.MaxDepth >= maxDepth && cachedEntry.Ply == board.Counters.Ply)
+                if (cachedEntry.MaxDepth == maxDepth && cachedEntry.Ply == board.Counters.Ply)
                 {
                     return cachedEntry.Score;
                 }
