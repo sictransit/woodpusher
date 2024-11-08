@@ -4,6 +4,8 @@
 A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 
 # Win vs. *Stockfish 15* in ultra bullet
+
+To be fair, I've let them play hundreds of games, and this is the only one where Woodpusher won. It's a very rare event and probably due to the phase of the moon or something.
 ```
 [Event "?"]
 [Site "?"]
