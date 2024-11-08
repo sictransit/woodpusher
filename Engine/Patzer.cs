@@ -141,6 +141,8 @@ namespace SicTransit.Woodpusher.Engine
 
             var progress = new List<(int depth, long time)>();
 
+            Array.Clear(transpositionTable, 0, transpositionTable.Length);
+
             while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp && enoughTime)
             {
                 try
