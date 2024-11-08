@@ -292,7 +292,7 @@ public class Board : IBoard
         }
     }
 
-    public IEnumerable<IBoard> PlayLegalMoves(Piece piece)
+    private IEnumerable<IBoard> PlayLegalMoves(Piece piece)
     {
         var whiteIsPlaying = ActiveColor.Is(Piece.White);
         var friendlyBoard = whiteIsPlaying ? white : black;
