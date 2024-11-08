@@ -58,8 +58,8 @@ namespace SicTransit.Woodpusher.Engine
             Log.Debug($"{color} plays: {move}");
 
             Board = Board.Play(move);
-            
-            repetitions.Add(Board.Hash, repetitions.GetValueOrDefault(Board.Hash) + 1);
+
+            repetitions[Board.Hash]= repetitions.GetValueOrDefault(Board.Hash) + 1;
         }
 
         private Move? GetOpeningBookMove()
