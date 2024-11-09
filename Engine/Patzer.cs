@@ -179,9 +179,13 @@ namespace SicTransit.Woodpusher.Engine
                         if (evaluationTime > 0)
                         {
                             progress.Add((maxDepth, evaluationTime));
+                            if (progress.Count > 3) 
+                            {
+                                progress.RemoveAt(0);
+                            }
 
-                            // Don't try to estimate enought time unless we've got >2 points and we're at least at depth 6.
-                            if (progress.Count > 2 && maxDepth>=6)
+                            // Don't try to estimate enought time unless we've got >2 points, i.e. we're at least at depth 6.
+                            if (progress.Count > 2)
                             {
                                 var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
                                 var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
