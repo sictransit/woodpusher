@@ -263,28 +263,21 @@ namespace SicTransit.Woodpusher.Engine
                 return 0;
             }
 
-            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.Capture).ToArray();
-
-            if (boards.Length == 0)
-            {
-                if (board.IsChecked)
-                {
-                    return -Declarations.MateScore + board.Counters.Ply;
-                }
-                else
-                {
-                    return Declarations.DrawScore;
-                }
-            }
-
             if (depth == maxDepth)
             {
                 if (repetitions.GetValueOrDefault(board.Hash) >= 2)
                 {
-                    return 0;
+                    return Declarations.DrawScore;
                 }
 
                 return board.Score * sign;
+            }
+
+            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.Capture).ToArray();
+
+            if (boards.Length == 0)
+            {
+                return board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
