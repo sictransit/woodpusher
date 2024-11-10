@@ -59,7 +59,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Board = Board.Play(move);
 
-            repetitions[Board.Hash]= repetitions.GetValueOrDefault(Board.Hash) + 1;
+            repetitions[Board.Hash] = repetitions.GetValueOrDefault(Board.Hash) + 1;
         }
 
         private Move? GetOpeningBookMove()
@@ -72,6 +72,13 @@ namespace SicTransit.Woodpusher.Engine
             var legalOpeningBookMoves = openingBookMoves.Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(move => move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) }).Where(l => l.legalMove != null).ToArray();
 
             return legalOpeningBookMoves.OrderByDescending(m => m.openingBookMove.Count).FirstOrDefault()?.legalMove;
+        }
+
+        private Move? GetTheoryMove()
+        {
+            var theoryMoves = Board.PlayLegalMoves().Select(b => new { move = b.Counters.LastMove, count = openingBook.GetMoves(b.Hash).Count() }).Where(t => t.count > 0).ToArray();
+
+            return theoryMoves.OrderByDescending(m => m.count).FirstOrDefault()?.move;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -136,6 +143,14 @@ namespace SicTransit.Woodpusher.Engine
                 return new AlgebraicMove(openingMove);
             }
 
+            var theoryMove = GetTheoryMove();
+            if (theoryMove != null)
+            {
+                Log.Information("Returning theory move: {0}", theoryMove);
+                SendDebugInfo($"playing theory move {theoryMove.ToAlgebraicMoveNotation()}");
+                return new AlgebraicMove(theoryMove);
+            }
+
             var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
             var bestMove = default(Move);
@@ -172,14 +187,14 @@ namespace SicTransit.Woodpusher.Engine
                         foundMate = mateIn is > 0;
 
                         var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
-                        var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));                        
-                        var hashFull = transpositionTable.Count(t=>t.Hash != 0)*1000 / transpositionTableSize;
+                        var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
+                        var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
                         SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
 
                         if (evaluationTime > 0)
                         {
                             progress.Add((maxDepth, evaluationTime));
-                            if (progress.Count > 3) 
+                            if (progress.Count > 3)
                             {
                                 progress.RemoveAt(0);
                             }
@@ -327,7 +342,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     break;
                 }
-            }            
+            }
 
             transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash, maxDepth);
 

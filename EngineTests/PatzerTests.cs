@@ -262,7 +262,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             if (!foundMate)
             {
                 Assert.Inconclusive("Patzer is not yet able to go to depth 20.");
-            }            
+            }
         }
 
         [TestMethod]

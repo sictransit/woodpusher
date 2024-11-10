@@ -7,7 +7,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
     {
         Piece ActiveColor { get; }
 
-        IBoard Play(Move move);        
+        IBoard Play(Move move);
 
         IEnumerable<IBoard> PlayLegalMoves();
 

@@ -64,7 +64,7 @@ public class Board : IBoard
 
             return score;
         }
-    }    
+    }
 
     public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
             ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)

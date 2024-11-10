@@ -30,8 +30,8 @@ namespace SicTransit.Woodpusher.Model
         private readonly ulong knight;
         private readonly ulong bishop;
         private readonly ulong queen;
-        private readonly ulong king;        
-        
+        private readonly ulong king;
+
         public ulong AllPieces { get; }
 
         public int Phase => BitOperations.PopCount(knight) + BitOperations.PopCount(bishop) + 2 * BitOperations.PopCount(rook) + 4 * BitOperations.PopCount(queen);

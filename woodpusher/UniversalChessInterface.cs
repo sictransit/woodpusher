@@ -189,7 +189,7 @@ namespace SicTransit.Woodpusher
         }
 
         private Task Go(string command)
-        {            
+        {
             return Task.Run(() =>
             {
                 lock (engine)
@@ -212,7 +212,7 @@ namespace SicTransit.Woodpusher
 
                         if (movetimeMatch.Success)
                         {
-                            timeLimit = int.Parse(movetimeMatch.Groups[1].Value) ;
+                            timeLimit = int.Parse(movetimeMatch.Groups[1].Value);
                         }
                         else if (whiteTimeMatch.Success && blackTimeMatch.Success)
                         {
@@ -222,7 +222,7 @@ namespace SicTransit.Woodpusher
 
                             if (movesToGoMatch.Success)
                             {
-                                movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);                                
+                                movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
                             }
                             else
                             {
@@ -230,7 +230,7 @@ namespace SicTransit.Woodpusher
                                 consoleOutput($"info string movestogo not specified, using {movesToGo}");
                             }
 
-                            timeLimit = Math.Min(timeLimit, timeLeft / movesToGo );
+                            timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
                         }
 
                         var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));

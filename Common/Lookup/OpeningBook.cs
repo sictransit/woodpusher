@@ -11,7 +11,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private Dictionary<ulong, Dictionary<string, int>> book = new();
 
-        private static readonly string BookFilename = Path.Combine(@"Resources","openings.json");
+        private static readonly string BookFilename = Path.Combine(@"Resources", "openings.json");
 
         public OpeningBook(bool startEmpty = false)
         {

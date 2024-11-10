@@ -592,7 +592,7 @@ d8d7: 1
             Log.Information(Environment.NewLine + board.PrettyPrint());
 
             Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
-        }     
+        }
 
         [TestMethod]
         public void MoveEqualityTest()
