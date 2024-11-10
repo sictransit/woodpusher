@@ -25,22 +25,32 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore]
-        public void GamesTest()
+        public void GenerateWhiteOpeningBook()
         {
-            static bool eloPredicate(int? w, int? b)
+            GenerateOpeningBook(true);
+        }
+
+        [TestMethod]
+        public void GenerateBlackOpeningBook()
+        {
+            GenerateOpeningBook(false);
+        }
+
+        public void GenerateOpeningBook(bool white)
+        {
+            static bool eloPredicate(PortableGameNotation game)
             {
-                if (!w.HasValue || !b.HasValue)
+                if (!game.WhiteElo.HasValue || !game.BlackElo.HasValue)
                 {
                     return false;
                 }
 
-                if ((w + b) / 2 < 2000)
+                if ((game.WhiteElo.Value + game.BlackElo.Value) / 2 < 2000)
                 {
                     return false;
                 }
 
-                if (Math.Abs(w.Value - b.Value) > 500)
+                if (Math.Abs(game.WhiteElo.Value - game.BlackElo.Value) > 500)
                 {
                     return false;
                 }
@@ -77,19 +87,30 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                         var sb = new StringBuilder();
 
-                        while (reader.ReadLine() is { } headerLine)
-                        {
-                            if (headerLine.StartsWith("[Event"))
-                            {
-                                games.Add(PortableGameNotation.Parse(sb.ToString()));
+                        var pgns= new List<string>();
 
-                                sb.Clear();
+                        while (reader.ReadLine() is { } line)
+                        {
+                            if (line.StartsWith("[Event"))
+                            {
+                                pgns.Add(sb.ToString());
+
+                                sb.Clear();                                
                             }
 
-                            sb.AppendLine(headerLine);
+                            sb.AppendLine(line);
                         }
 
-                        games.Add(PortableGameNotation.Parse(sb.ToString()));
+                        foreach (var pgn in pgns)
+                        {
+                            var game = PortableGameNotation.Parse(pgn);
+
+                            if (eloPredicate(game) && game.Result == (white ? Result.WhiteWin : Result.BlackWin))
+                            {
+                                games.Add(game);
+                            }
+                        }
+
                     }
 
                     Log.Information($"Total: {games.Count}");
@@ -97,13 +118,13 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     var openingBook = new OpeningBook(true);
                     var engine = new Patzer();
 
-                    foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result != Result.Ongoing && eloPredicate(g.WhiteElo, g.BlackElo)).OrderByDescending(g => g.WhiteElo + g.BlackElo).Take(1000))
+                    foreach (var game in games.Where(g => g.PgnMoves.Any() ))
                     {
                         engine.Initialize();
 
                         try
                         {
-                            foreach (var pgnMove in game.PgnMoves.Take(40))
+                            foreach (var pgnMove in game.PgnMoves)
                             {
                                 var move = pgnMove.GetMove(engine);
 
@@ -131,7 +152,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 newOpeningBook.LoadFromFile(jsonFile.FullName);
             }
 
-            newOpeningBook.SaveToFile("openings.json");
+            var filename = $"{(white ? "white" : "black")}.openingbook.json";
+            newOpeningBook.SaveToFile(filename);
         }
 
         [Ignore("external content")]
