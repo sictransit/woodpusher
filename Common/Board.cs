@@ -32,7 +32,7 @@ public class Board : IBoard
 
         whiteIsPlaying = counters.ActiveColor.Is(Piece.White);
         activeBoard = whiteIsPlaying ? white : black;
-        opponentBoard = whiteIsPlaying ? black : white;        
+        opponentBoard = whiteIsPlaying ? black : white;
 
         Counters = counters;
         this.internals = internals;
@@ -84,7 +84,7 @@ public class Board : IBoard
 
     public IBoard Play(Move move)
     {
-        var newHash = Hash;                
+        var newHash = Hash;
 
         var newActiveBoard = activeBoard.Toggle(move.Piece, move.Target);
 
