@@ -24,6 +24,24 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
         }
 
+        public void Prune(int keepTopPercent)
+        {
+            foreach (var hash in book.Keys)
+            {
+                var moves = book[hash];
+
+                foreach (var move in moves.OrderByDescending(m => m.Value).Skip(1))
+                {
+                    moves.Remove(move.Key);
+                }
+            }
+
+            foreach (var entry in book.OrderByDescending(e => e.Value.Sum(x => x.Value)).Skip(book.Count / keepTopPercent))
+            {
+                book.Remove(entry.Key);
+            }
+        }
+
         public void LoadFromFile(string? filename = null)
         {
             filename ??= BookFilename;
