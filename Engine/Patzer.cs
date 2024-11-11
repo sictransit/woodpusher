@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly Dictionary<ulong, int> repetitions = [];
 
-        private readonly OpeningBook openingBook = new();
+        private OpeningBook openingBook;
         private readonly Action<string>? infoCallback;
 
         private const int transpositionTableSize = 1_000_000;
@@ -64,6 +64,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? GetOpeningBookMove()
         {
+            if (openingBook == null)
+            {
+                openingBook = new OpeningBook(Board.ActiveColor);
+            }
+
             var openingBookMoves = openingBook.GetMoves(Board.Hash);
 
             var legalMoves = Board.GetLegalMoves().ToArray();

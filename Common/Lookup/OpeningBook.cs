@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using MessagePack;
 using Serilog;
 using SicTransit.Woodpusher.Model;
+using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common.Lookup
@@ -9,12 +10,16 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         // Credit: https://github.com/lichess-org/chess-openings
 
+        private readonly MessagePackSerializerOptions lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+
         private Dictionary<ulong, Dictionary<string, int>> book = new();
 
-        private static readonly string BookFilename = Path.Combine(@"Resources", "openings.json");
+        private readonly string bookFilename;
 
-        public OpeningBook(bool startEmpty = false)
+        public OpeningBook(Piece color, bool startEmpty = false)
         {
+            bookFilename = Path.Combine(@"Resources", $"openings.{(color.Is(Piece.White) ? "white" : "black")}.lz4");
+
             if (!startEmpty)
             {
                 LoadFromFile();
@@ -23,15 +28,15 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void LoadFromFile(string? filename = null)
         {
-            filename ??= BookFilename;
+            filename ??= bookFilename;
 
             if (!File.Exists(filename))
             {
                 Log.Error($"Unable to open the opening book: {filename}");
             }
             else
-            {
-                var loadedBook = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllText(filename))!;
+            {                
+                var loadedBook = MessagePackSerializer.Deserialize<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllBytes(filename), lz4Options);
 
                 foreach (var hash in loadedBook)
                 {
@@ -45,11 +50,11 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void SaveToFile(string? filename = null)
         {
-            filename ??= BookFilename;
+            filename ??= bookFilename;
 
-            var json = JsonConvert.SerializeObject(book, Formatting.Indented);
+            var bytes = MessagePackSerializer.Serialize(book, lz4Options);
 
-            File.WriteAllText(filename, json);
+            File.WriteAllBytes(filename, bytes);
         }
 
         public void AddMove(ulong hash, string move, int count = 1)

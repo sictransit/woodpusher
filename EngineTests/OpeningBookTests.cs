@@ -29,11 +29,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             GenerateOpeningBook(true);
 
-            Assert.IsTrue(File.Exists("white.openingbook.json"));
+            Assert.IsTrue(File.Exists("openings.white.lz4"));
 
             GenerateOpeningBook(false);
 
-            Assert.IsTrue(File.Exists("black.openingbook.json"));
+            Assert.IsTrue(File.Exists("openings.black.lz4"));
         }
 
         private static void GenerateOpeningBook(bool white)
@@ -62,7 +62,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             foreach(var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
             {
-                var outFile = $"{zipFile.Name}.{(white ? "white" : "black")}.json";
+                var outFile = $"{zipFile.Name}.{(white ? "white" : "black")}.lz4";
 
                 if (File.Exists(outFile))
                 {
@@ -109,7 +109,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Log.Information($"Total: {games.Count}");
 
-                var openingBook = new OpeningBook(true);
+                var openingBook = new OpeningBook(white ? Model.Enums.Piece.White : Model.Enums.Piece.None, true);
                 var engine = new Patzer();
 
                 foreach (var game in games.Where(g => g.PgnMoves.Any()))
@@ -138,14 +138,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 openingBook.SaveToFile(outFile);
             }
 
-            var newOpeningBook = new OpeningBook(true);
+            var newOpeningBook = new OpeningBook(white ? Model.Enums.Piece.White : Model.Enums.Piece.None, true);
 
-            foreach (var jsonFile in new DirectoryInfo(".").EnumerateFiles($"*.zip.{(white ? "white" : "black")}.json"))
+            foreach (var jsonFile in new DirectoryInfo(".").EnumerateFiles($"*.zip.{(white ? "white" : "black")}.lz4"))
             {
                 newOpeningBook.LoadFromFile(jsonFile.FullName);
             }
 
-            var filename = $"{(white ? "white" : "black")}.openingbook.json";
+            var filename = $"openings.{(white ? "white" : "black")}.lz4";
             newOpeningBook.SaveToFile(filename);
         }
 
@@ -154,7 +154,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void ParseECO()
         {
             IEngine engine = new Patzer();
-            var openingBook = new OpeningBook(true);
+            var openingBook = new OpeningBook(Model.Enums.Piece.White, true);
 
             var maxLength = 0;
             var longest = string.Empty;
@@ -235,7 +235,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             // 5rk1/5ppp/p1pbr3/1p1n3q/P2P2b1/1BPQB1P1/1P1N1P1P/R3R1K1 w - -
 
             IEngine engine = new Patzer();
-            var book = new OpeningBook();
+            var book = new OpeningBook(Model.Enums.Piece.White);
 
             foreach (var notation in "e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1g1 f8e7 f1e1 b7b5 a4b3 e8g8 c2c3 d7d5 e4d5 f6d5 f3e5 c6e5 e1e5 c7c6 d2d4 e7d6 e5e1 d8h4 g2g3 h4h3 c1e3 c8g4 d1d3 a8e8 b1d2 e8e6 a2a4 h3h5".Split())
             {
@@ -270,7 +270,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             // E60 Grünfeld Defense: Counterthrust Variation d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5
 
             IEngine engine = new Patzer();
-            var book = new OpeningBook();
+            var book = new OpeningBook(Model.Enums.Piece.White);
 
             foreach (var notation in "d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5".Split())
             {
