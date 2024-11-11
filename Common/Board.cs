@@ -10,6 +10,7 @@ public class Board : IBoard
     private readonly Bitboard white;
     private readonly Bitboard black;
     private readonly BoardInternals internals;
+    private int? score;
 
     public Counters Counters { get; }
 
@@ -48,21 +49,24 @@ public class Board : IBoard
     {
         get
         {
-            var phase = white.Phase + black.Phase;
-
-            var score = 0;
-
-            foreach (var piece in white.GetPieces())
+            if (!score.HasValue)
             {
-                score += internals.Scoring.EvaluatePiece(piece, phase);
+                var phase = white.Phase + black.Phase;
+
+                score = 0;
+
+                foreach (var piece in white.GetPieces())
+                {
+                    score += internals.Scoring.EvaluatePiece(piece, phase);
+                }
+
+                foreach (var piece in black.GetPieces())
+                {
+                    score -= internals.Scoring.EvaluatePiece(piece, phase);
+                }
             }
 
-            foreach (var piece in black.GetPieces())
-            {
-                score -= internals.Scoring.EvaluatePiece(piece, phase);
-            }
-
-            return score;
+            return score.Value;
         }
     }
 

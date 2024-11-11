@@ -120,6 +120,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Log.Information($"Done playing!");
             }
+
             whiteBook.Prune(10);
             blackBook.Prune(10);
 

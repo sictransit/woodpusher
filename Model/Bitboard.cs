@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong AllPieces { get; }
 
-        public int Phase => BitOperations.PopCount(knight) + BitOperations.PopCount(bishop) + 2 * BitOperations.PopCount(rook) + 4 * BitOperations.PopCount(queen);
+        public int Phase => Math.Min(12, BitOperations.PopCount(knight) + BitOperations.PopCount(bishop) + 2 * BitOperations.PopCount(rook) + 4 * BitOperations.PopCount(queen));
 
         private ulong GetBitmap(Piece pieceType) => pieceType switch
         {
