@@ -58,9 +58,9 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 return true;
             }
 
-            var root = new DirectoryInfo(@"C:\Temp\Chess Games");            
+            var root = new DirectoryInfo(@"C:\Temp\Chess Games");
 
-            foreach(var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
+            foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
             {
                 var outFile = $"{zipFile.Name}.{(white ? "white" : "black")}.lz4";
 

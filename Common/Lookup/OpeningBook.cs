@@ -35,7 +35,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                 Log.Error($"Unable to open the opening book: {filename}");
             }
             else
-            {                
+            {
                 var loadedBook = MessagePackSerializer.Deserialize<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllBytes(filename), lz4Options);
 
                 foreach (var hash in loadedBook)

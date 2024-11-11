@@ -228,7 +228,7 @@ public class Board : IBoard
         var threats = internals.Attacks.GetThreatMask(piece);
 
         var opponent = GetBitboard(color);
-        
+
         foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
         {
             yield return knight;
