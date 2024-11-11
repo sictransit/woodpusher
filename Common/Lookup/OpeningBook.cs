@@ -10,15 +10,13 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         // Credit: https://github.com/lichess-org/chess-openings
 
-        private readonly MessagePackSerializerOptions lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-
         private Dictionary<ulong, Dictionary<string, int>> book = new();
 
-        private readonly string bookFilename;
+        public string BookFilename { get; }
 
         public OpeningBook(Piece color, bool startEmpty = false)
         {
-            bookFilename = Path.Combine(@"Resources", $"openings.{(color.Is(Piece.White) ? "white" : "black")}.lz4");
+            BookFilename = Path.Combine(@"Resources", $"openings.{(color.Is(Piece.White) ? "white" : "black")}.bin");
 
             if (!startEmpty)
             {
@@ -28,7 +26,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void LoadFromFile(string? filename = null)
         {
-            filename ??= bookFilename;
+            filename ??= BookFilename;
 
             if (!File.Exists(filename))
             {
@@ -36,7 +34,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                var loadedBook = MessagePackSerializer.Deserialize<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllBytes(filename), lz4Options);
+                var loadedBook = MessagePackSerializer.Deserialize<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllBytes(filename));
 
                 foreach (var hash in loadedBook)
                 {
@@ -50,14 +48,14 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public void SaveToFile(string? filename = null)
         {
-            filename ??= bookFilename;
+            filename ??= BookFilename;
 
-            var bytes = MessagePackSerializer.Serialize(book, lz4Options);
+            var bytes = MessagePackSerializer.Serialize(book);
 
             File.WriteAllBytes(filename, bytes);
         }
 
-        public void AddMove(ulong hash, string move, int count = 1)
+        private void AddMove(ulong hash, string move, int count = 1)
         {
             if (book.TryGetValue(hash, out var moves))
             {

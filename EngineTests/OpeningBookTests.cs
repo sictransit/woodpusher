@@ -25,18 +25,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        //[Ignore("external content")]
         public void GenerateOpeningBooks()
-        {
-            GenerateOpeningBook(true);
-
-            Assert.IsTrue(File.Exists("openings.white.lz4"));
-
-            GenerateOpeningBook(false);
-
-            Assert.IsTrue(File.Exists("openings.black.lz4"));
-        }
-
-        private static void GenerateOpeningBook(bool white)
         {
             static bool eloPredicate(PortableGameNotation game)
             {
@@ -60,15 +50,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var root = new DirectoryInfo(@"C:\Temp\Chess Games");
 
+            var whiteBook = new OpeningBook(Model.Enums.Piece.White, true);
+            var blackBook = new OpeningBook(Model.Enums.Piece.None, true);
+
             foreach (var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
             {
-                var outFile = $"{zipFile.Name}.{(white ? "white" : "black")}.lz4";
-
-                if (File.Exists(outFile))
-                {
-                    continue;
-                }
-
                 var games = new List<PortableGameNotation>();
 
                 Log.Information($"Parsing PGN: {zipFile.FullName}");
@@ -99,54 +85,50 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     {
                         var game = PortableGameNotation.Parse(pgn);
 
-                        if (eloPredicate(game) && game.Result == (white ? Result.WhiteWin : Result.BlackWin))
+                        if (eloPredicate(game))
                         {
                             games.Add(game);
                         }
                     }
-
                 }
 
                 Log.Information($"Total: {games.Count}");
 
-                var openingBook = new OpeningBook(white ? Model.Enums.Piece.White : Model.Enums.Piece.None, true);
-                var engine = new Patzer();
-
-                foreach (var game in games.Where(g => g.PgnMoves.Any()))
+                foreach (var white in new[] {true,false })
                 {
-                    engine.Initialize();
+                    var openingBook = white ? whiteBook : blackBook;
+                    var engine = new Patzer();
 
-                    try
+                    foreach (var game in games.Where(g => g.PgnMoves.Any()).OrderByDescending(g => white ? g.WhiteElo : g.BlackElo).Take(1000))
                     {
-                        foreach (var pgnMove in game.PgnMoves)
+                        engine.Initialize();
+
+                        try
                         {
-                            var move = pgnMove.GetMove(engine);
+                            foreach (var pgnMove in game.PgnMoves.Take(40))
+                            {
+                                var move = pgnMove.GetMove(engine);
 
-                            var hash = engine.Board.Hash;
+                                var hash = engine.Board.Hash;
 
-                            engine.Play(move);
+                                engine.Play(move);
 
-                            openingBook.AddMove(hash, move);
+                                openingBook.AddMove(hash, move);
+                            }
+                        }
+                        catch (PgnParsingException e)
+                        {
+                            Log.Error(e, game.Source);
                         }
                     }
-                    catch (PgnParsingException e)
-                    {
-                        Log.Error(e, game.Source);
-                    }
                 }
-
-                openingBook.SaveToFile(outFile);
             }
 
-            var newOpeningBook = new OpeningBook(white ? Model.Enums.Piece.White : Model.Enums.Piece.None, true);
+            whiteBook.SaveToFile();
+            blackBook.SaveToFile();
 
-            foreach (var jsonFile in new DirectoryInfo(".").EnumerateFiles($"*.zip.{(white ? "white" : "black")}.lz4"))
-            {
-                newOpeningBook.LoadFromFile(jsonFile.FullName);
-            }
-
-            var filename = $"openings.{(white ? "white" : "black")}.lz4";
-            newOpeningBook.SaveToFile(filename);
+            Assert.IsTrue(File.Exists(whiteBook.BookFilename));
+            Assert.IsTrue(File.Exists(blackBook.BookFilename));
         }
 
         [Ignore("external content")]
