@@ -26,9 +26,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             foreach (var piece in pieces)
             {
-                var legalMoves = board.GetLegalMoves(piece).ToArray();
-
-                var legalMove = legalMoves.SingleOrDefault(move => move.GetTarget().Equals(square) && move.PromotionType == promotionType);
+                var legalMove = board.GetLegalMoves(piece).SingleOrDefault(move => move.GetTarget().Equals(square) && move.PromotionType == promotionType);
 
                 if (legalMove != null)
                 {

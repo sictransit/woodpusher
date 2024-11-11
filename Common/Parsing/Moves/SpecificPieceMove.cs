@@ -29,9 +29,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
 
             foreach (var piece in pieces)
             {
-                var legalMoves = board.GetLegalMoves(piece).ToArray();
-
-                var legalMove = legalMoves.SingleOrDefault(move => move.Piece.GetSquare().Equals(position) && move.GetTarget().Equals(square) && move.PromotionType == promotionType);
+                var legalMove = board.GetLegalMoves(piece).SingleOrDefault(move => move.Piece.GetSquare().Equals(position) && move.GetTarget().Equals(square) && move.PromotionType == promotionType);
 
                 if (legalMove != null)
                 {
@@ -39,7 +37,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 }
             }
 
-            throw new PgnParsingException(Raw, "unable to a legal move to match");
+            throw new PgnParsingException(Raw, "unable to find a legal move to match");
         }
 
         public override string ToString()

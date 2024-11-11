@@ -5,6 +5,7 @@ using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -24,7 +25,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("external content")]
+        //[Ignore("external content")]
         public void GenerateOpeningBooks()
         {
             static bool eloPredicate(PortableGameNotation game)
@@ -91,14 +92,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     }
                 }
 
-                Log.Information($"Total: {games.Count}");
+                Log.Information($"Found games: {games.Count}");
 
                 foreach (var white in new[] { true, false })
                 {
                     var openingBook = white ? whiteBook : blackBook;
                     var engine = new Patzer();
 
-                    foreach (var game in games.Where(g => g.PgnMoves.Any()).OrderByDescending(g => white ? g.WhiteElo : g.BlackElo).Take(1000))
+                    foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result == (white ? Result.WhiteWin : Result.BlackWin)).OrderByDescending(g => white ? g.WhiteElo : g.BlackElo).Take(1000))
                     {
                         engine.Initialize();
 
@@ -121,6 +122,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
                         }
                     }
                 }
+
+                Log.Information($"Done playing!");
             }
 
             whiteBook.SaveToFile();
