@@ -25,18 +25,18 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        public void GenerateWhiteOpeningBook()
+        public void GenerateOpeningBooks()
         {
             GenerateOpeningBook(true);
-        }
 
-        [TestMethod]
-        public void GenerateBlackOpeningBook()
-        {
+            Assert.IsTrue(File.Exists("white.openingbook.json"));
+
             GenerateOpeningBook(false);
+
+            Assert.IsTrue(File.Exists("black.openingbook.json"));
         }
 
-        public void GenerateOpeningBook(bool white)
+        private static void GenerateOpeningBook(bool white)
         {
             static bool eloPredicate(PortableGameNotation game)
             {
@@ -58,96 +58,89 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 return true;
             }
 
-            var root = new DirectoryInfo(@"C:\Users\micke\OneDrive\Documents\Chess Games");
+            var root = new DirectoryInfo(@"C:\Temp\Chess Games");            
 
-            var chunks = root.EnumerateFiles("*.zip", SearchOption.AllDirectories).Chunk(Environment.ProcessorCount);
-
-            foreach (var chunk in chunks)
+            foreach(var zipFile in root.EnumerateFiles("*.zip", SearchOption.AllDirectories))
             {
+                var outFile = $"{zipFile.Name}.{(white ? "white" : "black")}.json";
 
-                Parallel.ForEach(chunk, zipFile =>
+                if (File.Exists(outFile))
                 {
+                    continue;
+                }
 
-                    var outFile = $"{zipFile.Name}.json";
+                var games = new List<PortableGameNotation>();
 
-                    if (File.Exists(outFile))
+                Log.Information($"Parsing PGN: {zipFile.FullName}");
+
+                using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
+
+                foreach (var zipEntry in zipArchive.Entries)
+                {
+                    using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
+
+                    var sb = new StringBuilder();
+
+                    var pgns = new List<string>();
+
+                    while (reader.ReadLine() is { } line)
                     {
-                        return;
+                        if (line.StartsWith("[Event"))
+                        {
+                            pgns.Add(sb.ToString());
+
+                            sb.Clear();
+                        }
+
+                        sb.AppendLine(line);
                     }
 
-                    var games = new List<PortableGameNotation>();
-
-                    Log.Information($"Parsing PGN: {zipFile.FullName}");
-
-                    using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
-
-                    foreach (var zipEntry in zipArchive.Entries)
+                    foreach (var pgn in pgns)
                     {
-                        using var reader = new StreamReader(zipEntry.Open(), Encoding.UTF8);
+                        var game = PortableGameNotation.Parse(pgn);
 
-                        var sb = new StringBuilder();
-
-                        var pgns= new List<string>();
-
-                        while (reader.ReadLine() is { } line)
+                        if (eloPredicate(game) && game.Result == (white ? Result.WhiteWin : Result.BlackWin))
                         {
-                            if (line.StartsWith("[Event"))
-                            {
-                                pgns.Add(sb.ToString());
-
-                                sb.Clear();                                
-                            }
-
-                            sb.AppendLine(line);
-                        }
-
-                        foreach (var pgn in pgns)
-                        {
-                            var game = PortableGameNotation.Parse(pgn);
-
-                            if (eloPredicate(game) && game.Result == (white ? Result.WhiteWin : Result.BlackWin))
-                            {
-                                games.Add(game);
-                            }
-                        }
-
-                    }
-
-                    Log.Information($"Total: {games.Count}");
-
-                    var openingBook = new OpeningBook(true);
-                    var engine = new Patzer();
-
-                    foreach (var game in games.Where(g => g.PgnMoves.Any() ))
-                    {
-                        engine.Initialize();
-
-                        try
-                        {
-                            foreach (var pgnMove in game.PgnMoves)
-                            {
-                                var move = pgnMove.GetMove(engine);
-
-                                var hash = engine.Board.Hash;
-
-                                engine.Play(move);
-
-                                openingBook.AddMove(hash, move);
-                            }
-                        }
-                        catch (PgnParsingException e)
-                        {
-                            Log.Error(e, game.Source);
+                            games.Add(game);
                         }
                     }
 
-                    openingBook.SaveToFile(outFile);
-                });
+                }
+
+                Log.Information($"Total: {games.Count}");
+
+                var openingBook = new OpeningBook(true);
+                var engine = new Patzer();
+
+                foreach (var game in games.Where(g => g.PgnMoves.Any()))
+                {
+                    engine.Initialize();
+
+                    try
+                    {
+                        foreach (var pgnMove in game.PgnMoves)
+                        {
+                            var move = pgnMove.GetMove(engine);
+
+                            var hash = engine.Board.Hash;
+
+                            engine.Play(move);
+
+                            openingBook.AddMove(hash, move);
+                        }
+                    }
+                    catch (PgnParsingException e)
+                    {
+                        Log.Error(e, game.Source);
+                    }
+                }
+
+                openingBook.SaveToFile(outFile);
             }
 
             var newOpeningBook = new OpeningBook(true);
 
-            foreach (var jsonFile in new DirectoryInfo(".").EnumerateFiles("*.zip.json"))
+            foreach (var jsonFile in new DirectoryInfo(".").EnumerateFiles($"*.zip.{(white ? "white" : "black")}.json"))
             {
                 newOpeningBook.LoadFromFile(jsonFile.FullName);
             }
