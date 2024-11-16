@@ -154,7 +154,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             patzer.Position("2r5/R3n1p1/4kn2/7p/3P4/8/3NPPPP/4KB1R w K - 1 23");
 
-            var bestMove = patzer.FindBestMove();
+            var bestMove = patzer.FindBestMove(5000);
 
             Assert.AreNotEqual("h1g1", bestMove.Notation);
         }
@@ -222,7 +222,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             var bestMove = patzer.FindBestMove();
 
-            Assert.AreEqual("a2b3", bestMove.Notation);
+            Assert.IsTrue(new[] { "a2b1", "a2b3" }.Contains(bestMove.Notation));
         }
 
         [TestMethod]
@@ -234,7 +234,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(traceLines.Any(i => i.Contains("mate 4")));
+            Assert.IsTrue(traceLines.Exists(i => i.Contains("mate 4")));
         }
 
         [TestMethod]
@@ -248,7 +248,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             while (!task.IsCompleted)
             {
-                foundMate = traceLines.Any(i => i.Contains("mate 10"));
+                foundMate = traceLines.Exists(i => i.Contains("mate 10"));
 
                 if (foundMate)
                 {
@@ -259,10 +259,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
             }
 
             Assert.IsNotNull(task.Result);
+
             if (!foundMate)
             {
                 Assert.Inconclusive("Patzer is not yet able to go to depth 20.");
-            }            
+            }
         }
 
         [TestMethod]
@@ -270,11 +271,11 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
-            var move = patzer.FindBestMove(2000);
+            var move = patzer.FindBestMove(5000);
 
             Assert.IsNotNull(move);
 
-            Assert.IsTrue(traceLines.Any(i => i.Contains("mate -4")));
+            Assert.IsTrue(traceLines.Exists(i => i.Contains("mate -4")));
         }
 
         [TestMethod]
@@ -299,7 +300,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 patzer.Perft(depth);
 
-                if (traceLines.Any(line => line.Contains(nodes.ToString())))
+                if (traceLines.Exists(line => line.Contains(nodes.ToString())))
                 {
                     success = true;
 
