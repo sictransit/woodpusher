@@ -12,9 +12,7 @@ public class Board : IBoard
     private readonly Bitboard activeBoard;
     private readonly Bitboard opponentBoard;
     private readonly bool whiteIsPlaying;
-    private readonly BoardInternals internals;
-
-    private int? score;
+    private readonly BoardInternals internals;    
 
     public Counters Counters { get; }
 
@@ -57,24 +55,21 @@ public class Board : IBoard
     {
         get
         {
-            if (!score.HasValue)
+            var phase = white.Phase + black.Phase;
+
+            var score = 0;
+
+            foreach (var piece in white.GetPieces())
             {
-                var phase = white.Phase + black.Phase;
-
-                score = 0;
-
-                foreach (var piece in white.GetPieces())
-                {
-                    score += internals.Scoring.EvaluatePiece(piece, phase);
-                }
-
-                foreach (var piece in black.GetPieces())
-                {
-                    score -= internals.Scoring.EvaluatePiece(piece, phase);
-                }
+                score += internals.Scoring.EvaluatePiece(piece, phase);
             }
 
-            return score.Value;
+            foreach (var piece in black.GetPieces())
+            {
+                score -= internals.Scoring.EvaluatePiece(piece, phase);
+            }
+
+            return score;
         }
     }
 
