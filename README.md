@@ -3,7 +3,96 @@
 
 A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 
-# Win vs. *Stockfish 15* in ultra bullet
+## Features
+- UCI-compatible
+- Perft test
+- Opening book
+
+## UCI Commands
+
+### `uci`
+Initializes the engine and provides engine information.
+
+**Arguments:**
+- None
+
+### `isready`
+Checks if the engine is ready.
+
+**Arguments:**
+- None
+
+### `ucinewgame`
+Initializes a new game.
+
+**Arguments:**
+- None
+
+### `position`
+Sets up the board position using FEN and optional moves.
+
+**Arguments:**
+- `fen <fen_string>`: Sets the board position using the provided FEN string.
+- `moves <move1> <move2> ...`: A list of moves in algebraic notation to be played from the given position or the starting position if no FEN is provided.
+
+**Example:**
+
+`position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 e7e5`
+
+### `go`
+Starts the engine to find the best move or perform a perft test.
+
+**Arguments:**
+- `wtime <milliseconds>`: White's remaining time in milliseconds.
+- `btime <milliseconds>`: Black's remaining time in milliseconds.
+- `movestogo <number>`: Number of moves to the next time control.
+- `movetime <milliseconds>`: Time to search in milliseconds.
+- `perft <depth>`: Perform a perft test to the given depth.
+
+**Example:**
+
+```
+go wtime 300000 btime 300000 movestogo 40
+info string debug playing opening book g1f3
+bestmove g1f3
+```
+
+### `stop`
+Stops the engine's current calculation.
+
+**Arguments:**
+- None
+
+### `d`
+Displays the current board position.
+
+**Arguments:**
+- None
+
+**Example:**
+```
+d
+8 r n b q k b n r
+7 p p p p · p p p
+6 · · · · · · · ·
+5 · · · · p · · ·
+4 · · · · P · · ·
+3 · · · · · · · ·
+2 P P P P · P P P
+1 R N B Q K B N R
+  a b c d e f g h
+Hash: 6805972066694293741
+FEN: rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2
+```
+
+### `quit`
+Exits the engine.
+
+**Arguments:**
+- None
+
+
+## Win vs. *Stockfish 15* in ultra bullet
 
 To be fair, I've let them play hundreds of games, and this is the only one where Woodpusher won. It's a very rare event and probably due to the phase of the moon or something.
 ```
