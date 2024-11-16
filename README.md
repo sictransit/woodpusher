@@ -16,6 +16,14 @@ Initializes the engine and provides engine information.
 **Arguments:**
 - None
 
+**Example:**
+```
+uci
+id name Woodpusher 1.0.0+169dfebfdb4749ad97aabcbd779ec507f051ad72
+id author Mikael Fredriksson <micke@sictransit.net>
+uciok
+```
+
 ### `isready`
 Checks if the engine is ready.
 
