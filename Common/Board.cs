@@ -1,7 +1,9 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -59,14 +61,11 @@ public class Board : IBoard
 
             var score = 0;
 
-            foreach (var piece in white.GetPieces())
+            foreach (var piece in GetPieces())
             {
-                score += internals.Scoring.EvaluatePiece(piece, phase);
-            }
-
-            foreach (var piece in black.GetPieces())
-            {
-                score -= internals.Scoring.EvaluatePiece(piece, phase);
+                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+                
+                score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
             }
 
             return score;
