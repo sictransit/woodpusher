@@ -6,6 +6,7 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using System.IO.Compression;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace SicTransit.Woodpusher.Engine.Tests
@@ -43,7 +44,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 return true;
             }
 
-            var root = new DirectoryInfo(@"C:\Temp\Chess Games");
+            var root = new DirectoryInfo(@"C:\Users\micke\OneDrive\Documents\Chess Games");
 
             var whiteBook = new OpeningBook(Model.Enums.Piece.White, true);
             var blackBook = new OpeningBook(Model.Enums.Piece.None, true);
@@ -89,6 +90,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                 Log.Information($"Found games: {games.Count}");
 
+                var count = 0;
+
                 foreach (var white in new[] { true, false })
                 {
                     var openingBook = white ? whiteBook : blackBook;
@@ -110,6 +113,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                                 openingBook.AddMove(hash, move);
                             }
+
+                            count++;
                         }
                         catch (PgnParsingException e)
                         {
@@ -118,7 +123,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     }
                 }
 
-                Log.Information($"Done playing!");
+                Log.Information($"Done playing: {count}");
             }
 
             whiteBook.Prune(10);

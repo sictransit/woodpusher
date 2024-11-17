@@ -1,4 +1,4 @@
-﻿using MessagePack;
+﻿using Newtonsoft.Json;
 using Serilog;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public OpeningBook(Piece color, bool startEmpty = false)
         {
-            BookFilename = Path.Combine(@"Resources", $"openings.{(color.Is(Piece.White) ? "white" : "black")}.bin");
+            BookFilename = Path.Combine(@"Resources", $"openings.{(color.Is(Piece.White) ? "white" : "black")}.json");
 
             if (!startEmpty)
             {
@@ -52,7 +52,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                var loadedBook = MessagePackSerializer.Deserialize<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllBytes(filename));
+                var loadedBook = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllText(filename))!;
 
                 foreach (var hash in loadedBook)
                 {
@@ -68,9 +68,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
         {
             filename ??= BookFilename;
 
-            var bytes = MessagePackSerializer.Serialize(book);
+            var json = JsonConvert.SerializeObject(book, Formatting.Indented);
 
-            File.WriteAllBytes(filename, bytes);
+            File.WriteAllText(filename, json);
         }
 
         private void AddMove(ulong hash, string move, int count = 1)
