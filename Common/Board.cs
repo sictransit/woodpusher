@@ -340,19 +340,9 @@ public class Board : IBoard
     {
         if (move.Piece.Is(Piece.Pawn))
         {
-            if (!taking)
+            if ((taking && move.Flags.HasFlag(SpecialMove.PawnMoves)) || (!taking && move.Flags.HasFlag(SpecialMove.PawnTakes)))
             {
-                if (move.Flags.HasFlag(SpecialMove.PawnTakes))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (move.Flags.HasFlag(SpecialMove.PawnMoves))
-                {
-                    return false;
-                }
+                return false;
             }
 
             if (move.Flags.HasFlag(SpecialMove.PawnTakesEnPassant) && move.Target != Counters.EnPassantTarget)
