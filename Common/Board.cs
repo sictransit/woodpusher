@@ -306,9 +306,9 @@ public class Board : IBoard
                     break;
                 }
 
-                var hostileTarget = opponentBoard.Peek(move.Target);
+                var taking = opponentBoard.IsOccupied(move.Target);
 
-                if (!ValidateMove(move, hostileTarget))
+                if (!ValidateMove(move, taking))
                 {
                     break;
                 }
@@ -318,7 +318,7 @@ public class Board : IBoard
                 // Moving into check?
                 if (board.IsAttacked(board.FindKing(ActiveColor)))
                 {
-                    if (hostileTarget != Piece.None)
+                    if (taking)
                     {
                         break;
                     }
@@ -328,7 +328,7 @@ public class Board : IBoard
 
                 yield return board;
 
-                if (hostileTarget != Piece.None)
+                if (taking)
                 {
                     break;
                 }
@@ -336,11 +336,11 @@ public class Board : IBoard
         }
     }
 
-    private bool ValidateMove(Move move, Piece hostileTarget)
+    private bool ValidateMove(Move move, bool taking)
     {
         if (move.Piece.Is(Piece.Pawn))
         {
-            if (hostileTarget == Piece.None)
+            if (!taking)
             {
                 if (move.Flags.HasFlag(SpecialMove.PawnTakes))
                 {
