@@ -257,12 +257,9 @@ namespace SicTransit.Woodpusher.Engine
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.Hash == board.Hash)
+            if (cachedEntry.Hash == board.Hash && cachedEntry.MaxDepth == maxDepth && cachedEntry.Ply == board.Counters.Ply)
             {
-                if (cachedEntry.MaxDepth == maxDepth && cachedEntry.Ply == board.Counters.Ply)
-                {
-                    return cachedEntry.Score;
-                }
+                return cachedEntry.Score;
             }
 
             var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);
