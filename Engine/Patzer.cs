@@ -244,12 +244,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
         {
-            if (timeIsUp)
-            {
-                return 0;
-            }
-
-            if (depth == maxDepth)
+            if (depth == maxDepth || timeIsUp)
             {
                 return board.Score * sign;
             }
