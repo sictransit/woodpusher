@@ -258,11 +258,11 @@ namespace SicTransit.Woodpusher.Engine
                 return board.Score * sign;
             }
 
-            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Score * sign).ToArray();
-            if (boards.Length == 0)
-            {
-                return board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;
-            }
+            //var boards = board.PlayLegalMoves().OrderByDescending(b => b.Score * sign).ToArray();
+            //if (boards.Length == 0)
+            //{
+            //    return board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;
+            //}
 
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
@@ -274,12 +274,16 @@ namespace SicTransit.Woodpusher.Engine
                     return cachedEntry.Score;
                 }
 
-                var moveIndex = Array.FindIndex(boards, b => b.Counters.LastMove.Equals(cachedEntry.Move));
-                if (moveIndex > 0)
-                {
-                    (boards[moveIndex], boards[0]) = (boards[0], boards[moveIndex]);
-                }
+
+
+                //var moveIndex = Array.FindIndex(boards, b => b.Counters.LastMove.Equals(cachedEntry.Move));
+                //if (moveIndex > 0)
+                //{
+                //    (boards[moveIndex], boards[0]) = (boards[0], boards[moveIndex]);
+                //}
             }
+
+            var boards = board.PlayLegalMoves().OrderByDescending(b=>b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);
 
             Move? bestMove = null;
             var bestScore = -Declarations.MoveMaximumScore;
@@ -298,6 +302,11 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     break;
                 }
+            }
+
+            if (bestMove == null)
+            {
+                bestScore = board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;
             }
 
             transpositionTable[transpositionIndex] = new TranspositionTableEntry(board.Counters.Ply, bestMove, bestScore, board.Hash, maxDepth);
