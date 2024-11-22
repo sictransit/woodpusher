@@ -251,18 +251,8 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                //if (repetitions.GetValueOrDefault(board.Hash) >= 2)
-                //{
-                //    return Declarations.DrawScore;
-                //}
                 return board.Score * sign;
             }
-
-            //var boards = board.PlayLegalMoves().OrderByDescending(b => b.Score * sign).ToArray();
-            //if (boards.Length == 0)
-            //{
-            //    return board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;
-            //}
 
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
@@ -273,17 +263,9 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     return cachedEntry.Score;
                 }
-
-
-
-                //var moveIndex = Array.FindIndex(boards, b => b.Counters.LastMove.Equals(cachedEntry.Move));
-                //if (moveIndex > 0)
-                //{
-                //    (boards[moveIndex], boards[0]) = (boards[0], boards[moveIndex]);
-                //}
             }
 
-            var boards = board.PlayLegalMoves().OrderByDescending(b=>b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);
+            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);
 
             Move? bestMove = null;
             var bestScore = -Declarations.MoveMaximumScore;
