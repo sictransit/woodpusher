@@ -257,8 +257,8 @@ namespace SicTransit.Woodpusher.Engine
                 //}
                 return board.Score * sign;
             }
-            
-            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Score*sign).ToArray();            
+
+            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Score * sign).ToArray();
             if (boards.Length == 0)
             {
                 return board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;

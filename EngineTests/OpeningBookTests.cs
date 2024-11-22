@@ -6,7 +6,6 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Common.Parsing.Enum;
 using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using System.IO.Compression;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace SicTransit.Woodpusher.Engine.Tests

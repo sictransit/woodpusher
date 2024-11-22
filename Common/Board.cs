@@ -1,9 +1,7 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -14,7 +12,7 @@ public class Board : IBoard
     private readonly Bitboard activeBoard;
     private readonly Bitboard opponentBoard;
     private readonly bool whiteIsPlaying;
-    private readonly BoardInternals internals;    
+    private readonly BoardInternals internals;
 
     public Counters Counters { get; }
 
@@ -64,7 +62,7 @@ public class Board : IBoard
             foreach (var piece in GetPieces())
             {
                 var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
-                
+
                 score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
             }
 
@@ -232,45 +230,65 @@ public class Board : IBoard
 
         var opponent = GetBitboard(color);
 
-        foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
+        if ((opponent.AllPieces & threats.All) == 0)
         {
-            yield return knight;
+            yield break;
         }
 
-        foreach (var pawn in opponent.GetPieces(Piece.Pawn, threats.Pawn))
+        var target = piece.GetMask();
+
+        if ((opponent.Queen & threats.Queen) != 0)
         {
-            yield return pawn;
+            foreach (var queen in opponent.GetPieces(Piece.Queen, threats.Queen))
+            {
+                if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
+                {
+                    yield return queen;
+                }
+            }
+        }
+
+        if ((opponent.Bishop & threats.Bishop) != 0)
+        {
+            foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
+            {
+                if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
+                {
+                    yield return bishop;
+                }
+            }
+        }
+
+        if ((opponent.Rook & threats.Rook) != 0)
+        {
+            foreach (var rook in opponent.GetPieces(Piece.Rook, threats.Rook))
+            {
+                if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
+                {
+                    yield return rook;
+                }
+            }
+        }
+
+        if ((opponent.Knight & threats.Knight) != 0)
+        {
+            foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
+            {
+                yield return knight;
+            }
+        }
+
+        if ((opponent.Pawn & threats.Pawn) != 0)
+        {
+            foreach (var pawn in opponent.GetPieces(Piece.Pawn, threats.Pawn))
+            {
+                yield return pawn;
+            }
         }
 
         foreach (var king in opponent.GetPieces(Piece.King, threats.King))
         {
             yield return king;
-        }
-
-        var target = piece.GetMask();
-
-        foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
-        {
-            if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
-            {
-                yield return bishop;
-            }
-        }
-
-        foreach (var queen in opponent.GetPieces(Piece.Queen, threats.Queen))
-        {
-            if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
-            {
-                yield return queen;
-            }
-        }
-
-        foreach (var rook in opponent.GetPieces(Piece.Rook, threats.Rook))
-        {
-            if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
-            {
-                yield return rook;
-            }
         }
     }
 
