@@ -110,18 +110,10 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000)
-        {
-            stopwatch.Restart();
+        {            
             timeIsUp = false;
             maxDepth = 0;
             nodeCount = 0;
-
-            ThreadPool.QueueUserWorkItem(_ =>
-            {
-                Log.Debug("thinking time: {TimeLimit}", timeLimit);
-                Thread.Sleep(timeLimit);
-                timeIsUp = true;
-            });
 
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
@@ -146,6 +138,15 @@ namespace SicTransit.Woodpusher.Engine
             var progress = new List<(int depth, long time)>();
 
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Log.Debug("thinking time: {TimeLimit}", timeLimit);
+                Thread.Sleep(timeLimit);
+                timeIsUp = true;
+            });
+
+            stopwatch.Restart();
 
             while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp && enoughTime)
             {
@@ -226,12 +227,14 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private int? CalculateMateIn(int evaluation, int sign)
+        private int? CalculateMateIn(int evaluation, int playerSign)
         {
-            var mateIn = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore) - Board.Counters.Ply;
-            if (mateIn <= Declarations.MaxDepth)
+            var mateInPlies = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
+            if (mateInPlies <= Declarations.MaxDepth)
             {
-                return sign * (mateIn / 2 + (sign > 0 ? 1 : 0));
+                var resultSign = Math.Sign(evaluation);
+
+                return (mateInPlies / 2 + playerSign )* resultSign;
             }
             return null;
         }
@@ -298,7 +301,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (bestMove == null)
             {
-                bestScore = board.IsChecked ? -Declarations.MateScore + board.Counters.Ply : Declarations.DrawScore;
+                bestScore = board.IsChecked ? -Declarations.MateScore + depth : Declarations.DrawScore;
             }
 
             var entryType = bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact;
