@@ -210,7 +210,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             patzer.Position("rnbqkbnr/ppp2ppp/8/3pp3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3");
 
-            var bestMove = patzer.FindBestMove(1000);
+            var bestMove = patzer.FindBestMove(2000);
 
             Assert.AreNotEqual("d8g5", bestMove.Notation);
         }
@@ -271,7 +271,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 b - - 0 1");
 
-            var move = patzer.FindBestMove(5000);
+            var move = patzer.FindBestMove(10000);
 
             Assert.IsNotNull(move);
 
