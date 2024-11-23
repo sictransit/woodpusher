@@ -110,7 +110,7 @@ namespace SicTransit.Woodpusher.Engine
         }
 
         public AlgebraicMove FindBestMove(int timeLimit = 1000)
-        {            
+        {
             timeIsUp = false;
             maxDepth = 0;
             nodeCount = 0;
@@ -234,7 +234,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 var resultSign = Math.Sign(evaluation);
 
-                return (mateInPlies / 2 + playerSign )* resultSign;
+                return (mateInPlies / 2 + playerSign) * resultSign;
             }
             return null;
         }
@@ -259,7 +259,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Ply >= board.Counters.Ply - depth + maxDepth)
             {
-                switch(cachedEntry.EntryType)
+                switch (cachedEntry.EntryType)
                 {
                     case Enum.EntryType.Exact:
                         return cachedEntry.Score;

@@ -12,7 +12,7 @@ namespace SicTransit.Woodpusher.Engine
         public EntryType EntryType { get; }
 
         public TranspositionTableEntry(EntryType entryType, Move? move, int score, ulong hash, int ply)
-        {            
+        {
             Move = move;
             Score = score;
             Hash = hash;
