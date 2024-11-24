@@ -274,6 +274,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             if (timeIsUp)
             {
+                evaluatedBestMove = null;
                 return 0;
             }
 
@@ -336,7 +337,12 @@ namespace SicTransit.Woodpusher.Engine
             var entryType = bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact;
 
             transpositionTable[transpositionIndex] = new TranspositionTableEntry(entryType, bestMove, bestScore, board.Hash, maxDepth-depth);
-            evaluatedBestMove = bestMove;
+            
+            if (depth == 0)
+            {
+                evaluatedBestMove = bestMove;
+            }
+
             return bestScore;
         }
 
