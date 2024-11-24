@@ -302,18 +302,18 @@ public class Board : IBoard
         return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
-    public IEnumerable<IBoard> PlayLegalMoves()
+    public IEnumerable<IBoard> PlayLegalMoves(bool onlyCaptures = false)
     {
         foreach (var piece in activeBoard.GetPieces())
         {
-            foreach (var board in PlayLegalMoves(piece))
+            foreach (var board in PlayLegalMoves(piece, onlyCaptures))
             {
                 yield return board;
             }
         }
     }
 
-    private IEnumerable<IBoard> PlayLegalMoves(Piece piece)
+    private IEnumerable<IBoard> PlayLegalMoves(Piece piece, bool onlyCaptures)
     {
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
@@ -325,6 +325,11 @@ public class Board : IBoard
                 }
 
                 var taking = opponentBoard.IsOccupied(move.Target);
+
+                if (!taking && onlyCaptures)
+                {
+                    continue;
+                }
 
                 if (!ValidateMove(move, taking))
                 {

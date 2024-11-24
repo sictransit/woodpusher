@@ -256,7 +256,7 @@ namespace SicTransit.Woodpusher.Engine
 
             α = Math.Max(α, standPat);
 
-            var boards = board.PlayLegalMoves().Where(b=>b.Counters.Capture != Piece.None).OrderByDescending(b => b.Score * sign);
+            var boards = board.PlayLegalMoves(true).OrderByDescending(b => b.Score * sign);
             foreach (var newBoard in boards)
             {
                 nodeCount++;
@@ -287,7 +287,7 @@ namespace SicTransit.Woodpusher.Engine
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Ply >= board.Counters.Ply - depth + maxDepth)
+            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Ply >= maxDepth- depth )
             {
                 switch (cachedEntry.EntryType)
                 {
@@ -335,7 +335,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var entryType = bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact;
 
-            transpositionTable[transpositionIndex] = new TranspositionTableEntry(entryType, bestMove, bestScore, board.Hash, Board.Counters.Ply + maxDepth);
+            transpositionTable[transpositionIndex] = new TranspositionTableEntry(entryType, bestMove, bestScore, board.Hash, maxDepth-depth);
             evaluatedBestMove = bestMove;
             return bestScore;
         }
