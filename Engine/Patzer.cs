@@ -148,11 +148,11 @@ namespace SicTransit.Woodpusher.Engine
 
             stopwatch.Restart();
 
-            while (maxDepth < Declarations.MaxDepth - 2 && !foundMate && !timeIsUp && enoughTime)
+            while (maxDepth < Declarations.MaxDepth && !foundMate && !timeIsUp && enoughTime)
             {
                 try
                 {
-                    maxDepth += 2;
+                    maxDepth++;
                     long startTime = stopwatch.ElapsedMilliseconds;
                     var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
                     long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
@@ -281,10 +281,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                var quisceScore = -Quiesce(board, -β, -α, -sign);
-                var evaluatedScore = board.Score * sign;
-                
-                return quisceScore;
+                return Quiesce(board, α, β,  sign);
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
@@ -310,8 +307,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);
-            //var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.LastMove.Equals(cachedEntry.Move));
+            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);            
 
             Move? bestMove = null;
             var bestScore = -Declarations.MoveMaximumScore;
