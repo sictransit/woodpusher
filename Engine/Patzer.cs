@@ -245,13 +245,46 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
+        private int Quiesce(IBoard board, int α, int β, int sign)
+        {
+            var standPat = board.Score * sign;
+            
+            if (standPat >= β)
+            {
+                return β;
+            }
+
+            α = Math.Max(α, standPat);
+
+            var boards = board.PlayLegalMoves().Where(b=>b.Counters.Capture != Piece.None).OrderByDescending(b => b.Score * sign);
+            foreach (var newBoard in boards)
+            {
+                nodeCount++;
+                var score = -Quiesce(newBoard, -β, -α, -sign);
+                if (score >= β)
+                {
+                    return β;
+                }
+                α = Math.Max(α, score);
+            }
+            return α;
+        }
+
         private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
         {
+            if (timeIsUp)
+            {
+                return 0;
+            }
+
             var α0 = α;
 
-            if (depth == maxDepth || timeIsUp)
+            if (depth == maxDepth)
             {
-                return board.Score * sign;
+                var quisceScore = -Quiesce(board, -β, -α, -sign);
+                var evaluatedScore = board.Score * sign;
+                
+                return quisceScore;
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
