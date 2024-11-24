@@ -116,9 +116,18 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove? FindBestMove(int timeLimit = 1000)
         {
-            timeIsUp = false;
             maxDepth = 0;
             nodeCount = 0;
+            timeIsUp = false;
+            
+            stopwatch.Restart();
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Log.Debug("thinking time: {TimeLimit}", timeLimit);
+                Thread.Sleep(timeLimit);
+                timeIsUp = true;
+            });            
 
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
@@ -142,16 +151,7 @@ namespace SicTransit.Woodpusher.Engine
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
 
-            Array.Clear(transpositionTable, 0, transpositionTable.Length);
-
-            ThreadPool.QueueUserWorkItem(_ =>
-            {
-                Log.Debug("thinking time: {TimeLimit}", timeLimit);
-                Thread.Sleep(timeLimit);
-                timeIsUp = true;
-            });
-
-            stopwatch.Restart();
+            Array.Clear(transpositionTable, 0, transpositionTable.Length);        
 
             while (maxDepth < Declarations.MaxDepth && !foundMate && !timeIsUp && enoughTime)
             {
@@ -162,7 +162,7 @@ namespace SicTransit.Woodpusher.Engine
                     var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
                     long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
-                    if (!timeIsUp)
+                    if (!timeIsUp || (bestMove == null))
                     {
                         bestMove = evaluatedBestMove;
                         bestLine.Clear();
