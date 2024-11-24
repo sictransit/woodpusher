@@ -24,7 +24,9 @@ namespace SicTransit.Woodpusher.Engine
         // TODO: This doesn't stop opponent from forcing a draw.
         //private readonly Dictionary<ulong, int> repetitions = new();
 
-        private OpeningBook? openingBook;
+        private readonly OpeningBook whiteOpeningBook;
+        private readonly OpeningBook blackOpeningBook;
+
         private readonly Action<string>? infoCallback;
 
         private const int transpositionTableSize = 1_000_000;
@@ -37,6 +39,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public Patzer(Action<string>? infoCallback = null)
         {
+            whiteOpeningBook = new OpeningBook(Piece.White);
+            blackOpeningBook = new OpeningBook(Piece.None);
             Board = Common.Board.StartingPosition();
             this.infoCallback = infoCallback;
         }
@@ -60,7 +64,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? GetOpeningBookMove()
         {
-            openingBook ??= new OpeningBook(Board.ActiveColor);
+            var openingBook = Board.ActiveColor == Piece.White ? whiteOpeningBook : blackOpeningBook;
             var openingBookMoves = openingBook.GetMoves(Board.Hash);
             var legalMoves = Board.GetLegalMoves().ToArray();
             var legalOpeningBookMoves = openingBookMoves
@@ -72,6 +76,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? GetTheoryMove()
         {
+            var openingBook = Board.ActiveColor == Piece.White ? whiteOpeningBook : blackOpeningBook;
             var theoryMoves = Board.PlayLegalMoves()
                 .Select(b => new { move = b.Counters.LastMove, count = openingBook?.GetMoves(b.Hash).Count() ?? 0 })
                 .Where(t => t.count > 0)
