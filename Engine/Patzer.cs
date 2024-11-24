@@ -245,6 +245,16 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
+        private static IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, int sign, Move? preferredMove = null)
+        {
+            if (preferredMove == null)
+            { 
+                return boards.OrderByDescending(b => b.Score * sign);
+            }
+
+            return boards.OrderByDescending(b => b.Counters.LastMove.Equals(preferredMove)).ThenByDescending(b => b.Score * sign);
+        }
+
         private int Quiesce(IBoard board, int α, int β, int sign)
         {
             var standPat = board.Score * sign;
@@ -255,9 +265,8 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             α = Math.Max(α, standPat);
-
-            var boards = board.PlayLegalMoves(true).OrderByDescending(b => b.Score * sign);
-            foreach (var newBoard in boards)
+            
+            foreach (var newBoard in SortBords(board.PlayLegalMoves(true), sign))
             {
                 nodeCount++;
                 var score = -Quiesce(newBoard, -β, -α, -sign);
@@ -267,6 +276,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 α = Math.Max(α, score);
             }
+
             return α;
         }
 
@@ -308,12 +318,10 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            var boards = board.PlayLegalMoves().OrderByDescending(b => b.Counters.LastMove.Equals(cachedEntry.Move)).ThenByDescending(b => b.Score * sign);            
-
             Move? bestMove = null;
             var bestScore = -Declarations.MoveMaximumScore;
 
-            foreach (var newBoard in boards)
+            foreach (var newBoard in SortBords(board.PlayLegalMoves(), sign, cachedEntry.Move))
             {
                 nodeCount++;
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
@@ -333,10 +341,14 @@ namespace SicTransit.Woodpusher.Engine
             {
                 bestScore = board.IsChecked ? -Declarations.MateScore + depth : Declarations.DrawScore;
             }
-
-            var entryType = bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact;
-
-            transpositionTable[transpositionIndex] = new TranspositionTableEntry(entryType, bestMove, bestScore, board.Hash, maxDepth-depth);
+            
+            transpositionTable[transpositionIndex] = new TranspositionTableEntry(
+                bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
+                bestMove, 
+                bestScore, 
+                board.Hash, 
+                maxDepth-depth
+                );
             
             if (depth == 0)
             {
