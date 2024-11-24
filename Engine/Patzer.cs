@@ -109,7 +109,7 @@ namespace SicTransit.Woodpusher.Engine
             SendCallbackInfo(Environment.NewLine + $"Nodes searched: {nodes}");
         }
 
-        public AlgebraicMove FindBestMove(int timeLimit = 1000)
+        public AlgebraicMove? FindBestMove(int timeLimit = 1000)
         {
             timeIsUp = false;
             maxDepth = 0;
@@ -198,12 +198,7 @@ namespace SicTransit.Woodpusher.Engine
             SendDebugInfo($"aborting @ depth {maxDepth}");
             Log.Debug("evaluated {NodeCount} nodes, found: {BestMove}", nodeCount, bestMove);
 
-            if (bestMove == null)
-            {
-                throw new InvalidOperationException("No move found.");
-            }
-
-            return new AlgebraicMove(bestMove);
+            return bestMove == null ? null : new AlgebraicMove(bestMove);
         }
 
         private void UpdateBestLine(Move bestMove, int depth)

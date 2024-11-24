@@ -235,7 +235,7 @@ namespace SicTransit.Woodpusher
 
                         var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
 
-                        consoleOutput($"bestmove {bestMove.Notation}");
+                        consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
                     }
                 }
             });
