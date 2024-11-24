@@ -119,7 +119,7 @@ namespace SicTransit.Woodpusher.Engine
             maxDepth = 0;
             nodeCount = 0;
             timeIsUp = false;
-            
+
             stopwatch.Restart();
 
             ThreadPool.QueueUserWorkItem(_ =>
@@ -127,7 +127,7 @@ namespace SicTransit.Woodpusher.Engine
                 Log.Debug("thinking time: {TimeLimit}", timeLimit);
                 Thread.Sleep(timeLimit);
                 timeIsUp = true;
-            });            
+            });
 
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
@@ -151,7 +151,7 @@ namespace SicTransit.Woodpusher.Engine
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
 
-            Array.Clear(transpositionTable, 0, transpositionTable.Length);        
+            Array.Clear(transpositionTable, 0, transpositionTable.Length);
 
             while (maxDepth < Declarations.MaxDepth && !foundMate && !timeIsUp && enoughTime)
             {
@@ -248,7 +248,7 @@ namespace SicTransit.Woodpusher.Engine
         private static IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, int sign, Move? preferredMove = null)
         {
             if (preferredMove == null)
-            { 
+            {
                 return boards.OrderByDescending(b => b.Score * sign);
             }
 
@@ -258,14 +258,14 @@ namespace SicTransit.Woodpusher.Engine
         private int Quiesce(IBoard board, int α, int β, int sign)
         {
             var standPat = board.Score * sign;
-            
+
             if (standPat >= β)
             {
                 return β;
             }
 
             α = Math.Max(α, standPat);
-            
+
             foreach (var newBoard in SortBords(board.PlayLegalMoves(true), sign))
             {
                 nodeCount++;
@@ -292,13 +292,13 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                return Quiesce(board, α, β,  sign);
+                return Quiesce(board, α, β, sign);
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Ply >= maxDepth- depth )
+            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Ply >= maxDepth - depth)
             {
                 switch (cachedEntry.EntryType)
                 {
@@ -341,15 +341,15 @@ namespace SicTransit.Woodpusher.Engine
             {
                 bestScore = board.IsChecked ? -Declarations.MateScore + depth : Declarations.DrawScore;
             }
-            
+
             transpositionTable[transpositionIndex] = new TranspositionTableEntry(
                 bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
-                bestMove, 
-                bestScore, 
-                board.Hash, 
-                maxDepth-depth
+                bestMove,
+                bestScore,
+                board.Hash,
+                maxDepth - depth
                 );
-            
+
             if (depth == 0)
             {
                 evaluatedBestMove = bestMove;
