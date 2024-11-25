@@ -379,8 +379,9 @@ namespace SicTransit.Woodpusher.Engine
                 nodeCount++;
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
 
-                if (depth == 0 && repetitionTable.GetValueOrDefault(newBoard.Hash) >= 3)
+                if (depth < 2 && repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
+                    // A draw be repetition may be forced by either player.
                     score = Declarations.DrawScore;
                 }
 
