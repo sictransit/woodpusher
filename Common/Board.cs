@@ -62,65 +62,29 @@ public class Board : IBoard
             {
                 var phase = white.Phase + black.Phase;
 
-                score = 0;               
+                score = 0;
 
                 foreach (var piece in GetPieces(Piece.White))
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    switch (piece.GetPieceType())
-                    {
-                        case Piece.Knight:
-                            if (BitOperations.PopCount(white.Knight) > 1)
-                            {
-                                evaluation = evaluation * 3 / 2;
-                            }
-                            break;
-                        case Piece.Bishop:
-                            if (BitOperations.PopCount(white.Bishop) > 1)
-                            {
-                                evaluation = evaluation * 3 / 2;
-                            }
-                            break;
-                        case Piece.Rook:
-                            if (BitOperations.PopCount(white.Rook) > 1)
-                            {
-                                evaluation = evaluation * 3 / 2;
-                            }
-                            break;
-                    }
-
                     score += evaluation;
-                }                
+                }
+
+                score += BitOperations.PopCount(white.Knight) > 1 ? 50 : 0;
+                score += BitOperations.PopCount(white.Bishop) > 1 ? 50 : 0;
+                score += BitOperations.PopCount(white.Rook) > 1 ? 50 : 0;
 
                 foreach (var piece in GetPieces(Piece.None))
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    switch (piece.GetPieceType())
-                    {
-                        case Piece.Knight:
-                            if (BitOperations.PopCount(black.Knight) > 1)
-                            {
-                                evaluation = evaluation * 3 / 2;
-                            }
-                            break;
-                        case Piece.Bishop:
-                            if (BitOperations.PopCount(black.Bishop) > 1)
-                            {
-                                evaluation = evaluation * 3 / 2;
-                            }
-                            break;
-                        case Piece.Rook:
-                            if (BitOperations.PopCount(black.Rook) > 1)
-                            {
-                                evaluation = evaluation * 3 / 2;
-                            }
-                            break;
-                    }
-
                     score -= evaluation;
                 }
+
+                score -= BitOperations.PopCount(black.Knight) > 1 ? 50 : 0;
+                score -= BitOperations.PopCount(black.Bishop) > 1 ? 50 : 0;
+                score -= BitOperations.PopCount(black.Rook) > 1 ? 50 : 0;
             }
 
             return score.Value;

@@ -21,6 +21,8 @@ namespace SicTransit.Woodpusher.Engine
         private long nodeCount = 0;
         private static int engineMaxDepth = 128;
 
+        private int PlayerSign => Board.ActiveColor.Is(Piece.White) ? 1 : -1;
+
         private readonly OpeningBook whiteOpeningBook;
         private readonly OpeningBook blackOpeningBook;
 
@@ -183,37 +185,30 @@ namespace SicTransit.Woodpusher.Engine
         {
             maxDepth = 0;
             nodeCount = 0;
-
-            var openingMove = GetOpeningBookMove();
-            if (openingMove != null)
-            {
-                Log.Information("Returning opening book move: {0}", openingMove);
-                SendDebugInfo($"playing opening book {openingMove.ToAlgebraicMoveNotation()}");
-                return new AlgebraicMove(openingMove);
-            }
-
-            var theoryMove = GetTheoryMove();
-            if (theoryMove != null)
-            {
-                Log.Information("Returning theory move: {0}", theoryMove);
-                SendDebugInfo($"playing theory move {theoryMove.ToAlgebraicMoveNotation()}");
-                return new AlgebraicMove(theoryMove);
-            }
-
-            var sign = Board.ActiveColor.Is(Piece.White) ? 1 : -1;
             Move? bestMove = null;
             var foundMate = false;
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
-
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
 
-            while (maxDepth < engineMaxDepth && !foundMate && !timeIsUp && enoughTime)
+            var bookMove = GetOpeningBookMove() ?? GetTheoryMove();
+            if (bookMove != null)
+            {
+                UpdateBestLine(bookMove);
+                Log.Information("Returning book move: {0}", bookMove);
+                SendDebugInfo($"playing book move {bookMove.ToAlgebraicMoveNotation()}");
+                SendProgress(stopwatch, 0, null);
+                return new AlgebraicMove(bookMove);
+            }
+
+            while (maxDepth < engineMaxDepth)
             {
                 maxDepth++;
                 selDepth = maxDepth;
                 long startTime = stopwatch.ElapsedMilliseconds;
-                var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, sign);
+
+                var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, PlayerSign);
+
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
                 if (!timeIsUp || (bestMove == null))
@@ -222,16 +217,13 @@ namespace SicTransit.Woodpusher.Engine
                     bestLine.Clear();
                     if (bestMove != null)
                     {
-                        UpdateBestLine(bestMove, maxDepth);
+                        UpdateBestLine(bestMove);
                     }
 
-                    var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
-                    var mateIn = CalculateMateIn(score, sign);
+                    var mateIn = CalculateMateIn(score, PlayerSign);
                     foundMate = mateIn is > 0;
-                    var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
-                    var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
-                    var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
-                    SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+
+                    SendProgress(stopwatch, score, mateIn);
 
                     if (evaluationTime > 0)
                     {
@@ -247,25 +239,36 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                if (foundMate || timeIsUp)
+                if (foundMate || timeIsUp || !enoughTime)
                 {
                     break;
                 }
             }
 
             SendDebugInfo($"aborting @ depth {maxDepth}");
+
             Log.Debug("evaluated {NodeCount} nodes, found: {BestMove}", nodeCount, bestMove);
 
             return bestMove == null ? null : new AlgebraicMove(bestMove);
         }
 
-        private void UpdateBestLine(Move bestMove, int depth)
+        private void SendProgress(Stopwatch stopwatch, int score, int? mateIn)
+        {
+            var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
+            var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
+            var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
+            var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
+
+            SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+        }
+
+        private void UpdateBestLine(Move bestMove)
         {
             var ply = Board.Counters.Ply + 1;
             bestLine.Add((ply, bestMove));
             var board = Board.Play(bestMove);
 
-            for (var i = 0; i < engineMaxDepth; i++)
+            for (var i = 0; i < selDepth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
                 if (entry.EntryType == Enum.EntryType.Exact && entry.Hash == board.Hash && entry.Move != null && board.GetLegalMoves().Contains(entry.Move))
@@ -393,6 +396,7 @@ namespace SicTransit.Woodpusher.Engine
                     bestMove = newBoard.Counters.LastMove;
                     bestScore = score;
                 }
+
                 α = Math.Max(α, bestScore);
                 if (α >= β)
                 {
@@ -405,13 +409,16 @@ namespace SicTransit.Woodpusher.Engine
                 bestScore = board.IsChecked ? -Scoring.MateScore + depth : Scoring.DrawScore;
             }
 
-            transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
-                bestMove,
-                bestScore,
-                board.Hash,
-                maxDepth - depth
-                );
+            if (transpositionTable[transpositionIndex].Ply < maxDepth - depth)
+            {
+                transpositionTable[transpositionIndex] = new TranspositionTableEntry(
+                    bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
+                    bestMove,
+                    bestScore,
+                    board.Hash,
+                    maxDepth - depth
+                    );
+            }
 
             if (depth == 0)
             {
