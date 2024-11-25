@@ -19,6 +19,7 @@ namespace SicTransit.Woodpusher.Engine
         private int maxDepth = 0;
         private int selDepth = 0;
         private long nodeCount = 0;
+        private static int engineMaxDepth = 128;
 
         private readonly OpeningBook whiteOpeningBook;
         private readonly OpeningBook blackOpeningBook;
@@ -207,12 +208,12 @@ namespace SicTransit.Woodpusher.Engine
 
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
 
-            while (maxDepth < Declarations.MaxDepth && !foundMate && !timeIsUp && enoughTime)
+            while (maxDepth < engineMaxDepth && !foundMate && !timeIsUp && enoughTime)
             {
                 maxDepth++;
                 selDepth = maxDepth;
                 long startTime = stopwatch.ElapsedMilliseconds;
-                var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
+                var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, sign);
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
                 if (!timeIsUp || (bestMove == null))
@@ -281,8 +282,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private static int? CalculateMateIn(int evaluation, int playerSign)
         {
-            var mateInPlies = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
-            if (mateInPlies <= Declarations.MaxDepth)
+            var mateInPlies = Math.Abs(Math.Abs(evaluation) - Scoring.MateScore);
+            if (mateInPlies <= engineMaxDepth)
             {
                 var resultSign = Math.Sign(evaluation);
 
@@ -372,7 +373,7 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             Move? bestMove = null;
-            var bestScore = -Declarations.MoveMaximumScore;
+            var bestScore = -Scoring.MoveMaximumScore;
 
             foreach (var newBoard in SortBords(board.PlayLegalMoves(), sign, cachedEntry.Move))
             {
@@ -382,7 +383,7 @@ namespace SicTransit.Woodpusher.Engine
                 if (depth < 2 && repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
                     // A draw be repetition may be forced by either player.
-                    score = Declarations.DrawScore;
+                    score = Scoring.DrawScore;
                 }
 
                 if (score > bestScore)
@@ -399,7 +400,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (bestMove == null)
             {
-                bestScore = board.IsChecked ? -Declarations.MateScore + depth : Declarations.DrawScore;
+                bestScore = board.IsChecked ? -Scoring.MateScore + depth : Scoring.DrawScore;
             }
 
             transpositionTable[transpositionIndex] = new TranspositionTableEntry(
