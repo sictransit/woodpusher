@@ -19,9 +19,6 @@ namespace SicTransit.Woodpusher.Engine
         private int maxDepth = 0;
         private long nodeCount = 0;
 
-        // TODO: This doesn't stop opponent from forcing a draw.
-        //private readonly Dictionary<ulong, int> repetitions = new();
-
         private readonly OpeningBook whiteOpeningBook;
         private readonly OpeningBook blackOpeningBook;
 
@@ -46,8 +43,6 @@ namespace SicTransit.Woodpusher.Engine
         public void Initialize()
         {
             Board = Common.Board.StartingPosition();
-            //repetitions.Clear();
-            //repetitions[Board.Hash] = 1;
         }
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
@@ -57,7 +52,6 @@ namespace SicTransit.Woodpusher.Engine
             var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
             Log.Debug("{Color} plays: {Move}", color, move);
             Board = Board.Play(move);
-            //repetitions[Board.Hash] = repetitions.GetValueOrDefault(Board.Hash) + 1;
         }
 
         private Move? GetOpeningBookMove()
@@ -128,13 +122,17 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     if (!token.WaitHandle.WaitOne(timeLimit))
                     {
-                        Log.Information($"Time is up: {stopwatch.ElapsedMilliseconds}");
+                        Log.Information("Time is up: {ElapsedMilliseconds}", stopwatch.ElapsedMilliseconds);
                         timeIsUp = true;
                     }
                 }
                 catch (OperationCanceledException)
                 {
                     Log.Debug("Time limit check was canceled.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Time limit check failed.");
                 }
             }, token);
 
@@ -259,7 +257,7 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private int? CalculateMateIn(int evaluation, int playerSign)
+        private static int? CalculateMateIn(int evaluation, int playerSign)
         {
             var mateInPlies = Math.Abs(Math.Abs(evaluation) - Declarations.MateScore);
             if (mateInPlies <= Declarations.MaxDepth)
@@ -315,8 +313,7 @@ namespace SicTransit.Woodpusher.Engine
         private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
         {
             if (timeIsUp)
-            {
-                evaluatedBestMove = null;
+            {                
                 return 0;
             }
 

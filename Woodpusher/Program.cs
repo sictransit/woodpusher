@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher
             {
                 Console.WriteLine(s);
 
-                Log.Information($"Sent: {s}");
+                Log.Information("Sent: {Message}", s);
             }
 
             var uci = new UniversalChessInterface(ConsoleOutput, new Patzer(ConsoleOutput));
@@ -23,7 +23,7 @@ namespace SicTransit.Woodpusher
             {
                 var line = Console.ReadLine();
 
-                Log.Information($"Received: {line}");
+                Log.Information("Received: {Line}", line);
 
                 if (line != null)
                 {
