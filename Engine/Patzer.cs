@@ -116,6 +116,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove? FindBestMove(int timeLimit = 1000)
         {
+            Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+
             maxDepth = 0;
             nodeCount = 0;
             timeIsUp = false;
@@ -123,11 +125,11 @@ namespace SicTransit.Woodpusher.Engine
             stopwatch.Restart();
 
             ThreadPool.QueueUserWorkItem(_ =>
-            {
-                Log.Debug("thinking time: {TimeLimit}", timeLimit);
+            {                
                 Thread.Sleep(timeLimit);
+                Log.Information($"Time is up: {stopwatch.ElapsedMilliseconds}");
                 timeIsUp = true;
-            });
+            });            
 
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
@@ -191,6 +193,11 @@ namespace SicTransit.Woodpusher.Engine
                                 Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
                             }
                         }
+                    }
+
+                    if (foundMate || timeIsUp )
+                    {
+                        break;
                     }
                 }
                 catch (Exception ex)
