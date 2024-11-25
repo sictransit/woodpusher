@@ -207,8 +207,6 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public int EvaluatePiece(Piece piece, int phase)
         {
-            // TODO: This will not handle promotions.             
-
             var end = endGameEvaluations[piece] * (24 - phase);
             var middle = middleGameEvaluations[piece] * phase;
 

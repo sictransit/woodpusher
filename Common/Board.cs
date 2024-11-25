@@ -2,6 +2,7 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -61,18 +62,62 @@ public class Board : IBoard
             {
                 var phase = white.Phase + black.Phase;
 
-                score = 0;
+                score = 0;               
 
                 foreach (var piece in GetPieces(Piece.White))
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
+                    switch (piece.GetPieceType())
+                    {
+                        case Piece.Knight:
+                            if (BitOperations.PopCount(white.Knight) > 1)
+                            {
+                                evaluation = evaluation * 3 / 2;
+                            }
+                            break;
+                        case Piece.Bishop:
+                            if (BitOperations.PopCount(white.Bishop) > 1)
+                            {
+                                evaluation = evaluation * 3 / 2;
+                            }
+                            break;
+                        case Piece.Rook:
+                            if (BitOperations.PopCount(white.Rook) > 1)
+                            {
+                                evaluation = evaluation * 3 / 2;
+                            }
+                            break;
+                    }
+
                     score += evaluation;
-                }
+                }                
 
                 foreach (var piece in GetPieces(Piece.None))
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+
+                    switch (piece.GetPieceType())
+                    {
+                        case Piece.Knight:
+                            if (BitOperations.PopCount(black.Knight) > 1)
+                            {
+                                evaluation = evaluation * 3 / 2;
+                            }
+                            break;
+                        case Piece.Bishop:
+                            if (BitOperations.PopCount(black.Bishop) > 1)
+                            {
+                                evaluation = evaluation * 3 / 2;
+                            }
+                            break;
+                        case Piece.Rook:
+                            if (BitOperations.PopCount(black.Rook) > 1)
+                            {
+                                evaluation = evaluation * 3 / 2;
+                            }
+                            break;
+                    }
 
                     score -= evaluation;
                 }
