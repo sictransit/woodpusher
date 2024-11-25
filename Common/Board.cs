@@ -14,6 +14,8 @@ public class Board : IBoard
     private readonly bool whiteIsPlaying;
     private readonly BoardInternals internals;
 
+    private int? score = null;
+
     public Counters Counters { get; }
 
     public Piece ActiveColor => Counters.ActiveColor;
@@ -55,18 +57,21 @@ public class Board : IBoard
     {
         get
         {
-            var phase = white.Phase + black.Phase;
-
-            var score = 0;
-
-            foreach (var piece in GetPieces())
+            if (!score.HasValue)
             {
-                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+                var phase = white.Phase + black.Phase;
 
-                score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
+                score = 0;
+
+                foreach (var piece in GetPieces())
+                {
+                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+
+                    score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
+                }
             }
 
-            return score;
+            return score.Value;
         }
     }
 
