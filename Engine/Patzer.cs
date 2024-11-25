@@ -19,8 +19,6 @@ namespace SicTransit.Woodpusher.Engine
         private int maxDepth = 0;
         private long nodeCount = 0;
 
-        private readonly Stopwatch stopwatch = new();
-
         // TODO: This doesn't stop opponent from forcing a draw.
         //private readonly Dictionary<ulong, int> repetitions = new();
 
@@ -116,20 +114,55 @@ namespace SicTransit.Woodpusher.Engine
 
         public AlgebraicMove? FindBestMove(int timeLimit = 1000)
         {
-            Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            maxDepth = 0;
-            nodeCount = 0;
+            using var cts = new CancellationTokenSource();
+            var token = cts.Token;
+
             timeIsUp = false;
 
-            stopwatch.Restart();
-
             ThreadPool.QueueUserWorkItem(_ =>
-            {                
-                Thread.Sleep(timeLimit);
-                Log.Information($"Time is up: {stopwatch.ElapsedMilliseconds}");
-                timeIsUp = true;
-            });            
+            {
+                try
+                {
+                    if (!token.WaitHandle.WaitOne(timeLimit))
+                    {
+                        Log.Information($"Time is up: {stopwatch.ElapsedMilliseconds}");
+                        timeIsUp = true;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    Log.Debug("Time limit check was canceled.");
+                }
+            }, token);
+
+            AlgebraicMove? bestMove;
+
+            try
+            {
+                Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+
+                bestMove = SearchForBestMove(stopwatch ,timeLimit);
+            }
+            catch (Exception ex)
+            {
+                SendExceptionInfo(ex);
+                throw;
+            }
+            finally
+            {
+                cts.Cancel();
+            }
+
+            return bestMove;
+        }
+
+        private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
+        {
+            maxDepth = 0;
+            nodeCount = 0;
 
             var openingMove = GetOpeningBookMove();
             if (openingMove != null)
@@ -157,53 +190,45 @@ namespace SicTransit.Woodpusher.Engine
 
             while (maxDepth < Declarations.MaxDepth && !foundMate && !timeIsUp && enoughTime)
             {
-                try
+                maxDepth++;
+                long startTime = stopwatch.ElapsedMilliseconds;
+                var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
+                long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
+
+                if (!timeIsUp || (bestMove == null))
                 {
-                    maxDepth++;
-                    long startTime = stopwatch.ElapsedMilliseconds;
-                    var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
-                    long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
-
-                    if (!timeIsUp || (bestMove == null))
+                    bestMove = evaluatedBestMove;
+                    bestLine.Clear();
+                    if (bestMove != null)
                     {
-                        bestMove = evaluatedBestMove;
-                        bestLine.Clear();
-                        if (bestMove != null)
-                        {
-                            UpdateBestLine(bestMove, maxDepth);
-                        }
-
-                        var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
-                        var mateIn = CalculateMateIn(score, sign);
-                        foundMate = mateIn is > 0;
-                        var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
-                        var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
-                        var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
-                        SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
-
-                        if (evaluationTime > 0)
-                        {
-                            progress.Add((maxDepth, evaluationTime));
-
-                            if (progress.Count > 2)
-                            {
-                                var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
-                                var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
-                                enoughTime = remainingTime > estimatedTime;
-                                Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
-                            }
-                        }
+                        UpdateBestLine(bestMove, maxDepth);
                     }
 
-                    if (foundMate || timeIsUp )
+                    var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
+                    var mateIn = CalculateMateIn(score, sign);
+                    foundMate = mateIn is > 0;
+                    var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
+                    var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
+                    var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
+                    SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+
+                    if (evaluationTime > 0)
                     {
-                        break;
+                        progress.Add((maxDepth, evaluationTime));
+
+                        if (progress.Count > 2)
+                        {
+                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
+                            var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
+                            enoughTime = remainingTime > estimatedTime;
+                            Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
+                        }
                     }
                 }
-                catch (Exception ex)
+
+                if (foundMate || timeIsUp )
                 {
-                    SendExceptionInfo(ex);
-                    throw;
+                    break;
                 }
             }
 

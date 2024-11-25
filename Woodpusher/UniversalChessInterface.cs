@@ -233,9 +233,16 @@ namespace SicTransit.Woodpusher
                             timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
                         }
 
-                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
+                        try
+                        {
+                            var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
 
-                        consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                            consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Failed to find best move.");                            
+                        }
                     }
                 }
             });
