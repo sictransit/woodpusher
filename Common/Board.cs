@@ -63,11 +63,18 @@ public class Board : IBoard
 
                 score = 0;
 
-                foreach (var piece in GetPieces())
+                foreach (var piece in GetPieces(Piece.White))
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
+                    score += evaluation;
+                }
+
+                foreach (var piece in GetPieces(Piece.None))
+                {
+                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+
+                    score -= evaluation;
                 }
             }
 

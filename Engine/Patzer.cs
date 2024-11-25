@@ -280,14 +280,14 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private static int? CalculateMateIn(int evaluation, int playerSign)
+        private static int? CalculateMateIn(int evaluation, int sign)
         {
             var mateInPlies = Math.Abs(Math.Abs(evaluation) - Scoring.MateScore);
             if (mateInPlies <= engineMaxDepth)
             {
                 var resultSign = Math.Sign(evaluation);
 
-                return (mateInPlies / 2 + playerSign) * resultSign;
+                return (mateInPlies / 2 + (sign == 1 ? 1 : 0)) * resultSign;
             }
             return null;
         }
