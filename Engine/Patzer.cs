@@ -17,6 +17,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private bool timeIsUp = false;
         private int maxDepth = 0;
+        private int selDepth = 0;
         private long nodeCount = 0;
 
         private readonly OpeningBook whiteOpeningBook;
@@ -159,7 +160,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
         {
-            maxDepth = 0;
+            maxDepth = 0;            
             nodeCount = 0;
 
             var openingMove = GetOpeningBookMove();
@@ -189,6 +190,7 @@ namespace SicTransit.Woodpusher.Engine
             while (maxDepth < Declarations.MaxDepth && !foundMate && !timeIsUp && enoughTime)
             {
                 maxDepth++;
+                selDepth = maxDepth;
                 long startTime = stopwatch.ElapsedMilliseconds;
                 var score = EvaluateBoard(Board, 0, -Declarations.MoveMaximumScore, Declarations.MoveMaximumScore, sign);
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
@@ -208,7 +210,7 @@ namespace SicTransit.Woodpusher.Engine
                     var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
                     var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
                     var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
-                    SendInfo($"depth {maxDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+                    SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
 
                     if (evaluationTime > 0)
                     {
@@ -285,7 +287,7 @@ namespace SicTransit.Woodpusher.Engine
             return boards.OrderByDescending(b => b.Counters.LastMove.Equals(preferredMove)).ThenByDescending(b => b.Score * sign);
         }
 
-        private int Quiesce(IBoard board, int α, int β, int sign)
+        private int Quiesce(IBoard board, int α, int β, int sign, int depth)
         {
             var standPat = board.Score * sign;
 
@@ -296,10 +298,12 @@ namespace SicTransit.Woodpusher.Engine
 
             α = Math.Max(α, standPat);
 
+            selDepth = Math.Max(selDepth, depth);
+
             foreach (var newBoard in SortBords(board.PlayLegalMoves(true), sign))
             {
                 nodeCount++;
-                var score = -Quiesce(newBoard, -β, -α, -sign);
+                var score = -Quiesce(newBoard, -β, -α, -sign, depth+1);
                 if (score >= β)
                 {
                     return β;
@@ -321,7 +325,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                return Quiesce(board, α, β, sign);
+                return Quiesce(board, α, β, sign, maxDepth);
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
