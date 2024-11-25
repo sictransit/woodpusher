@@ -106,7 +106,7 @@ namespace SicTransit.Woodpusher
                       .InformationalVersion;
 
                     consoleOutput($"id name Woodpusher {version}");
-                    consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");                    
+                    consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
                     consoleOutput("uciok");
                 }
             });
@@ -238,7 +238,7 @@ namespace SicTransit.Woodpusher
                         }
                         catch (Exception ex)
                         {
-                            Log.Error(ex, "Failed to find best move.");                            
+                            Log.Error(ex, "Failed to find best move.");
                         }
                     }
                 }

@@ -28,6 +28,7 @@ namespace SicTransit.Woodpusher.Engine
         private const int transpositionTableSize = 1_000_000;
 
         private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
+        private readonly Dictionary<ulong, int> repetitionTable = new();
 
         private readonly List<(int ply, Move move)> bestLine = new();
 
@@ -37,13 +38,23 @@ namespace SicTransit.Woodpusher.Engine
         {
             whiteOpeningBook = new OpeningBook(Piece.White);
             blackOpeningBook = new OpeningBook(Piece.None);
-            Board = Common.Board.StartingPosition();
+
             this.infoCallback = infoCallback;
+
+            Initialize();
         }
 
         public void Initialize()
         {
-            Board = Common.Board.StartingPosition();
+            SetBoard(Common.Board.StartingPosition());
+        }
+
+        private void SetBoard(IBoard board)
+        {
+            Board = board;
+
+            repetitionTable.Clear();
+            repetitionTable[Board.Hash] = 1;
         }
 
         private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
@@ -53,6 +64,13 @@ namespace SicTransit.Woodpusher.Engine
             var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
             Log.Debug("{Color} plays: {Move}", color, move);
             Board = Board.Play(move);
+
+            if (Board.Counters.HalfmoveClock == 0)
+            {
+                repetitionTable.Clear();
+            }
+
+            repetitionTable[Board.Hash] = repetitionTable.GetValueOrDefault(Board.Hash) + 1;
         }
 
         private Move? GetOpeningBookMove()
@@ -80,7 +98,9 @@ namespace SicTransit.Woodpusher.Engine
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
             algebraicMoves ??= Array.Empty<AlgebraicMove>();
-            Board = ForsythEdwardsNotation.Parse(fen);
+
+            SetBoard(ForsythEdwardsNotation.Parse(fen));
+
             foreach (var algebraicMove in algebraicMoves)
             {
                 var legalMove = Board.GetLegalMoves().SingleOrDefault(move =>
@@ -143,7 +163,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
 
-                bestMove = SearchForBestMove(stopwatch ,timeLimit);
+                bestMove = SearchForBestMove(stopwatch, timeLimit);
             }
             catch (Exception ex)
             {
@@ -160,7 +180,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
         {
-            maxDepth = 0;            
+            maxDepth = 0;
             nodeCount = 0;
 
             var openingMove = GetOpeningBookMove();
@@ -226,7 +246,7 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                if (foundMate || timeIsUp )
+                if (foundMate || timeIsUp)
                 {
                     break;
                 }
@@ -303,7 +323,7 @@ namespace SicTransit.Woodpusher.Engine
             foreach (var newBoard in SortBords(board.PlayLegalMoves(true), sign))
             {
                 nodeCount++;
-                var score = -Quiesce(newBoard, -β, -α, -sign, depth+1);
+                var score = -Quiesce(newBoard, -β, -α, -sign, depth + 1);
                 if (score >= β)
                 {
                     return β;
@@ -317,7 +337,7 @@ namespace SicTransit.Woodpusher.Engine
         private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
         {
             if (timeIsUp)
-            {                
+            {
                 return 0;
             }
 
@@ -358,6 +378,12 @@ namespace SicTransit.Woodpusher.Engine
             {
                 nodeCount++;
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+
+                if (depth == 0 && repetitionTable.GetValueOrDefault(newBoard.Hash) >= 3)
+                {
+                    score = Declarations.DrawScore;
+                }
+
                 if (score > bestScore)
                 {
                     bestMove = newBoard.Counters.LastMove;
