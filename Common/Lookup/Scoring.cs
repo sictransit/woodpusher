@@ -10,7 +10,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         private readonly Dictionary<Piece, int> middleGameEvaluations = new();
         private readonly Dictionary<Piece, int> endGameEvaluations = new();
-        
+
         public const int DrawScore = 0;
         public const int MateScore = 1000000;
         public const int MoveMaximumScore = MateScore * 2;

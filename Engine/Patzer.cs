@@ -265,7 +265,7 @@ namespace SicTransit.Woodpusher.Engine
             bestLine.Add((ply, bestMove));
             var board = Board.Play(bestMove);
 
-            for (var i = 0; i < depth; i++)
+            for (var i = 0; i < engineMaxDepth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
                 if (entry.EntryType == Enum.EntryType.Exact && entry.Hash == board.Hash && entry.Move != null && board.GetLegalMoves().Contains(entry.Move))
@@ -283,12 +283,14 @@ namespace SicTransit.Woodpusher.Engine
         private static int? CalculateMateIn(int evaluation, int sign)
         {
             var mateInPlies = Math.Abs(Math.Abs(evaluation) - Scoring.MateScore);
+
             if (mateInPlies <= engineMaxDepth)
             {
                 var resultSign = Math.Sign(evaluation);
 
                 return (mateInPlies / 2 + (sign == 1 ? 1 : 0)) * resultSign;
             }
+
             return null;
         }
 
