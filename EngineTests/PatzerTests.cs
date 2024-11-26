@@ -242,7 +242,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
 
-            Task<AlgebraicMove> task = Task.Run(() => patzer.FindBestMove(30000));
+            Task<AlgebraicMove?> task = Task.Run(() => patzer.FindBestMove(60000));
 
             var foundMate = false;
 

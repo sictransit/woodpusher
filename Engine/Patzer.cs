@@ -303,14 +303,16 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
-        private static IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, int sign, Move? preferredMove = null)
+        private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, int sign, Move? preferredMove = null)
         {
+            static int captureValue(IBoard board) => board.Counters.Capture == Piece.None ? int.MinValue : (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece;
+
             if (preferredMove == null)
             {
-                return boards.OrderByDescending(b => b.Score * sign);
+                return boards.OrderByDescending(b => transpositionTable[b.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact).ThenByDescending(captureValue);
             }
 
-            return boards.OrderByDescending(b => b.Counters.LastMove.Equals(preferredMove)).ThenByDescending(b => b.Score * sign);
+            return boards.OrderByDescending(b => b.Counters.LastMove.Equals(preferredMove)).ThenByDescending(b => transpositionTable[b.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact).ThenByDescending(captureValue);
         }
 
         private int Quiesce(IBoard board, int α, int β, int sign, int depth)
