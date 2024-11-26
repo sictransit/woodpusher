@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
@@ -303,16 +304,27 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
-        private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, int sign, Move? preferredMove = null)
+        private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, Move? preferredMove = null)
         {
-            static int captureValue(IBoard board) => board.Counters.Capture == Piece.None ? int.MinValue : (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece;
+            return boards.OrderByDescending(b => { 
+                if (preferredMove != null && b.Counters.LastMove.Equals(preferredMove))
+                {
+                    return int.MaxValue;
+                }
 
-            if (preferredMove == null)
-            {
-                return boards.OrderByDescending(b => transpositionTable[b.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact).ThenByDescending(captureValue);
-            }
+                if (transpositionTable[b.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
+                {
+                    return int.MaxValue - 1;
+                }
 
-            return boards.OrderByDescending(b => b.Counters.LastMove.Equals(preferredMove)).ThenByDescending(b => transpositionTable[b.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact).ThenByDescending(captureValue);
+                if (b.Counters.Capture != Piece.None)
+                {
+                    return (int)b.Counters.Capture - (int)b.Counters.LastMove.Piece;
+                }
+
+                return int.MinValue;
+
+            });
         }
 
         private int Quiesce(IBoard board, int α, int β, int sign, int depth)
@@ -328,7 +340,7 @@ namespace SicTransit.Woodpusher.Engine
 
             selDepth = Math.Max(selDepth, depth);
 
-            foreach (var newBoard in SortBords(board.PlayLegalMoves(true), sign))
+            foreach (var newBoard in SortBords(board.PlayLegalMoves(true)))
             {
                 nodeCount++;
                 var score = -Quiesce(newBoard, -β, -α, -sign, depth + 1);
@@ -382,7 +394,7 @@ namespace SicTransit.Woodpusher.Engine
             Move? bestMove = null;
             var bestScore = -Scoring.MoveMaximumScore;
 
-            foreach (var newBoard in SortBords(board.PlayLegalMoves(), sign, cachedEntry.Move))
+            foreach (var newBoard in SortBords(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
