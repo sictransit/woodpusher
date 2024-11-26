@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
@@ -197,7 +196,7 @@ namespace SicTransit.Woodpusher.Engine
         private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
         {
             maxDepth = 0;
-            nodeCount = 0;            
+            nodeCount = 0;
             Move? bestMove = null;
             var foundMate = false;
             var enoughTime = true;
@@ -318,7 +317,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, Move? preferredMove = null)
         {
-            return boards.OrderByDescending(board => { 
+            return boards.OrderByDescending(board =>
+            {
                 if (preferredMove != null && board.Counters.LastMove.Equals(preferredMove))
                 {
                     return int.MaxValue;
