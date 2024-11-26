@@ -8,6 +8,7 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
+using System.Security;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -141,8 +142,8 @@ namespace SicTransit.Woodpusher.Engine
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            using var cts = new CancellationTokenSource();
-            var token = cts.Token;
+            using var cts = new CancellationTokenSource();            
+            var token = cts.Token;            
 
             timeIsUp = false;
 
@@ -226,7 +227,7 @@ namespace SicTransit.Woodpusher.Engine
                 if (!timeIsUp || (bestMove == null))
                 {
                     bestMove = evaluatedBestMove;
-                    bestLine.Clear();
+                    
                     if (bestMove != null)
                     {
                         UpdateBestLine(bestMove);
@@ -287,10 +288,18 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
+        private void SendCurrentMove(IBoard board)
+        {
+            SendInfo($"depth {maxDepth} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()}");
+        }
+
         private void UpdateBestLine(Move bestMove)
         {
             var ply = Board.Counters.Ply + 1;
+
+            bestLine.Clear();            
             bestLine.Add((ply, bestMove));
+
             var board = Board.Play(bestMove);
 
             for (var i = 0; i < selDepth; i++)
@@ -421,11 +430,17 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             Move? bestMove = null;
-            var bestScore = -Scoring.MoveMaximumScore;
+            var bestScore = -Scoring.MoveMaximumScore;            
 
             foreach (var newBoard in SortBords(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
+
+                if (depth == 0)
+                {
+                    SendCurrentMove(newBoard);
+                }
+
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
 
                 if (depth < 2 && repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
