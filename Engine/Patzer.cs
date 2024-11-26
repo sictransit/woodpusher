@@ -188,7 +188,7 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove;
         }
 
-        private void SetKillerMove(int ply, ulong hash)
+        private void AddKillerMove(int ply, ulong hash)
         {
             killerMoves[ply][1] = killerMoves[ply][0];
             killerMoves[ply][0] = hash;
@@ -243,7 +243,7 @@ namespace SicTransit.Woodpusher.Engine
 
                         if (progress.Count > 2)
                         {
-                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress);
+                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress, maxDepth+1);
                             var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
                             enoughTime = remainingTime > estimatedTime;
                             Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
@@ -443,7 +443,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
 
-                if (depth < 2 && repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
+                if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
                     // A draw be repetition may be forced by either player.
                     score = Scoring.DrawScore;
@@ -460,7 +460,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     if (newBoard.Counters.Capture == Piece.None)
                     {
-                        SetKillerMove(newBoard.Counters.Ply, newBoard.Hash);
+                        AddKillerMove(newBoard.Counters.Ply, newBoard.Hash);
                     }
                     break;
                 }
