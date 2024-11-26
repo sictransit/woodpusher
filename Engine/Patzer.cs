@@ -319,24 +319,24 @@ namespace SicTransit.Woodpusher.Engine
         {
             return boards.OrderByDescending(board =>
             {
-                if (preferredMove != null && board.Counters.LastMove.Equals(preferredMove))
+                if (board.Counters.LastMove.Equals(preferredMove))
                 {
-                    return int.MaxValue;
+                    return int.MaxValue; // Highest priority for preferred move.
                 }
 
                 if (transpositionTable[board.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
                 {
-                    return int.MaxValue - 1;
+                    return int.MaxValue - 1; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece;
+                    return (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece; // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply][0] == board.Hash || killerMoves[board.Counters.Ply][1] == board.Hash)
                 {
-                    return int.MinValue + 1;
+                    return int.MinValue + 1; // High priority for killer moves
                 }
 
                 return int.MinValue;
