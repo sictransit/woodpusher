@@ -32,7 +32,7 @@
 
             int maxX = progress.Max(p => p.depth);
 
-            return (int)(a * Math.Exp(b * (maxX + 2)));
+            return (int)(a * Math.Exp(b * (maxX + 1)));
         }
     }
 }

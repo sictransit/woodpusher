@@ -71,9 +71,9 @@ public class Board : IBoard
                     score += evaluation;
                 }
 
-                score += BitOperations.PopCount(white.Knight) > 1 ? 50 : 0;
-                score += BitOperations.PopCount(white.Bishop) > 1 ? 50 : 0;
-                score += BitOperations.PopCount(white.Rook) > 1 ? 50 : 0;
+                //score += BitOperations.PopCount(white.Knight) > 1 ? 50 : 0;
+                //score += BitOperations.PopCount(white.Bishop) > 1 ? 50 : 0;
+                //score += BitOperations.PopCount(white.Rook) > 1 ? 50 : 0;
 
                 foreach (var piece in GetPieces(Piece.None))
                 {
@@ -82,9 +82,9 @@ public class Board : IBoard
                     score -= evaluation;
                 }
 
-                score -= BitOperations.PopCount(black.Knight) > 1 ? 50 : 0;
-                score -= BitOperations.PopCount(black.Bishop) > 1 ? 50 : 0;
-                score -= BitOperations.PopCount(black.Rook) > 1 ? 50 : 0;
+                //score -= BitOperations.PopCount(black.Knight) > 1 ? 50 : 0;
+                //score -= BitOperations.PopCount(black.Bishop) > 1 ? 50 : 0;
+                //score -= BitOperations.PopCount(black.Rook) > 1 ? 50 : 0;
             }
 
             return score.Value;
