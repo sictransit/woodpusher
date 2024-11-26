@@ -28,7 +28,7 @@
             double lnA = (sumLogY - b * sumX) / n;
 
             // Convert ln(a) back to a
-            double a = Math.Exp(lnA);            
+            double a = Math.Exp(lnA);
 
             return (int)(a * Math.Exp(b * (nextDepth)));
         }

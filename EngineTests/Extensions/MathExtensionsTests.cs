@@ -17,7 +17,7 @@ namespace SicTransit.Woodpusher.Engine.Extensions.Tests
                 progress.Add(((i + 1), (long)(Math.Exp(i) * 100)));
             }
 
-            var estimated = MathExtensions.ApproximateNextDepthTime(progress, n+1);
+            var estimated = MathExtensions.ApproximateNextDepthTime(progress, n + 1);
 
             Assert.AreEqual(estimated, (long)(Math.Exp(n) * 100), estimated / 100);
         }

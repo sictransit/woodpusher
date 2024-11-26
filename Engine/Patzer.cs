@@ -8,7 +8,6 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
-using System.Security;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -142,8 +141,8 @@ namespace SicTransit.Woodpusher.Engine
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            using var cts = new CancellationTokenSource();            
-            var token = cts.Token;            
+            using var cts = new CancellationTokenSource();
+            var token = cts.Token;
 
             timeIsUp = false;
 
@@ -198,7 +197,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             maxDepth = 0;
             nodeCount = 0;
-            Move? bestMove = null;            
+            Move? bestMove = null;
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
@@ -227,7 +226,7 @@ namespace SicTransit.Woodpusher.Engine
                 if (!timeIsUp || (bestMove == null))
                 {
                     bestMove = evaluatedBestMove;
-                    
+
                     if (bestMove != null)
                     {
                         UpdateBestLine(bestMove);
@@ -243,7 +242,7 @@ namespace SicTransit.Woodpusher.Engine
 
                         if (progress.Count > 2)
                         {
-                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress, maxDepth+1);
+                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress, maxDepth + 1);
                             var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
                             enoughTime = remainingTime > estimatedTime;
                             Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
@@ -271,7 +270,7 @@ namespace SicTransit.Woodpusher.Engine
                     SendDebugInfo(abortMessage);
                     break;
                 }
-            }            
+            }
 
             Log.Debug("evaluated {NodeCount} nodes, found: {BestMove}", nodeCount, bestMove);
 
@@ -297,7 +296,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             var ply = Board.Counters.Ply + 1;
 
-            bestLine.Clear();            
+            bestLine.Clear();
             bestLine.Add((ply, bestMove));
 
             var board = Board.Play(bestMove);
@@ -430,7 +429,7 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             Move? bestMove = null;
-            var bestScore = -Scoring.MoveMaximumScore;            
+            var bestScore = -Scoring.MoveMaximumScore;
 
             foreach (var newBoard in SortBords(board.PlayLegalMoves(), cachedEntry.Move))
             {
