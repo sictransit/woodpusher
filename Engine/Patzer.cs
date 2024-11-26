@@ -32,9 +32,10 @@ namespace SicTransit.Woodpusher.Engine
         private const int transpositionTableSize = 1_000_000;
 
         private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
-        private readonly Dictionary<ulong, int> repetitionTable = new();
+        private readonly Dictionary<ulong, int> repetitionTable = [];
+        private readonly ulong[][] killerMoves = new ulong[1000][]; // TODO: Phase out killer moves as the game progresses.
 
-        private readonly List<(int ply, Move move)> bestLine = new();
+        private readonly List<(int ply, Move move)> bestLine = [];
 
         private Move? evaluatedBestMove = null;
 
@@ -51,6 +52,11 @@ namespace SicTransit.Woodpusher.Engine
         public void Initialize()
         {
             SetBoard(Common.Board.StartingPosition());
+
+            for (var i = 0; i < killerMoves.Length; i++)
+            {
+                killerMoves[i] = new ulong[2];
+            }
         }
 
         private void SetBoard(IBoard board)
@@ -182,10 +188,16 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove;
         }
 
+        private void SetKillerMove(int ply, ulong hash)
+        {
+            killerMoves[ply][1] = killerMoves[ply][0];
+            killerMoves[ply][0] = hash;
+        }
+
         private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
         {
             maxDepth = 0;
-            nodeCount = 0;
+            nodeCount = 0;            
             Move? bestMove = null;
             var foundMate = false;
             var enoughTime = true;
@@ -306,24 +318,28 @@ namespace SicTransit.Woodpusher.Engine
 
         private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, Move? preferredMove = null)
         {
-            return boards.OrderByDescending(b => { 
-                if (preferredMove != null && b.Counters.LastMove.Equals(preferredMove))
+            return boards.OrderByDescending(board => { 
+                if (preferredMove != null && board.Counters.LastMove.Equals(preferredMove))
                 {
                     return int.MaxValue;
                 }
 
-                if (transpositionTable[b.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
+                if (transpositionTable[board.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
                 {
                     return int.MaxValue - 1;
                 }
 
-                if (b.Counters.Capture != Piece.None)
+                if (board.Counters.Capture != Piece.None)
                 {
-                    return (int)b.Counters.Capture - (int)b.Counters.LastMove.Piece;
+                    return (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece;
+                }
+
+                if (killerMoves[board.Counters.Ply][0] == board.Hash || killerMoves[board.Counters.Ply][1] == board.Hash)
+                {
+                    return int.MinValue + 1;
                 }
 
                 return int.MinValue;
-
             });
         }
 
@@ -414,6 +430,10 @@ namespace SicTransit.Woodpusher.Engine
                 α = Math.Max(α, bestScore);
                 if (α >= β)
                 {
+                    if (newBoard.Counters.Capture == Piece.None)
+                    {
+                        SetKillerMove(newBoard.Counters.Ply, newBoard.Hash);
+                    }
                     break;
                 }
             }
