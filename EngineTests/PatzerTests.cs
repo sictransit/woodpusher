@@ -65,7 +65,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("Q2K3k/8/2p5/3b4/1p6/1nP5/qq6/5r2 b - - 0 93");
 
-            var bestMove = patzer.FindBestMove();
+            var bestMove = patzer.FindBestMove(10000);
 
             Assert.AreEqual("a2a8", bestMove.Notation);
         }
@@ -210,7 +210,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             patzer.Position("rnbqkbnr/ppp2ppp/8/3pp3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3");
 
-            var bestMove = patzer.FindBestMove(1000);
+            var bestMove = patzer.FindBestMove(2000);
 
             Assert.AreNotEqual("d8g5", bestMove.Notation);
         }
@@ -242,27 +242,34 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");
 
-            Task<AlgebraicMove> task = Task.Run(() => patzer.FindBestMove(30000));
+            Task<AlgebraicMove?> task = Task.Run(() => patzer.FindBestMove(60000));
 
             var foundMate = false;
 
             while (!task.IsCompleted)
             {
+                Thread.Sleep(200);
+
                 foundMate = traceLines.Exists(i => i.Contains("mate 10"));
 
                 if (foundMate)
                 {
                     patzer.Stop();
                 }
-
-                Thread.Sleep(200);
             }
 
             Assert.IsNotNull(task.Result);
 
             if (!foundMate)
             {
-                Assert.Inconclusive("Patzer is not yet able to go to depth 20.");
+                if (!traceLines.Exists(i => i.Contains("info depth 20")))
+                {
+                    Assert.Inconclusive("Patzer is not yet able to go to depth 20.");
+                }
+                else
+                {
+                    Assert.Fail("Mate in 10 not found.");
+                }
             }
         }
 

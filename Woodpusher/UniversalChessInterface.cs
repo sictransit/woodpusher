@@ -45,8 +45,6 @@ namespace SicTransit.Woodpusher
 
         public void ProcessCommand(string command)
         {
-            Log.Debug($"Processing command: {command}");
-
             Task? task = null;
 
             if (UciCommand.IsMatch(command))
@@ -83,7 +81,7 @@ namespace SicTransit.Woodpusher
             }
             else
             {
-                Log.Warning($"Ignored unknown command: {command}");
+                Log.Warning("Ignored unknown command: {Command}", command);
             }
 
             task?.ContinueWith(t =>
@@ -109,7 +107,6 @@ namespace SicTransit.Woodpusher
 
                     consoleOutput($"id name Woodpusher {version}");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-                    //consoleOutput("option name Ponder type check default false");
                     consoleOutput("uciok");
                 }
             });
@@ -155,7 +152,7 @@ namespace SicTransit.Woodpusher
 
                     if (!match.Success)
                     {
-                        Log.Error($"Unable to parse: {command}");
+                        Log.Error("Unable to parse: {Command}", command);
 
                         return;
                     }
@@ -179,7 +176,7 @@ namespace SicTransit.Woodpusher
                         }
                         else
                         {
-                            Log.Information($"failed to parse piece: {command}");
+                            Log.Information("Failed to parse piece: {Command}", command);
                         }
                     }
 
@@ -233,9 +230,16 @@ namespace SicTransit.Woodpusher
                             timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
                         }
 
-                        var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
+                        try
+                        {
+                            var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
 
-                        consoleOutput($"bestmove {bestMove.Notation}");
+                            consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Failed to find best move.");
+                        }
                     }
                 }
             });

@@ -18,7 +18,7 @@ namespace SicTransit.Woodpusher.Model
 
         public Move LastMove { get; }
 
-        public int Ply => FullmoveNumber * 2 - (ActiveColor == Piece.White ? 2 : 1);
+        public int Ply { get; }
 
         public Counters(Piece activeColor, Castlings castlings, ulong enPassantTarget, int halfmoveClock, int fullmoveNumber, Move lastMove, Piece capture)
         {
@@ -29,6 +29,7 @@ namespace SicTransit.Woodpusher.Model
             FullmoveNumber = fullmoveNumber;
             LastMove = lastMove;
             Capture = capture;
+            Ply = fullmoveNumber * 2 - (activeColor == Piece.White ? 2 : 1);
         }
 
         public static Counters Default => new(Piece.White, Castlings.WhiteKingside | Castlings.WhiteQueenside | Castlings.BlackKingside | Castlings.BlackQueenside, 0, 0, 1, null, Piece.None);

@@ -2,7 +2,7 @@
 {
     public static class MathExtensions
     {
-        public static int ApproximateNextDepthTime(List<(int depth, long time)> progress)
+        public static int ApproximateNextDepthTime(List<(int depth, long time)> progress, int nextDepth)
         {
             int n = progress.Count;
 
@@ -30,9 +30,7 @@
             // Convert ln(a) back to a
             double a = Math.Exp(lnA);
 
-            int maxX = progress.Max(p => p.depth);
-
-            return (int)(a * Math.Exp(b * (maxX + 2)));
+            return (int)(a * Math.Exp(b * (nextDepth)));
         }
     }
 }

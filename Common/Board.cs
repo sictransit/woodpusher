@@ -1,9 +1,7 @@
 ﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -14,7 +12,9 @@ public class Board : IBoard
     private readonly Bitboard activeBoard;
     private readonly Bitboard opponentBoard;
     private readonly bool whiteIsPlaying;
-    private readonly BoardInternals internals;    
+    private readonly BoardInternals internals;
+
+    private int? score = null;
 
     public Counters Counters { get; }
 
@@ -57,18 +57,36 @@ public class Board : IBoard
     {
         get
         {
-            var phase = white.Phase + black.Phase;
-
-            var score = 0;
-
-            foreach (var piece in GetPieces())
+            if (!score.HasValue)
             {
-                var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
-                
-                score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
+                var phase = white.Phase + black.Phase;
+
+                score = 0;
+
+                foreach (var piece in GetPieces(Piece.White))
+                {
+                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+
+                    score += evaluation;
+                }
+
+                //score += BitOperations.PopCount(white.Knight) > 1 ? 50 : 0;
+                //score += BitOperations.PopCount(white.Bishop) > 1 ? 50 : 0;
+                //score += BitOperations.PopCount(white.Rook) > 1 ? 50 : 0;
+
+                foreach (var piece in GetPieces(Piece.None))
+                {
+                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+
+                    score -= evaluation;
+                }
+
+                //score -= BitOperations.PopCount(black.Knight) > 1 ? 50 : 0;
+                //score -= BitOperations.PopCount(black.Bishop) > 1 ? 50 : 0;
+                //score -= BitOperations.PopCount(black.Rook) > 1 ? 50 : 0;
             }
 
-            return score;
+            return score.Value;
         }
     }
 
@@ -232,45 +250,65 @@ public class Board : IBoard
 
         var opponent = GetBitboard(color);
 
-        foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
+        if ((opponent.AllPieces & threats.All) == 0)
         {
-            yield return knight;
+            yield break;
         }
 
-        foreach (var pawn in opponent.GetPieces(Piece.Pawn, threats.Pawn))
+        var target = piece.GetMask();
+
+        if ((opponent.Queen & threats.Queen) != 0)
         {
-            yield return pawn;
+            foreach (var queen in opponent.GetPieces(Piece.Queen, threats.Queen))
+            {
+                if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
+                {
+                    yield return queen;
+                }
+            }
+        }
+
+        if ((opponent.Bishop & threats.Bishop) != 0)
+        {
+            foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
+            {
+                if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
+                {
+                    yield return bishop;
+                }
+            }
+        }
+
+        if ((opponent.Rook & threats.Rook) != 0)
+        {
+            foreach (var rook in opponent.GetPieces(Piece.Rook, threats.Rook))
+            {
+                if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
+                {
+                    yield return rook;
+                }
+            }
+        }
+
+        if ((opponent.Knight & threats.Knight) != 0)
+        {
+            foreach (var knight in opponent.GetPieces(Piece.Knight, threats.Knight))
+            {
+                yield return knight;
+            }
+        }
+
+        if ((opponent.Pawn & threats.Pawn) != 0)
+        {
+            foreach (var pawn in opponent.GetPieces(Piece.Pawn, threats.Pawn))
+            {
+                yield return pawn;
+            }
         }
 
         foreach (var king in opponent.GetPieces(Piece.King, threats.King))
         {
             yield return king;
-        }
-
-        var target = piece.GetMask();
-
-        foreach (var bishop in opponent.GetPieces(Piece.Bishop, threats.Bishop))
-        {
-            if (!IsOccupied(internals.Moves.GetTravelMask(bishop.GetMask(), target)))
-            {
-                yield return bishop;
-            }
-        }
-
-        foreach (var queen in opponent.GetPieces(Piece.Queen, threats.Queen))
-        {
-            if (!IsOccupied(internals.Moves.GetTravelMask(queen.GetMask(), target)))
-            {
-                yield return queen;
-            }
-        }
-
-        foreach (var rook in opponent.GetPieces(Piece.Rook, threats.Rook))
-        {
-            if (!IsOccupied(internals.Moves.GetTravelMask(rook.GetMask(), target)))
-            {
-                yield return rook;
-            }
         }
     }
 
@@ -284,18 +322,18 @@ public class Board : IBoard
         return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
-    public IEnumerable<IBoard> PlayLegalMoves()
+    public IEnumerable<IBoard> PlayLegalMoves(bool onlyCaptures = false)
     {
         foreach (var piece in activeBoard.GetPieces())
         {
-            foreach (var board in PlayLegalMoves(piece))
+            foreach (var board in PlayLegalMoves(piece, onlyCaptures))
             {
                 yield return board;
             }
         }
     }
 
-    private IEnumerable<IBoard> PlayLegalMoves(Piece piece)
+    private IEnumerable<IBoard> PlayLegalMoves(Piece piece, bool onlyCaptures)
     {
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
@@ -306,9 +344,14 @@ public class Board : IBoard
                     break;
                 }
 
-                var hostileTarget = opponentBoard.Peek(move.Target);
+                var taking = opponentBoard.IsOccupied(move.Target);
 
-                if (!ValidateMove(move, hostileTarget))
+                if (!taking && onlyCaptures)
+                {
+                    continue;
+                }
+
+                if (!ValidateMove(move, taking))
                 {
                     break;
                 }
@@ -318,7 +361,7 @@ public class Board : IBoard
                 // Moving into check?
                 if (board.IsAttacked(board.FindKing(ActiveColor)))
                 {
-                    if (hostileTarget != Piece.None)
+                    if (taking)
                     {
                         break;
                     }
@@ -328,7 +371,7 @@ public class Board : IBoard
 
                 yield return board;
 
-                if (hostileTarget != Piece.None)
+                if (taking)
                 {
                     break;
                 }
@@ -336,23 +379,13 @@ public class Board : IBoard
         }
     }
 
-    private bool ValidateMove(Move move, Piece hostileTarget)
+    private bool ValidateMove(Move move, bool taking)
     {
         if (move.Piece.Is(Piece.Pawn))
         {
-            if (hostileTarget == Piece.None)
+            if ((taking && move.Flags.HasFlag(SpecialMove.PawnMoves)) || (!taking && move.Flags.HasFlag(SpecialMove.PawnTakes)))
             {
-                if (move.Flags.HasFlag(SpecialMove.PawnTakes))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (move.Flags.HasFlag(SpecialMove.PawnMoves))
-                {
-                    return false;
-                }
+                return false;
             }
 
             if (move.Flags.HasFlag(SpecialMove.PawnTakesEnPassant) && move.Target != Counters.EnPassantTarget)

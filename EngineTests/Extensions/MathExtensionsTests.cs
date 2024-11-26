@@ -14,10 +14,10 @@ namespace SicTransit.Woodpusher.Engine.Extensions.Tests
 
             for (int i = 0; i < n; i++)
             {
-                progress.Add(((i + 1) * 2, (long)(Math.Exp(i) * 100)));
+                progress.Add(((i + 1), (long)(Math.Exp(i) * 100)));
             }
 
-            var estimated = MathExtensions.ApproximateNextDepthTime(progress);
+            var estimated = MathExtensions.ApproximateNextDepthTime(progress, n + 1);
 
             Assert.AreEqual(estimated, (long)(Math.Exp(n) * 100), estimated / 100);
         }
@@ -36,7 +36,7 @@ namespace SicTransit.Woodpusher.Engine.Extensions.Tests
 
             var depth14 = 14336;
 
-            var estimated = MathExtensions.ApproximateNextDepthTime(progress);
+            var estimated = MathExtensions.ApproximateNextDepthTime(progress, 14);
 
             Assert.AreEqual(estimated, depth14, depth14 / 10);
         }
