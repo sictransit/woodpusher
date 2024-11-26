@@ -409,7 +409,7 @@ namespace SicTransit.Woodpusher.Engine
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Ply >= maxDepth - depth)
+            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Depth >= maxDepth - depth)
             {
                 switch (cachedEntry.EntryType)
                 {
@@ -471,7 +471,7 @@ namespace SicTransit.Woodpusher.Engine
                 bestScore = board.IsChecked ? -Scoring.MateScore + depth : Scoring.DrawScore;
             }
 
-            if (transpositionTable[transpositionIndex].Ply < maxDepth - depth)
+            if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
                     bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
