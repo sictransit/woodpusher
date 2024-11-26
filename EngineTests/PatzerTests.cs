@@ -248,14 +248,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
             while (!task.IsCompleted)
             {
+                Thread.Sleep(200);
+
                 foundMate = traceLines.Exists(i => i.Contains("mate 10"));
 
                 if (foundMate)
                 {
                     patzer.Stop();
                 }
-
-                Thread.Sleep(200);
             }
 
             Assert.IsNotNull(task.Result);

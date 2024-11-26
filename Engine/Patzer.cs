@@ -197,8 +197,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             maxDepth = 0;
             nodeCount = 0;
-            Move? bestMove = null;
-            var foundMate = false;
+            Move? bestMove = null;            
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
@@ -218,6 +217,7 @@ namespace SicTransit.Woodpusher.Engine
                 maxDepth++;
                 selDepth = maxDepth;
                 long startTime = stopwatch.ElapsedMilliseconds;
+                int? mateIn = default;
 
                 var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, PlayerSign);
 
@@ -232,8 +232,7 @@ namespace SicTransit.Woodpusher.Engine
                         UpdateBestLine(bestMove);
                     }
 
-                    var mateIn = CalculateMateIn(score, PlayerSign);
-                    foundMate = mateIn is > 0;
+                    mateIn = CalculateMateIn(score, PlayerSign);
 
                     SendProgress(stopwatch, score, mateIn);
 
@@ -251,13 +250,27 @@ namespace SicTransit.Woodpusher.Engine
                     }
                 }
 
-                if (foundMate || timeIsUp || !enoughTime)
+                string? abortMessage = null;
+
+                if (mateIn is > 0)
                 {
+                    abortMessage = $"aborting search @ depth {maxDepth}, mate in {mateIn}";
+                }
+                else if (timeIsUp)
+                {
+                    abortMessage = $"aborting search @ depth {maxDepth}, time is up";
+                }
+                else if (!enoughTime)
+                {
+                    abortMessage = $"aborting search @ depth {maxDepth}, not enough time";
+                }
+
+                if (abortMessage != null)
+                {
+                    SendDebugInfo(abortMessage);
                     break;
                 }
-            }
-
-            SendDebugInfo($"aborting @ depth {maxDepth}");
+            }            
 
             Log.Debug("evaluated {NodeCount} nodes, found: {BestMove}", nodeCount, bestMove);
 
@@ -334,7 +347,7 @@ namespace SicTransit.Woodpusher.Engine
                     return (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece; // Capture value, sorting valuable captures first.
                 }
 
-                if (killerMoves[board.Counters.Ply][0] == board.Hash || killerMoves[board.Counters.Ply][1] == board.Hash)
+                if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
                     return int.MinValue + 1; // High priority for killer moves
                 }
