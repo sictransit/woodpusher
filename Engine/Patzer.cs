@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
@@ -23,8 +24,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private int PlayerSign => Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-        private readonly OpeningBook whiteOpeningBook;
-        private readonly OpeningBook blackOpeningBook;
+        private OpeningBook? openingBook;
 
         private readonly Action<string>? infoCallback;
 
@@ -38,19 +38,22 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? evaluatedBestMove = null;
 
+        private EngineOptions engineOptions;
+
         public Patzer(Action<string>? infoCallback = null)
         {
-            whiteOpeningBook = new OpeningBook(Piece.White);
-            blackOpeningBook = new OpeningBook(Piece.None);
-
             this.infoCallback = infoCallback;
 
-            Initialize();
+            Initialize(EngineOptions.Default);
         }
 
-        public void Initialize()
+        public void Initialize(EngineOptions options)
         {
+            engineOptions = options;
+
             SetBoard(Common.Board.StartingPosition());
+
+            openingBook = null;
 
             for (var i = 0; i < killerMoves.Length; i++)
             {
@@ -84,7 +87,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? GetOpeningBookMove()
         {
-            var openingBook = Board.ActiveColor == Piece.White ? whiteOpeningBook : blackOpeningBook;
+            openingBook ??= Board.ActiveColor == Piece.White ? new OpeningBook(Piece.White) : new OpeningBook(Piece.None);
+
             var openingBookMoves = openingBook.GetMoves(Board.Hash);
             var legalMoves = Board.GetLegalMoves().ToArray();
             var legalOpeningBookMoves = openingBookMoves
@@ -96,7 +100,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private Move? GetTheoryMove()
         {
-            var openingBook = Board.ActiveColor == Piece.White ? whiteOpeningBook : blackOpeningBook;
+            openingBook ??= Board.ActiveColor == Piece.White ? new OpeningBook(Piece.White) : new OpeningBook(Piece.None);
+
             var theoryMoves = Board.PlayLegalMoves()
                 .Select(b => new { move = b.Counters.LastMove, count = openingBook?.GetMoves(b.Hash).Count() ?? 0 })
                 .Where(t => t.count > 0)
@@ -202,14 +207,17 @@ namespace SicTransit.Woodpusher.Engine
             var progress = new List<(int depth, long time)>();
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
 
-            var bookMove = GetOpeningBookMove() ?? GetTheoryMove();
-            if (bookMove != null)
+            if (engineOptions.UseOpeningBook)
             {
-                UpdateBestLine(bookMove);
-                Log.Information("Returning book move: {0}", bookMove);
-                SendDebugInfo($"playing book move {bookMove.ToAlgebraicMoveNotation()}");
-                SendProgress(stopwatch, 0, null);
-                return new AlgebraicMove(bookMove);
+                var bookMove = GetOpeningBookMove() ?? GetTheoryMove();
+                if (bookMove != null)
+                {
+                    UpdateBestLine(bookMove);
+                    Log.Information("Returning book move: {0}", bookMove);
+                    SendDebugInfo($"playing book move {bookMove.ToAlgebraicMoveNotation()}");
+                    SendProgress(stopwatch, 0, null);
+                    return new AlgebraicMove(bookMove);
+                }
             }
 
             while (maxDepth < engineMaxDepth)
@@ -469,8 +477,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 bestScore = board.IsChecked ? -Scoring.MateScore + depth : Scoring.DrawScore;
             }
-
-            if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
+            else if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
                     bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,

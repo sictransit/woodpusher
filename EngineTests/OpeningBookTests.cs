@@ -98,7 +98,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
                     foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result == (white ? Result.WhiteWin : Result.BlackWin)).OrderByDescending(g => white ? g.WhiteElo : g.BlackElo).Take(1000))
                     {
-                        engine.Initialize();
+                        engine.Initialize(EngineOptions.Default);
 
                         try
                         {

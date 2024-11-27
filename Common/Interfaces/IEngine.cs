@@ -6,7 +6,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
     {
         IBoard Board { get; }
 
-        void Initialize();
+        void Initialize(EngineOptions options);
 
         void Stop();
 
