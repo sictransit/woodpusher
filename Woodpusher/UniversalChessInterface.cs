@@ -40,12 +40,13 @@ namespace SicTransit.Woodpusher
 
         private readonly IEngine engine;
 
-        private EngineOptions options = EngineOptions.Default;
+        private EngineOptions options;
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {
             this.consoleOutput = consoleOutput;
             this.engine = engine;
+            this.options = new EngineOptions() { UseOpeningBook = true };
         }
 
         public void ProcessCommand(string command)
