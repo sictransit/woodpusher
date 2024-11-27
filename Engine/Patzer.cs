@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private int PlayerSign => Board.ActiveColor.Is(Piece.White) ? 1 : -1;
 
-        private OpeningBook? openingBook;        
+        private OpeningBook? openingBook;
 
         private readonly Action<string>? infoCallback;
 
@@ -88,7 +88,7 @@ namespace SicTransit.Woodpusher.Engine
         private Move? GetOpeningBookMove()
         {
             openingBook ??= Board.ActiveColor == Piece.White ? new OpeningBook(Piece.White) : new OpeningBook(Piece.None);
-            
+
             var openingBookMoves = openingBook.GetMoves(Board.Hash);
             var legalMoves = Board.GetLegalMoves().ToArray();
             var legalOpeningBookMoves = openingBookMoves

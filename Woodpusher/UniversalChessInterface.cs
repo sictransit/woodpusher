@@ -3,7 +3,6 @@ using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
-using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -155,7 +154,8 @@ namespace SicTransit.Woodpusher
 
         private Task SetOption(string command)
         {
-            return Task.Run(() => {
+            return Task.Run(() =>
+            {
                 var match = OptionRegex.Match(command);
                 if (!match.Success)
                 {
