@@ -24,7 +24,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
         private static readonly Regex DisplayCommand = new(@"^d$", RegexOptions.Compiled);
-        private static readonly Regex SetOptionCommand = new(@"^setoption$", RegexOptions.Compiled);
+        private static readonly Regex SetOptionCommand = new(@"^setoption", RegexOptions.Compiled);
 
 
         private static readonly Regex PositionRegex =
@@ -83,7 +83,7 @@ namespace SicTransit.Woodpusher
             }
             else if (SetOptionCommand.IsMatch(command))
             {
-                //task = SetOption();
+                task = SetOption(command);
             }
             else if (QuitCommand.IsMatch(command))
             {
@@ -150,6 +150,24 @@ namespace SicTransit.Woodpusher
             return Task.Run(() =>
             {
                 engine.Stop();
+            });
+        }
+
+        private Task SetOption(string command)
+        {
+            return Task.Run(() => {
+                var match = OptionRegex.Match(command);
+                if (!match.Success)
+                {
+                    Log.Error("Unable to parse: {Command}", command);
+                    return;
+                }
+                var name = match.Groups[1].Value;
+                var value = match.Groups[2].Value;
+                if (name == "OwnBook")
+                {
+                    options.UseOpeningBook = bool.Parse(value);
+                }
             });
         }
 

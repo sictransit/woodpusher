@@ -5,8 +5,12 @@ A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 
 ## Features
 - UCI-compatible
+- PGN and FEN parsing
 - Perft test
 - Opening book
+- Zobrist hashing
+- Transposition table
+- Killer heuristic
 
 ## UCI Commands
 
@@ -19,9 +23,23 @@ Initializes the engine and provides engine information.
 **Example:**
 ```
 uci
-id name Woodpusher 1.0.0+169dfebfdb4749ad97aabcbd779ec507f051ad72
+id name Woodpusher 1.2.0+17b3326627bad1b95724019c2ab68eb6041c4409
 id author Mikael Fredriksson <micke@sictransit.net>
+option name OwnBook type check default true
 uciok
+```
+
+### `setoption`
+
+Sets an engine option.
+
+**Arguments:**
+- `name <option_name>`: The name of the option.
+- `value <option_value>`: The value of the option.
+
+**Example:**
+```
+setoption name OwnBook value false
 ```
 
 ### `isready`
