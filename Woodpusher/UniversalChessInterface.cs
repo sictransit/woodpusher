@@ -1,7 +1,9 @@
 ﻿using Serilog;
+using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -22,6 +24,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
         private static readonly Regex DisplayCommand = new(@"^d$", RegexOptions.Compiled);
+        private static readonly Regex SetOptionCommand = new(@"^setoption$", RegexOptions.Compiled);
 
 
         private static readonly Regex PositionRegex =
@@ -32,10 +35,13 @@ namespace SicTransit.Woodpusher
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
+        private static readonly Regex OptionRegex = new(@"^setoption name (\w+) value (\w+)$", RegexOptions.Compiled);
 
         private const int engineLatency = 100;
 
         private readonly IEngine engine;
+
+        private EngineOptions options = EngineOptions.Default;
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {
@@ -75,6 +81,10 @@ namespace SicTransit.Woodpusher
             {
                 task = Display();
             }
+            else if (SetOptionCommand.IsMatch(command))
+            {
+                //task = SetOption();
+            }
             else if (QuitCommand.IsMatch(command))
             {
                 Quit = true;
@@ -107,6 +117,7 @@ namespace SicTransit.Woodpusher
 
                     consoleOutput($"id name Woodpusher {version}");
                     consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
+                    consoleOutput("option name OwnBook type check default true");
                     consoleOutput("uciok");
                 }
             });
@@ -118,7 +129,7 @@ namespace SicTransit.Woodpusher
             {
                 lock (engine)
                 {
-                    engine.Initialize();
+                    engine.Initialize(options);
                 }
             });
         }
