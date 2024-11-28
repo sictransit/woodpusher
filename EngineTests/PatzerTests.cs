@@ -317,41 +317,5 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 Assert.IsTrue(success);
             }
         }
-
-        [TestMethod]
-        [Ignore("Not finished and will run for a long time anyway.")]
-        public void StrategicTestSuiteTest()
-        {
-            var epdLines = new List<string>();
-            foreach (var epdFile in new DirectoryInfo("resources/sts").EnumerateFiles("*.epd"))
-            {
-                epdLines.AddRange(File.ReadAllLines(epdFile.FullName));
-            }
-
-            var epdRegex = new Regex(@"(.+)\sbm\s(.+?);");
-
-            foreach (var epdLine in epdLines)
-            {
-                var match = epdRegex.Match(epdLine);
-
-                if (match.Success)
-                {
-                    var fen = match.Groups[1].Value;
-                    var epdBestMove = match.Groups[2].Value;
-
-                    patzer.Position(fen);
-
-                    var engineBestMove = patzer.FindBestMove();
-
-                    // TODO: Check suggested best move against engine move.
-
-                    Log.Information($"FEN: {fen}; BM: {epdBestMove}; ENGINE: {engineBestMove.Notation}");
-                }
-                else
-                {
-                    Assert.Fail($"Unable to parse: {epdLine}");
-                }
-            }
-        }
     }
 }
