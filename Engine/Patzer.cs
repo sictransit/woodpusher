@@ -346,6 +346,17 @@ namespace SicTransit.Woodpusher.Engine
 
         private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, Move? preferredMove = null)
         {
+            static int pieceValue(Piece piece) => piece.GetPieceType() switch
+            {
+                Piece.Pawn => 1,
+                Piece.Knight => 3,
+                Piece.Bishop => 3,
+                Piece.Rook => 5,
+                Piece.Queen => 9,
+                Piece.King => 1,
+                _ => 0,
+            };
+
             return boards.OrderByDescending(board =>
             {
                 if (board.Counters.LastMove.Equals(preferredMove))
@@ -360,7 +371,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return (int)board.Counters.Capture - (int)board.Counters.LastMove.Piece; // Capture value, sorting valuable captures first.
+                    return pieceValue(board.Counters.Capture) - pieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
