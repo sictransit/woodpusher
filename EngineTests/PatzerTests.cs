@@ -5,7 +5,6 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {

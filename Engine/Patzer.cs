@@ -295,9 +295,9 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(IBoard board)
+        private void SendCurrentMove(IBoard board, int currentMoveNumber)
         {
-            SendInfo($"depth {maxDepth} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()}");
+            SendInfo($"depth {maxDepth} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
 
         private void UpdateBestLine(Move bestMove)
@@ -450,13 +450,15 @@ namespace SicTransit.Woodpusher.Engine
             Move? bestMove = null;
             var bestScore = -Scoring.MoveMaximumScore;
 
+            var currentMoveNumber = 0;
+
             foreach (var newBoard in SortBords(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
 
                 if (depth == 0)
                 {
-                    SendCurrentMove(newBoard);
+                    SendCurrentMove(newBoard, ++currentMoveNumber);
                 }
 
                 var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
