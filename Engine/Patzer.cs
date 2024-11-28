@@ -359,14 +359,14 @@ namespace SicTransit.Woodpusher.Engine
 
             return boards.OrderByDescending(board =>
             {
-                if (board.Counters.LastMove.Equals(preferredMove))
+                if (preferredMove != null && board.Counters.LastMove.Equals(preferredMove))
                 {
-                    return int.MaxValue; // Highest priority for preferred move.
+                    return 20; // Highest priority for preferred move.
                 }
 
                 if (transpositionTable[board.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
                 {
-                    return int.MaxValue - 1; // High priority for exact transposition table entries.
+                    return 10; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
@@ -376,10 +376,10 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
-                    return int.MinValue + 1; // High priority for killer moves
+                    return -10; // High priority for killer moves
                 }
 
-                return int.MinValue;
+                return -20;
             });
         }
 
