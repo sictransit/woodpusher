@@ -55,9 +55,9 @@ public class Board : IBoard
 
     public ulong Hash { get; }
 
-    private int GetRookBonus(Bitboard board)
+    private int GetRookBonus(Bitboard bitboard)
     { 
-        var rooks = board.GetPieces(Piece.Rook, ulong.MaxValue).ToArray();
+        var rooks = bitboard.GetPieces(Piece.Rook, ulong.MaxValue).ToArray();
 
         if (rooks.Length == 2)
         {
@@ -73,6 +73,11 @@ public class Board : IBoard
         }
 
         return 0;
+    }
+
+    private int GetBishopBonus(Bitboard bitboard)
+    { 
+        return BitOperations.PopCount(bitboard.Bishop) > 2 ? 50 : 0;
     }
 
     public int Score
@@ -93,6 +98,7 @@ public class Board : IBoard
                 }
 
                 score += GetRookBonus(white) - GetRookBonus(black);
+                score += GetBishopBonus(white) - GetBishopBonus(black);
             }
 
             return score.Value;
