@@ -70,22 +70,21 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("long running")]
         public void RunHardProblemsFailingTest()
         {
-            // All except these fail even when the engine is given 10 minutes to think:
+            // All except these fail even when the engine is given *10 minutes* to think:
             // Success: rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1 - e5e6 (13065 ms)            
             // Success: 3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1 - c6e5 (69283 ms)
             // Success: 2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - 0 1 - b7e4 (62200 ms)
 
-            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromMinutes(10).TotalMilliseconds, false));
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, false));
         }
 
 
         [TestMethod]
         public void RunHardProblemsSucceedingTest()
         {
-            Assert.AreEqual(0, RunHardProblems(10000, true));
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, true));
         }
 
         private int RunHardProblems(int timeLimit, bool status)

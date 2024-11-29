@@ -420,9 +420,9 @@ public class Board : IBoard
         }
 
         return true;
-    }    
+    }
 
-    public bool IsChecked 
+    public bool IsChecked
     {
         get
         {
