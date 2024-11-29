@@ -344,7 +344,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
-        private IEnumerable<IBoard> SortBords(IEnumerable<IBoard> boards, Move? preferredMove = null)
+        private IEnumerable<IBoard> SortBoards(IEnumerable<IBoard> boards, Move? preferredMove = null)
         {
             return boards.OrderByDescending(board =>
             {
@@ -373,10 +373,10 @@ namespace SicTransit.Woodpusher.Engine
                     return -15;
                 }
 
-                if (board.Counters.LastMove.Flags.HasFlag(SpecialMove.PawnPromotes))
-                {
-                    return -20;
-                }
+                //if (board.Counters.LastMove.Flags.HasFlag(SpecialMove.PawnPromotes))
+                //{
+                //    return -20;
+                //}
 
                 return -25;
             });
@@ -395,7 +395,7 @@ namespace SicTransit.Woodpusher.Engine
 
             selDepth = Math.Max(selDepth, board.Counters.Ply - Board.Counters.Ply);
 
-            foreach (var newBoard in SortBords(board.PlayLegalMoves(true)))
+            foreach (var newBoard in SortBoards(board.PlayLegalMoves(true)))
             {
                 nodeCount++;
                 var score = -Quiesce(newBoard, -β, -α, -sign);
@@ -451,7 +451,7 @@ namespace SicTransit.Woodpusher.Engine
 
             var currentMoveNumber = 0;
 
-            foreach (var newBoard in SortBords(board.PlayLegalMoves(), cachedEntry.Move))
+            foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
 
