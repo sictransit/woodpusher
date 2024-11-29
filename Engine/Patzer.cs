@@ -260,7 +260,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 string? abortMessage = null;
 
-                if (mateIn is > 0)
+                if (mateIn.HasValue)
                 {
                     abortMessage = $"aborting search @ depth {maxDepth}, mate in {mateIn}";
                 }
@@ -384,7 +384,12 @@ namespace SicTransit.Woodpusher.Engine
                     return -15;
                 }
 
-                return -20;
+                if (board.Counters.LastMove.Flags.HasFlag(SpecialMove.PawnPromotes))
+                {
+                    return -20;
+                }
+
+                return -25;
             });
         }
 
