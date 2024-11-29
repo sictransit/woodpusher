@@ -309,10 +309,10 @@ namespace SicTransit.Woodpusher.Engine
 
             var board = Board.Play(bestMove);
 
-            for (var i = 0; i < selDepth; i++)
+            for (var i = 0; i < maxDepth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
-                if (entry.EntryType == Enum.EntryType.Exact && entry.Hash == board.Hash && entry.Move != null && board.GetLegalMoves().Contains(entry.Move))
+                if (entry.EntryType == Enum.EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
                 {
                     bestLine.Add((ply + i + 1, entry.Move));
                     board = board.Play(entry.Move);
@@ -427,7 +427,7 @@ namespace SicTransit.Woodpusher.Engine
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.EntryType != Enum.EntryType.None && cachedEntry.Hash == board.Hash && cachedEntry.Depth >= maxDepth - depth)
+            if (cachedEntry.Hash == board.Hash && cachedEntry.Depth >= maxDepth - depth)
             {
                 switch (cachedEntry.EntryType)
                 {
