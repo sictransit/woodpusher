@@ -2,7 +2,6 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -55,31 +54,6 @@ public class Board : IBoard
 
     public ulong Hash { get; }
 
-    private int GetRookBonus(Bitboard bitboard)
-    { 
-        var rooks = bitboard.GetPieces(Piece.Rook, ulong.MaxValue).ToArray();
-
-        if (rooks.Length == 2)
-        {
-            if (rooks[0].GetSquare().Rank == rooks[1].GetSquare().Rank || rooks[0].GetSquare().File == rooks[1].GetSquare().File)
-            {
-                var travelMask = internals.Moves.GetTravelMask(rooks[0].GetMask(), rooks[1].GetMask());
-
-                if ((travelMask & (white.AllPieces | black.AllPieces)) == 0)
-                {
-                    return 50;
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    private int GetBishopBonus(Bitboard bitboard)
-    { 
-        return BitOperations.PopCount(bitboard.Bishop) > 2 ? 50 : 0;
-    }
-
     public int Score
     {
         get
@@ -90,15 +64,12 @@ public class Board : IBoard
 
                 score = 0;
 
-                foreach(var piece in GetPieces())
+                foreach (var piece in GetPieces())
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
                     score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
                 }
-
-                score += GetRookBonus(white) - GetRookBonus(black);
-                score += GetBishopBonus(white) - GetBishopBonus(black);
             }
 
             return score.Value;

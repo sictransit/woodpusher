@@ -212,5 +212,16 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
             return (middle + end) / 24;
         }
+
+        public static int GetBasicBieceValue(Piece piece) => piece.GetPieceType() switch
+        {
+            Piece.Pawn => 1,
+            Piece.Knight => 3,
+            Piece.Bishop => 3,
+            Piece.Rook => 5,
+            Piece.Queen => 9,
+            Piece.King => 1,
+            _ => 0,
+        };
     }
 }
