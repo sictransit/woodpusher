@@ -379,6 +379,11 @@ namespace SicTransit.Woodpusher.Engine
                     return -10; // High priority for killer moves
                 }
 
+                if (board.IsChecked)
+                {
+                    return -15;
+                }
+
                 return -20;
             });
         }

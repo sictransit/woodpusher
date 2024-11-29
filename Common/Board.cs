@@ -15,6 +15,7 @@ public class Board : IBoard
     private readonly BoardInternals internals;
 
     private int? score = null;
+    private bool? isChecked = null;
 
     public Counters Counters { get; }
 
@@ -419,9 +420,17 @@ public class Board : IBoard
         }
 
         return true;
-    }
+    }    
 
-    public bool IsChecked => IsAttacked(FindKing(ActiveColor));
+    public bool IsChecked 
+    {
+        get
+        {
+            isChecked ??= IsAttacked(FindKing(ActiveColor));
+
+            return isChecked.Value;
+        }
+    }
 
     public bool IsAttacked(Piece piece) => GetPiecesInRange(piece, piece.OpponentColor()).Any();
 }
