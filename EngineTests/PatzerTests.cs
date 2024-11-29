@@ -5,7 +5,6 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using System.Diagnostics;
-using System.Text;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -72,7 +71,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
 
         [TestMethod]
         [Ignore("long running")]
-        public void RunHardProblemsFailingTest()        
+        public void RunHardProblemsFailingTest()
         {
             // All except these fail even when the engine is given 10 minutes to think:
             // Success: rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1 - e5e6 (13065 ms)            
@@ -330,7 +329,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]
-            {                
+            {
                 new("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193690690),
                 new("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 6, 11030083),
                 new("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5, 15833292),

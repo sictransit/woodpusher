@@ -383,7 +383,7 @@ namespace SicTransit.Woodpusher.Engine
             });
         }
 
-        private int Quiesce(IBoard board, int α, int β, int sign, int depth)
+        private int Quiesce(IBoard board, int α, int β, int sign)
         {
             var standPat = board.Score * sign;
 
@@ -394,12 +394,12 @@ namespace SicTransit.Woodpusher.Engine
 
             α = Math.Max(α, standPat);
 
-            selDepth = Math.Max(selDepth, depth);
+            selDepth = Math.Max(selDepth, board.Counters.Ply - Board.Counters.Ply);
 
             foreach (var newBoard in SortBords(board.PlayLegalMoves(true)))
             {
                 nodeCount++;
-                var score = -Quiesce(newBoard, -β, -α, -sign, depth + 1);
+                var score = -Quiesce(newBoard, -β, -α, -sign);
                 if (score >= β)
                 {
                     return β;
@@ -421,7 +421,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                return Quiesce(board, α, β, sign, maxDepth);
+                return Quiesce(board, α, β, sign);
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
