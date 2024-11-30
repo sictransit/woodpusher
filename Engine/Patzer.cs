@@ -456,6 +456,7 @@ namespace SicTransit.Woodpusher.Engine
                 if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
                     // A draw be repetition may be forced by either player.
+                    // TODO: This does not take into account moves made in the current evaluated line.
                     evaluation = Scoring.DrawScore;
                 }
 
