@@ -441,9 +441,7 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             Move? bestMove = null;
-            var bestScore = -Scoring.MoveMaximumScore;
             var α0 = α;
-
             var currentMoveNumber = 0;
 
             foreach (var newBoard in SortBoards(legalmoves, cachedEntry.Move))
@@ -455,21 +453,20 @@ namespace SicTransit.Woodpusher.Engine
                     SendCurrentMove(newBoard, ++currentMoveNumber);
                 }
 
-                var score = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+                var evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
 
                 if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
                     // A draw be repetition may be forced by either player.
-                    score = Scoring.DrawScore;
+                    evaluation = Scoring.DrawScore;
                 }
 
-                if (score > bestScore)
+                if (evaluation > α)
                 {
                     bestMove = newBoard.Counters.LastMove;
-                    bestScore = score;
+                    α = evaluation;
                 }
 
-                α = Math.Max(α, bestScore);
                 if (α >= β)
                 {
                     if (newBoard.Counters.Capture == Piece.None)
@@ -483,9 +480,9 @@ namespace SicTransit.Woodpusher.Engine
             if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                    bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
+                    α <= α0 ? Enum.EntryType.UpperBound : α >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
                     bestMove!,
-                    bestScore,
+                    α,
                     board.Hash,
                     maxDepth - depth
                     );
@@ -496,7 +493,7 @@ namespace SicTransit.Woodpusher.Engine
                 evaluatedBestMove = bestMove;
             }
 
-            return bestScore;
+            return α;
         }
 
         public void Stop() => timeIsUp = true;
