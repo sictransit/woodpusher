@@ -20,7 +20,7 @@ namespace SicTransit.Woodpusher.Engine
         private int maxDepth = 0;
         private int selDepth = 0;
         private uint nodeCount = 0;
-        private const uint EngineMaxDepth = 128;        
+        private const uint EngineMaxDepth = 128;
 
         private OpeningBook? openingBook;
 
@@ -431,9 +431,9 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            var legalmoves = board.PlayLegalMoves().ToArray();
+            var legalmoves = board.PlayLegalMoves();
 
-            if (legalmoves.Length == 0)
+            if (legalmoves.Count == 0)
             {
                 return board.IsChecked ? -Scoring.MateScore : Scoring.DrawScore;
             }

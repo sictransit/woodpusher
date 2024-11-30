@@ -9,7 +9,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 
         IBoard Play(Move move);
 
-        IEnumerable<IBoard> PlayLegalMoves(bool onlyCaptures = false);
+        List<IBoard> PlayLegalMoves(bool onlyCaptures = false);
 
         IEnumerable<Move> GetLegalMoves();
 
