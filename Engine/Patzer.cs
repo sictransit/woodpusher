@@ -405,8 +405,6 @@ namespace SicTransit.Woodpusher.Engine
                 return 0;
             }
 
-            var α0 = α;
-
             if (depth == maxDepth)
             {
                 return Quiesce(board, α, β, sign);
@@ -435,12 +433,20 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
+            var legalmoves = board.PlayLegalMoves().ToArray();
+
+            if (legalmoves.Length == 0)
+            {
+                return board.IsChecked ? -Scoring.MateScore : Scoring.DrawScore;
+            }
+
             Move? bestMove = null;
             var bestScore = -Scoring.MoveMaximumScore;
+            var α0 = α;
 
             var currentMoveNumber = 0;
 
-            foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
+            foreach (var newBoard in SortBoards(legalmoves, cachedEntry.Move))
             {
                 nodeCount++;
 
@@ -474,15 +480,11 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (bestMove == null)
-            {
-                bestScore = board.IsChecked ? -Scoring.MateScore : Scoring.DrawScore;
-            }
-            else if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
+            if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
                     bestScore <= α0 ? Enum.EntryType.UpperBound : bestScore >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
-                    bestMove,
+                    bestMove!,
                     bestScore,
                     board.Hash,
                     maxDepth - depth
