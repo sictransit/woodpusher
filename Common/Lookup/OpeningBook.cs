@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Serilog;
+using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -11,6 +12,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
         // Credit: https://github.com/lichess-org/chess-openings
 
         private Dictionary<ulong, Dictionary<string, int>> book = new();
+
+        private readonly Random random = new();
 
         public string BookFilename { get; }
 
@@ -107,6 +110,54 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
 
             return Enumerable.Empty<OpeningBookMove>();
+        }
+
+        public Move? GetMove(IBoard board)
+        {
+            if (book.TryGetValue(board.Hash, out Dictionary<string, int>? moves))
+            {
+                var sum = moves.Sum(m => m.Value);
+                var index = random.Next(sum);
+                var count = 0;
+                string algebraicMove = string.Empty;
+
+                foreach (var move in moves.OrderByDescending(m=>m.Value))
+                {
+                    count += move.Value;
+                    if (count > index)
+                    {
+                        algebraicMove = move.Key;
+
+                        break;
+                    }
+                }
+
+                foreach(var move in board.GetLegalMoves())
+                {
+                    if (move.ToAlgebraicMoveNotation() == algebraicMove)
+                    {
+                        return move;
+                    }
+                }
+
+            }
+
+            return null;
+        }
+
+        public Move? GetTheoryMove(IBoard board)
+        {
+            foreach (var newBoard in board.PlayLegalMoves())
+            {
+                var theoryMove = GetMove(newBoard);
+
+                if (theoryMove != null)
+                {
+                    return theoryMove;
+                }   
+            }
+
+            return null;
         }
 
         public class OpeningBookMove
