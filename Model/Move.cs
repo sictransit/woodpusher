@@ -14,11 +14,6 @@ namespace SicTransit.Woodpusher.Model
             CastlingCheckMask = castlingCheckMask;
             CastlingEmptySquaresMask = castlingEmptyMask;
             PromotionType = promotionType;
-
-            if (enPassantTarget != 0)
-            {
-                EnPassantMask = enPassantTarget.AddFileAndRank(0, Piece.Is(Piece.White) ? -1 : 1);
-            }
         }
 
         public Move(Piece piece, Square target, SpecialMove flags = SpecialMove.None) : this(piece, target.ToMask(), flags)
@@ -41,7 +36,7 @@ namespace SicTransit.Woodpusher.Model
 
         public ulong EnPassantTarget { get; }
 
-        public ulong EnPassantMask { get; }
+        public ulong EnPassantMask => EnPassantTarget.AddFileAndRank(0, Piece.Is(Piece.White) ? -1 : 1);
 
         public override string ToString()
         {

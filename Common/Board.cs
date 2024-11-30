@@ -15,6 +15,7 @@ public class Board : IBoard
     private readonly BoardInternals internals;
 
     private int? score = null;
+    private bool? isChecked = null;
 
     public Counters Counters { get; }
 
@@ -63,27 +64,12 @@ public class Board : IBoard
 
                 score = 0;
 
-                foreach (var piece in GetPieces(Piece.White))
+                foreach (var piece in GetPieces())
                 {
                     var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    score += evaluation;
+                    score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
                 }
-
-                //score += BitOperations.PopCount(white.Knight) > 1 ? 50 : 0;
-                //score += BitOperations.PopCount(white.Bishop) > 1 ? 50 : 0;
-                //score += BitOperations.PopCount(white.Rook) > 1 ? 50 : 0;
-
-                foreach (var piece in GetPieces(Piece.None))
-                {
-                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
-
-                    score -= evaluation;
-                }
-
-                //score -= BitOperations.PopCount(black.Knight) > 1 ? 50 : 0;
-                //score -= BitOperations.PopCount(black.Bishop) > 1 ? 50 : 0;
-                //score -= BitOperations.PopCount(black.Rook) > 1 ? 50 : 0;
             }
 
             return score.Value;
@@ -322,15 +308,18 @@ public class Board : IBoard
         return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
-    public IEnumerable<IBoard> PlayLegalMoves(bool onlyCaptures = false)
+    public List<IBoard> PlayLegalMoves(bool onlyCaptures = false)
     {
+        var boards = new List<IBoard>();
         foreach (var piece in activeBoard.GetPieces())
         {
             foreach (var board in PlayLegalMoves(piece, onlyCaptures))
             {
-                yield return board;
+                boards.Add(board);
             }
         }
+
+        return boards;
     }
 
     private IEnumerable<IBoard> PlayLegalMoves(Piece piece, bool onlyCaptures)
@@ -421,7 +410,15 @@ public class Board : IBoard
         return true;
     }
 
-    public bool IsChecked => IsAttacked(FindKing(ActiveColor));
+    public bool IsChecked
+    {
+        get
+        {
+            isChecked ??= IsAttacked(FindKing(ActiveColor));
+
+            return isChecked.Value;
+        }
+    }
 
     public bool IsAttacked(Piece piece) => GetPiecesInRange(piece, piece.OpponentColor()).Any();
 }

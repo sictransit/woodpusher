@@ -1,7 +1,7 @@
 ﻿namespace SicTransit.Woodpusher.Model.Enums
 {
     [Flags]
-    public enum SpecialMove
+    public enum SpecialMove : byte
     {
         None = 0,
         PawnTakes = 1,

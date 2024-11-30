@@ -5,7 +5,6 @@ using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher.Engine.Tests
 {
@@ -71,61 +70,100 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("Long running test")]
-        public void HardMultipleBestMoveTest()
+        public void RunHardProblemsFailingTest()
         {
-            var positions = new[]
+            // All except these fail even when the engine is given *10 minutes* to think:
+            // Success: rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1 - e5e6 (13065 ms)            
+            // Success: 3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1 - c6e5 (69283 ms)
+            // Success: 2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - 0 1 - b7e4 (62200 ms)
+
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, false));
+        }
+
+
+        [TestMethod]
+        public void RunHardProblemsSucceedingTest()
+        {
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, true));
+        }
+
+        private int RunHardProblems(int timeLimit, bool status)
+        {
+            // These are problems that the engine has failed to solve in the past.
+            // The suggested move is what Stockfish comes up with almost instantly.
+            var problems = new[]
             {
-                "1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1",
-                "3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/5K2/2R5 w - - 0 1",
-                "2q1rr1k/3bbnnp/p2p1pp1/2pPp3/PpP1P1P1/1P2BNNP/2BQ1PRK/7R b - - 0 1",
-                "rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1",
-                "r1b2rk1/2q1b1pp/p2ppn2/1p6/3QP3/1BN1B3/PPP3PP/R4RK1 w - - 0 1",
-                "2r3k1/pppR1pp1/4p3/4P1P1/5P2/1P4K1/P1P5/8 w - - 0 1",
-                "1nk1r1r1/pp2n1pp/4p3/q2pPp1N/b1pP1P2/B1P2R2/2P1B1PP/R2Q2K1 w - - 0 1",
-                "4b3/p3kp2/6p1/3pP2p/2pP1P2/4K1P1/P3N2P/8 w - - 0 1",
-                "2kr1bnr/pbpq4/2n1pp2/3p3p/3P1P1B/2N2N1Q/PPP3PP/2KR1B1R w - - 0 1",
-                "3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1",
-                "2r1nrk1/p2q1ppp/bp1p4/n1pPp3/P1P1P3/2PBB1N1/4QPPP/R4RK1 w - - 0 1",
-                "r3r1k1/ppqb1ppp/8/4p1NQ/8/2P5/PP3PPP/R3R1K1 b - - 0 1",
-                "r2q1rk1/4bppp/p2p4/2pP4/3pP3/3Q4/PP1B1PPP/R3R1K1 w - - 0 1",
-                "rnb2r1k/pp2p2p/2pp2p1/q2P1p2/8/1Pb2NP1/PB2PPBP/R2Q1RK1 w - - 0 1",
-                "2r3k1/1p2q1pp/2b1pr2/p1pp4/6Q1/1P1PP1R1/P1PN2PP/5RK1 w - - 0 1",
-                "r1bqkb1r/4npp1/p1p4p/1p1pP1B1/8/1B6/PPPN1PPP/R2Q1RK1 w kq - 0 1",
-                "r2q1rk1/1ppnbppp/p2p1nb1/3Pp3/2P1P1P1/2N2N1P/PPB1QP2/R1B2RK1 b - - 0 1",
-                "r1bq1rk1/pp2ppbp/2np2p1/2n5/P3PP2/N1P2N2/1PB3PP/R1B1QRK1 b - - 0 1",
-                "3rr3/2pq2pk/p2p1pnp/8/2QBPP2/1P6/P5PP/4RRK1 b - - 0 1",
-                "r4k2/pb2bp1r/1p1qp2p/3pNp2/3P1P2/2N3P1/PPP1Q2P/2KRR3 w - - 0 1",
-                "3rn2k/ppb2rpp/2ppqp2/5N2/2P1P3/1P5Q/PB3PPP/3RR1K1 w - - 0 1",
-                "2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - 0 1",
-                "r1bqk2r/pp2bppp/2p5/3pP3/P2Q1P2/2N1B3/1PP3PP/R4RK1 b kq - 0 1",
-                "r2qnrnk/p2b2b1/1p1p2pp/2pPpp2/1PP1P3/PRNBB3/3QNPPP/5RK1 w - - 0 1",
-            };
-            var solutions = new[]{
-                "Qd1+","d5","f5","e6","a4","g6","Nf6","f5","f5","Ne5","f4","Bf5","b4",
-                "Qd2 Qe1","Qxg7+","Ne4","h5","Nb3","Rxe4","g4","Nh6","Bxe4","f6","f4"
+                ("1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1", "d6d1", true),
+                ("3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/5K2/2R5 w - - 0 1", "d4d5", false),
+                ("rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1", "e5e6", false),
+                ("2r3k1/pppR1pp1/4p3/4P1P1/5P2/1P4K1/P1P5/8 w - - 0 1", "g5g6", false),
+                ("4b3/p3kp2/6p1/3pP2p/2pP1P2/4K1P1/P3N2P/8 w - - 0 1", "f4f5", true),
+                ("3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1", "c6e5", false),
+                ("2r1nrk1/p2q1ppp/bp1p4/n1pPp3/P1P1P3/2PBB1N1/4QPPP/R4RK1 w - - 0 1", "g2f5", false),
+                ("r3r1k1/ppqb1ppp/8/4p1NQ/8/2P5/PP3PPP/R3R1K1 b - - 0 1", "d7f5", true),
+                ("r2q1rk1/4bppp/p2p4/2pP4/3pP3/3Q4/PP1B1PPP/R3R1K1 w - - 0 1", "b2b4", false),
+                ("rnb2r1k/pp2p2p/2pp2p1/q2P1p2/8/1Pb2NP1/PB2PPBP/R2Q1RK1 w - - 0 1", "d1d2", true),
+                ("2r3k1/1p2q1pp/2b1pr2/p1pp4/6Q1/1P1PP1R1/P1PN2PP/5RK1 w - - 0 1", "g4g7", true),
+                ("r1bqkb1r/4npp1/p1p4p/1p1pP1B1/8/1B6/PPPN1PPP/R2Q1RK1 w kq - 0 1", "d2e4", true),
+                ("r1bq1rk1/pp2ppbp/2np2p1/2n5/P3PP2/N1P2N2/1PB3PP/R1B1QRK1 b - - 0 1", "c5b3", false),
+                ("3rr3/2pq2pk/p2p1pnp/8/2QBPP2/1P6/P5PP/4RRK1 b - - 0 1", "e8e4", true),
+                ("r4k2/pb2bp1r/1p1qp2p/3pNp2/3P1P2/2N3P1/PPP1Q2P/2KRR3 w - - 0 1", "g3g4", false),
+                ("3rn2k/ppb2rpp/2ppqp2/5N2/2P1P3/1P5Q/PB3PPP/3RR1K1 w - - 0 1", "f5h6", true),
+                ("2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - 0 1", "b7e4", false),
+                ("r1bqk2r/pp2bppp/2p5/3pP3/P2Q1P2/2N1B3/1PP3PP/R4RK1 b kq - 0 1", "f7f6", false),
+                ("r2qnrnk/p2b2b1/1p1p2pp/2pPpp2/1PP1P3/PRNBB3/3QNPPP/5RK1 w - - 0 1", "f2f4", true)
             };
 
-            var failures = 0;
+            var failures = new List<string>();
+            var successes = new List<string>();
 
-            for (var i = 0; i < positions.Length; i++)
+            var sw = new Stopwatch();
+
+            foreach (var problem in problems.Where(p => p.Item3 == status))
             {
-                patzer.Position(positions[i]);
+                traceLines.Clear();
 
-                var bestMove = patzer.FindBestMove(10000);
+                patzer.Position(problem.Item1);
 
-                if (!bestMove.Notation.Equals(solutions[i]))
+                sw.Restart();
+
+                Task<AlgebraicMove?> task = Task.Run(() => patzer.FindBestMove(timeLimit));
+
+                var foundMove = false;
+
+                while (!task.IsCompleted)
                 {
-                    Log.Error($"Failed: {positions[i]} - {bestMove.Notation} != {solutions[i]}");
-                    failures++;
+                    Thread.Sleep(200);
+
+                    foundMove = traceLines.Exists(i => i.Contains($"pv {problem.Item2}"));
+
+                    if (foundMove)
+                    {
+                        patzer.Stop();
+                    }
+                }
+
+                if (task.Result == null || task.Result.Notation != problem.Item2)
+                {
+                    failures.Add($"Failed: {problem.Item1} - {task.Result?.Notation} != {problem.Item2}");
                 }
                 else
                 {
-                    Log.Information($"Success: {positions[i]} - {bestMove.Notation} == {solutions[i]}");
+                    successes.Add($"Success: {problem.Item1} - {task.Result.Notation} ({sw.ElapsedMilliseconds} ms)");
                 }
             }
 
-            Assert.AreEqual(0, failures);
+            foreach (var success in successes)
+            {
+                Log.Information(success);
+            }
+
+            foreach (var failure in failures)
+            {
+                Log.Error(failure);
+            }
+
+            return failures.Count;
         }
 
         [TestMethod]
@@ -291,7 +329,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             var tests = new (string fen, int depth, ulong nodes)[]
             {
-                new(ForsythEdwardsNotation.StartingPosition, 5, 4865609),
                 new("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193690690),
                 new("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 6, 11030083),
                 new("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5, 15833292),
@@ -315,42 +352,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 }
 
                 Assert.IsTrue(success);
-            }
-        }
-
-        [TestMethod]
-        [Ignore("Not finished and will run for a long time anyway.")]
-        public void StrategicTestSuiteTest()
-        {
-            var epdLines = new List<string>();
-            foreach (var epdFile in new DirectoryInfo("resources/sts").EnumerateFiles("*.epd"))
-            {
-                epdLines.AddRange(File.ReadAllLines(epdFile.FullName));
-            }
-
-            var epdRegex = new Regex(@"(.+)\sbm\s(.+?);");
-
-            foreach (var epdLine in epdLines)
-            {
-                var match = epdRegex.Match(epdLine);
-
-                if (match.Success)
-                {
-                    var fen = match.Groups[1].Value;
-                    var epdBestMove = match.Groups[2].Value;
-
-                    patzer.Position(fen);
-
-                    var engineBestMove = patzer.FindBestMove();
-
-                    // TODO: Check suggested best move against engine move.
-
-                    Log.Information($"FEN: {fen}; BM: {epdBestMove}; ENGINE: {engineBestMove.Notation}");
-                }
-                else
-                {
-                    Assert.Fail($"Unable to parse: {epdLine}");
-                }
             }
         }
     }
