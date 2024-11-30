@@ -19,10 +19,8 @@ namespace SicTransit.Woodpusher.Engine
         private bool timeIsUp = false;
         private int maxDepth = 0;
         private int selDepth = 0;
-        private long nodeCount = 0;
-        private static int engineMaxDepth = 128;
-
-        private int PlayerSign => Board.ActiveColor.Is(Piece.White) ? 1 : -1;
+        private uint nodeCount = 0;
+        private const uint EngineMaxDepth = 128;        
 
         private OpeningBook? openingBook;
 
@@ -220,14 +218,14 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            while (maxDepth < engineMaxDepth)
+            while (maxDepth < EngineMaxDepth)
             {
                 maxDepth++;
                 selDepth = maxDepth;
                 long startTime = stopwatch.ElapsedMilliseconds;
                 int? mateIn = default;
 
-                var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, PlayerSign);
+                var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1);
 
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
