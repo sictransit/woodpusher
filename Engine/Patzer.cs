@@ -240,7 +240,10 @@ namespace SicTransit.Woodpusher.Engine
                         UpdateBestLine(bestMove);
                     }
 
-                    mateIn = CalculateMateIn(score, PlayerSign);
+                    if (Math.Abs(score) == Scoring.MateScore)
+                    {
+                        mateIn = maxDepth / 2 * Math.Sign(score);
+                    }
 
                     SendProgress(stopwatch, score, mateIn);
 
@@ -322,20 +325,6 @@ namespace SicTransit.Woodpusher.Engine
                     break;
                 }
             }
-        }
-
-        private static int? CalculateMateIn(int evaluation, int sign)
-        {
-            var mateInPlies = Math.Abs(Math.Abs(evaluation) - Scoring.MateScore);
-
-            if (mateInPlies <= engineMaxDepth)
-            {
-                var resultSign = Math.Sign(evaluation);
-
-                return (mateInPlies / 2 + (sign == 1 ? 1 : 0)) * resultSign;
-            }
-
-            return null;
         }
 
         private void SendInfo(string info) => SendCallbackInfo($"info {info}");
@@ -487,7 +476,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (bestMove == null)
             {
-                bestScore = board.IsChecked ? -Scoring.MateScore + depth : Scoring.DrawScore;
+                bestScore = board.IsChecked ? -Scoring.MateScore : Scoring.DrawScore;
             }
             else if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
             {
