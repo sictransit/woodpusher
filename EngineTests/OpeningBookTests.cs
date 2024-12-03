@@ -96,7 +96,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                     var openingBook = white ? whiteBook : blackBook;
                     var engine = new Patzer();
 
-                    foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result == (white ? Result.WhiteWin : Result.BlackWin)).OrderByDescending(g => white ? g.WhiteElo : g.BlackElo).Take(1000))
+                    foreach (var game in games.Where(g => g.PgnMoves.Any() && g.Result == (white ? Result.WhiteWin : Result.BlackWin)).OrderByDescending(g => white ? g.WhiteElo : g.BlackElo).ThenByDescending(g => white ? g.BlackElo : g.WhiteElo).Take(100))
                     {
                         engine.Initialize(EngineOptions.Default);
 
@@ -125,8 +125,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 Log.Information($"Done playing: {count}");
             }
 
-            whiteBook.Prune(10);
-            blackBook.Prune(10);
+            //whiteBook.Prune(10);
+            //blackBook.Prune(10);
 
             whiteBook.SaveToFile();
             blackBook.SaveToFile();

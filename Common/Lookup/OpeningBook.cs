@@ -12,6 +12,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         private Dictionary<ulong, Dictionary<string, int>> book = new();
 
+        private readonly Random random = new();
+
         public string BookFilename { get; }
 
         public OpeningBook(Piece color, bool startEmpty = false)
@@ -24,23 +26,23 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
         }
 
-        public void Prune(int keepTopPercent)
-        {
-            foreach (var hash in book.Keys)
-            {
-                var moves = book[hash];
+        //public void Prune(int keepTopPercent)
+        //{
+        //    foreach (var hash in book.Keys)
+        //    {
+        //        var moves = book[hash];
 
-                foreach (var move in moves.OrderByDescending(m => m.Value).Skip(1))
-                {
-                    moves.Remove(move.Key);
-                }
-            }
+        //        foreach (var move in moves.OrderByDescending(m => m.Value).Skip(Math.Max(1,moves.Count/keepTopPercent)))
+        //        {
+        //            moves.Remove(move.Key);
+        //        }
+        //    }
 
-            foreach (var entry in book.OrderByDescending(e => e.Value.Sum(x => x.Value)).Skip(book.Count / keepTopPercent))
-            {
-                book.Remove(entry.Key);
-            }
-        }
+        //    foreach (var entry in book.OrderByDescending(e => e.Value.Sum(x => x.Value)).Skip(book.Count / keepTopPercent))
+        //    {
+        //        book.Remove(entry.Key);
+        //    }
+        //}
 
         public void LoadFromFile(string? filename = null)
         {
@@ -107,6 +109,54 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
 
             return Enumerable.Empty<OpeningBookMove>();
+        }
+
+        public Move? GetMove(Board board)
+        {
+            if (book.TryGetValue(board.Hash, out Dictionary<string, int>? moves))
+            {
+                var sum = moves.Sum(m => m.Value);
+                var index = random.Next(sum);
+                var count = 0;
+                string algebraicMove = string.Empty;
+
+                foreach (var move in moves.OrderByDescending(m => m.Value))
+                {
+                    count += move.Value;
+                    if (count > index)
+                    {
+                        algebraicMove = move.Key;
+
+                        break;
+                    }
+                }
+
+                foreach (var move in board.GetLegalMoves())
+                {
+                    if (move.ToAlgebraicMoveNotation() == algebraicMove)
+                    {
+                        return move;
+                    }
+                }
+
+            }
+
+            return null;
+        }
+
+        public Move? GetTheoryMove(Board board)
+        {
+            foreach (var newBoard in board.PlayLegalMoves())
+            {
+                var theoryMove = GetMove(newBoard);
+
+                if (theoryMove != null)
+                {
+                    return theoryMove;
+                }
+            }
+
+            return null;
         }
 
         public class OpeningBookMove

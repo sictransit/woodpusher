@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common.Extensions;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -32,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void BoardTest()
         {
-            IBoard board = new Board();
+            Board board = new();
 
             var whiteKing = Piece.King | Piece.White;
             var blackKing = Piece.King | Piece.None;
@@ -52,7 +51,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void FillTest()
         {
-            IBoard board = new Board();
+            Board board = new();
 
             var whitePawn = Piece.Pawn | Piece.White;
 
@@ -67,7 +66,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void GetPiecesTest()
         {
-            IBoard board = new Board();
+            Board board = new();
 
             var e1 = new Square("e1");
             var whiteKing = (Piece.King | Piece.White).SetSquare(e1);
@@ -92,7 +91,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void GetPiecesOnFileByTypeTest()
         {
-            IBoard board = new Board();
+            Board board = new();
 
             var blackPawn1 = Piece.Pawn | Piece.None;
             var e2 = new Square("e2");
@@ -379,7 +378,7 @@ e8f7: 1
         }
 
         [TestMethod]
-        [Ignore("long running: did not finish in 40 minutes")]
+        //[Ignore("long running: 4.3 minutes on dev machine")]
         public void Perft7StartingPositionTest()
         {
             var stockfish = @"
@@ -624,7 +623,7 @@ d8d7: 1
         }
 
 
-        private static bool PerftAndCompare(IBoard board, string expected, int depth)
+        private static bool PerftAndCompare(Board board, string expected, int depth)
         {
             var expectedMoves = expected.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
 

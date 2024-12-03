@@ -73,7 +73,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         public void RunHardProblemsFailingTest()
         {
             // All except these fail even when the engine is given *10 minutes* to think:
-            // Success: rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1 - e5e6 (13065 ms)            
             // Success: 3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1 - c6e5 (69283 ms)
             // Success: 2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - 0 1 - b7e4 (62200 ms)
 
@@ -95,7 +94,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             {
                 ("1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1", "d6d1", true),
                 ("3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/5K2/2R5 w - - 0 1", "d4d5", false),
-                ("rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1", "e5e6", false),
+                ("rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1", "e5e6", true),
                 ("2r3k1/pppR1pp1/4p3/4P1P1/5P2/1P4K1/P1P5/8 w - - 0 1", "g5g6", false),
                 ("4b3/p3kp2/6p1/3pP2p/2pP1P2/4K1P1/P3N2P/8 w - - 0 1", "f4f5", true),
                 ("3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1", "c6e5", false),
@@ -324,7 +323,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("long running: 1,5 minutes on dev machine")]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]

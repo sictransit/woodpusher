@@ -40,250 +40,224 @@ namespace SicTransit.Woodpusher
 
         private readonly IEngine engine;
 
-        private EngineOptions options;
+        private EngineOptions engineOptions;
+
+        private volatile bool busy;
+
+        public bool Quit { get; private set; }
 
         public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
         {
             this.consoleOutput = consoleOutput;
             this.engine = engine;
-            this.options = new EngineOptions() { UseOpeningBook = true };
+            engineOptions = new EngineOptions() { UseOpeningBook = true };
         }
 
         public void ProcessCommand(string command)
         {
-            Task? task = null;
+            if (StopCommand.IsMatch(command))
+            {
+                Stop();
+                return;
+            }
+
+            if (QuitCommand.IsMatch(command))
+            {
+                Quit = true;
+                return;
+            }
+
+            if (busy)
+            {
+                Log.Warning("Engine is busy, ignoring command: {Command}", command);
+                return;
+            }
 
             if (UciCommand.IsMatch(command))
             {
-                task = Uci();
+                Uci();
             }
             else if (UciNewGameCommand.IsMatch(command))
             {
-                task = Initialize();
+                Initialize();
             }
             else if (IsReadyCommand.IsMatch(command))
             {
-                task = IsReady();
+                IsReady();
             }
             else if (PositionCommand.IsMatch(command))
             {
-                task = Position(command);
-            }
-            else if (GoCommand.IsMatch(command))
-            {
-                task = Go(command);
-            }
-            else if (StopCommand.IsMatch(command))
-            {
-                task = Stop();
+                Position(command);
             }
             else if (DisplayCommand.IsMatch(command))
             {
-                task = Display();
+                Display();
             }
             else if (SetOptionCommand.IsMatch(command))
             {
-                task = SetOption(command);
+                SetOption(command);
             }
-            else if (QuitCommand.IsMatch(command))
+            else if (GoCommand.IsMatch(command))
             {
-                Quit = true;
+                RunGoCommandAsync(command);
             }
             else
             {
                 Log.Warning("Ignored unknown command: {Command}", command);
             }
+        }
 
-            task?.ContinueWith(t =>
+        private void RunGoCommandAsync(string command)
+        {
+            busy = true;
+            Task.Run(() =>
             {
-                if (t.IsFaulted && t.Exception != null)
+                try
                 {
-                    Log.Error(t.Exception, "Engine task threw an Exception.");
+                    Go(command);
+                }
+                finally
+                {
+                    busy = false;
                 }
             });
         }
 
-        public bool Quit { get; private set; }
-
-        private Task Uci()
+        private void Uci()
         {
-            return Task.Run(() =>
-            {
-                lock (engine)
-                {
-                    var version = Assembly.GetExecutingAssembly()
-                      .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-                      .InformationalVersion;
+            var version = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion;
 
-                    consoleOutput($"id name Woodpusher {version}");
-                    consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-                    consoleOutput("option name OwnBook type check default true");
-                    consoleOutput("uciok");
-                }
-            });
+            consoleOutput($"id name Woodpusher {version}");
+            consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
+            consoleOutput("option name OwnBook type check default true");
+            consoleOutput("uciok");
         }
 
-        private Task Initialize()
-        {
-            return Task.Run(() =>
-            {
-                lock (engine)
-                {
-                    engine.Initialize(options);
-                }
-            });
-        }
+        private void Display() => consoleOutput(engine.Board.PrettyPrint());
 
-        private Task IsReady()
-        {
-            return Task.Run(() =>
-            {
-                lock (engine)
-                {
-                    consoleOutput("readyok");
-                }
-            });
-        }
+        private void Initialize() => engine.Initialize(engineOptions);
 
-        private Task Stop()
+        private void IsReady() => consoleOutput("readyok");
+
+        private void Stop()
         {
-            return Task.Run(() =>
+            if (busy)
             {
                 engine.Stop();
-            });
+            }
+            else
+            {
+                Log.Warning("Engine is not busy, ignoring stop command.");
+            }
         }
 
-        private Task SetOption(string command)
+        private void SetOption(string command)
         {
-            return Task.Run(() =>
+            var match = OptionRegex.Match(command);
+            if (!match.Success)
             {
-                var match = OptionRegex.Match(command);
-                if (!match.Success)
-                {
-                    Log.Error("Unable to parse: {Command}", command);
-                    return;
-                }
-                var name = match.Groups[1].Value;
-                var value = match.Groups[2].Value;
-                if (name == "OwnBook")
-                {
-                    options.UseOpeningBook = bool.Parse(value);
-                }
-            });
+                Log.Error("Unable to parse: {Command}", command);
+                return;
+            }
+            var name = match.Groups[1].Value;
+            var value = match.Groups[2].Value;
+            if (name == "OwnBook")
+            {
+                engineOptions.UseOpeningBook = bool.Parse(value);
+            }
         }
 
-        private Task Position(string command)
+        private void Position(string command)
         {
-            return Task.Run(() =>
+            var match = PositionRegex.Match(command);
+
+            if (!match.Success)
             {
-                lock (engine)
+                Log.Error("Unable to parse: {Command}", command);
+
+                return;
+            }
+
+            var fen = match.Groups[3].Value;
+
+            if (string.IsNullOrWhiteSpace(fen))
+            {
+                fen = ForsythEdwardsNotation.StartingPosition;
+            }
+
+            var moves = new List<AlgebraicMove>();
+
+            if (!string.IsNullOrWhiteSpace(match.Groups[5].Value))
+            {
+                var matches = MovesRegex.Matches(match.Groups[5].Value);
+
+                if (matches.Count > 0)
                 {
-                    var match = PositionRegex.Match(command);
-
-                    if (!match.Success)
-                    {
-                        Log.Error("Unable to parse: {Command}", command);
-
-                        return;
-                    }
-
-                    var fen = match.Groups[3].Value;
-
-                    if (string.IsNullOrWhiteSpace(fen))
-                    {
-                        fen = ForsythEdwardsNotation.StartingPosition;
-                    }
-
-                    var moves = new List<AlgebraicMove>();
-
-                    if (!string.IsNullOrWhiteSpace(match.Groups[5].Value))
-                    {
-                        var matches = MovesRegex.Matches(match.Groups[5].Value);
-
-                        if (matches.Count > 0)
-                        {
-                            moves.AddRange(matches.Select(m => AlgebraicMove.Parse(m.Value)));
-                        }
-                        else
-                        {
-                            Log.Information("Failed to parse piece: {Command}", command);
-                        }
-                    }
-
-                    engine.Position(fen, moves);
+                    moves.AddRange(matches.Select(m => AlgebraicMove.Parse(m.Value)));
                 }
-            });
+                else
+                {
+                    Log.Information("Failed to parse piece: {Command}", command);
+                }
+            }
+
+            engine.Position(fen, moves);
         }
 
-        private Task Go(string command)
+        private void Go(string command)
         {
-            return Task.Run(() =>
+            var movesToGoMatch = MovesToGoRegex.Match(command);
+            var whiteTimeMatch = WhiteTimeRegex.Match(command);
+            var blackTimeMatch = BlackTimeRegex.Match(command);
+            var movetimeMatch = MovetimeRegex.Match(command);
+            var perftMatch = PerftRegex.Match(command);
+
+            if (perftMatch.Success)
             {
-                lock (engine)
+                var depth = int.Parse(perftMatch.Groups[1].Value);
+
+                engine.Perft(depth);
+            }
+            else
+            {
+                var timeLimit = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
+
+                if (movetimeMatch.Success)
                 {
-                    var movesToGoMatch = MovesToGoRegex.Match(command);
-                    var whiteTimeMatch = WhiteTimeRegex.Match(command);
-                    var blackTimeMatch = BlackTimeRegex.Match(command);
-                    var movetimeMatch = MovetimeRegex.Match(command);
-                    var perftMatch = PerftRegex.Match(command);
+                    timeLimit = int.Parse(movetimeMatch.Groups[1].Value);
+                }
+                else if (whiteTimeMatch.Success && blackTimeMatch.Success)
+                {
+                    var timeLeft = int.Parse(engine.Board.ActiveColor.Is(Piece.White) ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
 
-                    if (perftMatch.Success)
+                    int movesToGo;
+
+                    if (movesToGoMatch.Success)
                     {
-                        var depth = int.Parse(perftMatch.Groups[1].Value);
-
-                        engine.Perft(depth);
+                        movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
                     }
                     else
                     {
-                        var timeLimit = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
-
-                        if (movetimeMatch.Success)
-                        {
-                            timeLimit = int.Parse(movetimeMatch.Groups[1].Value);
-                        }
-                        else if (whiteTimeMatch.Success && blackTimeMatch.Success)
-                        {
-                            var timeLeft = int.Parse(engine.Board.ActiveColor.Is(Piece.White) ? whiteTimeMatch.Groups[1].Value : blackTimeMatch.Groups[1].Value);
-
-                            int movesToGo;
-
-                            if (movesToGoMatch.Success)
-                            {
-                                movesToGo = int.Parse(movesToGoMatch.Groups[1].Value);
-                            }
-                            else
-                            {
-                                movesToGo = Math.Max(8, 40 - (engine.Board.Counters.FullmoveNumber % 40));
-                                consoleOutput($"info string movestogo not specified, using {movesToGo}");
-                            }
-
-                            timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
-                        }
-
-                        try
-                        {
-                            var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
-
-                            consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, "Failed to find best move.");
-                        }
+                        movesToGo = Math.Max(8, 40 - (engine.Board.Counters.FullmoveNumber % 40));
+                        consoleOutput($"info string movestogo not specified, using {movesToGo}");
                     }
-                }
-            });
-        }
 
-        private Task Display()
-        {
-            return Task.Run(() =>
-            {
-                lock (engine)
-                {
-                    consoleOutput(engine.Board.PrettyPrint());
+                    timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
                 }
-            });
+
+                try
+                {
+                    var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
+
+                    consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to find best move.");
+                }
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public IBoard Board { get; private set; }
+        public Board Board { get; private set; }
 
         private bool timeIsUp = false;
         private int maxDepth = 0;
@@ -59,7 +59,7 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private void SetBoard(IBoard board)
+        private void SetBoard(Board board)
         {
             Board = board;
 
@@ -81,30 +81,6 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             repetitionTable[Board.Hash] = repetitionTable.GetValueOrDefault(Board.Hash) + 1;
-        }
-
-        private Move? GetOpeningBookMove()
-        {
-            openingBook ??= Board.ActiveColor == Piece.White ? new OpeningBook(Piece.White) : new OpeningBook(Piece.None);
-
-            var openingBookMoves = openingBook.GetMoves(Board.Hash);
-            var legalMoves = Board.GetLegalMoves().ToArray();
-            var legalOpeningBookMoves = openingBookMoves
-                .Select(o => new { openingBookMove = o, legalMove = legalMoves.SingleOrDefault(move => move.ToAlgebraicMoveNotation().Equals(o.Move.Notation)) })
-                .Where(l => l.legalMove != null)
-                .ToArray();
-            return legalOpeningBookMoves.OrderByDescending(m => m.openingBookMove.Count).FirstOrDefault()?.legalMove;
-        }
-
-        private Move? GetTheoryMove()
-        {
-            openingBook ??= Board.ActiveColor == Piece.White ? new OpeningBook(Piece.White) : new OpeningBook(Piece.None);
-
-            var theoryMoves = Board.PlayLegalMoves()
-                .Select(b => new { move = b.Counters.LastMove, count = openingBook?.GetMoves(b.Hash).Count() ?? 0 })
-                .Where(t => t.count > 0)
-                .ToArray();
-            return theoryMoves.OrderByDescending(m => m.count).FirstOrDefault()?.move;
         }
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
@@ -196,6 +172,13 @@ namespace SicTransit.Woodpusher.Engine
             killerMoves[ply][0] = hash;
         }
 
+        private Move? GetBookMove()
+        {
+            openingBook ??= Board.ActiveColor == Piece.White ? new OpeningBook(Piece.White) : new OpeningBook(Piece.None);
+
+            return openingBook.GetMove(Board) ?? openingBook.GetTheoryMove(Board);
+        }
+
         private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
         {
             maxDepth = 0;
@@ -207,7 +190,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (engineOptions.UseOpeningBook)
             {
-                var bookMove = GetOpeningBookMove() ?? GetTheoryMove();
+                var bookMove = GetBookMove();
                 if (bookMove != null)
                 {
                     UpdateBestLine(bookMove);
@@ -296,7 +279,7 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(IBoard board, int currentMoveNumber)
+        private void SendCurrentMove(Board board, int currentMoveNumber)
         {
             SendInfo($"depth {maxDepth} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
@@ -331,7 +314,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
-        private IEnumerable<IBoard> SortBoards(IEnumerable<IBoard> boards, Move? preferredMove = null)
+        private IEnumerable<Board> SortBoards(IEnumerable<Board> boards, Move? preferredMove = null)
         {
             return boards.OrderByDescending(board =>
             {
@@ -347,7 +330,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return Scoring.GetBasicBieceValue(board.Counters.Capture) - Scoring.GetBasicBieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
@@ -369,7 +352,7 @@ namespace SicTransit.Woodpusher.Engine
             });
         }
 
-        private int Quiesce(IBoard board, int α, int β, int sign)
+        private int Quiesce(Board board, int α, int β, int sign)
         {
             var standPat = board.Score * sign;
 
@@ -396,7 +379,7 @@ namespace SicTransit.Woodpusher.Engine
             return α;
         }
 
-        private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
+        private int EvaluateBoard(Board board, int depth, int α, int β, int sign)
         {
             if (timeIsUp)
             {

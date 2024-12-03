@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Parsing.Exceptions;
+﻿using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -12,7 +11,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
     {
         public const string StartingPosition = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        public static IBoard Parse(string fen)
+        public static Board Parse(string fen)
         {
             if (fen is null)
             {
@@ -92,7 +91,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             return (white, black);
         }
 
-        public static string Export(IBoard board)
+        public static string Export(Board board)
         {
             var parts = new List<string>();
 

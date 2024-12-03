@@ -1,11 +1,10 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
 namespace SicTransit.Woodpusher.Common;
 
-public class Board : IBoard
+public class Board
 {
     private readonly Bitboard white;
     private readonly Bitboard black;
@@ -44,7 +43,7 @@ public class Board : IBoard
     {
     }
 
-    public static IBoard StartingPosition()
+    public static Board StartingPosition()
     {
         var white = new Bitboard(Piece.White, 65280, 129, 66, 36, 8, 16);
         var black = new Bitboard(Piece.None, 71776119061217280, 9295429630892703744, 4755801206503243776, 2594073385365405696, 576460752303423488, 1152921504606846976);
@@ -76,11 +75,11 @@ public class Board : IBoard
         }
     }
 
-    public IBoard SetPiece(Piece piece) => piece.Is(Piece.White)
+    public Board SetPiece(Piece piece) => piece.Is(Piece.White)
             ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
-            : (IBoard)new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
+            : new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
 
-    public IBoard Play(Move move)
+    public Board Play(Move move)
     {
         var newHash = Hash;
 
@@ -308,9 +307,9 @@ public class Board : IBoard
         return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
-    public List<IBoard> PlayLegalMoves(bool onlyCaptures = false)
+    public List<Board> PlayLegalMoves(bool onlyCaptures = false)
     {
-        var boards = new List<IBoard>();
+        var boards = new List<Board>();
         foreach (var piece in activeBoard.GetPieces())
         {
             foreach (var board in PlayLegalMoves(piece, onlyCaptures))
@@ -322,7 +321,7 @@ public class Board : IBoard
         return boards;
     }
 
-    private IEnumerable<IBoard> PlayLegalMoves(Piece piece, bool onlyCaptures)
+    private IEnumerable<Board> PlayLegalMoves(Piece piece, bool onlyCaptures)
     {
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
