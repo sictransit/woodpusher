@@ -4,7 +4,7 @@ namespace SicTransit.Woodpusher.Common.Interfaces
 {
     public interface IEngine
     {
-        IBoard Board { get; }
+        Board Board { get; }
 
         void Initialize(EngineOptions options);
 

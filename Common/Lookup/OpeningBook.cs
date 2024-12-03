@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Serilog;
-using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -112,7 +111,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             return Enumerable.Empty<OpeningBookMove>();
         }
 
-        public Move? GetMove(IBoard board)
+        public Move? GetMove(Board board)
         {
             if (book.TryGetValue(board.Hash, out Dictionary<string, int>? moves))
             {
@@ -121,7 +120,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                 var count = 0;
                 string algebraicMove = string.Empty;
 
-                foreach (var move in moves.OrderByDescending(m=>m.Value))
+                foreach (var move in moves.OrderByDescending(m => m.Value))
                 {
                     count += move.Value;
                     if (count > index)
@@ -132,7 +131,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                     }
                 }
 
-                foreach(var move in board.GetLegalMoves())
+                foreach (var move in board.GetLegalMoves())
                 {
                     if (move.ToAlgebraicMoveNotation() == algebraicMove)
                     {
@@ -145,7 +144,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
             return null;
         }
 
-        public Move? GetTheoryMove(IBoard board)
+        public Move? GetTheoryMove(Board board)
         {
             foreach (var newBoard in board.PlayLegalMoves())
             {
@@ -154,7 +153,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
                 if (theoryMove != null)
                 {
                     return theoryMove;
-                }   
+                }
             }
 
             return null;

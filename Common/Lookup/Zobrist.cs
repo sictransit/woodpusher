@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Movement;
+﻿using SicTransit.Woodpusher.Common.Movement;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
@@ -434,7 +433,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
         public ulong GetMaskHash(ulong mask) => maskHashes[mask];
 
 
-        public ulong GetHash(IBoard board)
+        public ulong GetHash(Board board)
         {
             var hash = board.GetPieces().Aggregate(0ul, (h, p) => h ^ pieceHashes[p]);
 

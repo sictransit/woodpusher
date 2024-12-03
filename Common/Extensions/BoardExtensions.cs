@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Common.Interfaces;
-using SicTransit.Woodpusher.Common.Parsing;
+﻿using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -9,7 +8,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
 {
     public static class BoardExtensions
     {
-        public static string PrettyPrint(this IBoard b)
+        public static string PrettyPrint(this Board b)
         {
             var sb = new StringBuilder();
 
@@ -47,7 +46,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
             return sb.ToString();
         }
 
-        public static ulong Perft(this IBoard board, int depth)
+        public static ulong Perft(this Board board, int depth)
         {
             ulong count = 0;
 
@@ -59,7 +58,7 @@ namespace SicTransit.Woodpusher.Common.Extensions
             return count;
         }
 
-        private static ulong ParallelPerft(this IBoard board, int depth)
+        private static ulong ParallelPerft(this Board board, int depth)
         {
             if (depth <= 1)
             {

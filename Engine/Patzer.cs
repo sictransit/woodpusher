@@ -14,7 +14,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public IBoard Board { get; private set; }
+        public Board Board { get; private set; }
 
         private bool timeIsUp = false;
         private int maxDepth = 0;
@@ -59,7 +59,7 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private void SetBoard(IBoard board)
+        private void SetBoard(Board board)
         {
             Board = board;
 
@@ -279,7 +279,7 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(IBoard board, int currentMoveNumber)
+        private void SendCurrentMove(Board board, int currentMoveNumber)
         {
             SendInfo($"depth {maxDepth} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
@@ -314,7 +314,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void SendExceptionInfo(Exception exception) => SendInfo($"string exception {exception.GetType().Name} {exception.Message}");
 
-        private IEnumerable<IBoard> SortBoards(IEnumerable<IBoard> boards, Move? preferredMove = null)
+        private IEnumerable<Board> SortBoards(IEnumerable<Board> boards, Move? preferredMove = null)
         {
             return boards.OrderByDescending(board =>
             {
@@ -352,7 +352,7 @@ namespace SicTransit.Woodpusher.Engine
             });
         }
 
-        private int Quiesce(IBoard board, int α, int β, int sign)
+        private int Quiesce(Board board, int α, int β, int sign)
         {
             var standPat = board.Score * sign;
 
@@ -379,7 +379,7 @@ namespace SicTransit.Woodpusher.Engine
             return α;
         }
 
-        private int EvaluateBoard(IBoard board, int depth, int α, int β, int sign)
+        private int EvaluateBoard(Board board, int depth, int α, int β, int sign)
         {
             if (timeIsUp)
             {
