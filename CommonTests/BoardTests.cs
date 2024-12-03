@@ -378,7 +378,7 @@ e8f7: 1
         }
 
         [TestMethod]
-        [Ignore("long running: did not finish in 40 minutes")]
+        //[Ignore("long running: 4.3 minutes on dev machine")]
         public void Perft7StartingPositionTest()
         {
             var stockfish = @"
