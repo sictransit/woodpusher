@@ -29,8 +29,8 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PositionRegex =
             new(@"^(position).+?(fen(.+?))?(moves(.+?))?$", RegexOptions.Compiled);
         private static readonly Regex MovesRegex = new(@"([a-h][1-8][a-h][1-8][rnbq]?)", RegexOptions.Compiled);
-        private static readonly Regex WhiteTimeRegex = new(@"wtime (\d+)", RegexOptions.Compiled);
-        private static readonly Regex BlackTimeRegex = new(@"btime (\d+)", RegexOptions.Compiled);
+        private static readonly Regex WhiteTimeRegex = new(@"wtime (-?\d+)", RegexOptions.Compiled);
+        private static readonly Regex BlackTimeRegex = new(@"btime (-?\d+)", RegexOptions.Compiled);
         private static readonly Regex MovesToGoRegex = new(@"movestogo (\d+)", RegexOptions.Compiled);
         private static readonly Regex MovetimeRegex = new(@"movetime (\d+)", RegexOptions.Compiled);
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
