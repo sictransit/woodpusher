@@ -31,7 +31,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void BoardTest()
         {
-            Board board = new Board();
+            Board board = new();
 
             var whiteKing = Piece.King | Piece.White;
             var blackKing = Piece.King | Piece.None;
@@ -51,7 +51,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void FillTest()
         {
-            Board board = new Board();
+            Board board = new();
 
             var whitePawn = Piece.Pawn | Piece.White;
 
@@ -66,7 +66,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void GetPiecesTest()
         {
-            Board board = new Board();
+            Board board = new();
 
             var e1 = new Square("e1");
             var whiteKing = (Piece.King | Piece.White).SetSquare(e1);
@@ -91,7 +91,7 @@ namespace SicTransit.Woodpusher.Common.Tests
         [TestMethod]
         public void GetPiecesOnFileByTypeTest()
         {
-            Board board = new Board();
+            Board board = new();
 
             var blackPawn1 = Piece.Pawn | Piece.None;
             var e2 = new Square("e2");

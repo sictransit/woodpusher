@@ -322,7 +322,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.IsTrue(traceLines.Exists(i => i.Contains("mate -4")));
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]
