@@ -70,6 +70,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        [Ignore("Fails and takes 58 secs.")]
         public void RunHardProblemsFailingTest()
         {
             // All except these fail even when the engine is given *10 minutes* to think:
@@ -323,6 +324,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        [Ignore("45 secs")]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]

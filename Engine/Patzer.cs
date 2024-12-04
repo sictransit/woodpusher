@@ -196,7 +196,7 @@ namespace SicTransit.Woodpusher.Engine
                     UpdateBestLine(bookMove);
                     Log.Information("Returning book move: {0}", bookMove);
                     SendDebugInfo($"playing book move {bookMove.ToAlgebraicMoveNotation()}");
-                    SendProgress(stopwatch, 0, null);
+                    SendProgress(stopwatch, 1, 1, Board.Play(bookMove).Score, null);
                     return new AlgebraicMove(bookMove);
                 }
             }
@@ -226,7 +226,7 @@ namespace SicTransit.Woodpusher.Engine
                         mateIn = maxDepth / 2 * Math.Sign(score);
                     }
 
-                    SendProgress(stopwatch, score, mateIn);
+                    SendProgress(stopwatch, maxDepth, nodeCount, score, mateIn);
 
                     if (evaluationTime > 0)
                     {
@@ -269,14 +269,14 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove == null ? null : new AlgebraicMove(bestMove);
         }
 
-        private void SendProgress(Stopwatch stopwatch, int score, int? mateIn)
+        private void SendProgress(Stopwatch stopwatch, int depth, uint nodes, int score, int? mateIn)
         {
-            var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
+            var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodes * 1000 / stopwatch.ElapsedMilliseconds;
             var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
             var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
             var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
 
-            SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+            SendInfo($"depth {depth} seldepth {selDepth} nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
         private void SendCurrentMove(Board board, int currentMoveNumber)
@@ -424,6 +424,7 @@ namespace SicTransit.Woodpusher.Engine
             Move? bestMove = null;
             var α0 = α;
             var currentMoveNumber = 0;
+            var firstMove = true;
 
             foreach (var newBoard in SortBoards(legalmoves, cachedEntry.Move))
             {
@@ -434,13 +435,29 @@ namespace SicTransit.Woodpusher.Engine
                     SendCurrentMove(newBoard, ++currentMoveNumber);
                 }
 
-                var evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+                int evaluation;
 
                 if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
-                    // A draw be repetition may be forced by either player.
+                    // A draw by repetition may be forced by either player.
                     // TODO: This does not take into account moves made in the current evaluated line.
                     evaluation = Scoring.DrawScore;
+                }
+                else
+                {
+                    if (firstMove)
+                    {
+                        firstMove = false;
+                        evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+                    }
+                    else
+                    {
+                        evaluation = -EvaluateBoard(newBoard, depth + 1, -α - 1, -α, -sign);
+                        if (α < evaluation && evaluation < β)
+                        {
+                            evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+                        }
+                    }
                 }
 
                 if (evaluation > α)
