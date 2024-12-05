@@ -103,5 +103,29 @@ namespace SicTransit.Woodpusher.Model.Tests.Extensions
             Assert.AreEqual(new Square("a1"), c3.ToMask().AddFileAndRank(-2, -2).ToSquare());
             Assert.AreEqual(new Square("a5"), c3.ToMask().AddFileAndRank(-2, 2).ToSquare());
         }
+
+        [DataTestMethod]
+        [DataRow("a1", "a2", true)] // Same file
+        [DataRow("a1", "b1", true)] // Same rank
+        [DataRow("a1", "h1", true)] // Same rank
+        [DataRow("a1", "a3", true)] // Same file
+        [DataRow("a1", "b2", false)] // Different file and rank
+        [DataRow("h1", "h8", true)] // Same file
+        [DataRow("h1", "h2", true)] // Same file
+        [DataRow("a8", "h8", true)] // Same rank
+        [DataRow("a8", "b8", true)] // Same rank
+        [DataRow("a1", "h8", false)] // Different file and rank
+        public void SameFileOrRankTest(string square1, string square2, bool expected)
+        {
+            // Arrange
+            var mask1 = new Square(square1).ToMask();
+            var mask2 = new Square(square2).ToMask();
+
+            // Act
+            var result = mask1.SameFileOrRank(mask2);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common.Extensions;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -651,7 +652,35 @@ d8d7: 1
             return success;
         }
 
+        [TestMethod]
+        public void ConnectedRooksBonusTest()
+        {
+            // Arrange
+            var whiteRook1 = Piece.Rook | Piece.White;
+            var whiteRook2 = Piece.Rook | Piece.White;
 
+            var d1 = new Square("d1");
+            var e1 = new Square("e1");
+            var a2 = new Square("a2");
 
+            var boardWithConnectedRooks = new Board()
+                .SetPiece(whiteRook1.SetSquare(d1))
+                .SetPiece(whiteRook2.SetSquare(e1));
+
+            var boardWithDisconnectedRooks = new Board()
+                .SetPiece(whiteRook1.SetSquare(d1))
+                .SetPiece(whiteRook2.SetSquare(a2));
+
+            // Act
+            var scoreWithConnectedRooks = boardWithConnectedRooks.Score;
+            var scoreWithDisconnectedRooks = boardWithDisconnectedRooks.Score;
+
+            // Assert            
+            var actualBonus = scoreWithConnectedRooks - scoreWithDisconnectedRooks;
+
+            Assert.IsTrue(actualBonus > 0);
+            Assert.AreEqual(actualBonus, Scoring.ConnectedRooksBonus, Scoring.ConnectedRooksBonus / 2);
+            
+        }
     }
 }

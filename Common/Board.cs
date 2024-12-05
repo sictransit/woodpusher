@@ -74,17 +74,15 @@ public class Board
                         score += evaluation * sign;
                     }
 
+                    // Connected rooks bonus
                     var rooks = bitboard.GetMasks(Piece.Rook, ulong.MaxValue).ToArray();
-                    if (rooks.Length == 2)
+                    if (rooks.Length == 2 && rooks[0].SameFileOrRank(rooks[1]))
                     {
-                        if (rooks[0].SameFileOrRank(rooks[1]))
-                        {
-                            var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);
+                        var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);                            
 
-                            if (((white.AllPieces | black.AllPieces) & travelMask) == 0)
-                            {
-                                score += Scoring.ConnectedRooksBonus * sign;
-                            }
+                        if (!IsOccupied(travelMask))
+                        {
+                            score += Scoring.ConnectedRooksBonus * sign;
                         }
                     }
 
