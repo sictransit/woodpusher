@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common;
+using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -124,6 +125,8 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 traceLines.Clear();
 
                 patzer.Position(problem.Item1);
+
+                Log.Information($"Problem:\n{patzer.Board.PrettyPrint()}\nSolution: {problem.Item2}");
 
                 sw.Restart();
 
