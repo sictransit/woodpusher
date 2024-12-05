@@ -680,7 +680,7 @@ d8d7: 1
 
             Assert.IsTrue(actualBonus > 0);
             Assert.AreEqual(actualBonus, Scoring.ConnectedRooksBonus, Scoring.ConnectedRooksBonus / 2);
-            
+
         }
     }
 }

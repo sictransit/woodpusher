@@ -2,7 +2,6 @@
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -66,7 +65,7 @@ public class Board
                 score = 0;
 
                 foreach (var (bitboard, sign) in new[] { (white, 1), (black, -1) })
-                { 
+                {
                     foreach (var piece in bitboard.GetPieces())
                     {
                         var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
@@ -78,7 +77,7 @@ public class Board
                     var rooks = bitboard.GetMasks(Piece.Rook, ulong.MaxValue).ToArray();
                     if (rooks.Length == 2 && rooks[0].SameFileOrRank(rooks[1]))
                     {
-                        var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);                            
+                        var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);
 
                         if (!IsOccupied(travelMask))
                         {
