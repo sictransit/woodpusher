@@ -279,6 +279,22 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        public void Issue38_DoNotPlayF3E5()
+        {
+            // Reported by tissatussa as issue #38: https://github.com/sictransit/woodpusher/issues/38
+            // The engine was playing f3e5, which is a blunder.
+            // At depth 7 it finds d1e2 which is OK, but that's after 38 seconds.
+
+            patzer.Position("3rr1k1/ppp3pp/2n3q1/1B1b1p2/3Pn3/P3PN2/1B3PPP/2RQ1RK1 w - - 2 18");
+
+            var move = patzer.FindBestMove(5000);
+
+            Assert.IsNotNull(move);
+
+            Assert.AreNotEqual("f3e5", move.Notation);
+        }
+
+        [TestMethod]
         public void FindMateInTenTest()
         {
             patzer.Position("4b3/1p6/8/1p1P4/1p6/7P/1P3K1p/7k w - - 0 1");

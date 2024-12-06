@@ -4,6 +4,7 @@ using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Engine.Enum;
 using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -49,7 +50,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             engineOptions = options;
 
-            SetBoard(Common.Board.StartingPosition());
+            SetBoard(Board.StartingPosition());
 
             openingBook = null;
 
@@ -296,7 +297,7 @@ namespace SicTransit.Woodpusher.Engine
             for (var i = 0; i < maxDepth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
-                if (entry.EntryType == Enum.EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
+                if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
                 {
                     bestLine.Add((ply + i + 1, entry.Move));
                     board = board.Play(entry.Move);
@@ -398,12 +399,12 @@ namespace SicTransit.Woodpusher.Engine
             {
                 switch (cachedEntry.EntryType)
                 {
-                    case Enum.EntryType.Exact:
+                    case EntryType.Exact:
                         return cachedEntry.Score;
-                    case Enum.EntryType.LowerBound:
+                    case EntryType.LowerBound:
                         α = Math.Max(α, cachedEntry.Score);
                         break;
-                    case Enum.EntryType.UpperBound:
+                    case EntryType.UpperBound:
                         β = Math.Min(β, cachedEntry.Score);
                         break;
                 }
@@ -479,7 +480,7 @@ namespace SicTransit.Woodpusher.Engine
             if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                    α <= α0 ? Enum.EntryType.UpperBound : α >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
+                    α <= α0 ? EntryType.UpperBound : α >= β ? EntryType.LowerBound : EntryType.Exact,
                     bestMove!,
                     α,
                     board.Hash,
