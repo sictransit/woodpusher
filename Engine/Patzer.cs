@@ -229,9 +229,11 @@ namespace SicTransit.Woodpusher.Engine
                         UpdateBestLine(bestMove);
                     }
 
-                    if (Math.Abs(score) == Scoring.MateScore)
+                    var mateScore = Scoring.MateScore - Math.Abs(score) - Board.Counters.Ply + 1;
+
+                    if (mateScore <= EngineMaxDepth )
                     {
-                        mateIn = maxDepth / 2 * Math.Sign(score);
+                        mateIn = mateScore/ 2 * Math.Sign(score);
                     }
 
                     SendProgress(stopwatch, maxDepth, nodeCount, score, mateIn);
@@ -362,18 +364,23 @@ namespace SicTransit.Woodpusher.Engine
 
         private int Quiesce(Board board, int α, int β, int sign)
         {
-            var standPat = board.Score * sign;
+            var isChecked = board.IsChecked;
 
-            if (standPat >= β)
+            if (!isChecked)
             {
-                return β;
+                var standPat = board.Score * sign;
+                if (standPat >= β)
+                {
+                    return β;
+                }
+                α = Math.Max(α, standPat);
             }
-
-            α = Math.Max(α, standPat);
 
             selDepth = Math.Max(selDepth, board.Counters.Ply - Board.Counters.Ply);
 
-            foreach (var newBoard in SortBoards(board.PlayLegalMoves(true)))
+            var n0 = nodeCount;
+
+            foreach (var newBoard in SortBoards(board.PlayLegalMoves(!isChecked)))
             {
                 nodeCount++;
                 var score = -Quiesce(newBoard, -β, -α, -sign);
@@ -382,6 +389,11 @@ namespace SicTransit.Woodpusher.Engine
                     return β;
                 }
                 α = Math.Max(α, score);
+            }
+
+            if (nodeCount == n0)
+            {
+                return isChecked ? -Scoring.MateScore+board.Counters.Ply : Scoring.DrawScore;
             }
 
             return α;
@@ -422,19 +434,20 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            var legalmoves = board.PlayLegalMoves();
+            
 
-            if (legalmoves.Count == 0)
-            {
-                return board.IsChecked ? -Scoring.MateScore : Scoring.DrawScore;
-            }
+            //if (legalmoves.Count == 0)
+            //{
+            //    return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
+            //}
 
             Move? bestMove = null;
             var α0 = α;
             var currentMoveNumber = 0;
             var firstMove = true;
+            var n0 = nodeCount;
 
-            foreach (var newBoard in SortBoards(legalmoves, cachedEntry.Move))
+            foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
 
@@ -482,6 +495,11 @@ namespace SicTransit.Woodpusher.Engine
                     }
                     break;
                 }
+            }
+
+            if (n0 == nodeCount)
+            {
+                return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
 
             if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)

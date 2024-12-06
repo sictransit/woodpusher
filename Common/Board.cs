@@ -324,18 +324,18 @@ public class Board
         return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
-    public List<Board> PlayLegalMoves(bool onlyCaptures = false)
+    public IEnumerable<Board> PlayLegalMoves(bool quiescence = false)
     {
-        var boards = new List<Board>();
+        
         foreach (var piece in activeBoard.GetPieces())
         {
-            foreach (var board in PlayLegalMoves(piece, onlyCaptures))
+            foreach (var board in PlayLegalMoves(piece, quiescence))
             {
-                boards.Add(board);
+                yield return board;
             }
         }
 
-        return boards;
+        
     }
 
     private IEnumerable<Board> PlayLegalMoves(Piece piece, bool quiescence)
