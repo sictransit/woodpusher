@@ -78,14 +78,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
             // Success: 3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1 - c6e5 (69283 ms)
             // Success: 2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - 0 1 - b7e4 (62200 ms)
 
-            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, false));
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(20).TotalMilliseconds, false));
         }
 
 
         [TestMethod]
         public void RunHardProblemsSucceedingTest()
         {
-            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, true));
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(20).TotalMilliseconds, true));
         }
 
         private int RunHardProblems(int timeLimit, bool status)

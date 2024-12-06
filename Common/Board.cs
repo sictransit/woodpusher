@@ -338,7 +338,7 @@ public class Board
         return boards;
     }
 
-    private IEnumerable<Board> PlayLegalMoves(Piece piece, bool onlyCaptures)
+    private IEnumerable<Board> PlayLegalMoves(Piece piece, bool quiescence)
     {
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
@@ -351,7 +351,8 @@ public class Board
 
                 var taking = opponentBoard.IsOccupied(move.Target);
 
-                if (!taking && onlyCaptures)
+                //if (quiescence && (!taking || !move.Flags.HasFlag(SpecialMove.PawnPromotes)))
+                if (quiescence && !taking)
                 {
                     continue;
                 }
