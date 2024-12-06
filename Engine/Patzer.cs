@@ -35,8 +35,6 @@ namespace SicTransit.Woodpusher.Engine
 
         private readonly List<(int ply, Move move)> bestLine = [];
 
-        private Move? evaluatedBestMove = null;
-
         private EngineOptions engineOptions;
 
         public Patzer(Action<string>? infoCallback = null)
@@ -215,7 +213,16 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (!timeIsUp || (bestMove == null))
                 {
-                    bestMove = evaluatedBestMove;
+                    var ttEntry = transpositionTable[Board.Hash % transpositionTableSize];
+
+                    if (ttEntry.Hash == Board.Hash && ttEntry.EntryType == EntryType.Exact)
+                    {
+                        bestMove = ttEntry.Move;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Unable to find best move in transposition table.");
+                    }
 
                     if (bestMove != null)
                     {
@@ -486,11 +493,6 @@ namespace SicTransit.Woodpusher.Engine
                     board.Hash,
                     maxDepth - depth
                     );
-            }
-
-            if (depth == 0)
-            {
-                evaluatedBestMove = bestMove;
             }
 
             return α;
