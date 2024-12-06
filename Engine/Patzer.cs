@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public Board Board { get; private set; }
+        public Board Board { get; private set; }        
 
         private bool timeIsUp = false;
         private int maxDepth = 0;
@@ -70,8 +70,8 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Play(Move move)
         {
-            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Debug("{Color} plays: {Move}", color, move);
+            Log.Information("{Color} plays: {Move}", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", move);
+            
             Board = Board.Play(move);
 
             if (Board.Counters.HalfmoveClock == 0)
@@ -148,7 +148,7 @@ namespace SicTransit.Woodpusher.Engine
 
             try
             {
-                Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+                Log.Information("{Player} is thinking: {TimeLimit} ms", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", timeLimit);
 
                 bestMove = SearchForBestMove(stopwatch, timeLimit);
             }
