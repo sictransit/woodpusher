@@ -71,7 +71,7 @@ namespace SicTransit.Woodpusher.Engine
         private void SendCallbackInfo(string message, bool info) => infoCallback?.Invoke(message, info);
 
         public void Play(Move move)
-        {            
+        {
             Log.Debug("{Color} plays: {Move}", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", move);
 
             Board = Board.Play(move);
@@ -118,7 +118,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 totalNodes += nodes;
             }
-            SendCallbackInfo(sb.ToString() +  Environment.NewLine + $"Nodes searched: {totalNodes}" ,false);
+            SendCallbackInfo(sb.ToString() + Environment.NewLine + $"Nodes searched: {totalNodes}", false);
         }
 
         public AlgebraicMove? FindBestMove(int timeLimit = 1000)
