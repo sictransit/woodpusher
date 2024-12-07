@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Engine
     {
         public Board Board { get; private set; }
 
-        private bool timeIsUp = false;
+        private volatile bool timeIsUp = false;
         private int maxDepth = 0;
         private int selDepth = 0;
         private uint nodeCount = 0;
@@ -72,7 +72,7 @@ namespace SicTransit.Woodpusher.Engine
         public void Play(Move move)
         {
             var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Debug("{Color} plays: {Move}", color, move);
+            Log.Information("{Color} plays: {Move}", color, move);
             Board = Board.Play(move);
 
             if (Board.Counters.HalfmoveClock == 0)
@@ -149,7 +149,7 @@ namespace SicTransit.Woodpusher.Engine
 
             try
             {
-                Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+                Log.Information("{Player} thinking time: {TimeLimit} ms", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", timeLimit);
 
                 bestMove = SearchForBestMove(stopwatch, timeLimit);
             }

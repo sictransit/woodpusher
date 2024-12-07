@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Engine;
+using System.Collections.Concurrent;
 
 namespace SicTransit.Woodpusher
 {
@@ -15,21 +16,36 @@ namespace SicTransit.Woodpusher
                 Console.WriteLine(s);
 
                 Log.Information("Sent: {Message}", s);
-            }
+            }                        
 
-            var uci = new UniversalChessInterface(ConsoleOutput, new Patzer(ConsoleOutput));
+            using var quitSource = new CancellationTokenSource();
 
-            while (!uci.Quit)
+            var uci = new UniversalChessInterface(ConsoleOutput, quitSource.Token);
+
+            uci.Run();
+
+            while (!quitSource.Token.IsCancellationRequested)
             {
-                var line = Console.ReadLine();
+                var line = Console.ReadLine()?.Trim();
 
                 Log.Information("Received: {Line}", line);
 
-                if (line != null)
+                if (!string.IsNullOrEmpty(line))
                 {
-                    uci.ProcessCommand(line);
+                    switch (line)
+                    {
+                        case "quit":
+                            quitSource.Cancel();                            
+                            break;
+                        case "stop":
+                            uci.Stop();
+                            break;
+                        default:
+                            uci.EnqueueCommand(line);
+                            break;
+                    }
                 }
-            }
+            }            
         }
     }
 }
