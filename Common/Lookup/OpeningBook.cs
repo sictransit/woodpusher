@@ -146,13 +146,14 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public Move? GetTheoryMove(Board board)
         {
+            // Check all legal moves on the board.
             foreach (var newBoard in board.PlayLegalMoves())
             {
-                var theoryMove = GetMove(newBoard);
-
-                if (theoryMove != null)
+                // Check if the new board is in the opening book.
+                if (GetMove(newBoard) != null)
                 {
-                    return theoryMove;
+                    // If the move returns us to the opening book, return that move.
+                    return newBoard.Counters.LastMove;
                 }
             }
 

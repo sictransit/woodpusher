@@ -15,10 +15,14 @@ namespace SicTransit.Woodpusher.Engine.Tests
         private Patzer patzer;
         private readonly List<string> traceLines = [];
 
-        private void PatzerCallback(string s)
+        private void PatzerCallback(string message, bool info)
         {
-            Trace.WriteLine(s);
-            traceLines.Add(s);
+            if (!info)
+            {
+                Trace.WriteLine(message);                
+            }
+
+            traceLines.Add(message);
         }
 
         [TestInitialize]
