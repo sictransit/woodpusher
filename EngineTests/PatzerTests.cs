@@ -18,9 +18,10 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             if (!info)
             {
-                Trace.WriteLine(message);
-                traceLines.Add(message);
+                Trace.WriteLine(message);                
             }
+
+            traceLines.Add(message);
         }
 
         [TestInitialize]
