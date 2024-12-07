@@ -1,7 +1,5 @@
 ﻿using Serilog;
 using SicTransit.Woodpusher.Common;
-using SicTransit.Woodpusher.Engine;
-using System.Collections.Concurrent;
 
 namespace SicTransit.Woodpusher
 {
@@ -11,12 +9,19 @@ namespace SicTransit.Woodpusher
         {
             Logging.EnableLogging(Serilog.Events.LogEventLevel.Debug, false);
 
-            static void ConsoleOutput(string s)
+            static void ConsoleOutput(string message, bool isInfo = false)
             {
-                Console.WriteLine(s);
+                Console.WriteLine(message);
 
-                Log.Information("Sent: {Message}", s);
-            }                        
+                if (isInfo)
+                {
+                    Log.Debug("Sent: {Message}", message);
+                }
+                else
+                {
+                    Log.Information("Sent: {Message}", message);
+                }
+            }
 
             using var quitSource = new CancellationTokenSource();
 
@@ -35,7 +40,7 @@ namespace SicTransit.Woodpusher
                     switch (line)
                     {
                         case "quit":
-                            quitSource.Cancel();                            
+                            quitSource.Cancel();
                             break;
                         case "stop":
                             uci.Stop();
@@ -45,7 +50,7 @@ namespace SicTransit.Woodpusher
                             break;
                     }
                 }
-            }            
+            }
         }
     }
 }

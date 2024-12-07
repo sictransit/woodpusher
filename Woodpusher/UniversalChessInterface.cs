@@ -15,8 +15,9 @@ namespace SicTransit.Woodpusher
 {
     public class UniversalChessInterface
     {
-        private readonly Action<string> consoleOutput;
+        private readonly Action<string, bool> consoleOutput;
         private readonly CancellationToken quitToken;
+
         private static readonly Regex UciCommand = new(@"^uci$", RegexOptions.Compiled);
         private static readonly Regex IsReadyCommand = new(@"^isready$", RegexOptions.Compiled);
         private static readonly Regex UciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
@@ -35,32 +36,29 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
         private static readonly Regex OptionRegex = new(@"^setoption name (\w+) value (\w+)$", RegexOptions.Compiled);
 
-        private const int EngineLatency = 100;
+        private const int EngineLatency = 10;
 
         private readonly ManualResetEvent commandAvailable = new(false);
         private readonly ConcurrentQueue<string> commandQueue = new();
 
-        private volatile EngineOptions engineOptions = new() { UseOpeningBook = true };
+        private readonly EngineOptions engineOptions = new() { UseOpeningBook = true };
 
         private volatile IEngine engine;
 
         public bool Quit { get; private set; }
 
-        public UniversalChessInterface(Action<string> consoleOutput, CancellationToken quitToken)
+        public UniversalChessInterface(Action<string, bool> consoleOutput, CancellationToken quitToken)
         {
             this.consoleOutput = consoleOutput;
             this.quitToken = quitToken;
         }
 
         public void Stop()
-        { 
-            engine?.Stop();            
+        {
+            engine?.Stop();
         }
 
-        public void Run()
-        {
-            Task.Run(EngineLoop);
-        }
+        public void Run() => Task.Run(EngineLoop);
 
         private void EngineLoop()
         {
@@ -68,7 +66,7 @@ namespace SicTransit.Woodpusher
             engine.Initialize(engineOptions);
             while (!quitToken.IsCancellationRequested)
             {
-                commandAvailable.WaitOne(EngineLatency);
+                commandAvailable.WaitOne(20);
 
                 while (commandQueue.TryDequeue(out var command))
                 {
@@ -121,23 +119,28 @@ namespace SicTransit.Woodpusher
             }
         }
 
+        private void Output(string message, bool isInfo = false)
+        {
+            consoleOutput(message, isInfo);
+        }
+
         private void Uci(IEngine engine)
         {
             var version = Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                 .InformationalVersion;
 
-            consoleOutput($"id name Woodpusher {version}");
-            consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-            consoleOutput("option name OwnBook type check default true");
-            consoleOutput("uciok");
+            Output($"id name Woodpusher {version}");
+            Output("id author Mikael Fredriksson <micke@sictransit.net>");
+            Output("option name OwnBook type check default true");
+            Output("uciok");
         }
 
-        private void Display(IEngine engine) => consoleOutput(engine.Board.PrettyPrint());
+        private void Display(IEngine engine) => Output(engine.Board.PrettyPrint());
 
         private void Initialize(IEngine engine) => engine.Initialize(engineOptions);
 
-        private void IsReady() => consoleOutput("readyok");
+        private void IsReady() => Output("readyok");
 
         private void SetOption(string command)
         {
@@ -227,7 +230,7 @@ namespace SicTransit.Woodpusher
                     else
                     {
                         movesToGo = Math.Max(8, 40 - (engine.Board.Counters.FullmoveNumber % 40));
-                        consoleOutput($"info string movestogo not specified, using {movesToGo}");
+                        Output($"info string movestogo not specified, using {movesToGo}", true);
                     }
 
                     timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
@@ -237,7 +240,7 @@ namespace SicTransit.Woodpusher
                 {
                     var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - EngineLatency));
 
-                    consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                    Output($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
                 }
                 catch (Exception ex)
                 {
