@@ -9,6 +9,7 @@ using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Diagnostics;
+using System.Text;
 
 namespace SicTransit.Woodpusher.Engine
 {
@@ -16,7 +17,7 @@ namespace SicTransit.Woodpusher.Engine
     {
         public Board Board { get; private set; }
 
-        private bool timeIsUp = false;
+        private volatile bool timeIsUp = false;
         private int maxDepth = 0;
         private int selDepth = 0;
         private uint nodeCount = 0;
@@ -24,7 +25,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private OpeningBook? openingBook;
 
-        private readonly Action<string>? infoCallback;
+        private readonly Action<string, bool>? infoCallback;
 
         private const int transpositionTableSize = 1_000_000;
 
@@ -38,7 +39,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private EngineOptions engineOptions;
 
-        public Patzer(Action<string>? infoCallback = null)
+        public Patzer(Action<string, bool>? infoCallback = null)
         {
             this.infoCallback = infoCallback;
 
@@ -67,12 +68,12 @@ namespace SicTransit.Woodpusher.Engine
             repetitionTable[Board.Hash] = 1;
         }
 
-        private void SendCallbackInfo(string info) => infoCallback?.Invoke(info);
+        private void SendCallbackInfo(string message, bool info) => infoCallback?.Invoke(message, info);
 
         public void Play(Move move)
         {
-            var color = Board.ActiveColor.Is(Piece.White) ? "White" : "Black";
-            Log.Debug("{Color} plays: {Move}", color, move);
+            Log.Debug("{Color} plays: {Move}", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", move);
+
             Board = Board.Play(move);
 
             if (Board.Counters.HalfmoveClock == 0)
@@ -107,12 +108,17 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Perft(int depth)
         {
-            ulong nodes = 0;
+            ulong totalNodes = 0;
+            var sb = new StringBuilder();
+
             foreach (var board in Board.PlayLegalMoves())
             {
-                nodes += depth > 1 ? board.Perft(depth) : 1;
+                var nodes = depth > 1 ? board.Perft(depth) : 1;
+                sb.AppendLine($"{board.Counters.LastMove.ToAlgebraicMoveNotation()}: {nodes}");
+
+                totalNodes += nodes;
             }
-            SendCallbackInfo(Environment.NewLine + $"Nodes searched: {nodes}");
+            SendCallbackInfo(sb.ToString() + Environment.NewLine + $"Nodes searched: {totalNodes}", false);
         }
 
         public AlgebraicMove? FindBestMove(int timeLimit = 1000)
@@ -149,7 +155,7 @@ namespace SicTransit.Woodpusher.Engine
 
             try
             {
-                Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+                Log.Information("{Player} thinking time: {TimeLimit} ms", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", timeLimit);
 
                 bestMove = SearchForBestMove(stopwatch, timeLimit);
             }
@@ -308,7 +314,7 @@ namespace SicTransit.Woodpusher.Engine
             }
         }
 
-        private void SendInfo(string info) => SendCallbackInfo($"info {info}");
+        private void SendInfo(string info) => SendCallbackInfo($"info {info}", true);
 
         private void SendDebugInfo(string debugInfo) => SendInfo($"string debug {debugInfo}");
 

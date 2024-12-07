@@ -3,9 +3,11 @@ using SicTransit.Woodpusher.Common;
 using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Engine;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -13,18 +15,16 @@ namespace SicTransit.Woodpusher
 {
     public class UniversalChessInterface
     {
-        private readonly Action<string> consoleOutput;
+        private readonly Action<string, bool> consoleOutput;
+        private readonly CancellationToken quitToken;
 
         private static readonly Regex UciCommand = new(@"^uci$", RegexOptions.Compiled);
         private static readonly Regex IsReadyCommand = new(@"^isready$", RegexOptions.Compiled);
         private static readonly Regex UciNewGameCommand = new(@"^ucinewgame$", RegexOptions.Compiled);
-        private static readonly Regex QuitCommand = new(@"^quit$", RegexOptions.Compiled);
-        private static readonly Regex StopCommand = new(@"^stop$", RegexOptions.Compiled);
         private static readonly Regex PositionCommand = new(@"^position", RegexOptions.Compiled);
         private static readonly Regex GoCommand = new(@"^go", RegexOptions.Compiled);
         private static readonly Regex DisplayCommand = new(@"^d$", RegexOptions.Compiled);
         private static readonly Regex SetOptionCommand = new(@"^setoption", RegexOptions.Compiled);
-
 
         private static readonly Regex PositionRegex =
             new(@"^(position).+?(fen(.+?))?(moves(.+?))?$", RegexOptions.Compiled);
@@ -36,50 +36,62 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
         private static readonly Regex OptionRegex = new(@"^setoption name (\w+) value (\w+)$", RegexOptions.Compiled);
 
-        private const int engineLatency = 100;
+        private const int EngineLatency = 10;
 
-        private readonly IEngine engine;
+        private readonly ManualResetEvent commandAvailable = new(false);
+        private readonly ConcurrentQueue<string> commandQueue = new();
 
-        private EngineOptions engineOptions;
+        private readonly EngineOptions engineOptions = new() { UseOpeningBook = true };
 
-        private volatile bool busy;
+        private volatile IEngine engine;
 
         public bool Quit { get; private set; }
 
-        public UniversalChessInterface(Action<string> consoleOutput, IEngine engine)
+        public UniversalChessInterface(Action<string, bool> consoleOutput, CancellationToken quitToken)
         {
             this.consoleOutput = consoleOutput;
-            this.engine = engine;
-            engineOptions = new EngineOptions() { UseOpeningBook = true };
+            this.quitToken = quitToken;
         }
 
-        public void ProcessCommand(string command)
+        public void Stop()
         {
-            if (StopCommand.IsMatch(command))
-            {
-                Stop();
-                return;
-            }
+            engine?.Stop();
+        }
 
-            if (QuitCommand.IsMatch(command))
-            {
-                Quit = true;
-                return;
-            }
+        public void Run() => Task.Run(EngineLoop);
 
-            if (busy)
+        private void EngineLoop()
+        {
+            engine = new Patzer(consoleOutput);
+            engine.Initialize(engineOptions);
+            while (!quitToken.IsCancellationRequested)
             {
-                Log.Warning("Engine is busy, ignoring command: {Command}", command);
-                return;
-            }
+                commandAvailable.WaitOne(20);
 
+                while (commandQueue.TryDequeue(out var command))
+                {
+                    ProcessCommand(engine, command);
+                }
+
+                commandAvailable.Reset();
+            }
+        }
+
+        public void EnqueueCommand(string command)
+        {
+            commandQueue.Enqueue(command);
+            commandAvailable.Set();
+        }
+
+        private void ProcessCommand(IEngine engine, string command)
+        {
             if (UciCommand.IsMatch(command))
             {
-                Uci();
+                Uci(engine);
             }
             else if (UciNewGameCommand.IsMatch(command))
             {
-                Initialize();
+                Initialize(engine);
             }
             else if (IsReadyCommand.IsMatch(command))
             {
@@ -87,11 +99,11 @@ namespace SicTransit.Woodpusher
             }
             else if (PositionCommand.IsMatch(command))
             {
-                Position(command);
+                Position(engine, command);
             }
             else if (DisplayCommand.IsMatch(command))
             {
-                Display();
+                Display(engine);
             }
             else if (SetOptionCommand.IsMatch(command))
             {
@@ -99,7 +111,7 @@ namespace SicTransit.Woodpusher
             }
             else if (GoCommand.IsMatch(command))
             {
-                RunGoCommandAsync(command);
+                Go(engine, command);
             }
             else
             {
@@ -107,51 +119,28 @@ namespace SicTransit.Woodpusher
             }
         }
 
-        private void RunGoCommandAsync(string command)
+        private void Output(string message, bool isInfo = false)
         {
-            busy = true;
-            Task.Run(() =>
-            {
-                try
-                {
-                    Go(command);
-                }
-                finally
-                {
-                    busy = false;
-                }
-            });
+            consoleOutput(message, isInfo);
         }
 
-        private void Uci()
+        private void Uci(IEngine engine)
         {
             var version = Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                 .InformationalVersion;
 
-            consoleOutput($"id name Woodpusher {version}");
-            consoleOutput("id author Mikael Fredriksson <micke@sictransit.net>");
-            consoleOutput("option name OwnBook type check default true");
-            consoleOutput("uciok");
+            Output($"id name Woodpusher {version}");
+            Output("id author Mikael Fredriksson <micke@sictransit.net>");
+            Output("option name OwnBook type check default true");
+            Output("uciok");
         }
 
-        private void Display() => consoleOutput(engine.Board.PrettyPrint());
+        private void Display(IEngine engine) => Output(engine.Board.PrettyPrint());
 
-        private void Initialize() => engine.Initialize(engineOptions);
+        private void Initialize(IEngine engine) => engine.Initialize(engineOptions);
 
-        private void IsReady() => consoleOutput("readyok");
-
-        private void Stop()
-        {
-            if (busy)
-            {
-                engine.Stop();
-            }
-            else
-            {
-                Log.Warning("Engine is not busy, ignoring stop command.");
-            }
-        }
+        private void IsReady() => Output("readyok");
 
         private void SetOption(string command)
         {
@@ -169,7 +158,7 @@ namespace SicTransit.Woodpusher
             }
         }
 
-        private void Position(string command)
+        private void Position(IEngine engine, string command)
         {
             var match = PositionRegex.Match(command);
 
@@ -206,7 +195,7 @@ namespace SicTransit.Woodpusher
             engine.Position(fen, moves);
         }
 
-        private void Go(string command)
+        private void Go(IEngine engine, string command)
         {
             var movesToGoMatch = MovesToGoRegex.Match(command);
             var whiteTimeMatch = WhiteTimeRegex.Match(command);
@@ -241,7 +230,7 @@ namespace SicTransit.Woodpusher
                     else
                     {
                         movesToGo = Math.Max(8, 40 - (engine.Board.Counters.FullmoveNumber % 40));
-                        consoleOutput($"info string movestogo not specified, using {movesToGo}");
+                        Output($"info string movestogo not specified, using {movesToGo}", true);
                     }
 
                     timeLimit = Math.Min(timeLimit, timeLeft / movesToGo);
@@ -249,9 +238,9 @@ namespace SicTransit.Woodpusher
 
                 try
                 {
-                    var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - engineLatency));
+                    var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - EngineLatency));
 
-                    consoleOutput($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                    Output($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
                 }
                 catch (Exception ex)
                 {
