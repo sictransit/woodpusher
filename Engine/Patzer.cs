@@ -429,17 +429,9 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            
-
-            //if (legalmoves.Count == 0)
-            //{
-            //    return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
-            //}
-
             Move? bestMove = null;
             var α0 = α;
-            var currentMoveNumber = 0;
-            var firstMove = true;
+            var currentMoveNumber = 0;            
             var n0 = nodeCount;
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
@@ -461,9 +453,8 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (firstMove)
-                    {
-                        firstMove = false;
+                    if (nodeCount == n0+1)
+                    {                        
                         evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
                     }
                     else

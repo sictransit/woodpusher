@@ -74,19 +74,19 @@ namespace SicTransit.Woodpusher.Model
             }
         }
 
-        public IEnumerable<ulong> GetMasks(Piece type, ulong mask)
-        {
-            var bitmap = GetBitmap(type) & mask;
+        //public IEnumerable<ulong> GetMasks(Piece type, ulong mask)
+        //{
+        //    var bitmap = GetBitmap(type) & mask;
 
-            while (bitmap != 0ul)
-            {
-                var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
+        //    while (bitmap != 0ul)
+        //    {
+        //        var bit = 1ul << BitOperations.TrailingZeroCount(bitmap);
 
-                yield return bit;
+        //        yield return bit;
 
-                bitmap &= ~bit;
-            }
-        }
+        //        bitmap &= ~bit;
+        //    }
+        //}
 
         public bool IsOccupied(ulong mask) => (AllPieces & mask) != 0;
 
