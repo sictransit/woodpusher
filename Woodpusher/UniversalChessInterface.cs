@@ -36,7 +36,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
         private static readonly Regex OptionRegex = new(@"^setoption name (\w+) value (\w+)$", RegexOptions.Compiled);
 
-        private const int EngineLatency = 10;
+        private const int EngineLatency = 50;
 
         private readonly ManualResetEvent commandAvailable = new(false);
         private readonly ConcurrentQueue<string> commandQueue = new();

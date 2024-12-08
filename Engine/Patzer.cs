@@ -463,7 +463,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     if (firstMove)
                     {
-                        //firstMove = false;
+                        firstMove = false;
                         evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
                     }
                     else
