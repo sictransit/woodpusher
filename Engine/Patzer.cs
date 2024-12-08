@@ -370,23 +370,17 @@ namespace SicTransit.Woodpusher.Engine
 
         private int Quiesce(Board board, int α, int β, int sign)
         {
-            var isChecked = board.IsChecked;
-
-            if (!isChecked)
+            var standPat = board.Score * sign;
+            if (standPat >= β)
             {
-                var standPat = board.Score * sign;
-                if (standPat >= β)
-                {
-                    return β;
-                }
-                α = Math.Max(α, standPat);
+                return β;
             }
+
+            α = Math.Max(α, standPat);
 
             selDepth = Math.Max(selDepth, board.Counters.Ply - Board.Counters.Ply);
 
-            var n0 = nodeCount;
-
-            foreach (var newBoard in SortBoards(board.PlayLegalMoves(!isChecked)))
+            foreach (var newBoard in SortBoards(board.PlayLegalMoves(true)))
             {
                 nodeCount++;
                 var score = -Quiesce(newBoard, -β, -α, -sign);
@@ -395,11 +389,6 @@ namespace SicTransit.Woodpusher.Engine
                     return β;
                 }
                 α = Math.Max(α, score);
-            }
-
-            if (nodeCount == n0)
-            {
-                return isChecked ? -Scoring.MateScore+board.Counters.Ply : Scoring.DrawScore;
             }
 
             return α;
@@ -474,7 +463,7 @@ namespace SicTransit.Woodpusher.Engine
                 {
                     if (firstMove)
                     {
-                        firstMove = false;
+                        //firstMove = false;
                         evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
                     }
                     else
