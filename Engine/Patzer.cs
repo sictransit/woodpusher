@@ -171,9 +171,9 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove;
         }
 
-        public AlgebraicMove? GetPonderMove() 
-        { 
-            var ponderMove = bestLine.Count < 2 ? null : bestLine[1]; 
+        public AlgebraicMove? GetPonderMove()
+        {
+            var ponderMove = bestLine.Count < 2 ? null : bestLine[1];
 
             return ponderMove == null ? null : new AlgebraicMove(ponderMove);
         }
@@ -440,7 +440,7 @@ namespace SicTransit.Woodpusher.Engine
             Move? bestMove = null;
             var α0 = α;
             var n0 = nodeCount;
-            var currentMoveNumber = 0;            
+            var currentMoveNumber = 0;
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
@@ -497,7 +497,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
 
-            var ttEntry = transpositionTable[transpositionIndex];            
+            var ttEntry = transpositionTable[transpositionIndex];
             if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
