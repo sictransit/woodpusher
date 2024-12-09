@@ -154,7 +154,7 @@ namespace SicTransit.Woodpusher.Engine
 
             try
             {
-                Log.Information("Thinking time: {TimeLimit} ms", timeLimit);
+                Log.Information("{Player} thinking time: {TimeLimit} ms", Board.ActiveColor.Is(Piece.White) ? "White" : "Black", timeLimit);
 
                 bestMove = SearchForBestMove(stopwatch, timeLimit);
             }
