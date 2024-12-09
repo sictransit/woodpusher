@@ -348,7 +348,8 @@ public class Board
                 }
 
                 var taking = opponentBoard.IsOccupied(move.Target);
-                
+
+                //if (quiescence && (!taking || !move.Flags.HasFlag(SpecialMove.PawnPromotes)))
                 if (quiescence && !taking)
                 {
                     continue;
