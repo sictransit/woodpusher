@@ -5,16 +5,16 @@ A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 
 ## Features
 - UCI-compatible
-- Negamax search with alpha-beta pruning
-	- NegaScout (or PVS?) 
-	- Quiescence 
-	- Iterative deepening 
-- Move ordering 
-	- MVV/LVA, history heuristic, killer heuristic, transposition table
 - PGN and FEN parsing
 - Perft test
 - Opening book
 - Zobrist hashing
+- Negamax search with alpha-beta pruning
+	- NegaScout (or PVS?) 
+	- Quiescence 
+	- Iterative deepening 
+    - Move ordering 
+    	- MVV/LVA, history heuristic, killer heuristic, transposition table
 
 ## UCI Commands
 
@@ -123,9 +123,7 @@ Exits the engine.
 
 ## Strength of play (ELO)
 
-This is the result of a small tournament vs Stockfish 15 locked to ELO 2500. 
-
-The current version is stronger than the previous. On my machine, it's even a bit better than Stockfish 15, but it's not a fair comparison since Stockfish seems to blunder to lower its strength.
+This is the result of a small tournament vs Stockfish 15 locked to ELO 2500. The current version is stronger than the previous. On my machine, it's even a bit better than Stockfish 15, but it's not a fair comparison since Stockfish seems to blunder to lower its strength.
 
 ```
 Rank Name                          Elo     +/-   Games   Score    Draw 
