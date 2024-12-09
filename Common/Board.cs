@@ -63,11 +63,26 @@ public class Board
 
                 score = 0;
 
-                foreach (var piece in GetPieces())
+                foreach (var (bitboard, sign) in new[] { (white, 1), (black, -1) })
                 {
-                    var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+                    foreach (var piece in bitboard.GetPieces())
+                    {
+                        var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
 
-                    score += evaluation * (piece.Is(Piece.White) ? 1 : -1);
+                        score += evaluation * sign;
+                    }
+
+                    //// Connected rooks bonus
+                    //var rooks = bitboard.GetMasks(Piece.Rook, ulong.MaxValue).ToArray();
+                    //if (rooks.Length == 2 && rooks[0].SameFileOrRank(rooks[1]))
+                    //{
+                    //    var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);
+
+                    //    if (!IsOccupied(travelMask))
+                    //    {
+                    //        score += Scoring.ConnectedRooksBonus * sign;
+                    //    }
+                    //}
                 }
             }
 
@@ -307,21 +322,21 @@ public class Board
         return PlayLegalMoves().Where(b => b.Counters.LastMove.Piece == piece).Select(b => b.Counters.LastMove);
     }
 
-    public List<Board> PlayLegalMoves(bool onlyCaptures = false)
+    public IEnumerable<Board> PlayLegalMoves(bool quiescence = false)
     {
-        var boards = new List<Board>();
+
         foreach (var piece in activeBoard.GetPieces())
         {
-            foreach (var board in PlayLegalMoves(piece, onlyCaptures))
+            foreach (var board in PlayLegalMoves(piece, quiescence))
             {
-                boards.Add(board);
+                yield return board;
             }
         }
 
-        return boards;
+
     }
 
-    private IEnumerable<Board> PlayLegalMoves(Piece piece, bool onlyCaptures)
+    private IEnumerable<Board> PlayLegalMoves(Piece piece, bool quiescence)
     {
         foreach (var vector in internals.Moves.GetVectors(piece))
         {
@@ -334,7 +349,8 @@ public class Board
 
                 var taking = opponentBoard.IsOccupied(move.Target);
 
-                if (!taking && onlyCaptures)
+                //if (quiescence && (!taking || !move.Flags.HasFlag(SpecialMove.PawnPromotes)))
+                if (quiescence && !taking)
                 {
                     continue;
                 }

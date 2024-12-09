@@ -11,6 +11,24 @@ namespace SicTransit.Woodpusher.Model.Extensions
             return squares.Aggregate(0ul, (a, b) => a | b.ToMask());
         }
 
+        public static bool SameFileOrRank(this ulong mask, ulong other)
+        {
+            var tzMask = BitOperations.TrailingZeroCount(mask);
+            var tzOther = BitOperations.TrailingZeroCount(other);
+
+            if (tzMask % 8 == tzOther % 8)
+            {
+                return true;
+            }
+
+            if (tzMask / 8 == tzOther / 8)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static ulong AddFileAndRank(this ulong mask, int fileDelta, int rankDelta)
         {
             var shift = rankDelta * 8 + fileDelta;

@@ -15,6 +15,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
         public const int MateScore = 1000000;
         public const int MoveMaximumScore = MateScore * 2;
 
+        public const int ConnectedRooksBonus = 25;
+
         private static readonly int[] PawnMiddleGameModifiers =
         {
       0,   0,   0,   0,   0,   0,  0,   0,

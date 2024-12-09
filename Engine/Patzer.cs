@@ -4,6 +4,7 @@ using SicTransit.Woodpusher.Common.Extensions;
 using SicTransit.Woodpusher.Common.Interfaces;
 using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
+using SicTransit.Woodpusher.Engine.Enum;
 using SicTransit.Woodpusher.Engine.Extensions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -18,7 +19,6 @@ namespace SicTransit.Woodpusher.Engine
         public Board Board { get; private set; }
 
         private volatile bool timeIsUp = false;
-        private int maxDepth = 0;
         private int selDepth = 0;
         private uint nodeCount = 0;
         private const uint EngineMaxDepth = 128;
@@ -32,10 +32,9 @@ namespace SicTransit.Woodpusher.Engine
         private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
         private readonly Dictionary<ulong, int> repetitionTable = [];
         private readonly ulong[][] killerMoves = new ulong[1000][]; // TODO: Phase out killer moves as the game progresses.
+        private readonly int[,] historyHeuristics = new int[64, 64];
 
-        private readonly List<(int ply, Move move)> bestLine = [];
-
-        private Move? evaluatedBestMove = null;
+        private readonly List<Move> bestLine = [];
 
         private EngineOptions engineOptions;
 
@@ -50,7 +49,7 @@ namespace SicTransit.Woodpusher.Engine
         {
             engineOptions = options;
 
-            SetBoard(Common.Board.StartingPosition());
+            SetBoard(Board.StartingPosition());
 
             openingBook = null;
 
@@ -172,6 +171,13 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove;
         }
 
+        public AlgebraicMove? GetPonderMove()
+        {
+            var ponderMove = bestLine.Count < 2 ? null : bestLine[1];
+
+            return ponderMove == null ? null : new AlgebraicMove(ponderMove);
+        }
+
         private void AddKillerMove(int ply, ulong hash)
         {
             killerMoves[ply][1] = killerMoves[ply][0];
@@ -187,60 +193,72 @@ namespace SicTransit.Woodpusher.Engine
 
         private AlgebraicMove? SearchForBestMove(Stopwatch stopwatch, int timeLimit = 1000)
         {
-            maxDepth = 0;
+            var depth = 0;
             nodeCount = 0;
             Move? bestMove = null;
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
+            Array.Clear(historyHeuristics, 0, historyHeuristics.Length);
 
             if (engineOptions.UseOpeningBook)
             {
                 var bookMove = GetBookMove();
                 if (bookMove != null)
                 {
-                    UpdateBestLine(bookMove);
+                    UpdateBestLine(bookMove, 1);
                     Log.Information("Returning book move: {0}", bookMove);
                     SendDebugInfo($"playing book move {bookMove.ToAlgebraicMoveNotation()}");
-                    SendProgress(stopwatch, 0, null);
+                    SendProgress(stopwatch, 1, 1, Board.Play(bookMove).Score, null);
                     return new AlgebraicMove(bookMove);
                 }
             }
 
-            while (maxDepth < EngineMaxDepth)
+            while (depth < EngineMaxDepth)
             {
-                maxDepth++;
-                selDepth = maxDepth;
+                depth++;
+                selDepth = depth;
                 long startTime = stopwatch.ElapsedMilliseconds;
                 int? mateIn = default;
 
-                var score = EvaluateBoard(Board, 0, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1);
+                var score = EvaluateBoard(Board, depth, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1, true);
 
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
                 if (!timeIsUp || (bestMove == null))
                 {
-                    bestMove = evaluatedBestMove;
+                    var ttEntry = transpositionTable[Board.Hash % transpositionTableSize];
+
+                    if (ttEntry.Hash == Board.Hash && ttEntry.EntryType == EntryType.Exact)
+                    {
+                        bestMove = ttEntry.Move;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Unable to find best move in transposition table.");
+                    }
 
                     if (bestMove != null)
                     {
-                        UpdateBestLine(bestMove);
+                        UpdateBestLine(bestMove, depth);
                     }
 
-                    if (Math.Abs(score) == Scoring.MateScore)
+                    var mateScore = Scoring.MateScore - Math.Abs(score) - Board.Counters.Ply + 1;
+
+                    if (mateScore <= EngineMaxDepth)
                     {
-                        mateIn = maxDepth / 2 * Math.Sign(score);
+                        mateIn = mateScore / 2 * Math.Sign(score);
                     }
 
-                    SendProgress(stopwatch, score, mateIn);
+                    SendProgress(stopwatch, depth, nodeCount, score, mateIn);
 
                     if (evaluationTime > 0)
                     {
-                        progress.Add((maxDepth, evaluationTime));
+                        progress.Add((depth, evaluationTime));
 
                         if (progress.Count > 2)
                         {
-                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress, maxDepth + 1);
+                            var estimatedTime = MathExtensions.ApproximateNextDepthTime(progress, depth + 1);
                             var remainingTime = timeLimit - stopwatch.ElapsedMilliseconds;
                             enoughTime = remainingTime > estimatedTime;
                             Log.Debug("Estimated time for next depth: {0}ms, remaining time: {1}ms, enough time: {2}", estimatedTime, remainingTime, enoughTime);
@@ -252,15 +270,15 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (mateIn.HasValue)
                 {
-                    abortMessage = $"aborting search @ depth {maxDepth}, mate in {mateIn}";
+                    abortMessage = $"aborting search @ depth {depth}, mate in {mateIn}";
                 }
                 else if (timeIsUp)
                 {
-                    abortMessage = $"aborting search @ depth {maxDepth}, time is up";
+                    abortMessage = $"aborting search @ depth {depth}, time is up";
                 }
                 else if (!enoughTime)
                 {
-                    abortMessage = $"aborting search @ depth {maxDepth}, not enough time";
+                    abortMessage = $"aborting search @ depth {depth}, not enough time";
                 }
 
                 if (abortMessage != null)
@@ -275,36 +293,34 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove == null ? null : new AlgebraicMove(bestMove);
         }
 
-        private void SendProgress(Stopwatch stopwatch, int score, int? mateIn)
+        private void SendProgress(Stopwatch stopwatch, int depth, uint nodes, int score, int? mateIn)
         {
-            var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodeCount * 1000 / stopwatch.ElapsedMilliseconds;
+            var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodes * 1000 / stopwatch.ElapsedMilliseconds;
             var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
             var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
-            var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
+            var pvString = string.Join(' ', bestLine.Select(m => m.ToAlgebraicMoveNotation()));
 
-            SendInfo($"depth {maxDepth} seldepth {selDepth} nodes {nodeCount} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+            SendInfo($"depth {depth} seldepth {selDepth} multipv 1 nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(Board board, int currentMoveNumber)
+        private void SendCurrentMove(Move move, int depth, int currentMoveNumber)
         {
-            SendInfo($"depth {maxDepth} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
+            SendInfo($"depth {depth} currmove {move.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
 
-        private void UpdateBestLine(Move bestMove)
+        private void UpdateBestLine(Move bestMove, int depth)
         {
-            var ply = Board.Counters.Ply + 1;
-
             bestLine.Clear();
-            bestLine.Add((ply, bestMove));
+            bestLine.Add(bestMove);
 
             var board = Board.Play(bestMove);
 
-            for (var i = 0; i < maxDepth; i++)
+            for (var i = 0; i < depth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
-                if (entry.EntryType == Enum.EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
+                if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
                 {
-                    bestLine.Add((ply + i + 1, entry.Move));
+                    bestLine.Add(entry.Move);
                     board = board.Play(entry.Move);
                 }
                 else
@@ -324,44 +340,45 @@ namespace SicTransit.Woodpusher.Engine
         {
             return boards.OrderByDescending(board =>
             {
-                if (preferredMove != null && board.Counters.LastMove.Equals(preferredMove))
+                var move = board.Counters.LastMove;
+
+                if (preferredMove != null && move.Equals(preferredMove))
                 {
-                    return 20; // Highest priority for preferred move.
+                    return int.MaxValue; // Highest priority for preferred move.
                 }
 
-                if (transpositionTable[board.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
+                if (transpositionTable[board.Hash % transpositionTableSize].EntryType == EntryType.Exact)
                 {
-                    return 10; // High priority for exact transposition table entries.
+                    return int.MaxValue - 10; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return int.MaxValue - 20 + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
-                    return -10; // High priority for killer moves
+                    return int.MaxValue - 30; // High priority for killer moves
                 }
 
                 if (board.IsChecked)
                 {
-                    return -15;
+                    return int.MaxValue - 40;
                 }
 
-                //if (board.Counters.LastMove.Flags.HasFlag(SpecialMove.PawnPromotes))
-                //{
-                //    return -20;
-                //}
-
-                return -25;
+                return int.MinValue + historyHeuristics[move.FromIndex, move.ToIndex];
             });
         }
 
         private int Quiesce(Board board, int α, int β, int sign)
         {
-            var standPat = board.Score * sign;
+            if (timeIsUp)
+            {
+                return 0;
+            }
 
+            var standPat = board.Score * sign;
             if (standPat >= β)
             {
                 return β;
@@ -385,14 +402,14 @@ namespace SicTransit.Woodpusher.Engine
             return α;
         }
 
-        private int EvaluateBoard(Board board, int depth, int α, int β, int sign)
+        private int EvaluateBoard(Board board, int depth, int α, int β, int sign, bool isRootNode = false)
         {
             if (timeIsUp)
             {
                 return 0;
             }
 
-            if (depth == maxDepth)
+            if (depth == 0)
             {
                 return Quiesce(board, α, β, sign);
             }
@@ -400,16 +417,16 @@ namespace SicTransit.Woodpusher.Engine
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.Hash == board.Hash && cachedEntry.Depth >= maxDepth - depth)
+            if (cachedEntry.Depth >= depth && cachedEntry.Hash == board.Hash)
             {
                 switch (cachedEntry.EntryType)
                 {
-                    case Enum.EntryType.Exact:
+                    case EntryType.Exact:
                         return cachedEntry.Score;
-                    case Enum.EntryType.LowerBound:
+                    case EntryType.LowerBound:
                         α = Math.Max(α, cachedEntry.Score);
                         break;
-                    case Enum.EntryType.UpperBound:
+                    case EntryType.UpperBound:
                         β = Math.Min(β, cachedEntry.Score);
                         break;
                 }
@@ -420,38 +437,48 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            var legalmoves = board.PlayLegalMoves();
-
-            if (legalmoves.Count == 0)
-            {
-                return board.IsChecked ? -Scoring.MateScore : Scoring.DrawScore;
-            }
-
             Move? bestMove = null;
             var α0 = α;
+            var n0 = nodeCount;
             var currentMoveNumber = 0;
 
-            foreach (var newBoard in SortBoards(legalmoves, cachedEntry.Move))
+            foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
 
-                if (depth == 0)
+                if (isRootNode)
                 {
-                    SendCurrentMove(newBoard, ++currentMoveNumber);
+                    SendCurrentMove(newBoard.Counters.LastMove, depth, ++currentMoveNumber);
                 }
 
-                var evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
+                int evaluation;
 
                 if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
                 {
-                    // A draw be repetition may be forced by either player.
+                    // A draw by repetition may be forced by either player.
                     // TODO: This does not take into account moves made in the current evaluated line.
                     evaluation = Scoring.DrawScore;
+                }
+                else
+                {
+                    if (nodeCount == n0 + 1)
+                    {
+                        evaluation = -EvaluateBoard(newBoard, depth - 1, -β, -α, -sign);
+                    }
+                    else
+                    {
+                        evaluation = -EvaluateBoard(newBoard, depth - 1, -α - 1, -α, -sign);
+                        if (α < evaluation && evaluation < β)
+                        {
+                            evaluation = -EvaluateBoard(newBoard, depth - 1, -β, -α, -sign);
+                        }
+                    }
                 }
 
                 if (evaluation > α)
                 {
                     bestMove = newBoard.Counters.LastMove;
+                    historyHeuristics[bestMove.FromIndex, bestMove.ToIndex] += depth * depth;
                     α = evaluation;
                 }
 
@@ -465,20 +492,21 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (transpositionTable[transpositionIndex].Depth <= maxDepth - depth)
+            if (n0 == nodeCount)
+            {
+                return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
+            }
+
+            var ttEntry = transpositionTable[transpositionIndex];
+            if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                    α <= α0 ? Enum.EntryType.UpperBound : α >= β ? Enum.EntryType.LowerBound : Enum.EntryType.Exact,
+                    α <= α0 ? EntryType.UpperBound : α >= β ? EntryType.LowerBound : EntryType.Exact,
                     bestMove!,
                     α,
                     board.Hash,
-                    maxDepth - depth
+                    depth
                     );
-            }
-
-            if (depth == 0)
-            {
-                evaluatedBestMove = bestMove;
             }
 
             return α;

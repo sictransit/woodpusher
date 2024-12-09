@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common.Extensions;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -379,7 +380,7 @@ e8f7: 1
 
         [TestMethod]
         //[Ignore("long running: 4.3 minutes on dev machine")]
-        public void Perft7StartingPositionTest()
+        public void Perft7Test()
         {
             var stockfish = @"
 a2a3: 106743106
@@ -408,7 +409,7 @@ g1h3: 120669525
         }
 
         [TestMethod]
-        public void Perft6StartingPositionTest()
+        public void Perft6Test()
         {
             var stockfish = @"
 a2a3: 4463267
@@ -437,7 +438,7 @@ g1h3: 4877234
         }
 
         [TestMethod]
-        public void Perft5StartingPositionTest()
+        public void Perft5Test()
         {
             var stockfish = @"
 a2a3: 181046
@@ -466,7 +467,7 @@ g1h3: 198502
         }
 
         [TestMethod]
-        public void Perft4StartingPositionTest()
+        public void Perft4Test()
         {
             var stockfish = @"
 a2a3: 8457
@@ -495,102 +496,90 @@ g1h3: 8881
         }
 
         [TestMethod]
-        public void Perft3StartingPositionC2C3Test()
+        public void Perft3Test()
         {
             var stockfish = @"
-a7a6: 397
-b7b6: 439
-c7c6: 441
-d7d6: 545
-e7e6: 627
-f7f6: 396
-g7g6: 439
-h7h6: 397
-a7a5: 438
-b7b5: 443
-c7c5: 461
-d7d5: 566
-e7e5: 628
-f7f5: 418
-g7g5: 440
-h7h5: 439
-b8a6: 418
-b8c6: 462
-g8f6: 460
-g8h6: 418
+a2a3: 380
+b2b3: 420
+c2c3: 420
+d2d3: 539
+e2e3: 599
+f2f3: 380
+g2g3: 420
+h2h3: 380
+a2a4: 420
+b2b4: 421
+c2c4: 441
+d2d4: 560
+e2e4: 600
+f2f4: 401
+g2g4: 421
+h2h4: 420
+b1a3: 400
+b1c3: 440
+g1f3: 440
+g1h3: 400
 ";
 
-            var board = Board.StartingPosition();
-
-            var move = board.GetLegalMoves().Single(move => move.Piece.GetSquare().Equals(new Square("c2")) && move.GetTarget().Equals(new Square("c3")));
-
-            Assert.IsTrue(PerftAndCompare(board.Play(move), stockfish, 3));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 3));
         }
 
         [TestMethod]
-        public void Perft2StartingPositionC2C3D7D6Test()
+        public void Perft2Test()
         {
             var stockfish = @"
-a2a3: 27
-b2b3: 27
-d2d3: 27
-e2e3: 27
-f2f3: 27
-g2g3: 27
-h2h3: 27
-c3c4: 27
-a2a4: 27
-b2b4: 27
-d2d4: 27
-e2e4: 27
-f2f4: 27
-g2g4: 26
-h2h4: 27
-b1a3: 27
-g1f3: 27
-g1h3: 27
-d1c2: 27
-d1b3: 27
-d1a4: 6
+a2a3: 20
+b2b3: 20
+c2c3: 20
+d2d3: 20
+e2e3: 20
+f2f3: 20
+g2g3: 20
+h2h3: 20
+a2a4: 20
+b2b4: 20
+c2c4: 20
+d2d4: 20
+e2e4: 20
+f2f4: 20
+g2g4: 20
+h2h4: 20
+b1a3: 20
+b1c3: 20
+g1f3: 20
+g1h3: 20
 ";
 
-            var board = Board.StartingPosition();
-
-            var c2c3 = board.GetLegalMoves().Single(move => move.Piece.GetSquare().Equals(new Square("c2")) && move.GetTarget().Equals(new Square("c3")));
-            board = board.Play(c2c3);
-
-            var d7d6 = board.GetLegalMoves().Single(move => move.Piece.GetSquare().Equals(new Square("d7")) && move.GetTarget().Equals(new Square("d6")));
-            board = board.Play(d7d6);
-
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 2));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 2));
         }
 
         [TestMethod]
-        public void Perft1StartingPositionC2C3D7D6D1A4Test()
+        public void Perft1Test()
         {
             var stockfish = @"
-c7c6: 1
-b7b5: 1
-b8c6: 1
-b8d7: 1
-c8d7: 1
-d8d7: 1
+a2a3: 1
+b2b3: 1
+c2c3: 1
+d2d3: 1
+e2e3: 1
+f2f3: 1
+g2g3: 1
+h2h3: 1
+a2a4: 1
+b2b4: 1
+c2c4: 1
+d2d4: 1
+e2e4: 1
+f2f4: 1
+g2g4: 1
+h2h4: 1
+b1a3: 1
+b1c3: 1
+g1f3: 1
+g1h3: 1
 ";
 
-            var board = Board.StartingPosition();
-
-            var c2c3 = board.GetLegalMoves().Single(move => move.Piece.GetSquare().Equals(new Square("c2")) && move.GetTarget().Equals(new Square("c3")));
-            board = board.Play(c2c3);
-
-            var d7d6 = board.GetLegalMoves().Single(move => move.Piece.GetSquare().Equals(new Square("d7")) && move.GetTarget().Equals(new Square("d6")));
-            board = board.Play(d7d6);
-
-            var d1a4 = board.GetLegalMoves().Single(move => move.Piece.GetSquare().Equals(new Square("d1")) && move.GetTarget().Equals(new Square("a4")));
-            board = board.Play(d1a4);
-
-            Log.Information(Environment.NewLine + board.PrettyPrint());
-
-            Assert.IsTrue(PerftAndCompare(board, stockfish, 1));
+            Assert.IsTrue(PerftAndCompare(Board.StartingPosition(), stockfish, 1));
         }
 
         [TestMethod]
@@ -629,9 +618,9 @@ d8d7: 1
 
             var success = true;
 
-            foreach (var legalMove in board.GetLegalMoves())
+            foreach (var newBoard in board.PlayLegalMoves())
             {
-                var result = $"{legalMove.ToAlgebraicMoveNotation()}: {(depth > 1 ? board.Play(legalMove).Perft(depth) : 1)}";
+                var result = $"{newBoard.Counters.LastMove.ToAlgebraicMoveNotation()}: {(depth > 1 ? newBoard.Perft(depth) : 1)}";
 
                 if (!expectedMoves.Remove(result))
                 {
@@ -651,7 +640,35 @@ d8d7: 1
             return success;
         }
 
+        [TestMethod]
+        public void ConnectedRooksBonusTest()
+        {
+            // Arrange
+            var whiteRook1 = Piece.Rook | Piece.White;
+            var whiteRook2 = Piece.Rook | Piece.White;
 
+            var d1 = new Square("d1");
+            var e1 = new Square("e1");
+            var a2 = new Square("a2");
 
+            var boardWithConnectedRooks = new Board()
+                .SetPiece(whiteRook1.SetSquare(d1))
+                .SetPiece(whiteRook2.SetSquare(e1));
+
+            var boardWithDisconnectedRooks = new Board()
+                .SetPiece(whiteRook1.SetSquare(d1))
+                .SetPiece(whiteRook2.SetSquare(a2));
+
+            // Act
+            var scoreWithConnectedRooks = boardWithConnectedRooks.Score;
+            var scoreWithDisconnectedRooks = boardWithDisconnectedRooks.Score;
+
+            // Assert            
+            var actualBonus = scoreWithConnectedRooks - scoreWithDisconnectedRooks;
+
+            Assert.IsTrue(actualBonus > 0);
+            Assert.AreEqual(actualBonus, Scoring.ConnectedRooksBonus, Scoring.ConnectedRooksBonus / 2);
+
+        }
     }
 }

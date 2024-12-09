@@ -37,7 +37,7 @@ namespace SicTransit.Woodpusher.Common.Parsing.Moves
                 }
             }
 
-            throw new PgnParsingException(Raw, "unable to find a legal move to match");
+            throw new PgnParsingException(Raw, "Unable to find a legal move to match.");
         }
 
         public override string ToString()

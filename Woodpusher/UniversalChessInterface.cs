@@ -9,6 +9,7 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
@@ -36,7 +37,7 @@ namespace SicTransit.Woodpusher
         private static readonly Regex PerftRegex = new(@"perft (\d+)", RegexOptions.Compiled);
         private static readonly Regex OptionRegex = new(@"^setoption name (\w+) value (\w+)$", RegexOptions.Compiled);
 
-        private const int EngineLatency = 10;
+        private const int EngineLatency = 50;
 
         private readonly ManualResetEvent commandAvailable = new(false);
         private readonly ConcurrentQueue<string> commandQueue = new();
@@ -133,6 +134,7 @@ namespace SicTransit.Woodpusher
             Output($"id name Woodpusher {version}");
             Output("id author Mikael Fredriksson <micke@sictransit.net>");
             Output("option name OwnBook type check default true");
+            Output("option name Ponder type check default false");
             Output("uciok");
         }
 
@@ -240,7 +242,16 @@ namespace SicTransit.Woodpusher
                 {
                     var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - EngineLatency));
 
-                    Output($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                    var sb = new StringBuilder();
+                    sb.Append($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+
+                    var ponderMove = engine.GetPonderMove();
+                    if (ponderMove != null)
+                    {
+                        sb.Append($" ponder {ponderMove.Notation}");
+                    }
+
+                    Output(sb.ToString());
                 }
                 catch (Exception ex)
                 {

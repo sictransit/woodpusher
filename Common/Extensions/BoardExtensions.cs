@@ -50,9 +50,9 @@ namespace SicTransit.Woodpusher.Common.Extensions
         {
             ulong count = 0;
 
-            Parallel.ForEach(board.GetLegalMoves(), m =>
+            Parallel.ForEach(board.PlayLegalMoves(), b =>
             {
-                Interlocked.Add(ref count, board.Play(m).ParallelPerft(depth - 1));
+                Interlocked.Add(ref count, b.ParallelPerft(depth - 1));
             });
 
             return count;

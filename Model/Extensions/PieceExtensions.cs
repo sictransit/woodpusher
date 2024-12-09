@@ -5,8 +5,8 @@ namespace SicTransit.Woodpusher.Model.Extensions;
 
 public static class PieceExtensions
 {
-    private const UInt16 SquareMask = 0x00ff;
-    private const UInt16 PieceMask = 0xff00;
+    private const ushort SquareMask = 0x00ff;
+    private const ushort PieceMask = 0xff00;
 
     public static Piece SetMask(this Piece p, ulong mask) => (Piece)(((int)p & PieceMask) | (1 + BitOperations.TrailingZeroCount(mask)));
 
