@@ -417,7 +417,7 @@ namespace SicTransit.Woodpusher.Engine
             var transpositionIndex = board.Hash % transpositionTableSize;
             var cachedEntry = transpositionTable[transpositionIndex];
 
-            if (cachedEntry.Hash == board.Hash && cachedEntry.Depth >= depth)
+            if (cachedEntry.Depth >= depth && cachedEntry.Hash == board.Hash)
             {
                 switch (cachedEntry.EntryType)
                 {
@@ -497,8 +497,7 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
 
-            var ttEntry = transpositionTable[transpositionIndex];
-
+            var ttEntry = transpositionTable[transpositionIndex];            
             if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
