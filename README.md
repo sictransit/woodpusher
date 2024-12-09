@@ -6,13 +6,11 @@ A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 ## Features
 - UCI-compatible
 - Negamax search with alpha-beta pruning
-- NegaScout (or PVS?) search with move ordering
-- Quiescence search
-- Iterative deepening 
-- MVV/LVA move ordering
-- Static exchange evaluation
-- Transposition table
-- Killer heuristic
+	- NegaScout (or PVS?) 
+	- Quiescence 
+	- Iterative deepening 
+- Move ordering 
+	- MVV/LVA, history heuristic, killer heuristic, transposition table
 - PGN and FEN parsing
 - Perft test
 - Opening book
