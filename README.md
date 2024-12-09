@@ -27,7 +27,7 @@ Initializes the engine and provides engine information.
 **Example:**
 ```
 uci
-id name Woodpusher 1.5.0+f0c51756e8bb393fe779a2d352103eef54f837fe
+id name Woodpusher 1.5.0+9dc177f687e8ac917fe08b361619ac5d0d7d9ba3
 id author Mikael Fredriksson <micke@sictransit.net>
 option name OwnBook type check default true
 uciok
