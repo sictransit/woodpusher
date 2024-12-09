@@ -400,7 +400,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                return board.IsChecked ? board.Score * sign : Quiesce(board, α, β, sign);
+                return Quiesce(board, α, β, sign);
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
