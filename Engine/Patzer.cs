@@ -300,7 +300,7 @@ namespace SicTransit.Woodpusher.Engine
             var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
             var pvString = string.Join(' ', bestLine.Select(m => m.ToAlgebraicMoveNotation()));
 
-            SendInfo($"depth {depth} seldepth {selDepth} nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
+            SendInfo($"depth {depth} seldepth {selDepth} multipv 1 nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
         private void SendCurrentMove(Move move, int depth, int currentMoveNumber)

@@ -134,6 +134,7 @@ namespace SicTransit.Woodpusher
             Output($"id name Woodpusher {version}");
             Output("id author Mikael Fredriksson <micke@sictransit.net>");
             Output("option name OwnBook type check default true");
+            Output("option name Ponder type check default false");
             Output("uciok");
         }
 
