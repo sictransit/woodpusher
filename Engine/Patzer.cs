@@ -221,7 +221,7 @@ namespace SicTransit.Woodpusher.Engine
                 long startTime = stopwatch.ElapsedMilliseconds;
                 int? mateIn = default;
 
-                var score = EvaluateBoard(Board, depth, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1);
+                var score = EvaluateBoard(Board, depth, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1, true);
 
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
@@ -303,9 +303,9 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {depth} seldepth {selDepth} nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(Board board, int currentMoveNumber)
+        private void SendCurrentMove(Move move, int depth, int currentMoveNumber)
         {
-            SendInfo($"depth {board.Counters.Ply - board.Counters.Ply} currmove {board.Counters.LastMove.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
+            SendInfo($"depth {depth} currmove {move.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
 
         private void UpdateBestLine(Move bestMove, int depth)
@@ -373,6 +373,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private int Quiesce(Board board, int α, int β, int sign)
         {
+            if (timeIsUp)
+            {
+                return 0;
+            }
+
             var standPat = board.Score * sign;
             if (standPat >= β)
             {
@@ -397,7 +402,7 @@ namespace SicTransit.Woodpusher.Engine
             return α;
         }
 
-        private int EvaluateBoard(Board board, int depth, int α, int β, int sign)
+        private int EvaluateBoard(Board board, int depth, int α, int β, int sign, bool isRootNode = false)
         {
             if (timeIsUp)
             {
@@ -434,16 +439,16 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = null;
             var α0 = α;
-            var currentMoveNumber = 0;
             var n0 = nodeCount;
+            var currentMoveNumber = 0;            
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
                 nodeCount++;
 
-                if (depth == 0)
+                if (isRootNode)
                 {
-                    SendCurrentMove(newBoard, ++currentMoveNumber);
+                    SendCurrentMove(newBoard.Counters.LastMove, depth, ++currentMoveNumber);
                 }
 
                 int evaluation;
