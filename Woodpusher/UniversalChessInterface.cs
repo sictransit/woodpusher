@@ -9,6 +9,7 @@ using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SicTransit.Woodpusher
@@ -240,7 +241,16 @@ namespace SicTransit.Woodpusher
                 {
                     var bestMove = engine.FindBestMove(Math.Max(0, timeLimit - EngineLatency));
 
-                    Output($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+                    var sb = new StringBuilder();
+                    sb.Append($"bestmove {(bestMove == null ? "(none)" : bestMove.Notation)}");
+
+                    var ponderMove = engine.GetPonderMove();
+                    if (ponderMove != null)
+                    {
+                        sb.Append($" ponder {ponderMove.Notation}");
+                    }
+
+                    Output(sb.ToString());
                 }
                 catch (Exception ex)
                 {

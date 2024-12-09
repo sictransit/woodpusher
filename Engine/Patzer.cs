@@ -172,6 +172,13 @@ namespace SicTransit.Woodpusher.Engine
             return bestMove;
         }
 
+        public AlgebraicMove? GetPonderMove() 
+        { 
+            var ponderMove = bestLine.Count < 2 ? null : bestLine[1]; 
+
+            return ponderMove == null ? null : new AlgebraicMove(ponderMove);
+        }
+
         private void AddKillerMove(int ply, ulong hash)
         {
             killerMoves[ply][1] = killerMoves[ply][0];
