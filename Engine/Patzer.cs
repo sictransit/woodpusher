@@ -33,6 +33,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
         private readonly Dictionary<ulong, int> repetitionTable = [];
         private readonly ulong[][] killerMoves = new ulong[1000][]; // TODO: Phase out killer moves as the game progresses.
+        private readonly int[,] historyHeuristics = new int[64,64];
 
         private readonly List<Move> bestLine = [];
 
@@ -192,6 +193,7 @@ namespace SicTransit.Woodpusher.Engine
             var enoughTime = true;
             var progress = new List<(int depth, long time)>();
             Array.Clear(transpositionTable, 0, transpositionTable.Length);
+            Array.Clear(historyHeuristics, 0, historyHeuristics.Length);
 
             if (engineOptions.UseOpeningBook)
             {
@@ -332,37 +334,39 @@ namespace SicTransit.Woodpusher.Engine
         {
             return boards.OrderByDescending(board =>
             {
-                if (preferredMove != null && board.Counters.LastMove.Equals(preferredMove))
+                var move = board.Counters.LastMove;
+
+                if (preferredMove != null && move.Equals(preferredMove))
                 {
-                    return 20; // Highest priority for preferred move.
+                    return int.MaxValue; // Highest priority for preferred move.
                 }
 
                 if (transpositionTable[board.Hash % transpositionTableSize].EntryType == EntryType.Exact)
                 {
-                    return 10; // High priority for exact transposition table entries.
+                    return int.MaxValue-10; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return int.MaxValue -20 + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
-                    return -10; // High priority for killer moves
+                    return int.MaxValue -30; // High priority for killer moves
                 }
 
                 if (board.IsChecked)
                 {
-                    return -15;
+                    return int.MaxValue - 40;
                 }
 
                 //if (board.Counters.LastMove.Flags.HasFlag(SpecialMove.PawnPromotes))
                 //{
-                //    return -20;
+                //    return int.MaxValue - 50;
                 //}
 
-                return -25;
+                return int.MinValue + historyHeuristics[move.FromIndex, move.ToIndex];
             });
         }
 
@@ -468,6 +472,7 @@ namespace SicTransit.Woodpusher.Engine
                 if (evaluation > α)
                 {
                     bestMove = newBoard.Counters.LastMove;
+                    historyHeuristics[bestMove.FromIndex, bestMove.ToIndex] += depth * depth;
                     α = evaluation;
                 }
 

@@ -1,5 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Model
 {
@@ -14,11 +15,17 @@ namespace SicTransit.Woodpusher.Model
             CastlingCheckMask = castlingCheckMask;
             CastlingEmptySquaresMask = castlingEmptyMask;
             PromotionType = promotionType;
+            FromIndex = BitOperations.TrailingZeroCount(Piece.GetMask()); 
+            ToIndex = BitOperations.TrailingZeroCount(target);
         }
 
         public Move(Piece piece, Square target, SpecialMove flags = SpecialMove.None) : this(piece, target.ToMask(), flags)
         {
         }
+
+        public int FromIndex { get; }
+
+        public int ToIndex { get; }
 
         public Piece Piece { get; }
 
