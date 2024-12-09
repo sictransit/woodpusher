@@ -283,7 +283,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             // Reported by tissatussa as issue #38: https://github.com/sictransit/woodpusher/issues/38
             // The engine was playing f3e5, which is a blunder.
-            // At depth 7 it finds d1e2 which is OK, but that's after 38 seconds.
+            // At depth 7 it finds d1e2 which is OK, but that's after 24 seconds.
 
             patzer.Position("3rr1k1/ppp3pp/2n3q1/1B1b1p2/3Pn3/P3PN2/1B3PPP/2RQ1RK1 w - - 2 18");
 
