@@ -1,5 +1,4 @@
-﻿using SicTransit.Woodpusher.Common.Lookup;
-using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
 
@@ -325,7 +324,7 @@ public class Board
 
     public IEnumerable<Board> PlayLegalMoves(bool quiescence = false)
     {
-        
+
         foreach (var piece in activeBoard.GetPieces())
         {
             foreach (var board in PlayLegalMoves(piece, quiescence))
@@ -334,7 +333,7 @@ public class Board
             }
         }
 
-        
+
     }
 
     private IEnumerable<Board> PlayLegalMoves(Piece piece, bool quiescence)

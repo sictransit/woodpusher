@@ -16,7 +16,7 @@ namespace SicTransit.Woodpusher.Engine
 {
     public class Patzer : IEngine
     {
-        public Board Board { get; private set; }        
+        public Board Board { get; private set; }
 
         private volatile bool timeIsUp = false;
         private int maxDepth = 0;
@@ -237,9 +237,9 @@ namespace SicTransit.Woodpusher.Engine
 
                     var mateScore = Scoring.MateScore - Math.Abs(score) - Board.Counters.Ply + 1;
 
-                    if (mateScore <= EngineMaxDepth )
+                    if (mateScore <= EngineMaxDepth)
                     {
-                        mateIn = mateScore/ 2 * Math.Sign(score);
+                        mateIn = mateScore / 2 * Math.Sign(score);
                     }
 
                     SendProgress(stopwatch, maxDepth, nodeCount, score, mateIn);
@@ -302,7 +302,7 @@ namespace SicTransit.Woodpusher.Engine
 
         private void UpdateBestLine(Move bestMove)
         {
-            bestLine.Clear();            
+            bestLine.Clear();
             bestLine.Add(bestMove);
 
             var board = Board.Play(bestMove);
@@ -337,7 +337,7 @@ namespace SicTransit.Woodpusher.Engine
                     return 20; // Highest priority for preferred move.
                 }
 
-                if (transpositionTable[board.Hash % transpositionTableSize].EntryType == Enum.EntryType.Exact)
+                if (transpositionTable[board.Hash % transpositionTableSize].EntryType == EntryType.Exact)
                 {
                     return 10; // High priority for exact transposition table entries.
                 }
@@ -429,7 +429,7 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = null;
             var α0 = α;
-            var currentMoveNumber = 0;            
+            var currentMoveNumber = 0;
             var n0 = nodeCount;
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
@@ -451,8 +451,8 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (nodeCount == n0+1)
-                    {                        
+                    if (nodeCount == n0 + 1)
+                    {
                         evaluation = -EvaluateBoard(newBoard, depth + 1, -β, -α, -sign);
                     }
                     else

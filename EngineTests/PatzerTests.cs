@@ -19,7 +19,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             if (!info)
             {
-                Trace.WriteLine(message);                
+                Trace.WriteLine(message);
             }
 
             traceLines.Add(message);
