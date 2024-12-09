@@ -123,6 +123,18 @@ Exits the engine.
 **Arguments:**
 - None
 
+## Strength of play (ELO)
+
+This is the result of a small tournament vs Stockfish 15 locked to ELO 2000:
+
+```<language>
+Rank Name                          Elo     +/-   Games   Score    Draw 
+   1 Stockfish (2000)              inf     nan      10  100.0%    0.0% 
+   2 Woodpusher (1.5.0)            -35     237      10   45.0%   10.0% 
+   3 Woodpusher (1.4.2)           -512     nan      10    5.0%   10.0% 
+
+15 of 15 games finished.
+```
 
 ## Win vs. *Stockfish 15* in ultra bullet
 
