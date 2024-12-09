@@ -33,7 +33,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly TranspositionTableEntry[] transpositionTable = new TranspositionTableEntry[transpositionTableSize];
         private readonly Dictionary<ulong, int> repetitionTable = [];
         private readonly ulong[][] killerMoves = new ulong[1000][]; // TODO: Phase out killer moves as the game progresses.
-        private readonly int[,] historyHeuristics = new int[64,64];
+        private readonly int[,] historyHeuristics = new int[64, 64];
 
         private readonly List<Move> bestLine = [];
 
@@ -343,28 +343,23 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (transpositionTable[board.Hash % transpositionTableSize].EntryType == EntryType.Exact)
                 {
-                    return int.MaxValue-10; // High priority for exact transposition table entries.
+                    return int.MaxValue - 10; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return int.MaxValue -20 + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return int.MaxValue - 20 + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
-                    return int.MaxValue -30; // High priority for killer moves
+                    return int.MaxValue - 30; // High priority for killer moves
                 }
 
                 if (board.IsChecked)
                 {
                     return int.MaxValue - 40;
                 }
-
-                //if (board.Counters.LastMove.Flags.HasFlag(SpecialMove.PawnPromotes))
-                //{
-                //    return int.MaxValue - 50;
-                //}
 
                 return int.MinValue + historyHeuristics[move.FromIndex, move.ToIndex];
             });
@@ -405,7 +400,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == maxDepth)
             {
-                return Quiesce(board, α, β, sign);
+                return board.IsChecked ? board.Score * sign : Quiesce(board, α, β, sign);
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;

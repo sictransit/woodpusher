@@ -15,7 +15,7 @@ namespace SicTransit.Woodpusher.Model
             CastlingCheckMask = castlingCheckMask;
             CastlingEmptySquaresMask = castlingEmptyMask;
             PromotionType = promotionType;
-            FromIndex = BitOperations.TrailingZeroCount(Piece.GetMask()); 
+            FromIndex = BitOperations.TrailingZeroCount(Piece.GetMask());
             ToIndex = BitOperations.TrailingZeroCount(target);
         }
 
