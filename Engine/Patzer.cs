@@ -34,7 +34,7 @@ namespace SicTransit.Woodpusher.Engine
         private readonly Dictionary<ulong, int> repetitionTable = [];
         private readonly ulong[][] killerMoves = new ulong[1000][]; // TODO: Phase out killer moves as the game progresses.
 
-        private readonly List<(int ply, Move move)> bestLine = [];
+        private readonly List<Move> bestLine = [];
 
         private EngineOptions engineOptions;
 
@@ -290,7 +290,7 @@ namespace SicTransit.Woodpusher.Engine
             var nodesPerSecond = stopwatch.ElapsedMilliseconds == 0 ? 0 : nodes * 1000 / stopwatch.ElapsedMilliseconds;
             var hashFull = transpositionTable.Count(t => t.Hash != 0) * 1000 / transpositionTableSize;
             var scoreString = mateIn.HasValue ? $"mate {mateIn.Value}" : $"cp {score}";
-            var pvString = string.Join(' ', bestLine.Select(m => m.move.ToAlgebraicMoveNotation()));
+            var pvString = string.Join(' ', bestLine.Select(m => m.ToAlgebraicMoveNotation()));
 
             SendInfo($"depth {depth} seldepth {selDepth} nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
@@ -302,10 +302,8 @@ namespace SicTransit.Woodpusher.Engine
 
         private void UpdateBestLine(Move bestMove)
         {
-            var ply = Board.Counters.Ply + 1;
-
-            bestLine.Clear();
-            bestLine.Add((ply, bestMove));
+            bestLine.Clear();            
+            bestLine.Add(bestMove);
 
             var board = Board.Play(bestMove);
 
@@ -314,7 +312,7 @@ namespace SicTransit.Woodpusher.Engine
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
                 if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
                 {
-                    bestLine.Add((ply + i + 1, entry.Move));
+                    bestLine.Add(entry.Move);
                     board = board.Play(entry.Move);
                 }
                 else
