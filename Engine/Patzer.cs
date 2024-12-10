@@ -268,7 +268,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 string? abortMessage = null;
 
-                if (mateIn.HasValue && mateIn <0)
+                if (mateIn.HasValue && mateIn < 0)
                 {
                     abortMessage = $"aborting search @ depth {depth}, mate in {mateIn}";
                 }
@@ -278,7 +278,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else if (!enoughTime)
                 {
-                    abortMessage = $"aborting search @ depth {depth}, not enough time";
+                    abortMessage = $"aborting search @ depth {depth}, not enough time to continue";
                 }
 
                 if (abortMessage != null)
@@ -439,9 +439,9 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             if (depth == 0)
-            {                
+            {
                 return Quiesce(board, α, β, sign);
-            }            
+            }
 
             // Null move pruning
             if (IsNullMovePruningApplicable(board, depth))

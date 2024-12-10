@@ -69,12 +69,12 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("Q2K3k/8/2p5/3b4/1p6/1nP5/qq6/5r2 b - - 0 93");
 
-            var bestMove = patzer.FindBestMove(10000);
+            var bestMove = patzer.FindBestMove(2000);
 
             Assert.AreEqual("a2a8", bestMove.Notation);
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void RunHardProblemsFailingTest()
         {
             Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, false));
@@ -270,7 +270,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("7k/PP6/8/4K3/8/8/8/8 w - - 0 1");
 
-            var move = patzer.FindBestMove(5000);
+            var move = patzer.FindBestMove(1000);
 
             Assert.IsNotNull(move);
 
@@ -315,18 +315,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
             }
 
             Assert.IsNotNull(task.Result);
-
-            if (!foundMate)
-            {
-                if (!traceLines.Exists(i => i.Contains("info depth 20")))
-                {
-                    Assert.Inconclusive("Patzer is not yet able to go to depth 20.");
-                }
-                else
-                {
-                    Assert.Fail("Mate in 10 not found.");
-                }
-            }
+            Assert.IsTrue(foundMate);
         }
 
         [TestMethod]

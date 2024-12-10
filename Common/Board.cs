@@ -1,7 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Diagnostics.Metrics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -9,7 +8,7 @@ public class Board
 {
     private readonly Bitboard white;
     private readonly Bitboard black;
-    
+
     private readonly Bitboard opponentBoard;
     private readonly bool whiteIsPlaying;
     private readonly BoardInternals internals;
@@ -57,7 +56,8 @@ public class Board
 
     public ulong Hash { get; }
 
-    public int Phase {
+    public int Phase
+    {
         get
         {
             phase ??= white.Phase + black.Phase;
@@ -125,7 +125,7 @@ public class Board
             ^ internals.Zobrist.GetMaskHash(0);
 
         // Return the new board state
-        return new Board(white, black, newCounters, internals, newHash);    
+        return new Board(white, black, newCounters, internals, newHash);
     }
 
     public Board SetPiece(Piece piece) => piece.Is(Piece.White)

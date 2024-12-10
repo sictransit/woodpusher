@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common.Extensions;
-using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
