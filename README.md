@@ -13,6 +13,7 @@ A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 	- NegaScout (or PVS?) 
 	- Quiescence 
 	- Iterative deepening 
+	- Null move pruning
     - Move ordering 
     	- MVV/LVA, history heuristic, killer heuristic, transposition table
 
