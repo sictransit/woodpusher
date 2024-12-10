@@ -410,8 +410,7 @@ namespace SicTransit.Woodpusher.Engine
             }
 
             if (depth == 0)
-            {
-                return board.Score * sign;
+            {                
                 return Quiesce(board, α, β, sign);
             }
 
