@@ -411,6 +411,7 @@ namespace SicTransit.Woodpusher.Engine
 
             if (depth == 0)
             {
+                return board.Score * sign;
                 return Quiesce(board, α, β, sign);
             }
 
@@ -497,16 +498,19 @@ namespace SicTransit.Woodpusher.Engine
                 return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
 
-            var ttEntry = transpositionTable[transpositionIndex];
-            if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
+            if (bestMove != null)
             {
-                transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                    α <= α0 ? EntryType.UpperBound : α >= β ? EntryType.LowerBound : EntryType.Exact,
-                    bestMove!,
-                    α,
-                    board.Hash,
-                    depth
-                    );
+                var ttEntry = transpositionTable[transpositionIndex];
+                if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
+                {
+                    transpositionTable[transpositionIndex] = new TranspositionTableEntry(
+                        α <= α0 ? EntryType.UpperBound : (α >= β ? EntryType.LowerBound : EntryType.Exact),
+                        bestMove!,
+                        α,
+                        board.Hash,
+                        depth
+                        );
+                }
             }
 
             return α;
