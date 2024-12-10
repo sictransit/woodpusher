@@ -402,6 +402,35 @@ namespace SicTransit.Woodpusher.Engine
             return α;
         }
 
+        private int NullMovePruning(Board board, int depth, int α, int β, int sign)
+        {
+            const int R = 2; // Reduction depth for null move pruning
+
+            if (depth <= R || board.IsChecked)
+            {
+                return EvaluateBoard(board, depth - 1, α, β, sign);
+            }
+
+            // Make a null move
+            var nullMoveBoard = board.PlayNullMove();
+
+            // Evaluate the position after the null move
+            int score = -EvaluateBoard(nullMoveBoard, depth - 1 - R, -β, -β + 1, -sign);
+
+            // If the score is greater than or equal to β, prune the branch
+            if (score >= β)
+            {
+                return β;
+            }
+
+            return α;
+        }
+
+        private static bool IsNullMovePruningApplicable(Board board, int depth)
+        {
+            return depth > 1 && ((board.ActiveBoard.AllPieces ^ board.ActiveBoard.Pawn) != board.ActiveBoard.King) && !board.IsChecked;
+        }
+
         private int EvaluateBoard(Board board, int depth, int α, int β, int sign, bool isRootNode = false)
         {
             if (timeIsUp)
@@ -412,6 +441,16 @@ namespace SicTransit.Woodpusher.Engine
             if (depth == 0)
             {                
                 return Quiesce(board, α, β, sign);
+            }            
+
+            // Null move pruning
+            if (IsNullMovePruningApplicable(board, depth))
+            {
+                int nullMoveScore = NullMovePruning(board, depth, α, β, sign);
+                if (nullMoveScore >= β)
+                {
+                    return β;
+                }
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;

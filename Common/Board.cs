@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Diagnostics.Metrics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -8,17 +9,20 @@ public class Board
 {
     private readonly Bitboard white;
     private readonly Bitboard black;
-    private readonly Bitboard activeBoard;
+    
     private readonly Bitboard opponentBoard;
     private readonly bool whiteIsPlaying;
     private readonly BoardInternals internals;
 
     private int? score = null;
+    private int? phase = null;
     private bool? isChecked = null;
 
     public Counters Counters { get; }
 
     public Piece ActiveColor => Counters.ActiveColor;
+
+    public Bitboard ActiveBoard { get; }
 
     public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
     {
@@ -31,7 +35,7 @@ public class Board
         this.black = black;
 
         whiteIsPlaying = counters.ActiveColor.Is(Piece.White);
-        activeBoard = whiteIsPlaying ? white : black;
+        ActiveBoard = whiteIsPlaying ? white : black;
         opponentBoard = whiteIsPlaying ? black : white;
 
         Counters = counters;
@@ -53,21 +57,28 @@ public class Board
 
     public ulong Hash { get; }
 
+    public int Phase {
+        get
+        {
+            phase ??= white.Phase + black.Phase;
+
+            return phase.Value;
+        }
+    }
+
     public int Score
     {
         get
         {
             if (!score.HasValue)
             {
-                var phase = white.Phase + black.Phase;
-
                 score = 0;
 
                 foreach (var (bitboard, sign) in new[] { (white, 1), (black, -1) })
                 {
                     foreach (var piece in bitboard.GetPieces())
                     {
-                        var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+                        var evaluation = internals.Scoring.EvaluatePiece(piece, Phase);
 
                         score += evaluation * sign;
                     }
@@ -90,6 +101,33 @@ public class Board
         }
     }
 
+    public Board PlayNullMove()
+    {
+        // Toggle the active color
+        var newActiveColor = ActiveColor == Piece.White ? Piece.None : Piece.White;
+
+        // Update the counters
+        var newCounters = new Counters(
+            newActiveColor,
+            Counters.Castlings,
+            0, // No en passant target for null move
+            Counters.HalfmoveClock + 1,
+            Counters.FullmoveNumber + (ActiveColor == Piece.None ? 1 : 0),
+            Counters.LastMove,
+            Piece.None // No capture for null move
+        );
+
+        // Calculate the new hash
+        var newHash = Hash
+            ^ internals.Zobrist.GetPieceHash(ActiveColor)
+            ^ internals.Zobrist.GetPieceHash(newActiveColor)
+            ^ internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
+            ^ internals.Zobrist.GetMaskHash(0);
+
+        // Return the new board state
+        return new Board(white, black, newCounters, internals, newHash);    
+    }
+
     public Board SetPiece(Piece piece) => piece.Is(Piece.White)
             ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
             : new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
@@ -98,7 +136,7 @@ public class Board
     {
         var newHash = Hash;
 
-        var newActiveBoard = activeBoard.Toggle(move.Piece, move.Target);
+        var newActiveBoard = ActiveBoard.Toggle(move.Piece, move.Target);
 
         newHash ^= internals.Zobrist.GetPieceHash(move.Piece) ^ internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
 
@@ -325,7 +363,7 @@ public class Board
     public IEnumerable<Board> PlayLegalMoves(bool quiescence = false)
     {
 
-        foreach (var piece in activeBoard.GetPieces())
+        foreach (var piece in ActiveBoard.GetPieces())
         {
             foreach (var board in PlayLegalMoves(piece, quiescence))
             {
@@ -342,7 +380,7 @@ public class Board
         {
             foreach (var move in vector)
             {
-                if (activeBoard.IsOccupied(move.Target))
+                if (ActiveBoard.IsOccupied(move.Target))
                 {
                     break;
                 }
