@@ -74,18 +74,17 @@ namespace SicTransit.Woodpusher.Engine.Tests
             Assert.AreEqual("a2a8", bestMove.Notation);
         }
 
-        [TestMethod]
-        //[Ignore("Fails and takes a lot of time.")]
+        [TestMethod]        
         public void RunHardProblemsFailingTest()
         {
-            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(20).TotalMilliseconds, false));
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, false));
         }
 
 
         [TestMethod]
         public void RunHardProblemsSucceedingTest()
         {
-            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(20).TotalMilliseconds, true));
+            Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(10).TotalMilliseconds, true));
         }
 
         private int RunHardProblems(int timeLimit, bool status)

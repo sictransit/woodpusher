@@ -268,7 +268,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 string? abortMessage = null;
 
-                if (mateIn.HasValue)
+                if (mateIn.HasValue && mateIn <0)
                 {
                     abortMessage = $"aborting search @ depth {depth}, mate in {mateIn}";
                 }
