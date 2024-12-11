@@ -428,7 +428,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private static bool IsNullMovePruningApplicable(Board board, int depth)
         {
-            return depth > 1 && ((board.ActiveBoard.AllPieces ^ board.ActiveBoard.Pawn) != board.ActiveBoard.King) && !board.IsChecked;
+            return 
+                depth > 1 && 
+                board.Counters.LastMove != null && 
+                ((board.ActiveBoard.AllPieces ^ board.ActiveBoard.Pawn) != board.ActiveBoard.King) && 
+                !board.IsChecked;
         }
 
         private int EvaluateBoard(Board board, int depth, int α, int β, int sign, bool isRootNode = false)

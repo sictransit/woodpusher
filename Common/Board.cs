@@ -113,7 +113,7 @@ public class Board
             0, // No en passant target for null move
             Counters.HalfmoveClock + 1,
             Counters.FullmoveNumber + (ActiveColor == Piece.None ? 1 : 0),
-            Counters.LastMove,
+            null,
             Piece.None // No capture for null move
         );
 
@@ -122,7 +122,7 @@ public class Board
             ^ internals.Zobrist.GetPieceHash(ActiveColor)
             ^ internals.Zobrist.GetPieceHash(newActiveColor)
             ^ internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
-            ^ internals.Zobrist.GetMaskHash(0);
+            ^ internals.Zobrist.GetMaskHash(newCounters.EnPassantTarget);
 
         // Return the new board state
         return new Board(white, black, newCounters, internals, newHash);
