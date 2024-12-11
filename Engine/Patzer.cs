@@ -303,7 +303,7 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {depth} seldepth {selDepth} multipv 1 nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(Move move, int depth, int currentMoveNumber)
+        private void SendCurrentMove(Move move, int depth, uint currentMoveNumber)
         {
             SendInfo($"depth {depth} currmove {move.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
@@ -428,10 +428,10 @@ namespace SicTransit.Woodpusher.Engine
 
         private static bool IsNullMovePruningApplicable(Board board, int depth)
         {
-            return 
-                depth > 1 && 
-                board.Counters.LastMove != null && 
-                ((board.ActiveBoard.AllPieces ^ board.ActiveBoard.Pawn) != board.ActiveBoard.King) && 
+            return
+                depth > 1 &&
+                board.Counters.LastMove != null &&
+                ((board.ActiveBoard.AllPieces ^ board.ActiveBoard.Pawn) != board.ActiveBoard.King) &&
                 !board.IsChecked;
         }
 
@@ -482,16 +482,15 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = null;
             var α0 = α;
-            var n0 = nodeCount;
-            var currentMoveNumber = 0;
+            uint currentMoveNumber = 0;
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
-                nodeCount++;
+                currentMoveNumber++;
 
                 if (isRootNode)
                 {
-                    SendCurrentMove(newBoard.Counters.LastMove, depth, ++currentMoveNumber);
+                    SendCurrentMove(newBoard.Counters.LastMove, depth, currentMoveNumber);
                 }
 
                 int evaluation;
@@ -504,7 +503,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (nodeCount == n0 + 1)
+                    if (currentMoveNumber == 1)
                     {
                         evaluation = -EvaluateBoard(newBoard, depth - 1, -β, -α, -sign);
                     }
@@ -535,7 +534,9 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (n0 == nodeCount)
+            nodeCount += currentMoveNumber;
+
+            if (currentMoveNumber == 0)
             {
                 return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
