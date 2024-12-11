@@ -442,7 +442,7 @@ namespace SicTransit.Woodpusher.Engine
                 return 0;
             }
 
-            if (depth == 0)
+            if (depth <= 0)
             {
                 return Quiesce(board, α, β, sign);
             }
