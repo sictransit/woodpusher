@@ -378,7 +378,7 @@ e8f7: 1
         }
 
         [TestMethod]
-        //[Ignore("long running: 4.3 minutes on dev machine")]
+        [Ignore("long running: 4.3 minutes on dev machine")]
         public void Perft7Test()
         {
             var stockfish = @"
