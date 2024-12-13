@@ -362,7 +362,6 @@ public class Board
 
     public IEnumerable<Board> PlayLegalMoves(bool quiescence = false)
     {
-
         foreach (var piece in ActiveBoard.GetPieces())
         {
             foreach (var board in PlayLegalMoves(piece, quiescence))
@@ -370,8 +369,6 @@ public class Board
                 yield return board;
             }
         }
-
-
     }
 
     private IEnumerable<Board> PlayLegalMoves(Piece piece, bool quiescence)
@@ -386,8 +383,7 @@ public class Board
                 }
 
                 var taking = opponentBoard.IsOccupied(move.Target);
-
-                //if (quiescence && (!taking || !move.Flags.HasFlag(SpecialMove.PawnPromotes)))
+                
                 if (quiescence && !taking)
                 {
                     continue;
@@ -425,7 +421,12 @@ public class Board
     {
         if (move.Piece.Is(Piece.Pawn))
         {
-            if ((taking && move.Flags.HasFlag(SpecialMove.PawnMoves)) || (!taking && move.Flags.HasFlag(SpecialMove.PawnTakes)))
+            if (taking && move.Flags.HasFlag(SpecialMove.PawnMoves))
+            {
+                return false;
+            }
+
+            if (!taking && move.Flags.HasFlag(SpecialMove.PawnTakes))
             {
                 return false;
             }
