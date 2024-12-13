@@ -538,22 +538,18 @@ namespace SicTransit.Woodpusher.Engine
 
             if (currentMoveNumber == 0)
             {
-                return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
+                α = board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
 
-            if (bestMove != null)
+            if (transpositionTable[transpositionIndex].Depth <= depth)
             {
-                var ttEntry = transpositionTable[transpositionIndex];
-                if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
-                {
-                    transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                        α <= α0 ? EntryType.UpperBound : (α >= β ? EntryType.LowerBound : EntryType.Exact),
-                        bestMove!,
-                        α,
-                        board.Hash,
-                        depth
-                        );
-                }
+                transpositionTable[transpositionIndex] = new TranspositionTableEntry(
+                    α <= α0 ? EntryType.UpperBound : (α >= β ? EntryType.LowerBound : EntryType.Exact),
+                    bestMove!,
+                    α,
+                    board.Hash,
+                    depth
+                    );
             }
 
             return α;

@@ -48,8 +48,20 @@ public class Board
 
     public static Board StartingPosition()
     {
-        var white = new Bitboard(Piece.White, 65280, 129, 66, 36, 8, 16);
-        var black = new Bitboard(Piece.None, 71776119061217280, 9295429630892703744, 4755801206503243776, 2594073385365405696, 576460752303423488, 1152921504606846976);
+        var white = new Bitboard(Piece.White, 
+            0xFF00, 
+            0x0081, 
+            0x0042, 
+            0x0024, 
+            0x0008, 
+            0x0010);
+        var black = new Bitboard(Piece.None, 
+            0x00FF000000000000, 
+            0x8100000000000000, 
+            0x4200000000000000, 
+            0x2400000000000000, 
+            0x0800000000000000, 
+            0x1000000000000000);
 
         return new Board(white, black, Counters.Default);
     }
