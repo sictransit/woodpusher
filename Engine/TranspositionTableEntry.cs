@@ -5,13 +5,13 @@ namespace SicTransit.Woodpusher.Engine
 {
     internal readonly struct TranspositionTableEntry
     {
-        public Move Move { get; }
+        public Move? Move { get; }
         public int Score { get; }
         public ulong Hash { get; }
         public int Depth { get; }
         public EntryType EntryType { get; }
 
-        public TranspositionTableEntry(EntryType entryType, Move move, int score, ulong hash, int depth)
+        public TranspositionTableEntry(EntryType entryType, Move? move, int score, ulong hash, int depth)
         {
             Move = move;
             Score = score;

@@ -318,7 +318,7 @@ namespace SicTransit.Woodpusher.Engine
             for (var i = 0; i < depth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
-                if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
+                if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && entry.Move != null && board.GetLegalMoves().Contains(entry.Move))
                 {
                     bestLine.Add(entry.Move);
                     board = board.Play(entry.Move);
@@ -482,15 +482,15 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = null;
             var α0 = α;
-            uint currentMoveNumber = 0;
+            uint moveCounter = 0;
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
-                currentMoveNumber++;
+                moveCounter++;
 
                 if (isRootNode)
                 {
-                    SendCurrentMove(newBoard.Counters.LastMove, depth, currentMoveNumber);
+                    SendCurrentMove(newBoard.Counters.LastMove, depth, moveCounter);
                 }
 
                 int evaluation;
@@ -503,7 +503,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (currentMoveNumber == 1)
+                    if (moveCounter == 1)
                     {
                         evaluation = -EvaluateBoard(newBoard, depth - 1, -β, -α, -sign);
                     }
@@ -534,9 +534,9 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            nodeCount += currentMoveNumber;
+            nodeCount += moveCounter;
 
-            if (currentMoveNumber == 0)
+            if (moveCounter == 0)
             {
                 α = board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
@@ -545,7 +545,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
                     α <= α0 ? EntryType.UpperBound : (α >= β ? EntryType.LowerBound : EntryType.Exact),
-                    bestMove!,
+                    bestMove,
                     α,
                     board.Hash,
                     depth
