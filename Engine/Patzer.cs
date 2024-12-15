@@ -503,7 +503,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (moveCounter == 1)
+                    if (α0 == α)
                     {
                         evaluation = -EvaluateBoard(newBoard, depth - 1, -β, -α, -sign);
                     }
