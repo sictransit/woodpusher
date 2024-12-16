@@ -229,7 +229,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         {
             patzer.Position("8/pk6/3B4/1B6/8/P1N5/1Pb2KP1/4R3 w - - 1 38");
 
-            var bestMove = patzer.FindBestMove(10000);
+            var bestMove = patzer.FindBestMove(1000);
 
             Assert.AreEqual("e1e7", bestMove.Notation);
         }
