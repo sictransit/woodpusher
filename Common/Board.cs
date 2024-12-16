@@ -1,7 +1,6 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
-using System.Formats.Asn1;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -49,19 +48,19 @@ public class Board
 
     public static Board StartingPosition()
     {
-        var white = new Bitboard(Piece.White, 
-            0xFF00, 
-            0x0081, 
-            0x0042, 
-            0x0024, 
-            0x0008, 
+        var white = new Bitboard(Piece.White,
+            0xFF00,
+            0x0081,
+            0x0042,
+            0x0024,
+            0x0008,
             0x0010);
-        var black = new Bitboard(Piece.None, 
-            0x00FF000000000000, 
-            0x8100000000000000, 
-            0x4200000000000000, 
-            0x2400000000000000, 
-            0x0800000000000000, 
+        var black = new Bitboard(Piece.None,
+            0x00FF000000000000,
+            0x8100000000000000,
+            0x4200000000000000,
+            0x2400000000000000,
+            0x0800000000000000,
             0x1000000000000000);
 
         return new Board(white, black, Counters.Default);
@@ -396,7 +395,7 @@ public class Board
                 }
 
                 var taking = opponentBoard.IsOccupied(move.Target);
-                
+
                 if (quiescence)
                 {
                     if (move.Piece.Is(Piece.Pawn))
@@ -404,7 +403,7 @@ public class Board
                         if (move.Flags.HasFlag(SpecialMove.PawnMoves))
                         {
                             continue;
-                        }                        
+                        }
                     }
                     else if (!taking)
                     {

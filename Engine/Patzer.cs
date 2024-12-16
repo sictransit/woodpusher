@@ -349,27 +349,27 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (transpositionTable[board.Hash % transpositionTableSize].EntryType == EntryType.Exact)
                 {
-                    return int.MaxValue - 10; // High priority for exact transposition table entries.
+                    return int.MaxValue >> 1; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return int.MaxValue - 20 + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return (int.MaxValue >> 2) + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
-                    return int.MaxValue - 30; // High priority for killer moves
+                    return int.MaxValue >> 3; // High priority for killer moves
                 }
 
                 if (move.Flags.HasFlag(SpecialMove.PawnPromotes))
                 {
-                    return int.MaxValue - 40; // High priority for pawn promotions
+                    return int.MaxValue >> 4; // High priority for pawn promotions
                 }
 
                 if (board.IsChecked)
                 {
-                    return int.MaxValue - 50;
+                    return int.MaxValue >> 5;
                 }
 
                 return int.MinValue + historyHeuristics[move.FromIndex, move.ToIndex];
