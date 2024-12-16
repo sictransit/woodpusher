@@ -1,6 +1,7 @@
 ﻿using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Formats.Asn1;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -396,9 +397,19 @@ public class Board
 
                 var taking = opponentBoard.IsOccupied(move.Target);
                 
-                if (quiescence && !taking)
+                if (quiescence)
                 {
-                    continue;
+                    if (move.Piece.Is(Piece.Pawn))
+                    {
+                        if (move.Flags.HasFlag(SpecialMove.PawnMoves))
+                        {
+                            continue;
+                        }                        
+                    }
+                    else if (!taking)
+                    {
+                        continue;
+                    }
                 }
 
                 if (!ValidateMove(move, taking))

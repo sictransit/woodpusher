@@ -362,9 +362,14 @@ namespace SicTransit.Woodpusher.Engine
                     return int.MaxValue - 30; // High priority for killer moves
                 }
 
+                if (move.Flags.HasFlag(SpecialMove.PawnPromotes))
+                {
+                    return int.MaxValue - 40; // High priority for pawn promotions
+                }
+
                 if (board.IsChecked)
                 {
-                    return int.MaxValue - 40;
+                    return int.MaxValue - 50;
                 }
 
                 return int.MinValue + historyHeuristics[move.FromIndex, move.ToIndex];
