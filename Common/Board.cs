@@ -93,7 +93,6 @@ public class Board
                     foreach (var piece in bitboard.GetPieces())
                     {
                         var evaluation = internals.Scoring.EvaluatePiece(piece, Phase);
-
                         score += evaluation * sign;
                     }
 
@@ -105,22 +104,9 @@ public class Board
                         if (pawnCount > 1)
                         {
                             var penalty = Scoring.DoubledPawnPenalty * ((2 << (pawnCount - 2)) - 1);
-                            score -= penalty;
+                            score -= penalty * sign;
                         }
                     }
-
-
-                    //// Connected rooks bonus
-                    //var rooks = bitboard.GetMasks(Piece.Rook, ulong.MaxValue).ToArray();
-                    //if (rooks.Length == 2 && rooks[0].SameFileOrRank(rooks[1]))
-                    //{
-                    //    var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);
-
-                    //    if (!IsOccupied(travelMask))
-                    //    {
-                    //        score += Scoring.ConnectedRooksBonus * sign;
-                    //    }
-                    //}
                 }
             }
 
