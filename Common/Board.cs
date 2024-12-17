@@ -1,6 +1,8 @@
-﻿using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Common.Lookup;
+using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -94,6 +96,19 @@ public class Board
 
                         score += evaluation * sign;
                     }
+
+                    // Penalty for doubled pawns
+                    for (var file = 0; file < 8; file++)
+                    {
+                        var pawnCount = BitOperations.PopCount(Bitboard.Files[file] & bitboard.Pawn);
+
+                        if (pawnCount > 1)
+                        {
+                            var penalty = Scoring.DoubledPawnPenalty * ((2 << (pawnCount - 2)) - 1);
+                            score -= penalty;
+                        }
+                    }
+
 
                     //// Connected rooks bonus
                     //var rooks = bitboard.GetMasks(Piece.Rook, ulong.MaxValue).ToArray();

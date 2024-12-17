@@ -168,6 +168,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
                 ? (piece.GetSquare().File + piece.GetSquare().Rank * 8) ^ 56
                 : piece.GetSquare().File + piece.GetSquare().Rank * 8;
 
+        public const int DoubledPawnPenalty = 10;
+
         public Scoring()
         {
             InitializeEvaluations(middleGameEvaluations, false);
@@ -205,7 +207,6 @@ namespace SicTransit.Woodpusher.Common.Lookup
             Piece.King => 0,
             _ => throw new ArgumentException(pieceType.ToString()),
         };
-
 
         public int EvaluatePiece(Piece piece, int phase)
         {

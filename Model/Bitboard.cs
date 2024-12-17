@@ -36,6 +36,18 @@ namespace SicTransit.Woodpusher.Model
 
         public int Phase => Math.Min(12, BitOperations.PopCount(Knight) + BitOperations.PopCount(Bishop) + 2 * BitOperations.PopCount(Rook) + 4 * BitOperations.PopCount(Queen));
 
+        public static ulong[] Files =
+        [
+            0x0101010101010101,
+            0x0202020202020202,
+            0x0404040404040404,
+            0x0808080808080808,
+            0x1010101010101010,
+            0x2020202020202020,
+            0x4040404040404040,
+            0x8080808080808080,
+        ];
+
         private ulong GetBitmap(Piece pieceType) => pieceType switch
         {
             Piece.Pawn => Pawn,

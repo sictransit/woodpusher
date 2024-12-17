@@ -157,7 +157,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
 
         private static int ParseFullmoveNumber(string s)
-        { 
+        {
             var number = int.Parse(s);
 
             if (number < 1)
@@ -168,7 +168,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
             }
 
             return number;
-        } 
+        }
 
         private static int ParseHalfmoveClock(string s) => int.Parse(s);
 

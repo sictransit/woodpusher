@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 using SicTransit.Woodpusher.Common.Extensions;
+using SicTransit.Woodpusher.Common.Lookup;
 using SicTransit.Woodpusher.Common.Parsing;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
@@ -608,6 +609,39 @@ g1h3: 1
             {
                 Assert.IsTrue(kingsLegalMoves.Any(m => m.Equals(referenceMove)));
             }
+        }
+
+        [TestMethod]
+        public void DoublePawnPenaltyTest()
+        {
+            // Arrange: Set up a board with doubled pawns
+            var fen = "8/8/8/8/8/8/8/8 w - - 0 1";
+            var board = ForsythEdwardsNotation.Parse(fen);
+
+            var whitePawn1 = Piece.Pawn | Piece.White;
+            var whitePawn2 = Piece.Pawn | Piece.White;
+            var whitePawn3 = Piece.Pawn | Piece.White;
+            var whitePawn4 = Piece.Pawn | Piece.White;
+
+            var g1 = new Square("g1");
+            var g2 = new Square("g2");
+            var g3 = new Square("g3");
+            var g4 = new Square("g4");
+
+            board = board.SetPiece(whitePawn1.SetSquare(g1));
+            var score1 = board.Score;
+
+            Assert.IsTrue(score1 > 0);
+
+            board = board.SetPiece(whitePawn2.SetSquare(g2));            
+            Assert.AreEqual(score1 * 2 - Scoring.DoubledPawnPenalty, board.Score, Scoring.DoubledPawnPenalty * 0.5);
+
+            board = board.SetPiece(whitePawn3.SetSquare(g3));            
+            Assert.AreEqual(score1 * 3 - Scoring.DoubledPawnPenalty * 3, board.Score, Scoring.DoubledPawnPenalty);
+
+            board = board.SetPiece(whitePawn4.SetSquare(g4));            
+            Assert.AreEqual(score1 * 4 - Scoring.DoubledPawnPenalty * 7, board.Score, Scoring.DoubledPawnPenalty * 2);
+
         }
 
         private static bool PerftAndCompare(Board board, string expected, int depth)
