@@ -1,4 +1,5 @@
-﻿using SicTransit.Woodpusher.Common.Parsing.Exceptions;
+﻿using Serilog;
+using SicTransit.Woodpusher.Common.Parsing.Exceptions;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
@@ -35,7 +36,7 @@ namespace SicTransit.Woodpusher.Common.Parsing
 
             var halfmoveClock = parts.Length > 4 ? ParseHalfmoveClock(parts[4]) : 0;
 
-            var fullmoveNumber = parts.Length > 5 ? ParseFullmoveNumber(parts[5]) : 0;
+            var fullmoveNumber = parts.Length > 5 ? ParseFullmoveNumber(parts[5]) : 1;
 
             var counters = new Counters(activeColor, castling, enPassantTarget?.ToMask() ?? 0, halfmoveClock, fullmoveNumber, null, Piece.None);
 
@@ -155,7 +156,19 @@ namespace SicTransit.Woodpusher.Common.Parsing
         }
 
 
-        private static int ParseFullmoveNumber(string s) => int.Parse(s);
+        private static int ParseFullmoveNumber(string s)
+        { 
+            var number = int.Parse(s);
+
+            if (number < 1)
+            {
+                number = 1;
+
+                Log.Warning("fullmove number should be >= 1, setting to 1");
+            }
+
+            return number;
+        } 
 
         private static int ParseHalfmoveClock(string s) => int.Parse(s);
 
