@@ -107,6 +107,20 @@ public class Board
                             score -= penalty * sign;
                         }
                     }
+
+                    // Penalty for single rook, bishop, knight
+                    if (BitOperations.PopCount(bitboard.Rook) == 1)
+                    {
+                        score -= Scoring.SingleRookPenalty;
+                    }
+                    if (BitOperations.PopCount(bitboard.Bishop) == 1)
+                    {
+                        score -= Scoring.SingleBishopPenalty;
+                    }
+                    if (BitOperations.PopCount(bitboard.Knight) == 1)
+                    {
+                        score -= Scoring.SingleKnightPenalty;
+                    }
                 }
             }
 

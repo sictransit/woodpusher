@@ -633,13 +633,13 @@ g1h3: 1
 
             Assert.IsTrue(score1 > 0);
 
-            board = board.SetPiece(whitePawn2.SetSquare(g2));            
+            board = board.SetPiece(whitePawn2.SetSquare(g2));
             Assert.AreEqual(score1 * 2 - Scoring.DoubledPawnPenalty, board.Score, Scoring.DoubledPawnPenalty * 0.5);
 
-            board = board.SetPiece(whitePawn3.SetSquare(g3));            
+            board = board.SetPiece(whitePawn3.SetSquare(g3));
             Assert.AreEqual(score1 * 3 - Scoring.DoubledPawnPenalty * 3, board.Score, Scoring.DoubledPawnPenalty);
 
-            board = board.SetPiece(whitePawn4.SetSquare(g4));            
+            board = board.SetPiece(whitePawn4.SetSquare(g4));
             Assert.AreEqual(score1 * 4 - Scoring.DoubledPawnPenalty * 7, board.Score, Scoring.DoubledPawnPenalty * 2);
 
         }
