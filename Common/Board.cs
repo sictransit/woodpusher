@@ -91,9 +91,8 @@ public class Board
                 foreach (var (bitboard, sign) in new[] { (white, 1), (black, -1) })
                 {
                     foreach (var piece in bitboard.GetPieces())
-                    {
-                        var evaluation = internals.Scoring.EvaluatePiece(piece, Phase);
-                        score += evaluation * sign;
+                    {                        
+                        score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
                     }
 
                     // Penalty for doubled pawns
@@ -109,17 +108,17 @@ public class Board
                     }
 
                     // Penalty for single rook, bishop, knight
-                    if (BitOperations.PopCount(bitboard.Rook) == 1)
+                    if (BitOperations.PopCount(bitboard.Rook) < 2)
                     {
-                        score -= Scoring.SingleRookPenalty;
+                        score -= Scoring.SingleRookPenalty * sign;
                     }
-                    if (BitOperations.PopCount(bitboard.Bishop) == 1)
+                    if (BitOperations.PopCount(bitboard.Bishop) <2)
                     {
-                        score -= Scoring.SingleBishopPenalty;
+                        score -= Scoring.SingleBishopPenalty * sign;
                     }
-                    if (BitOperations.PopCount(bitboard.Knight) == 1)
+                    if (BitOperations.PopCount(bitboard.Knight) < 2)
                     {
-                        score -= Scoring.SingleKnightPenalty;
+                        score -= Scoring.SingleKnightPenalty * sign;
                     }
                 }
             }

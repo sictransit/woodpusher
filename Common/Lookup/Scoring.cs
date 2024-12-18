@@ -169,9 +169,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
                 : piece.GetSquare().File + piece.GetSquare().Rank * 8;
 
         public const int DoubledPawnPenalty = 10;
-        public const int SingleRookPenalty = 10;
-        public const int SingleBishopPenalty = 10;
-        public const int SingleKnightPenalty = 10;
+        public const int SingleRookPenalty = 50;
+        public const int SingleBishopPenalty = 30;
+        public const int SingleKnightPenalty = 30;
 
         public Scoring()
         {
