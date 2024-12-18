@@ -15,7 +15,10 @@ namespace SicTransit.Woodpusher.Common.Lookup
         public const int MateScore = 1000000;
         public const int MoveMaximumScore = MateScore * 2;
 
-        public const int ConnectedRooksBonus = 25;
+        public const int DoubledPawnPenalty = 10;
+        public const int SingleRookPenalty = 50;
+        public const int SingleBishopPenalty = 30;
+        public const int SingleKnightPenalty = 30;
 
         private static readonly int[] PawnMiddleGameModifiers =
         {
@@ -167,11 +170,6 @@ namespace SicTransit.Woodpusher.Common.Lookup
         private static int GetModifierIndex(Piece piece) => piece.Is(Piece.White)
                 ? (piece.GetSquare().File + piece.GetSquare().Rank * 8) ^ 56
                 : piece.GetSquare().File + piece.GetSquare().Rank * 8;
-
-        public const int DoubledPawnPenalty = 10;
-        public const int SingleRookPenalty = 50;
-        public const int SingleBishopPenalty = 30;
-        public const int SingleKnightPenalty = 30;
 
         public Scoring()
         {

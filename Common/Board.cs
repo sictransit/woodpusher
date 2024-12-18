@@ -91,7 +91,7 @@ public class Board
                 foreach (var (bitboard, sign) in new[] { (white, 1), (black, -1) })
                 {
                     foreach (var piece in bitboard.GetPieces())
-                    {                        
+                    {
                         score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
                     }
 
@@ -112,7 +112,7 @@ public class Board
                     {
                         score -= Scoring.SingleRookPenalty * sign;
                     }
-                    if (BitOperations.PopCount(bitboard.Bishop) <2)
+                    if (BitOperations.PopCount(bitboard.Bishop) < 2)
                     {
                         score -= Scoring.SingleBishopPenalty * sign;
                     }
