@@ -17,6 +17,7 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         // TODO: These values need to be tuned.
         public const int PassedPawnBonus = 10;
+        public const int IsolatedPawnPenalty = 10;
         public const int DoubledPawnPenalty = 10;
         public const int SingleRookPenalty = 50;
         public const int SingleBishopPenalty = 30;

@@ -106,10 +106,18 @@ public class Board
                         score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
 
                         // TODO: Not slow, but gives weird results. Needs to be fixed.
-                        //if (piece.Is(Piece.Pawn) && IsPassedPawn(piece))
-                        //{
-                        //    score += Scoring.PassedPawnBonus * sign;
-                        //}
+                        if (piece.Is(Piece.Pawn))
+                        {
+                            if (IsPassedPawn(piece))
+                            {
+                                score += Scoring.PassedPawnBonus * sign;
+                            }
+
+                            if (IsIsolatedPawn(piece))
+                            {
+                                score -= Scoring.IsolatedPawnPenalty * sign;
+                            }
+                        }
                     }
 
                     // Penalty for doubled pawns
@@ -312,6 +320,8 @@ public class Board
     }
 
     public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
+
+    public bool IsIsolatedPawn(Piece piece) => (internals.Moves.GetIsolatedPawnMask(piece) & GetBitboard(piece & Piece.White).Pawn) == 0;
 
     private bool IsOccupied(ulong mask) => ((white.AllPieces | black.AllPieces) & mask) != 0;
 

@@ -626,6 +626,28 @@ g1h3: 1
         }
 
         [TestMethod]
+        public void IsIsolatedPawnTest()
+        {
+            var board = ForsythEdwardsNotation.Parse("8/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/8 w - - 0 1");
+
+            Log.Information(Environment.NewLine + board.PrettyPrint());
+
+            var isolated = new[] { "a7", "e4" };
+
+            foreach (var piece in board.GetPieces())
+            {
+                if (isolated.Contains(piece.GetSquare().ToAlgebraicNotation()))
+                {
+                    Assert.IsTrue(board.IsIsolatedPawn(piece));
+                }
+                else
+                {
+                    Assert.IsFalse(board.IsIsolatedPawn(piece));
+                }
+            }            
+        }
+
+        [TestMethod]
         public void DoublePawnPenaltyTest()
         {
             // Arrange: Set up a board with doubled pawns
