@@ -654,28 +654,25 @@ g1h3: 1
             var fen = "8/8/8/8/8/8/8/8 w - - 0 1";
             var board = ForsythEdwardsNotation.Parse(fen);
 
-            var whitePawn1 = Piece.Pawn | Piece.White;
-            var whitePawn2 = Piece.Pawn | Piece.White;
-            var whitePawn3 = Piece.Pawn | Piece.White;
-            var whitePawn4 = Piece.Pawn | Piece.White;
+            var whitePawn = Piece.Pawn | Piece.White;
 
-            var g1 = new Square("g1");
             var g2 = new Square("g2");
             var g3 = new Square("g3");
             var g4 = new Square("g4");
+            var g5 = new Square("g5");
 
-            board = board.SetPiece(whitePawn1.SetSquare(g1));
+            board = board.SetPiece(whitePawn.SetSquare(g2));
             var score1 = board.Score;
 
             Assert.IsTrue(score1 > 0);
 
-            board = board.SetPiece(whitePawn2.SetSquare(g2));
+            board = board.SetPiece(whitePawn.SetSquare(g3));
             Assert.AreEqual(score1 * 2 - Scoring.DoubledPawnPenalty, board.Score, Scoring.DoubledPawnPenalty * 0.5);
 
-            board = board.SetPiece(whitePawn3.SetSquare(g3));
+            board = board.SetPiece(whitePawn.SetSquare(g4));
             Assert.AreEqual(score1 * 3 - Scoring.DoubledPawnPenalty * 3, board.Score, Scoring.DoubledPawnPenalty);
 
-            board = board.SetPiece(whitePawn4.SetSquare(g4));
+            board = board.SetPiece(whitePawn.SetSquare(g5));
             Assert.AreEqual(score1 * 4 - Scoring.DoubledPawnPenalty * 7, board.Score, Scoring.DoubledPawnPenalty * 2);
 
         }

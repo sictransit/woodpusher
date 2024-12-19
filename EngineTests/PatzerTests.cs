@@ -75,7 +75,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("fails and takes too long")]
+        [Ignore("fails and takes too long, but we're getting there")]
         public void RunHardProblemsFailingTest()
         {
             Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(20).TotalMilliseconds, false));
@@ -97,7 +97,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
                 ("1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1", "d6d1", true),
                 ("3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/5K2/2R5 w - - 0 1", "d4d5", false),
                 ("rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R w KQkq - 0 1", "e5e6", true),
-                ("2r3k1/pppR1pp1/4p3/4P1P1/5P2/1P4K1/P1P5/8 w - - 0 1", "g5g6", false),
+                ("2r3k1/pppR1pp1/4p3/4P1P1/5P2/1P4K1/P1P5/8 w - - 0 1", "g5g6", true),
                 ("4b3/p3kp2/6p1/3pP2p/2pP1P2/4K1P1/P3N2P/8 w - - 0 1", "f4f5", true),
                 ("3rr1k1/pp3pp1/1qn2np1/8/3p4/PP1R1P2/2P1NQPP/R1B3K1 b - - 0 1", "c6e5", false),
                 ("2r1nrk1/p2q1ppp/bp1p4/n1pPp3/P1P1P3/2PBB1N1/4QPPP/R4RK1 w - - 0 1", "g2f5", false),
@@ -332,7 +332,6 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        [Ignore("45 secs")]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]
