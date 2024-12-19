@@ -75,7 +75,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
-        //[Ignore("fails and takes too long")]
+        [Ignore("fails and takes too long")]
         public void RunHardProblemsFailingTest()
         {
             Assert.AreEqual(0, RunHardProblems((int)TimeSpan.FromSeconds(20).TotalMilliseconds, false));

@@ -93,6 +93,11 @@ public class Board
                     foreach (var piece in bitboard.GetPieces())
                     {
                         score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
+
+                        //if (piece.Is(Piece.Pawn) && IsPassedPawn(piece))
+                        //{
+                        //    score += Scoring.PassedPawnBonus * sign;
+                        //}
                     }
 
                     // Penalty for doubled pawns
@@ -293,6 +298,8 @@ public class Board
             ? new Board(newActiveBoard, newOpponentBoard, counters, internals, newHash)
             : new Board(newOpponentBoard, newActiveBoard, counters, internals, newHash);
     }
+
+    public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
 
     private bool IsOccupied(ulong mask) => ((white.AllPieces | black.AllPieces) & mask) != 0;
 

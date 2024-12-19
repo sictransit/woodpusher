@@ -15,6 +15,8 @@ namespace SicTransit.Woodpusher.Common.Lookup
         public const int MateScore = 1000000;
         public const int MoveMaximumScore = MateScore * 2;
 
+        public const int PassedPawnBonus = 20;
+
         public const int DoubledPawnPenalty = 10;
         public const int SingleRookPenalty = 50;
         public const int SingleBishopPenalty = 30;
