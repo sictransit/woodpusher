@@ -18,6 +18,7 @@ public class Board
     private int? score = null;
     private int? phase = null;
     private bool? isChecked = null;
+    private ulong? hash;
 
     public Counters Counters { get; }
 
@@ -30,7 +31,7 @@ public class Board
 
     }
 
-    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
+    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong? hash = null)
     {
         this.white = white;
         this.black = black;
@@ -40,11 +41,13 @@ public class Board
         opponentBoard = whiteIsPlaying ? black : white;
 
         Counters = counters;
+
         this.internals = internals;
-        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
+
+        this.hash = hash;
     }
 
-    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
+    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals())
     {
     }
 
@@ -68,7 +71,15 @@ public class Board
         return new Board(white, black, Counters.Default);
     }
 
-    public ulong Hash { get; }
+    public ulong Hash
+    {
+        get
+        {
+            hash ??= internals.Zobrist.GetHash(this);
+
+            return hash.Value;
+        }
+    }
 
     public int Phase
     {
@@ -160,8 +171,8 @@ public class Board
     }
 
     public Board SetPiece(Piece piece) => piece.Is(Piece.White)
-            ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
-            : new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
+            ? new Board(white.Toggle(piece), black, Counters, internals)
+            : new Board(white, black.Toggle(piece), Counters, internals);
 
     public Board Play(Move move)
     {
