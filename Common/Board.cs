@@ -105,6 +105,7 @@ public class Board
                     {
                         score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
 
+                        // TODO: Not slow, but gives weird results. Needs to be fixed.
                         //if (piece.Is(Piece.Pawn) && IsPassedPawn(piece))
                         //{
                         //    score += Scoring.PassedPawnBonus * sign;
