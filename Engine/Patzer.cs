@@ -268,7 +268,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 string? abortMessage = null;
 
-                if (mateIn.HasValue)
+                if (mateIn.HasValue && mateIn < 0)
                 {
                     abortMessage = $"aborting search @ depth {depth}, mate in {mateIn}";
                 }
@@ -278,7 +278,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else if (!enoughTime)
                 {
-                    abortMessage = $"aborting search @ depth {depth}, not enough time";
+                    abortMessage = $"aborting search @ depth {depth}, not enough time to continue";
                 }
 
                 if (abortMessage != null)
@@ -303,7 +303,7 @@ namespace SicTransit.Woodpusher.Engine
             SendInfo($"depth {depth} seldepth {selDepth} multipv 1 nodes {nodes} nps {nodesPerSecond} hashfull {hashFull} score {scoreString} time {stopwatch.ElapsedMilliseconds} pv {pvString}");
         }
 
-        private void SendCurrentMove(Move move, int depth, int currentMoveNumber)
+        private void SendCurrentMove(Move move, int depth, uint currentMoveNumber)
         {
             SendInfo($"depth {depth} currmove {move.ToAlgebraicMoveNotation()} currmovenumber {currentMoveNumber}");
         }
@@ -318,7 +318,7 @@ namespace SicTransit.Woodpusher.Engine
             for (var i = 0; i < depth; i++)
             {
                 var entry = transpositionTable[board.Hash % transpositionTableSize];
-                if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && board.GetLegalMoves().Contains(entry.Move))
+                if (entry.EntryType == EntryType.Exact && entry.Hash == board.Hash && entry.Move != null && board.GetLegalMoves().Contains(entry.Move))
                 {
                     bestLine.Add(entry.Move);
                     board = board.Play(entry.Move);
@@ -349,22 +349,27 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (transpositionTable[board.Hash % transpositionTableSize].EntryType == EntryType.Exact)
                 {
-                    return int.MaxValue - 10; // High priority for exact transposition table entries.
+                    return int.MaxValue >> 1; // High priority for exact transposition table entries.
                 }
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return int.MaxValue - 20 + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return (int.MaxValue >> 2) + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
                 {
-                    return int.MaxValue - 30; // High priority for killer moves
+                    return int.MaxValue >> 3; // High priority for killer moves
+                }
+
+                if (move.Flags.HasFlag(SpecialMove.PawnPromotes))
+                {
+                    return int.MaxValue >> 4; // High priority for pawn promotions
                 }
 
                 if (board.IsChecked)
                 {
-                    return int.MaxValue - 40;
+                    return int.MaxValue >> 5;
                 }
 
                 return int.MinValue + historyHeuristics[move.FromIndex, move.ToIndex];
@@ -402,6 +407,39 @@ namespace SicTransit.Woodpusher.Engine
             return α;
         }
 
+        private int NullMovePruning(Board board, int depth, int α, int β, int sign)
+        {
+            const int R = 2; // Reduction depth for null move pruning
+
+            if (depth <= R || board.IsChecked)
+            {
+                return EvaluateBoard(board, depth - 1, α, β, sign);
+            }
+
+            // Make a null move
+            var nullMoveBoard = board.PlayNullMove();
+
+            // Evaluate the position after the null move
+            int score = -EvaluateBoard(nullMoveBoard, depth - 1 - R, -β, -β + 1, -sign);
+
+            // If the score is greater than or equal to β, prune the branch
+            if (score >= β)
+            {
+                return β;
+            }
+
+            return α;
+        }
+
+        private static bool IsNullMovePruningApplicable(Board board, int depth)
+        {
+            return
+                depth > 1 &&
+                board.Counters.LastMove != null &&
+                ((board.ActiveBoard.AllPieces ^ board.ActiveBoard.Pawn) != board.ActiveBoard.King) &&
+                !board.IsChecked;
+        }
+
         private int EvaluateBoard(Board board, int depth, int α, int β, int sign, bool isRootNode = false)
         {
             if (timeIsUp)
@@ -409,9 +447,19 @@ namespace SicTransit.Woodpusher.Engine
                 return 0;
             }
 
-            if (depth == 0)
+            if (depth <= 0)
             {
                 return Quiesce(board, α, β, sign);
+            }
+
+            // Null move pruning
+            if (IsNullMovePruningApplicable(board, depth))
+            {
+                int nullMoveScore = NullMovePruning(board, depth, α, β, sign);
+                if (nullMoveScore >= β)
+                {
+                    return β;
+                }
             }
 
             var transpositionIndex = board.Hash % transpositionTableSize;
@@ -439,21 +487,20 @@ namespace SicTransit.Woodpusher.Engine
 
             Move? bestMove = null;
             var α0 = α;
-            var n0 = nodeCount;
-            var currentMoveNumber = 0;
+            uint moveCounter = 0;
 
             foreach (var newBoard in SortBoards(board.PlayLegalMoves(), cachedEntry.Move))
             {
-                nodeCount++;
+                moveCounter++;
 
                 if (isRootNode)
                 {
-                    SendCurrentMove(newBoard.Counters.LastMove, depth, ++currentMoveNumber);
+                    SendCurrentMove(newBoard.Counters.LastMove, depth, moveCounter);
                 }
 
                 int evaluation;
 
-                if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
+                if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2 || board.Counters.HalfmoveClock == 50)
                 {
                     // A draw by repetition may be forced by either player.
                     // TODO: This does not take into account moves made in the current evaluated line.
@@ -461,7 +508,7 @@ namespace SicTransit.Woodpusher.Engine
                 }
                 else
                 {
-                    if (nodeCount == n0 + 1)
+                    if (α0 == α)
                     {
                         evaluation = -EvaluateBoard(newBoard, depth - 1, -β, -α, -sign);
                     }
@@ -492,17 +539,18 @@ namespace SicTransit.Woodpusher.Engine
                 }
             }
 
-            if (n0 == nodeCount)
+            nodeCount += moveCounter;
+
+            if (moveCounter == 0)
             {
-                return board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
+                α = board.IsChecked ? -Scoring.MateScore + board.Counters.Ply : Scoring.DrawScore;
             }
 
-            var ttEntry = transpositionTable[transpositionIndex];
-            if (ttEntry.EntryType == EntryType.None || ttEntry.Depth <= depth)
+            if (transpositionTable[transpositionIndex].Depth <= depth)
             {
                 transpositionTable[transpositionIndex] = new TranspositionTableEntry(
-                    α <= α0 ? EntryType.UpperBound : α >= β ? EntryType.LowerBound : EntryType.Exact,
-                    bestMove!,
+                    α <= α0 ? EntryType.UpperBound : (α >= β ? EntryType.LowerBound : EntryType.Exact),
+                    bestMove,
                     α,
                     board.Hash,
                     depth

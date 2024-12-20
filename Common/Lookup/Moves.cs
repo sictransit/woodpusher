@@ -9,12 +9,15 @@ namespace SicTransit.Woodpusher.Common.Lookup
     {
         private readonly Dictionary<Piece, Move[][]> vectors = new();
         private readonly Dictionary<ulong, ulong> travelMasks = new();
+        private readonly Dictionary<Piece, ulong> passedPawnMasks = new();
+        private readonly Dictionary<Piece, ulong> isolatedPawnMasks = new();
 
         public Moves()
         {
             InitializeVectors();
-
             InitializeTravelMasks();
+            InitializePassedPawnMasks();
+            InitializeIsolatedPawnMasks();
         }
 
         private void InitializeTravelMasks()
@@ -35,6 +38,62 @@ namespace SicTransit.Woodpusher.Common.Lookup
         }
 
         public ulong GetTravelMask(ulong current, ulong target) => travelMasks[current | target];
+
+        private void InitializePassedPawnMasks()
+        {
+            var pieceTypes = PieceExtensions.Colors.Select(c => Piece.Pawn | c);
+            var squares = SquareExtensions.AllSquares.Where(s => s.Rank is > 0 and < 7);
+
+            var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
+
+            foreach (var piece in pieces)
+            {
+                var mask = 0ul;
+                var minRank = piece.Is(Piece.White) ? piece.GetSquare().Rank + 1 : 1;
+                var maxRank = piece.Is(Piece.White) ? 6 : piece.GetSquare().Rank - 1;
+
+                foreach (var dFile in new[] { -1, 0, 1 })
+                {
+                    for (var rank = minRank; rank <= maxRank; rank++)
+                    {
+                        if (Square.TryCreate(piece.GetSquare().File + dFile, rank, out var square))
+                        {
+                            mask |= square.ToMask();
+                        }
+                    }
+                }
+
+                passedPawnMasks.Add(piece, mask);
+            }
+        }
+
+        public ulong GetPassedPawnMask(Piece piece) => passedPawnMasks[piece];
+
+        private void InitializeIsolatedPawnMasks()
+        {
+            var pieceTypes = PieceExtensions.Colors.Select(c => Piece.Pawn | c);
+            var squares = SquareExtensions.AllSquares.Where(s => s.Rank is > 0 and < 7);
+            var pieces = pieceTypes.Select(p => squares.Select(s => p.SetSquare(s))).SelectMany(p => p);
+
+            foreach (var piece in pieces)
+            {
+                var mask = 0ul;
+                foreach (var dFile in new[] { -1, 1 })
+                {
+                    for (var rank = 1; rank < 7; rank++)
+                    {
+                        if (Square.TryCreate(piece.GetSquare().File + dFile, rank, out var square))
+                        {
+                            mask |= square.ToMask();
+                        }
+                    }
+                }
+
+                isolatedPawnMasks.Add(piece, mask);
+            }
+        }
+
+        public ulong GetIsolatedPawnMask(Piece piece) => isolatedPawnMasks[piece];
 
         private void InitializeVectors()
         {

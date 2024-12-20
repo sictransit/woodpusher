@@ -13,6 +13,7 @@ A more or less UCI-compatible chess engine. Plug it into your favourite GUI.
 	- NegaScout (or PVS?) 
 	- Quiescence 
 	- Iterative deepening 
+	- Null move pruning
     - Move ordering 
     	- MVV/LVA, history heuristic, killer heuristic, transposition table
 
@@ -27,7 +28,7 @@ Initializes the engine and provides engine information.
 **Example:**
 ```
 uci
-id name Woodpusher 1.5.0+e1061610be8d96db24890a658c1b57373402d6de
+id name Woodpusher 1.6.0+eadfe77ee3e88bf7fbd97491bcdf15d3f09b07a5
 id author Mikael Fredriksson <micke@sictransit.net>
 option name OwnBook type check default true
 option name Ponder type check default false
@@ -126,38 +127,4 @@ Exits the engine.
 
 ## Strength of play (ELO)
 
-This is the result of a small tournament vs Stockfish 15 locked to ELO 2500. The current version is stronger than the previous. **On my machine**, it even a beats Stockfish 15, but it's not a fair comparison since Stockfish seems to blunder to lower its strength.
-
-```
-Rank Name                          Elo     +/-   Games   Score    Draw 
-   1 Woodpusher (1.5.0)             89     131      20   62.5%   35.0% 
-   2 stockfish-windows-x86-64-avx2  35     145      20   55.0%   20.0% 
-   3 Woodpusher (1.4.2)           -127     149      20   32.5%   25.0% 
-
-SPRT: llr 0 (0.0%), lbound -inf, ubound inf
-30 of 30 games finished.
-
-Player: stockfish-windows-x86-64-avx2
-   "Draw by 3-fold repetition": 3
-   "Draw by insufficient mating material": 1
-   "Loss: Black mates": 1
-   "Loss: White mates": 6
-   "Win: Black mates": 4
-   "Win: White mates": 5
-Player: Woodpusher (1.5.0)
-   "Draw by 3-fold repetition": 5
-   "Draw by adjudication: user decision": 1 (both sides had rook + king)
-   "Draw by insufficient mating material": 1
-   "Loss: Black mates": 2
-   "Loss: White mates": 2
-   "Win: Black mates": 3
-   "Win: White mates": 6
-Player: Woodpusher (1.4.2)
-   "Draw by 3-fold repetition": 4
-   "Draw by adjudication: user decision": 1 (both sides had rook + king)
-   "Loss: Black mates": 6
-   "Loss: White mates": 5
-   "Win: Black mates": 2
-   "Win: White mates": 2
-```
-
+On my machine it plays about even vs Stockfish 15 locked to ELO 2500. It is not a fair comparison since Stockfish seems to blunder to lower its strength, but it is a number.

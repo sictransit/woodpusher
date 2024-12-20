@@ -379,7 +379,7 @@ e8f7: 1
         }
 
         [TestMethod]
-        //[Ignore("long running: 4.3 minutes on dev machine")]
+        [Ignore("long running: 4.3 minutes on dev machine")]
         public void Perft7Test()
         {
             var stockfish = @"
@@ -611,6 +611,71 @@ g1h3: 1
             }
         }
 
+        [TestMethod]
+        public void IsPassedPawnTest()
+        {
+            var board = ForsythEdwardsNotation.Parse("8/8/7p/1P2Pp1P/2Pp1PP1/8/8/8 w - - 0 1");
+
+            var whitePassedPawns = board.GetPieces(Piece.White, Piece.Pawn).Where(board.IsPassedPawn).ToArray();
+
+            Assert.AreEqual(3, whitePassedPawns.Length);
+
+            var blackPassedPawns = board.GetPieces(Piece.None, Piece.Pawn).Where(board.IsPassedPawn).ToArray();
+
+            Assert.AreEqual(1, blackPassedPawns.Length);
+        }
+
+        [TestMethod]
+        public void IsIsolatedPawnTest()
+        {
+            var board = ForsythEdwardsNotation.Parse("8/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/8 w - - 0 1");
+
+            Log.Information(Environment.NewLine + board.PrettyPrint());
+
+            var isolated = new[] { "a7", "e4" };
+
+            foreach (var piece in board.GetPieces())
+            {
+                if (isolated.Contains(piece.GetSquare().ToAlgebraicNotation()))
+                {
+                    Assert.IsTrue(board.IsIsolatedPawn(piece));
+                }
+                else
+                {
+                    Assert.IsFalse(board.IsIsolatedPawn(piece));
+                }
+            }            
+        }
+
+        [TestMethod]
+        public void DoublePawnPenaltyTest()
+        {
+            // Arrange: Set up a board with doubled pawns
+            var fen = "8/8/8/8/8/8/8/8 w - - 0 1";
+            var board = ForsythEdwardsNotation.Parse(fen);
+
+            var whitePawn = Piece.Pawn | Piece.White;
+
+            var g2 = new Square("g2");
+            var g3 = new Square("g3");
+            var g4 = new Square("g4");
+            var g5 = new Square("g5");
+
+            board = board.SetPiece(whitePawn.SetSquare(g2));
+            var score1 = board.Score;
+
+            Assert.IsTrue(score1 > 0);
+
+            board = board.SetPiece(whitePawn.SetSquare(g3));
+            Assert.AreEqual(score1 * 2 - Scoring.DoubledPawnPenalty, board.Score, Scoring.DoubledPawnPenalty * 0.5);
+
+            board = board.SetPiece(whitePawn.SetSquare(g4));
+            Assert.AreEqual(score1 * 3 - Scoring.DoubledPawnPenalty * 3, board.Score, Scoring.DoubledPawnPenalty);
+
+            board = board.SetPiece(whitePawn.SetSquare(g5));
+            Assert.AreEqual(score1 * 4 - Scoring.DoubledPawnPenalty * 7, board.Score, Scoring.DoubledPawnPenalty * 2);
+
+        }
 
         private static bool PerftAndCompare(Board board, string expected, int depth)
         {
@@ -638,37 +703,6 @@ g1h3: 1
             }
 
             return success;
-        }
-
-        [TestMethod]
-        public void ConnectedRooksBonusTest()
-        {
-            // Arrange
-            var whiteRook1 = Piece.Rook | Piece.White;
-            var whiteRook2 = Piece.Rook | Piece.White;
-
-            var d1 = new Square("d1");
-            var e1 = new Square("e1");
-            var a2 = new Square("a2");
-
-            var boardWithConnectedRooks = new Board()
-                .SetPiece(whiteRook1.SetSquare(d1))
-                .SetPiece(whiteRook2.SetSquare(e1));
-
-            var boardWithDisconnectedRooks = new Board()
-                .SetPiece(whiteRook1.SetSquare(d1))
-                .SetPiece(whiteRook2.SetSquare(a2));
-
-            // Act
-            var scoreWithConnectedRooks = boardWithConnectedRooks.Score;
-            var scoreWithDisconnectedRooks = boardWithDisconnectedRooks.Score;
-
-            // Assert            
-            var actualBonus = scoreWithConnectedRooks - scoreWithDisconnectedRooks;
-
-            Assert.IsTrue(actualBonus > 0);
-            Assert.AreEqual(actualBonus, Scoring.ConnectedRooksBonus, Scoring.ConnectedRooksBonus / 2);
-
         }
     }
 }

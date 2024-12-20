@@ -1,6 +1,8 @@
-﻿using SicTransit.Woodpusher.Model;
+﻿using SicTransit.Woodpusher.Common.Lookup;
+using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Numerics;
 
 namespace SicTransit.Woodpusher.Common;
 
@@ -8,50 +10,86 @@ public class Board
 {
     private readonly Bitboard white;
     private readonly Bitboard black;
-    private readonly Bitboard activeBoard;
+
     private readonly Bitboard opponentBoard;
     private readonly bool whiteIsPlaying;
     private readonly BoardInternals internals;
 
     private int? score = null;
+    private int? phase = null;
     private bool? isChecked = null;
+    private ulong? hash;
 
     public Counters Counters { get; }
 
     public Piece ActiveColor => Counters.ActiveColor;
+
+    public Bitboard ActiveBoard { get; }
 
     public Board() : this(new Bitboard(Piece.White), new Bitboard(Piece.None), Counters.Default)
     {
 
     }
 
-    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong hash)
+    private Board(Bitboard white, Bitboard black, Counters counters, BoardInternals internals, ulong? hash = null)
     {
         this.white = white;
         this.black = black;
 
         whiteIsPlaying = counters.ActiveColor.Is(Piece.White);
-        activeBoard = whiteIsPlaying ? white : black;
+        ActiveBoard = whiteIsPlaying ? white : black;
         opponentBoard = whiteIsPlaying ? black : white;
 
         Counters = counters;
+
         this.internals = internals;
-        Hash = hash == BoardInternals.InvalidHash ? internals.Zobrist.GetHash(this) : hash;
+
+        this.hash = hash;
     }
 
-    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals(), BoardInternals.InvalidHash)
+    public Board(Bitboard white, Bitboard black, Counters counters) : this(white, black, counters, new BoardInternals())
     {
     }
 
     public static Board StartingPosition()
     {
-        var white = new Bitboard(Piece.White, 65280, 129, 66, 36, 8, 16);
-        var black = new Bitboard(Piece.None, 71776119061217280, 9295429630892703744, 4755801206503243776, 2594073385365405696, 576460752303423488, 1152921504606846976);
+        var white = new Bitboard(Piece.White,
+            0xFF00,
+            0x0081,
+            0x0042,
+            0x0024,
+            0x0008,
+            0x0010);
+        var black = new Bitboard(Piece.None,
+            0x00FF000000000000,
+            0x8100000000000000,
+            0x4200000000000000,
+            0x2400000000000000,
+            0x0800000000000000,
+            0x1000000000000000);
 
         return new Board(white, black, Counters.Default);
     }
 
-    public ulong Hash { get; }
+    public ulong Hash
+    {
+        get
+        {
+            hash ??= internals.Zobrist.GetHash(this);
+
+            return hash.Value;
+        }
+    }
+
+    public int Phase
+    {
+        get
+        {
+            phase ??= white.Phase + black.Phase;
+
+            return phase.Value;
+        }
+    }
 
     public int Score
     {
@@ -59,30 +97,54 @@ public class Board
         {
             if (!score.HasValue)
             {
-                var phase = white.Phase + black.Phase;
-
                 score = 0;
 
                 foreach (var (bitboard, sign) in new[] { (white, 1), (black, -1) })
                 {
                     foreach (var piece in bitboard.GetPieces())
                     {
-                        var evaluation = internals.Scoring.EvaluatePiece(piece, phase);
+                        score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
 
-                        score += evaluation * sign;
+                        // TODO: Not slow, but gives weird results. Needs to be fixed.
+                        if (piece.Is(Piece.Pawn))
+                        {
+                            if (IsPassedPawn(piece))
+                            {
+                                score += Scoring.PassedPawnBonus * sign;
+                            }
+
+                            if (IsIsolatedPawn(piece))
+                            {
+                                score -= Scoring.IsolatedPawnPenalty * sign;
+                            }
+                        }
                     }
 
-                    //// Connected rooks bonus
-                    //var rooks = bitboard.GetMasks(Piece.Rook, ulong.MaxValue).ToArray();
-                    //if (rooks.Length == 2 && rooks[0].SameFileOrRank(rooks[1]))
-                    //{
-                    //    var travelMask = internals.Moves.GetTravelMask(rooks[0], rooks[1]);
+                    // Penalty for doubled pawns
+                    for (var file = 0; file < 8; file++)
+                    {
+                        var pawnCount = BitOperations.PopCount(Bitboard.Files[file] & bitboard.Pawn);
 
-                    //    if (!IsOccupied(travelMask))
-                    //    {
-                    //        score += Scoring.ConnectedRooksBonus * sign;
-                    //    }
-                    //}
+                        if (pawnCount > 1)
+                        {
+                            var penalty = Scoring.DoubledPawnPenalty * ((2 << (pawnCount - 2)) - 1);
+                            score -= penalty * sign;
+                        }
+                    }
+
+                    // Penalty for single rook, bishop, knight
+                    if (BitOperations.PopCount(bitboard.Rook) < 2)
+                    {
+                        score -= Scoring.SingleRookPenalty * sign;
+                    }
+                    if (BitOperations.PopCount(bitboard.Bishop) < 2)
+                    {
+                        score -= Scoring.SingleBishopPenalty * sign;
+                    }
+                    if (BitOperations.PopCount(bitboard.Knight) < 2)
+                    {
+                        score -= Scoring.SingleKnightPenalty * sign;
+                    }
                 }
             }
 
@@ -90,15 +152,42 @@ public class Board
         }
     }
 
+    public Board PlayNullMove()
+    {
+        // Toggle the active color
+        var newActiveColor = ActiveColor == Piece.White ? Piece.None : Piece.White;
+
+        // Update the counters
+        var newCounters = new Counters(
+            newActiveColor,
+            Counters.Castlings,
+            0, // No en passant target for null move
+            Counters.HalfmoveClock + 1,
+            Counters.FullmoveNumber + (ActiveColor == Piece.None ? 1 : 0),
+            null,
+            Piece.None // No capture for null move
+        );
+
+        // Calculate the new hash
+        var newHash = Hash
+            ^ internals.Zobrist.GetPieceHash(ActiveColor)
+            ^ internals.Zobrist.GetPieceHash(newActiveColor)
+            ^ internals.Zobrist.GetMaskHash(Counters.EnPassantTarget)
+            ^ internals.Zobrist.GetMaskHash(newCounters.EnPassantTarget);
+
+        // Return the new board state
+        return new Board(white, black, newCounters, internals, newHash);
+    }
+
     public Board SetPiece(Piece piece) => piece.Is(Piece.White)
-            ? new Board(white.Toggle(piece), black, Counters, internals, BoardInternals.InvalidHash)
-            : new Board(white, black.Toggle(piece), Counters, internals, BoardInternals.InvalidHash);
+            ? new Board(white.Toggle(piece), black, Counters, internals)
+            : new Board(white, black.Toggle(piece), Counters, internals);
 
     public Board Play(Move move)
     {
         var newHash = Hash;
 
-        var newActiveBoard = activeBoard.Toggle(move.Piece, move.Target);
+        var newActiveBoard = ActiveBoard.Toggle(move.Piece, move.Target);
 
         newHash ^= internals.Zobrist.GetPieceHash(move.Piece) ^ internals.Zobrist.GetPieceHash(move.Piece.SetMask(move.Target));
 
@@ -230,6 +319,10 @@ public class Board
             : new Board(newOpponentBoard, newActiveBoard, counters, internals, newHash);
     }
 
+    public bool IsPassedPawn(Piece piece) => (internals.Moves.GetPassedPawnMask(piece) & GetBitboard(piece.OpponentColor()).Pawn) == 0;
+
+    public bool IsIsolatedPawn(Piece piece) => (internals.Moves.GetIsolatedPawnMask(piece) & GetBitboard(piece & Piece.White).Pawn) == 0;
+
     private bool IsOccupied(ulong mask) => ((white.AllPieces | black.AllPieces) & mask) != 0;
 
     private Bitboard GetBitboard(Piece color) => color.Is(Piece.White) ? white : black;
@@ -324,16 +417,13 @@ public class Board
 
     public IEnumerable<Board> PlayLegalMoves(bool quiescence = false)
     {
-
-        foreach (var piece in activeBoard.GetPieces())
+        foreach (var piece in ActiveBoard.GetPieces())
         {
             foreach (var board in PlayLegalMoves(piece, quiescence))
             {
                 yield return board;
             }
         }
-
-
     }
 
     private IEnumerable<Board> PlayLegalMoves(Piece piece, bool quiescence)
@@ -342,17 +432,26 @@ public class Board
         {
             foreach (var move in vector)
             {
-                if (activeBoard.IsOccupied(move.Target))
+                if (ActiveBoard.IsOccupied(move.Target))
                 {
                     break;
                 }
 
                 var taking = opponentBoard.IsOccupied(move.Target);
 
-                //if (quiescence && (!taking || !move.Flags.HasFlag(SpecialMove.PawnPromotes)))
-                if (quiescence && !taking)
+                if (quiescence)
                 {
-                    continue;
+                    if (move.Piece.Is(Piece.Pawn))
+                    {
+                        if (move.Flags.HasFlag(SpecialMove.PawnMoves))
+                        {
+                            continue;
+                        }
+                    }
+                    else if (!taking)
+                    {
+                        continue;
+                    }
                 }
 
                 if (!ValidateMove(move, taking))
@@ -387,7 +486,12 @@ public class Board
     {
         if (move.Piece.Is(Piece.Pawn))
         {
-            if ((taking && move.Flags.HasFlag(SpecialMove.PawnMoves)) || (!taking && move.Flags.HasFlag(SpecialMove.PawnTakes)))
+            if (taking && move.Flags.HasFlag(SpecialMove.PawnMoves))
+            {
+                return false;
+            }
+
+            if (!taking && move.Flags.HasFlag(SpecialMove.PawnTakes))
             {
                 return false;
             }
