@@ -500,7 +500,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 int evaluation;
 
-                if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2)
+                if (repetitionTable.GetValueOrDefault(newBoard.Hash) >= 2 || board.Counters.HalfmoveClock == 50)
                 {
                     // A draw by repetition may be forced by either player.
                     // TODO: This does not take into account moves made in the current evaluated line.
