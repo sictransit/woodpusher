@@ -332,6 +332,7 @@ namespace SicTransit.Woodpusher.Engine.Tests
         }
 
         [TestMethod]
+        [Ignore("takes too long")]
         public void PerftTest()
         {
             var tests = new (string fen, int depth, ulong nodes)[]

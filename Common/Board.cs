@@ -110,12 +110,12 @@ public class Board
                         {
                             if (IsPassedPawn(piece))
                             {
-                                score += Scoring.PassedPawnBonus * sign;
+                                score += Scoring.CalculateBonus(Scoring.PassedPawnBonus, Phase) * sign;
                             }
 
                             if (IsIsolatedPawn(piece))
                             {
-                                score -= Scoring.IsolatedPawnPenalty * sign;
+                                score -= Scoring.CalculateBonus(Scoring.IsolatedPawnPenalty, Phase) * sign;
                             }
                         }
                     }
@@ -127,23 +127,23 @@ public class Board
 
                         if (pawnCount > 1)
                         {
-                            var penalty = Scoring.DoubledPawnPenalty * ((2 << (pawnCount - 2)) - 1);
+                            var penalty = Scoring.CalculateBonus(Scoring.DoubledPawnPenalty, Phase) * ((2 << (pawnCount - 2)) - 1);
                             score -= penalty * sign;
                         }
                     }
 
-                    // Penalty for single rook, bishop, knight
-                    if (BitOperations.PopCount(bitboard.Rook) < 2)
+                    // Bonus for double rook, bishop, knight
+                    if (BitOperations.PopCount(bitboard.Rook) >= 2)
                     {
-                        score -= Scoring.SingleRookPenalty * sign;
+                        score += Scoring.CalculateBonus(Scoring.DoubleRookBonus, Phase) * sign;
                     }
-                    if (BitOperations.PopCount(bitboard.Bishop) < 2)
+                    if (BitOperations.PopCount(bitboard.Bishop) >= 2)
                     {
-                        score -= Scoring.SingleBishopPenalty * sign;
+                        score += Scoring.CalculateBonus(Scoring.DoubleBishopBonus, Phase) * sign;
                     }
-                    if (BitOperations.PopCount(bitboard.Knight) < 2)
+                    if (BitOperations.PopCount(bitboard.Knight) >= 2)
                     {
-                        score -= Scoring.SingleKnightPenalty * sign;
+                        score += Scoring.CalculateBonus(Scoring.DoubleKnightBonus, Phase) * sign;
                     }
                 }
             }
