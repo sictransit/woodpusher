@@ -85,7 +85,7 @@ namespace SicTransit.Woodpusher.Engine
 
         public void Position(string fen, IEnumerable<AlgebraicMove>? algebraicMoves = null)
         {
-            algebraicMoves ??= Array.Empty<AlgebraicMove>();
+            algebraicMoves ??= [];
 
             SetBoard(ForsythEdwardsNotation.Parse(fen));
 
@@ -224,7 +224,7 @@ namespace SicTransit.Woodpusher.Engine
                 long startTime = stopwatch.ElapsedMilliseconds;
                 int? mateIn = default;
 
-                var score = EvaluateBoard(Board, depth, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1, true);
+                var score = EvaluateBoard(Board, depth, -Scoring.MoveMaximumScore, Scoring.MoveMaximumScore, Board.ActiveColor.Is(Piece.White) ? 1 : -1);
 
                 long evaluationTime = stopwatch.ElapsedMilliseconds - startTime;
 
@@ -443,7 +443,7 @@ namespace SicTransit.Woodpusher.Engine
                 !board.IsChecked;
         }
 
-        private int EvaluateBoard(Board board, int depth, int α, int β, int sign, bool isRootNode = false)
+        private int EvaluateBoard(Board board, int depth, int α, int β, int sign)
         {
             if (timeIsUp)
             {
@@ -496,7 +496,7 @@ namespace SicTransit.Woodpusher.Engine
             {
                 moveCounter++;
 
-                if (isRootNode)
+                if (newBoard.Counters.Ply == Board.Counters.Ply + 1)
                 {
                     SendCurrentMove(newBoard.Counters.LastMove, depth, moveCounter);
                 }
