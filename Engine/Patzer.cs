@@ -180,8 +180,11 @@ namespace SicTransit.Woodpusher.Engine
 
         private void AddKillerMove(int ply, ulong hash)
         {
-            killerMoves[ply][1] = killerMoves[ply][0];
-            killerMoves[ply][0] = hash;
+            if (killerMoves[ply][0] != hash)
+            {
+                killerMoves[ply][1] = killerMoves[ply][0];
+                killerMoves[ply][0] = hash;
+            }
         }
 
         private Move? GetBookMove()
