@@ -222,7 +222,9 @@ namespace SicTransit.Woodpusher.Common.Lookup
 
         public static int CalculateBonus((int middle, int end) bonus, int phase) => (bonus.middle * phase + bonus.end * (24 - phase)) / 24;
 
-        public static int GetBasicPieceValue(Piece piece) => piece.GetPieceType() switch
+        public static int EvaluateCapture(Piece victim, Piece aggresor) => GetBasicPieceValue(victim) - GetBasicPieceValue(aggresor);
+
+        private static int GetBasicPieceValue(Piece piece) => piece.GetPieceType() switch
         {
             Piece.Pawn => 1,
             Piece.Knight => 3,

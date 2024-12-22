@@ -357,7 +357,7 @@ namespace SicTransit.Woodpusher.Engine
 
                 if (board.Counters.Capture != Piece.None)
                 {
-                    return (int.MaxValue >> 2) + Scoring.GetBasicPieceValue(board.Counters.Capture) - Scoring.GetBasicPieceValue(board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
+                    return (int.MaxValue >> 2) + Scoring.EvaluateCapture(board.Counters.Capture, board.Counters.LastMove.Piece); // Capture value, sorting valuable captures first.
                 }
 
                 if (killerMoves[board.Counters.Ply].Contains(board.Hash))
