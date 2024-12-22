@@ -63,14 +63,12 @@ namespace SicTransit.Woodpusher.Model
         {
             foreach (var pieceType in PieceExtensions.Types)
             {
-                foreach (var piece in GetPieces(pieceType))
+                foreach (var piece in GetPieces(pieceType, ulong.MaxValue))
                 {
                     yield return piece;
                 }
             }
         }
-
-        private IEnumerable<Piece> GetPieces(Piece type) => GetPieces(type, ulong.MaxValue);
 
         public IEnumerable<Piece> GetPieces(Piece type, ulong mask)
         {
