@@ -123,7 +123,7 @@ public class Board
                     // Penalty for doubled pawns
                     for (var file = 0; file < 8; file++)
                     {
-                        var pawnCount = BitOperations.PopCount(Bitboard.Files[file] & bitboard.Pawn);
+                        var pawnCount = BitOperations.PopCount(Scoring.Files[file] & bitboard.Pawn);
 
                         if (pawnCount > 1)
                         {
