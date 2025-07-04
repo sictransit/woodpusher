@@ -106,18 +106,18 @@ public class Board
                         score += internals.Scoring.EvaluatePiece(piece, Phase) * sign;
 
                         // TODO: Not slow, but gives weird results. Needs to be fixed.
-                        if (piece.Is(Piece.Pawn))
-                        {
-                            if (IsPassedPawn(piece))
-                            {
-                                score += Scoring.CalculateBonus(Scoring.PassedPawnBonus, Phase) * sign;
-                            }
+                        //if (piece.Is(Piece.Pawn))
+                        //{
+                        //    if (IsPassedPawn(piece))
+                        //    {
+                        //        score += Scoring.CalculateBonus(Scoring.PassedPawnBonus, Phase) * sign;
+                        //    }
 
-                            if (IsIsolatedPawn(piece))
-                            {
-                                score -= Scoring.CalculateBonus(Scoring.IsolatedPawnPenalty, Phase) * sign;
-                            }
-                        }
+                        //    if (IsIsolatedPawn(piece))
+                        //    {
+                        //        score -= Scoring.CalculateBonus(Scoring.IsolatedPawnPenalty, Phase) * sign;
+                        //    }
+                        //}
                     }
 
                     // Penalty for doubled pawns
