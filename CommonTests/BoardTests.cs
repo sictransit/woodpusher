@@ -644,7 +644,7 @@ g1h3: 1
                 {
                     Assert.IsFalse(board.IsIsolatedPawn(piece));
                 }
-            }            
+            }
         }
 
         [TestMethod]
@@ -667,13 +667,13 @@ g1h3: 1
             Assert.IsTrue(score1 > 0);
 
             board = board.SetPiece(whitePawn.SetSquare(g3));
-            Assert.AreEqual(score1 * 2 - Scoring.DoubledPawnPenalty, board.Score, Scoring.DoubledPawnPenalty * 0.5);
+            Assert.AreEqual(score1 * 2 - Scoring.DoubledPawnPenalty.Item2, board.Score, Scoring.DoubledPawnPenalty.Item2 * 0.5);
 
             board = board.SetPiece(whitePawn.SetSquare(g4));
-            Assert.AreEqual(score1 * 3 - Scoring.DoubledPawnPenalty * 3, board.Score, Scoring.DoubledPawnPenalty);
+            Assert.AreEqual(score1 * 3 - Scoring.DoubledPawnPenalty.Item2 * 3, board.Score, Scoring.DoubledPawnPenalty.Item2);
 
             board = board.SetPiece(whitePawn.SetSquare(g5));
-            Assert.AreEqual(score1 * 4 - Scoring.DoubledPawnPenalty * 7, board.Score, Scoring.DoubledPawnPenalty * 2);
+            Assert.AreEqual(score1 * 4 - Scoring.DoubledPawnPenalty.Item2 * 7, board.Score, Scoring.DoubledPawnPenalty.Item2 * 2);
 
         }
 
