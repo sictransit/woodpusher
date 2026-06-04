@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Serilog;
+﻿using Serilog;
 using SicTransit.Woodpusher.Model;
 using SicTransit.Woodpusher.Model.Enums;
 using SicTransit.Woodpusher.Model.Extensions;
+using System.Text.Json;
 
 namespace SicTransit.Woodpusher.Common.Lookup
 {
@@ -54,7 +54,12 @@ namespace SicTransit.Woodpusher.Common.Lookup
             }
             else
             {
-                var loadedBook = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllText(filename))!;
+                var loadedBook = JsonSerializer.Deserialize<Dictionary<ulong, Dictionary<string, int>>>(File.ReadAllText(filename));
+
+                if (loadedBook is null)
+                {
+                    return;
+                }
 
                 foreach (var hash in loadedBook)
                 {
@@ -70,7 +75,10 @@ namespace SicTransit.Woodpusher.Common.Lookup
         {
             filename ??= BookFilename;
 
-            var json = JsonConvert.SerializeObject(book, Formatting.Indented);
+            var json = JsonSerializer.Serialize(book, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
 
             File.WriteAllText(filename, json);
         }
